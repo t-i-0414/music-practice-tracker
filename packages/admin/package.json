@@ -1,5 +1,5 @@
 {
-  "name": "@music-practice-tracker/web-admin",
+  "name": "@music-practice-tracker/admin",
   "version": "1.0.0",
   "private": true,
   "scripts": {
