@@ -5,6 +5,10 @@
     "packages/*"
   ],
   "scripts": {
-    "sort-package-json": "bunx sort-package-json"
+    "sort-package-json": "bunx sort-package-json",
+    "cspell": "cspell '**'"
+  },
+  "devDependencies": {
+    "cspell": "^9.0.2"
   }
 }
