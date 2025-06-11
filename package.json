@@ -7,6 +7,8 @@
   ],
   "scripts": {
     "cspell": "cspell '**'",
+    "format:check": "NODE_OPTIONS='--experimental-strip-types' prettier --check .",
+    "format:fix": "NODE_OPTIONS='--experimental-strip-types' prettier --write .",
     "sort-package-json": "sort-package-json",
     "type:sync": "typesync && bun install"
   },
