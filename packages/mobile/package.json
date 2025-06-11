@@ -4,18 +4,19 @@
   "private": true,
   "main": "expo-router/entry",
   "scripts": {
-    "android": "expo start --android",
+    "dev": "expo start",
+    "dev:android": "expo start --android",
+    "dev:ios": "expo start --ios",
+    "dev:web": "expo start --web",
     "format:check": "prettier --check .",
     "format:fix": "prettier --write .",
-    "ios": "expo start --ios",
     "lint": "expo lint",
     "lint:check": "expo lint",
     "lint:fix": "expo lint --fix",
     "reset-project": "node ./scripts/reset-project.js",
-    "start": "expo start",
-    "type-check": "tsc --noEmit",
-    "web": "expo start --web",
-    "sort-package-json": "bunx sort-package-json"
+    "sort-package-json": "sort-package-json",
+    "type:check": "tsc --noEmit",
+    "type:sync": "typesync && bun install"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
@@ -35,8 +36,6 @@
     "expo-symbols": "~0.4.5",
     "expo-system-ui": "~5.0.8",
     "expo-web-browser": "~14.1.6",
-    "react": "19.0.0",
-    "react-dom": "19.0.0",
     "react-native": "0.79.3",
     "react-native-gesture-handler": "~2.24.0",
     "react-native-reanimated": "~3.17.4",
@@ -47,12 +46,8 @@
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
-    "@types/react": "~19.0.10",
-    "eslint": "^9.25.0",
-    "eslint-config-expo": "~9.2.0",
-    "eslint-config-prettier": "^10.1.5",
-    "eslint-plugin-prettier": "^5.4.1",
-    "prettier": "^3.5.3",
-    "typescript": "~5.8.3"
+    "@types/babel__core": "~7.20.5",
+    "@types/react-native-web": "~0.19.1",
+    "eslint-config-expo": "~9.2.0"
   }
 }
