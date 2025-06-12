@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 if [ "$SKIP_POSTINSTALL" = "1" ]; then
   echo "⚠️  SKIP_POSTINSTALL=1 → Skipping postinstall"

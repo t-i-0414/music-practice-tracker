@@ -8,15 +8,10 @@
     "dev:android": "expo start --android",
     "dev:ios": "expo start --ios",
     "dev:web": "expo start --web",
-    "format:check": "NODE_OPTIONS='--experimental-strip-types' prettier --check .",
-    "format:fix": "NODE_OPTIONS='--experimental-strip-types' prettier --write .",
-    "lint": "expo lint",
     "lint:check": "expo lint",
     "lint:fix": "expo lint --fix",
     "reset-project": "node ./scripts/reset-project.js",
-    "sort-package-json": "sort-package-json",
-    "type:check": "tsc --noEmit",
-    "type:sync": "typesync && bun install"
+    "type:check": "tsc --noEmit"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
