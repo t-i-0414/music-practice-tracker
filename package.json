@@ -9,14 +9,17 @@
     "cspell": "cspell '**'",
     "format:check": "NODE_OPTIONS='--experimental-strip-types' prettier --check .",
     "format:fix": "NODE_OPTIONS='--experimental-strip-types' prettier --write .",
+    "postinstall": "sh scripts/postinstall.sh",
     "sort-package-json": "sort-package-json",
-    "type:sync": "typesync && bun install"
+    "type:sync": "sh scripts/type_sync_and_install.sh"
   },
   "dependencies": {
     "react": "19.0.0",
     "react-dom": "19.0.0"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
     "@eslint/eslintrc": "^3.3.1",
     "@types/node": "22.15.31",
     "@types/react": "^19.1.7",
@@ -25,6 +28,7 @@
     "eslint": "^9.28.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-prettier": "^5.4.1",
+    "lefthook": "^1.11.13",
     "prettier": "^3.5.3",
     "sort-package-json": "^3.2.1",
     "typescript": "^5.8.3",
