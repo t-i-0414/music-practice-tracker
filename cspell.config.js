@@ -7,6 +7,7 @@ export default defineConfig({
     'bunx',
     'commitlint',
     'evenodd',
+    'lefthook',
     'logomark',
     'osx',
     'Pressable',
