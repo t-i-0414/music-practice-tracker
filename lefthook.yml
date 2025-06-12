@@ -1,0 +1,14 @@
+commit-msg:
+  commands:
+    commitlint:
+      run: bunx commitlint --edit {1}
+
+pre-commit:
+  parallel: true
+  commands:
+    sort-package-json:
+      glob: "{package.json,**/package.json}"
+      run: |
+        for file in {staged_files}; do
+          bun sort-package-json "$file"
+        done
