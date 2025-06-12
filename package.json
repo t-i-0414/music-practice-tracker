@@ -7,8 +7,8 @@
   ],
   "scripts": {
     "cspell": "cspell '**'",
-    "format:check": "NODE_OPTIONS='--experimental-strip-types' prettier --check .",
-    "format:fix": "NODE_OPTIONS='--experimental-strip-types' prettier --write .",
+    "format:check": "prettier --check .",
+    "format:fix": "prettier --write .",
     "postinstall": "sh scripts/postinstall.sh",
     "type:check": "sh scripts/type_check.sh",
     "type:sync": "sh scripts/type_sync_and_install.sh"
