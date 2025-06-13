@@ -6,5 +6,10 @@ if [ "$SKIP_POSTINSTALL" = "1" ]; then
   exit 0
 fi
 
-echo "▶ Running bun run type:sync"
-bun run type:sync
+INSTALL_LOG=$(SKIP_POSTINSTALL=1 bun install 2>&1)
+if echo "$INSTALL_LOG" | grep -q "(no changes)"; then
+  echo "✅ bun install had no changes — skipping type:sync"
+else
+  echo "▶ Running bun run type:sync"
+  bun run type:sync
+fi
