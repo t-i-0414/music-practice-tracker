@@ -6,7 +6,13 @@ export default defineConfig({
   words: [
     'bunx',
     'commitlint',
+    'cov',
+    'env',
     'evenodd',
+    'Kamil',
+    'mau',
+    'Myśliwiec',
+    'nestframework',
     'lefthook',
     'logomark',
     'osx',
