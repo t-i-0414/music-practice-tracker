@@ -1,0 +1,47 @@
+version: '3.8'
+
+networks:
+  music_practice_tracker_net:
+    driver: bridge
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: music-practice-tracker-db
+    networks:
+      - music_practice_tracker_net
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-music_practice_tracker}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_INITDB_ARGS: '--auth-host=scram-sha-256'
+      POSTGRES_SHARED_PRELOAD_LIBRARIES: pg_stat_statements
+      POSTGRES_MAX_CONNECTIONS: 200
+      POSTGRES_SHARED_BUFFERS: 256MB
+      POSTGRES_EFFECTIVE_CACHE_SIZE: 1GB
+      POSTGRES_WORK_MEM: 4MB
+      POSTGRES_MAINTENANCE_WORK_MEM: 64MB
+    ports:
+      - '${POSTGRES_PORT:-15432}:5432'
+    volumes:
+      - music-practice-tracker-db-data:/var/lib/postgresql/data
+      - ./.postgres-backups:/backups
+    restart: unless-stopped
+    user: postgres
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-music_practice_tracker}']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  music-practice-tracker-db-data:
+    driver: local
