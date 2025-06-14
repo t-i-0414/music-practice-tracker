@@ -1,6 +1,6 @@
 import { User as UserModel } from '@generated/prisma';
 import { Body, Controller, Get, Post } from '@nestjs/common';
-import { UsersService } from './user.service';
+import { UsersService } from '../user/user.service';
 
 @Controller()
 export class AppController {
