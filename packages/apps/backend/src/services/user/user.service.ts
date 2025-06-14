@@ -1,9 +1,9 @@
-import { Prisma, User } from '@generated/prisma';
+import { PrismaService } from '@/common/prisma/prisma.service';
+import { Prisma, User } from '@/generated/prisma';
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
-export class UsersService {
+export class UserService {
   constructor(private prisma: PrismaService) {}
 
   async user(userWhereUniqueInput: Prisma.UserWhereUniqueInput): Promise<User | null> {
