@@ -1,51 +1,32 @@
-import { PrismaService } from '@/common/prisma/prisma.service';
-import { Prisma, User } from '@/generated/prisma';
 import { Injectable } from '@nestjs/common';
+import { UserEntity, UserRepository } from './user.repository';
 
 @Injectable()
 export class UserService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private repository: UserRepository) {}
 
-  async user(userWhereUniqueInput: Prisma.UserWhereUniqueInput): Promise<User | null> {
-    return this.prisma.user.findUnique({
-      where: userWhereUniqueInput,
-    });
+  async createUser(data: { email: string; name: string }): Promise<UserEntity> {
+    return this.repository.createUser(data);
   }
 
-  async users(params: {
-    skip?: number;
-    take?: number;
-    cursor?: Prisma.UserWhereUniqueInput;
-    where?: Prisma.UserWhereInput;
-    orderBy?: Prisma.UserOrderByWithRelationInput;
-  }): Promise<User[]> {
-    const { skip, take, cursor, where, orderBy } = params;
-    return this.prisma.user.findMany({
-      skip,
-      take,
-      cursor,
-      where,
-      orderBy,
-    });
+  async findUserById(id: UserEntity['id']): Promise<UserEntity | null> {
+    return this.repository.findUser({ id });
   }
 
-  async createUser(data: Prisma.UserCreateInput): Promise<User> {
-    return this.prisma.user.create({
+  async updateUserById({
+    id,
+    data,
+  }: {
+    id: UserEntity['id'];
+    data: Partial<Omit<UserEntity, 'id'>>;
+  }): Promise<UserEntity> {
+    return this.repository.updateUser({
+      where: { id },
       data,
     });
   }
 
-  async updateUser(params: { where: Prisma.UserWhereUniqueInput; data: Prisma.UserUpdateInput }): Promise<User> {
-    const { where, data } = params;
-    return this.prisma.user.update({
-      data,
-      where,
-    });
-  }
-
-  async deleteUser(where: Prisma.UserWhereUniqueInput): Promise<User> {
-    return this.prisma.user.delete({
-      where,
-    });
+  async deleteUserById(id: UserEntity['id']): Promise<UserEntity> {
+    return this.repository.deleteUser({ id });
   }
 }

@@ -1,24 +1,32 @@
 import { ApiController } from '@/common/decorators/api-controller.decorator';
 import { User as UserModel } from '@/generated/prisma';
 import { UserService } from '@/services/user/user.service';
-import { Body, Get, Post } from '@nestjs/common';
+import { Body, Delete, Get, Param, Post, Put } from '@nestjs/common';
 
 @ApiController('users')
 export class UsersController {
   constructor(private readonly userService: UserService) {}
 
-  @Get('/')
-  async getUsers(): Promise<UserModel[]> {
-    return this.userService.users({});
-  }
-
   @Post('/create')
-  async createUser(@Body() userData: { name: string; email: string }): Promise<UserModel> {
-    return this.userService.createUser(userData);
+  async createUser(@Body() data: { name: string; email: string }): Promise<UserModel> {
+    return this.userService.createUser(data);
   }
 
   @Get('/:id')
-  async getUser(@Body() userId: { id: number }): Promise<UserModel | null> {
-    return this.userService.user({ id: userId.id });
+  async findUserById(@Param('id') id: string): Promise<UserModel | null> {
+    return this.userService.findUserById(Number(id));
+  }
+
+  @Put('/:id')
+  async updateUserById(@Param('id') id: string, @Body() data: Partial<Omit<UserModel, 'id'>>): Promise<UserModel> {
+    return this.userService.updateUserById({
+      id: Number(id),
+      data,
+    });
+  }
+
+  @Delete('/:id')
+  async deleteUserById(@Param('id') id: string): Promise<UserModel> {
+    return this.userService.deleteUserById(Number(id));
   }
 }
