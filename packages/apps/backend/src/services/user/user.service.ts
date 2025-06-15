@@ -1,32 +1,29 @@
 import { Injectable } from '@nestjs/common';
+import { CreateUserDto, DeleteUserByIdDto, FindUserByIdDto, UpdateUserDto } from './user.dto';
 import { UserEntity, UserRepository } from './user.repository';
 
 @Injectable()
 export class UserService {
   constructor(private repository: UserRepository) {}
 
-  async createUser(data: { email: string; name: string }): Promise<UserEntity> {
+  async createUser(data: CreateUserDto): Promise<UserEntity> {
     return this.repository.createUser(data);
   }
 
-  async findUserById(id: UserEntity['id']): Promise<UserEntity | null> {
+  async findUserById({ id }: FindUserByIdDto): Promise<UserEntity | null> {
     return this.repository.findUser({ id });
   }
 
-  async updateUserById({
-    id,
-    data,
-  }: {
-    id: UserEntity['id'];
-    data: Partial<Omit<UserEntity, 'id'>>;
-  }): Promise<UserEntity> {
+  async updateUserById(data: { findUserByIdDto: FindUserByIdDto; updateUserDto: UpdateUserDto }): Promise<UserEntity> {
     return this.repository.updateUser({
-      where: { id },
-      data,
+      where: { id: data.findUserByIdDto.id },
+      data: {
+        ...data.updateUserDto,
+      },
     });
   }
 
-  async deleteUserById(id: UserEntity['id']): Promise<UserEntity> {
+  async deleteUserById({ id }: DeleteUserByIdDto): Promise<UserEntity> {
     return this.repository.deleteUser({ id });
   }
 }
