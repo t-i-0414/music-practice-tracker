@@ -2,203 +2,266 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## プロジェクト概要
+## Project Overview
 
-音楽練習トラッカーアプリケーション。ワークスペースを使用したモノレポ構造で構築されており、3つのメインアプリケーションで構成されています：
+Music practice tracker application built as a monorepo with workspaces, consisting of three main applications:
 
-- **Backend**: PostgreSQLデータベースを使用したNestJS APIサーバー
-- **Admin**: Next.js管理ダッシュボード
-- **Mobile**: Expoを使用したReact Nativeアプリ
+- **Backend**: NestJS API server with PostgreSQL database
+- **Admin**: Next.js admin dashboard
+- **Mobile**: React Native app with Expo
 
-## 開発セットアップ
+## Development Setup
 
-### 初期セットアップ
+### Initial Setup
 
 ```bash
 make setup
 ```
 
-これにより以下が実行されます：
+This executes:
 
-- `bun install`で依存関係をインストール
-- `.env.example`を`.env`にコピー（存在しない場合）
-- ルートの`.env`をbackendディレクトリにシンボリックリンク
-- Prismaマイグレーションを実行
+- `bun install` to install dependencies
+- Copies `.env.example` to `.env` (if not exists)
+- Symlinks root `.env` to backend directory
+- Runs Prisma migrations
 
-### データベース
+### Database
 
-- PostgreSQLデータベースはDocker Composeで実行
-- PrismaORMでデータベーススキーマを管理
-- 生成されたPrismaクライアントは`packages/apps/backend/generated/prisma`に出力
-- データベースURL: `postgresql://postgres:postgres@localhost:15432/music_practice_tracker`
-- ポート15432を使用（デフォルトの5432ではない）
+- PostgreSQL database runs via Docker Compose
+- Prisma ORM manages database schema
+- Generated Prisma client outputs to `packages/apps/backend/generated/prisma`
+- Database URL: `postgresql://postgres:postgres@localhost:15432/music_practice_tracker`
+- Port 15432 (not default 5432)
 
-### Dockerコマンド
+### Docker Commands
 
 ```bash
-# データベース開始
+# Start database
 docker compose up -d
 
-# データベース停止
+# Stop database
 docker compose down
 
-# backendディレクトリから
+# From backend directory
 make docker-compose-up
 make docker-compose-down
 ```
 
-### Prismaコマンド
+### Prisma Commands
 
 ```bash
-# backendディレクトリで実行
+# Run in backend directory
 cd packages/apps/backend
 
-# マイグレーション作成・実行
+# Create and run migration
 bunx prisma migrate dev --name [migration_name]
 
-# スキーマをデータベースにプッシュ（開発時のみ）
+# Push schema to database (development only)
 bunx prisma db push
 
-# Prisma Studioでデータベース確認
+# Open Prisma Studio
 bunx prisma studio
 
-# クライアント再生成
+# Regenerate client
 bunx prisma generate
 ```
 
-## 開発コマンド
+## Development Commands
 
-### ルートレベルコマンド
+### Root Level Commands
 
 ```bash
-# 全パッケージの型チェック
+# Type check all packages
 npm run type:check
 
-# 型同期とインストール
+# Type sync and install
 npm run type:sync
 
-# フォーマットチェックと修正
+# Format check and fix
 npm run format:check
 npm run format:fix
 
-# スペルチェック
+# Spell check
 npm run cspell
 ```
 
 ### Backend (packages/apps/backend)
 
 ```bash
-# 開発
+# Development
 npm run start:dev
 npm run start:debug
 
-# ビルド
+# Build
 npm run build
 npm run start:prod
 
-# テスト
-npm run test
-npm run test:watch
-npm run test:e2e
-npm run test:cov
-npm run test:debug  # デバッグモードでテスト実行
+# Testing
+npm run test              # Run all unit tests
+npm run test:watch        # Watch mode
+npm run test:e2e          # End-to-end tests
+npm run test:cov          # Coverage report
+npm run test:debug        # Debug mode
 
-# リンティング
+# Run single test file
+bunx jest path/to/test.spec.ts
+
+# Run tests matching pattern
+bunx jest --testNamePattern="should create a user"
+
+# Linting
 npm run lint:check
 npm run lint:fix
 
-# 型チェック
+# Type checking
 npm run type:check
 ```
 
 ### Admin (packages/apps/admin)
 
 ```bash
-# 開発（Turbopack使用）
+# Development (uses Turbopack)
 npm run dev
 
-# ビルド
+# Build
 npm run build
 npm run start
 
-# リンティング
+# Linting
 npm run lint:check
 npm run lint:fix
 
-# 型チェック
+# Type checking
 npm run type:check
 ```
+
+Note: Test setup not yet configured for Admin package.
 
 ### Mobile (packages/apps/mobile)
 
 ```bash
-# 開発
+# Development
 npm run dev
 npm run dev:ios
 npm run dev:android
 npm run dev:web
 
-# リンティング（並列実行）
+# Linting (runs in parallel)
 npm run lint
 npm run lint:check
 npm run lint:fix
 
-# 型チェック
+# Type checking
 npm run type:check
 
-# プロジェクトリセット
+# Reset project
 npm run reset-project
 ```
 
-## アーキテクチャ
+Note: Test setup not yet configured for Mobile package.
 
-### Backendの構造
+## Architecture
 
-- **NestJS**フレームワークでモジュラーアーキテクチャ
-- **Prisma ORM**でデータベース操作
-- **PostgreSQL**データベース
-- **APIモジュール**は`src/api/`に配置（例：usersモジュール）
-- **リポジトリパターン**を`src/repository/`で実装
-- **サービス層**は`src/services/`でビジネスロジックを処理
-- **共通ユーティリティ**は`src/common/`に配置（デコレータなど）
+### Backend Structure
 
-### データベーススキーマ
+- **NestJS** framework with modular architecture
+- **Prisma ORM** for database operations
+- **PostgreSQL** database
+- **API modules** located in `src/api/` (e.g., users module)
+- **Repository pattern** implemented in `src/repository/`
+- **Service layer** in `src/services/` handles business logic
+- **Common utilities** in `src/common/` (decorators, etc.)
+- **Path aliases**: `@/*` maps to `./src/*`, `@/generated/*` maps to `./generated/*`
 
-- シンプルなUserモデル（id、email、name フィールド）
-- 現在は基本的なCRUD操作のみ実装
+### Module Organization
 
-### フロントエンドアプリケーション
+- **AppModule**: Root module importing ApiModule
+- **ApiModule**: Groups all API-related modules
+- **UserModule**: Handles user-related functionality
+- **RepositoryModule**: Provides database access services
 
-- **Admin**: TypeScriptを使用したNext.js 15
-- **Mobile**: Expo Router for navigationを使用したExpo 53とReact Native
+### Repository Pattern
 
-### 共有ライブラリ
+- `RepositoryService` extends PrismaClient and manages database connection
+- Individual repositories (e.g., `UserRepository`) encapsulate data access logic
+- Services use repositories to separate business logic from data access
 
-- 現在`packages/libs/`には共有ライブラリなし
-- 共有依存関係はルートレベルで管理
+### Database Schema
 
-## 主要技術
+- All models use UUID as primary key (PostgreSQL's gen_random_uuid() function)
+- Required fields for each model: `id` (UUID), `createdAt`, `updatedAt`
+- Prisma schema validation ensures consistency
 
-- **ランタイム**: パッケージ管理と開発にBun使用
-- **言語**: 全パッケージでTypeScript使用
-- **データベース**: PostgreSQL with Prisma
+### Prisma Schema Validation Rules
+
+`scripts/validate-prisma-schema.sh` enforces:
+
+1. **ID Fields**
+   - Field name must be `id`
+   - `String` type with `@id` attribute
+   - `@db.Uuid` for UUID storage
+   - `@default(uuid())` or `@default(dbgenerated("gen_random_uuid()"))`
+
+2. **Timestamps**
+   - `createdAt`: `DateTime` type with `@default(now())`
+   - `updatedAt`: `DateTime` type with `@updatedAt`
+
+3. **Constraints**
+   - No composite primary keys (`@@id`)
+   - All models must have the above fields
+
+### Test Configuration (Backend)
+
+- **Unit tests**: Jest configuration in `package.json`
+  - Pattern: `*.spec.ts`
+  - Root: `src` directory
+  - Coverage from all `.ts` and `.js` files
+- **E2E tests**: Configuration in `test/jest-e2e.json`
+  - Pattern: `*.e2e-spec.ts`
+  - Root: `test` directory
+
+### Frontend Applications
+
+- **Admin**: Next.js 15 with TypeScript
+- **Mobile**: Expo 53 with React Native and Expo Router for navigation
+
+### Shared Libraries
+
+- Currently no shared libraries in `packages/libs/`
+- Shared dependencies managed at root level
+
+## Key Technologies
+
+- **Runtime**: Bun for package management and development
+- **Language**: TypeScript across all packages
+- **Database**: PostgreSQL with Prisma
 - **Backend**: NestJS
-- **Frontend**: Next.js（admin）、React Native with Expo（mobile）
-- **テスト**: Jest
-- **リンティング**: ESLint with Prettier
-- **Gitフック**: Lefthookで pre-commit チェック
-- **コミット**: commitlintで Conventional commits
+- **Frontend**: Next.js (admin), React Native with Expo (mobile)
+- **Testing**: Jest
+- **Linting**: ESLint with Prettier
+- **Git hooks**: Lefthook for pre-commit checks
+- **Commits**: commitlint for Conventional commits
 
-## Git フック設定
+## Git Hook Configuration
 
-Lefthookによる自動化：
+Lefthook automation:
 
-- コミットメッセージの検証（commitlint）
-- package.jsonの自動ソート
-- 並列処理でパフォーマンス最適化
+- Commit message validation (commitlint)
+- Automatic package.json sorting
+- Automatic Prisma schema validation (validate-prisma-schema)
+- Parallel processing for performance
 
-## 環境設定
+## Environment Configuration
 
-- ルートの`.env`ファイルでデータベース設定
-- backendへシンボリックリンクしてデータベースアクセス
-- PostgreSQLはポート15432で実行（デフォルトの5432ではない）
+- Root `.env` file for database configuration
+- Symlinked to backend for database access
+- PostgreSQL runs on port 15432 (not default 5432)
+
+## Utility Scripts
+
+Located in root `scripts/` directory:
+
+- `validate-prisma-schema.sh`: Validates Prisma schema conventions
+- `postinstall.sh`: Post-installation setup
+- `type_check.sh`: Type checks all packages
+- `type_sync_and_install.sh`: Type synchronization and installation
