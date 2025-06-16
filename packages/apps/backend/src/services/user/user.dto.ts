@@ -1,36 +1,80 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import { User } from '@/generated/prisma';
+import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import { IsDate, IsEmail, IsNotEmpty, IsString, IsUUID, MaxLength } from 'class-validator';
 import { MAX_EMAIL_LENGTH, MAX_NAME_LENGTH } from './user.constants';
 
-export class CreateUserDto {
+class UserBasicDto implements Partial<User> {
+  @ApiProperty({
+    description: 'The user ID',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    format: 'uuid',
+  })
+  @IsUUID()
+  id: string;
+
+  @ApiProperty({
+    description: 'The user email address',
+    example: 'takuya.iwashiro@takudev.net',
+    format: 'email',
+    maxLength: MAX_EMAIL_LENGTH,
+  })
   @IsEmail()
-  @IsNotEmpty()
   @MaxLength(MAX_EMAIL_LENGTH)
   email: string;
 
+  @ApiProperty({
+    description: 'The user name',
+    example: 'Takuya Iwashiro',
+    maxLength: MAX_NAME_LENGTH,
+  })
   @IsString()
-  @IsNotEmpty()
   @MaxLength(MAX_NAME_LENGTH)
+  name: string;
+
+  @ApiProperty({
+    description: 'The user created at timestamp',
+    example: '2024-01-15T09:30:00.000Z',
+    format: 'date-time',
+  })
+  @IsDate()
+  @Type(() => Date)
+  createdAt: Date;
+
+  @ApiProperty({
+    description: 'The user updated at timestamp',
+    example: '2024-06-16T14:45:30.123Z',
+    format: 'date-time',
+  })
+  @IsDate()
+  @Type(() => Date)
+  updatedAt: Date;
+}
+
+/**
+ * User response DTO - Read-only fields returned from API
+ */
+export class UserResponseDto extends PickType(UserBasicDto, [
+  'id',
+  'email',
+  'name',
+  'createdAt',
+  'updatedAt',
+] as const) {}
+
+export class CreateUserDto extends PickType(UserBasicDto, ['email', 'name'] as const) {
+  @IsNotEmpty()
+  email: string;
+
+  @IsNotEmpty()
   name: string;
 }
 
-export class FindUserByIdDto {
-  @IsUUID()
+export class FindUserByIdDto extends PickType(UserBasicDto, ['id'] as const) {
+  @IsNotEmpty()
   id: string;
 }
 
-export class UpdateUserDto {
-  @IsOptional()
-  @IsEmail()
-  @MaxLength(MAX_EMAIL_LENGTH)
-  email?: string;
+export class UpdateUserDto extends PartialType(CreateUserDto) {}
 
-  @IsOptional()
-  @IsString()
-  @MaxLength(MAX_NAME_LENGTH)
-  name?: string;
-}
-
-export class DeleteUserByIdDto {
-  @IsUUID()
-  id: string;
-}
+export class DeleteUserByIdDto extends FindUserByIdDto {}
