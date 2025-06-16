@@ -6,13 +6,16 @@ import { Injectable } from '@nestjs/common';
 export class UserRepository {
   constructor(private repository: RepositoryService) {}
 
-  async findUser(params: Prisma.UserWhereUniqueInput): Promise<User | null> {
+  async findUniqueActiveUser(params: Prisma.UserWhereUniqueInput): Promise<User | null> {
     return this.repository.user.findUnique({
-      where: params,
+      where: {
+        ...params,
+        deletedAt: null,
+      },
     });
   }
 
-  async findManyUsers(params: {
+  async findManyActiveUsers(params: {
     skip?: number;
     take?: number;
     cursor?: Prisma.UserWhereUniqueInput;
@@ -21,6 +24,42 @@ export class UserRepository {
   }): Promise<User[]> {
     return this.repository.user.findMany({
       ...params,
+      where: {
+        ...params.where,
+        deletedAt: null,
+      },
+    });
+  }
+
+  async findManyDeletedUsers(params: {
+    skip?: number;
+    take?: number;
+    cursor?: Prisma.UserWhereUniqueInput;
+    where?: Prisma.UserWhereInput;
+    orderBy?: Prisma.UserOrderByWithRelationInput;
+  }): Promise<User[]> {
+    return this.repository.user.findMany({
+      ...params,
+      where: {
+        ...params.where,
+        deletedAt: { not: null },
+      },
+    });
+  }
+
+  async findManyAllUsers(params: {
+    skip?: number;
+    take?: number;
+    cursor?: Prisma.UserWhereUniqueInput;
+    where?: Prisma.UserWhereInput;
+    orderBy?: Prisma.UserOrderByWithRelationInput;
+  }): Promise<User[]> {
+    return this.repository.user.findMany({
+      ...params,
+      where: {
+        ...params.where,
+        OR: [{ deletedAt: null }, { deletedAt: { not: null } }],
+      },
     });
   }
 

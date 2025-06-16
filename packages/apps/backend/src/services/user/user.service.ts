@@ -11,7 +11,7 @@ export class UserService {
   }
 
   async findUserById({ id }: FindUserByIdDto): Promise<UserResponseDto | null> {
-    return this.repository.findUser({ id });
+    return this.repository.findUniqueActiveUser({ id });
   }
 
   async updateUserById(data: {
