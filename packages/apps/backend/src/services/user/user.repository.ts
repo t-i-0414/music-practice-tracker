@@ -15,6 +15,23 @@ export class UserRepository {
     });
   }
 
+  async findUniqueDeletedUser(params: Prisma.UserWhereUniqueInput): Promise<User | null> {
+    return this.repository.user.findUnique({
+      where: {
+        ...params,
+        deletedAt: { not: null },
+      },
+    });
+  }
+  async findUniqueAnyUser(params: Prisma.UserWhereUniqueInput): Promise<User | null> {
+    return this.repository.user.findUnique({
+      where: {
+        ...params,
+        OR: [{ deletedAt: null }, { deletedAt: { not: null } }],
+      },
+    });
+  }
+
   async findManyActiveUsers(params: {
     skip?: number;
     take?: number;
@@ -47,7 +64,7 @@ export class UserRepository {
     });
   }
 
-  async findManyAllUsers(params: {
+  async findManyAnyUsers(params: {
     skip?: number;
     take?: number;
     cursor?: Prisma.UserWhereUniqueInput;

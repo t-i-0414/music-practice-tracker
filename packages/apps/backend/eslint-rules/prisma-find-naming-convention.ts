@@ -1,5 +1,5 @@
 import type { Rule } from 'eslint';
-import type { CallExpression, MemberExpression, Node, Identifier, ObjectExpression, Property } from 'estree';
+import type { CallExpression, Identifier, MemberExpression, Node, ObjectExpression, Property } from 'estree';
 
 type FunctionNode = Node & {
   id?: Identifier | null;
@@ -18,11 +18,11 @@ const rule: Rule.RuleModule = {
     schema: [],
     messages: {
       invalidFindMethodName:
-        'Prisma find method "{{method}}" must be in a function named "{{method}}(Active|Deleted|All){{suffix}}". Current function: "{{functionName}}"',
+        'Prisma find method "{{method}}" must be in a function named "{{method}}(Active|Deleted|Any){{suffix}}". Current function: "{{functionName}}"',
       missingDeletedAtFilter:
         'Function "{{functionName}}" must include deletedAt filter. Use deletedAt: null for active, deletedAt: { not: null } for deleted',
-      missingAllIndicator:
-        'Function "{{functionName}}" for "all" must include OR: [{ deletedAt: null }, { deletedAt: { not: null } }] as the last property in where clause',
+      missingAnyIndicator:
+        'Function "{{functionName}}" for "any" must include OR: [{ deletedAt: null }, { deletedAt: { not: null } }] as the last property in where clause',
       deletedAtNotLastInWhere: 'deletedAt or OR filter must be the last property in the where clause',
       incorrectDeletedAtValue:
         'Function "{{functionName}}" has incorrect deletedAt value. Expected {{expected}} but got {{actual}}',
@@ -119,7 +119,7 @@ const rule: Rule.RuleModule = {
     }
 
     // Check if function name follows the convention
-    function validateFunctionName(functionName: string, method: string): 'active' | 'deleted' | 'all' | null {
+    function validateFunctionName(functionName: string, method: string): 'active' | 'deleted' | 'any' | null {
       // Check if function starts with the find method name
       if (!functionName.startsWith(method)) {
         return null;
@@ -127,26 +127,26 @@ const rule: Rule.RuleModule = {
 
       const suffix = functionName.slice(method.length);
 
-      // Check for Active, Deleted, or All
+      // Check for Active, Deleted, or Any
       if (suffix.startsWith('Active')) {
         return 'active';
       } else if (suffix.startsWith('Deleted')) {
         return 'deleted';
-      } else if (suffix.startsWith('All')) {
-        return 'all';
+      } else if (suffix.startsWith('Any')) {
+        return 'any';
       }
 
       return null;
     }
 
     // Check if where clause has correct deletedAt filter
-    function checkWhereClause(node: CallExpression, expectedType: 'active' | 'deleted' | 'all'): boolean {
+    function checkWhereClause(node: CallExpression, expectedType: 'active' | 'deleted' | 'any'): boolean {
       if (!node.arguments[0] || node.arguments[0].type !== 'ObjectExpression') {
-        // All types need a where clause
-        if (expectedType === 'all') {
+        // Any types need a where clause
+        if (expectedType === 'any') {
           context.report({
             node,
-            messageId: 'missingAllIndicator',
+            messageId: 'missingAnyIndicator',
             data: {
               functionName: getCurrentFunctionName() || 'unknown',
             },
@@ -162,10 +162,10 @@ const rule: Rule.RuleModule = {
       );
 
       if (!whereProperty || whereProperty.value.type !== 'ObjectExpression') {
-        if (expectedType === 'all') {
+        if (expectedType === 'any') {
           context.report({
             node: arg,
-            messageId: 'missingAllIndicator',
+            messageId: 'missingAnyIndicator',
             data: {
               functionName: getCurrentFunctionName() || 'unknown',
             },
@@ -177,8 +177,8 @@ const rule: Rule.RuleModule = {
 
       const whereObject = whereProperty.value as ObjectExpression;
 
-      if (expectedType === 'all') {
-        // For 'all' type, check for OR clause
+      if (expectedType === 'any') {
+        // For 'any' type, check for OR clause
         const orIndex = whereObject.properties.findIndex(
           (prop): prop is Property =>
             prop.type === 'Property' && prop.key.type === 'Identifier' && prop.key.name === 'OR',
@@ -187,7 +187,7 @@ const rule: Rule.RuleModule = {
         if (orIndex === -1) {
           context.report({
             node: whereObject,
-            messageId: 'missingAllIndicator',
+            messageId: 'missingAnyIndicator',
             data: {
               functionName: getCurrentFunctionName() || 'unknown',
             },
