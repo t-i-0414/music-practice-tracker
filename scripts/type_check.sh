@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 echo "🔍 Searching for tsconfig.json files in packages/..."
 

@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 if [ "$SKIP_POSTINSTALL" = "1" ]; then
   echo "⚠️  SKIP_POSTINSTALL=1 → Skipping postinstall"
