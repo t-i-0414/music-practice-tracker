@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 # Validate Prisma schema:
 # 1. Check that @id fields use String type with @default(uuid())
