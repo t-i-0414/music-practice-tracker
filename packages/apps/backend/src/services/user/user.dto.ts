@@ -1,5 +1,4 @@
-import { Type } from 'class-transformer';
-import { IsEmail, IsInt, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
 import { MAX_EMAIL_LENGTH, MAX_NAME_LENGTH } from './user.constants';
 
 export class CreateUserDto {
@@ -15,9 +14,8 @@ export class CreateUserDto {
 }
 
 export class FindUserByIdDto {
-  @IsInt()
-  @Type(() => Number)
-  id: number;
+  @IsUUID()
+  id: string;
 }
 
 export class UpdateUserDto {
@@ -33,7 +31,6 @@ export class UpdateUserDto {
 }
 
 export class DeleteUserByIdDto {
-  @IsInt()
-  @Type(() => Number)
-  id: number;
+  @IsUUID()
+  id: string;
 }
