@@ -6,6 +6,8 @@ set -euo pipefail
 # 2. Check that @id attribute is only applied to fields named "id"
 # 3. Check that each model has createdAt field with DateTime @default(now())
 # 4. Check that each model has updatedAt field with DateTime @updatedAt
+# 5. Check that each model has deletedAt field with DateTime? (optional)
+# 6. Check that each model has @@index([createdAt]) and @@index([deletedAt])
 
 error_count=0
 
@@ -24,6 +26,9 @@ validate_model() {
   local has_id=false
   local has_createdAt=false
   local has_updatedAt=false
+  local has_deletedAt=false
+  local has_createdAt_index=false
+  local has_deletedAt_index=false
 
   # Process each line in the model
   local line_offset=0
@@ -101,6 +106,30 @@ validate_model() {
         ((error_count++))
       fi
     fi
+
+    # Check deletedAt fields
+    if [ "$field_name" = "deletedAt" ]; then
+      has_deletedAt=true
+
+      # Check if it's DateTime? (optional type)
+      if ! echo "$line" | grep -q "DateTime?"; then
+        echo "Error at line $current_line: deletedAt field should be of type DateTime? (optional) in model $model_name"
+        ((error_count++))
+      fi
+    fi
+
+    # Check for @@index directives
+    if echo "$line" | grep -q "@@index"; then
+      # Check for createdAt index
+      if echo "$line" | grep -q "@@index.*\[createdAt\]"; then
+        has_createdAt_index=true
+      fi
+      
+      # Check for deletedAt index
+      if echo "$line" | grep -q "@@index.*\[deletedAt\]"; then
+        has_deletedAt_index=true
+      fi
+    fi
   done <<<"$model_content"
 
   # Check if required fields exist
@@ -116,6 +145,22 @@ validate_model() {
 
   if [ "$has_updatedAt" = false ]; then
     echo "Error: Model $model_name is missing required field 'updatedAt'"
+    ((error_count++))
+  fi
+
+  if [ "$has_deletedAt" = false ]; then
+    echo "Error: Model $model_name is missing required field 'deletedAt'"
+    ((error_count++))
+  fi
+
+  # Check if required indexes exist
+  if [ "$has_createdAt_index" = false ]; then
+    echo "Error: Model $model_name is missing required index @@index([createdAt])"
+    ((error_count++))
+  fi
+
+  if [ "$has_deletedAt_index" = false ]; then
+    echo "Error: Model $model_name is missing required index @@index([deletedAt])"
     ((error_count++))
   fi
 }
