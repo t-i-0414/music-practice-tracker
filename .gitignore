@@ -166,3 +166,6 @@ dist
 
 # postgresql
 .postgres-backups
+
+# CLAUDE
+.claude/*.local.*
