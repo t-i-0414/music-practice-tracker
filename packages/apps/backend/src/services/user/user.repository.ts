@@ -39,8 +39,11 @@ export class UserRepository {
   }
 
   async deleteUser(params: Prisma.UserWhereUniqueInput): Promise<void> {
-    await this.repository.user.delete({
+    await this.repository.user.update({
       where: params,
+      data: {
+        deletedAt: new Date(),
+      },
     });
   }
 }
