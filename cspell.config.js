@@ -29,7 +29,7 @@ export default defineConfig({
     'vitest',
   ],
   flagWords: [],
-  ignorePaths: ['**/node_modules/**', '**/generated/**', '**/dist/**', 'packages/apps/backend/prisma/migrations/**'],
+  ignorePaths: ['**/node_modules/**', '**/generated/**', '**/dist/**', 'packages/apps/backend/prisma/**'],
   maxNumberOfProblems: 0,
   minWordLength: 3,
 });
