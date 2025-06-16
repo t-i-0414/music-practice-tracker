@@ -23,8 +23,7 @@ const rule: Rule.RuleModule = {
         'Function "{{functionName}}" must include deletedAt filter. Use deletedAt: null for active, deletedAt: { not: null } for deleted',
       missingAllIndicator:
         'Function "{{functionName}}" for "all" must include OR: [{ deletedAt: null }, { deletedAt: { not: null } }] as the last property in where clause',
-      deletedAtNotLastInWhere:
-        'deletedAt or OR filter must be the last property in the where clause',
+      deletedAtNotLastInWhere: 'deletedAt or OR filter must be the last property in the where clause',
       incorrectDeletedAtValue:
         'Function "{{functionName}}" has incorrect deletedAt value. Expected {{expected}} but got {{actual}}',
     },
@@ -51,14 +50,8 @@ const rule: Rule.RuleModule = {
       }
 
       // Check for find methods
-      const findMethodNames = [
-        'findUnique',
-        'findUniqueOrThrow',
-        'findFirst',
-        'findFirstOrThrow',
-        'findMany',
-      ];
-      
+      const findMethodNames = ['findUnique', 'findUniqueOrThrow', 'findFirst', 'findFirstOrThrow', 'findMany'];
+
       if (!findMethodNames.includes(property.name)) {
         return false;
       }
@@ -68,30 +61,33 @@ const rule: Rule.RuleModule = {
       while (current) {
         if (current.type === 'MemberExpression') {
           const memberExp = current as MemberExpression;
-          const objectName = memberExp.object.type === 'Identifier' 
-            ? memberExp.object.name 
-            : memberExp.object.type === 'MemberExpression' && memberExp.object.property?.type === 'Identifier'
-              ? memberExp.object.property.name
-              : undefined;
-          const propertyName = memberExp.property?.type === 'Identifier' 
-            ? memberExp.property.name 
-            : undefined;
+          const objectName =
+            memberExp.object.type === 'Identifier'
+              ? memberExp.object.name
+              : memberExp.object.type === 'MemberExpression' && memberExp.object.property?.type === 'Identifier'
+                ? memberExp.object.property.name
+                : undefined;
+          const propertyName = memberExp.property?.type === 'Identifier' ? memberExp.property.name : undefined;
 
           // Common Prisma patterns
-          if (objectName === 'prisma' || 
-              objectName === 'repository' || 
-              objectName === 'this' ||
-              propertyName === 'prisma' ||
-              propertyName === 'repository') {
+          if (
+            objectName === 'prisma' ||
+            objectName === 'repository' ||
+            objectName === 'this' ||
+            propertyName === 'prisma' ||
+            propertyName === 'repository'
+          ) {
             return true;
           }
           current = memberExp.object;
         } else if (current.type === 'Identifier') {
           const name = current.name.toLowerCase();
-          if (name.includes('repository') || 
-              name.includes('prisma') || 
-              name.includes('model') ||
-              name.includes('service')) {
+          if (
+            name.includes('repository') ||
+            name.includes('prisma') ||
+            name.includes('model') ||
+            name.includes('service')
+          ) {
             return true;
           }
           break;
@@ -108,7 +104,7 @@ const rule: Rule.RuleModule = {
     // Helper to get function name from parent nodes
     function getFunctionName(node: FunctionNode): string | null {
       let name = node.id?.name || null;
-      
+
       if (!name && node.parent) {
         if (node.parent.type === 'VariableDeclarator' && node.parent.id?.type === 'Identifier') {
           name = node.parent.id.name;
@@ -118,7 +114,7 @@ const rule: Rule.RuleModule = {
           name = node.parent.key.name;
         }
       }
-      
+
       return name;
     }
 
@@ -130,7 +126,7 @@ const rule: Rule.RuleModule = {
       }
 
       const suffix = functionName.slice(method.length);
-      
+
       // Check for Active, Deleted, or All
       if (suffix.startsWith('Active')) {
         return 'active';
@@ -139,7 +135,7 @@ const rule: Rule.RuleModule = {
       } else if (suffix.startsWith('All')) {
         return 'all';
       }
-      
+
       return null;
     }
 
@@ -161,10 +157,8 @@ const rule: Rule.RuleModule = {
 
       const arg = node.arguments[0] as ObjectExpression;
       const whereProperty = arg.properties.find(
-        (prop): prop is Property => 
-          prop.type === 'Property' && 
-          prop.key.type === 'Identifier' && 
-          prop.key.name === 'where'
+        (prop): prop is Property =>
+          prop.type === 'Property' && prop.key.type === 'Identifier' && prop.key.name === 'where',
       );
 
       if (!whereProperty || whereProperty.value.type !== 'ObjectExpression') {
@@ -182,14 +176,12 @@ const rule: Rule.RuleModule = {
       }
 
       const whereObject = whereProperty.value as ObjectExpression;
-      
+
       if (expectedType === 'all') {
         // For 'all' type, check for OR clause
         const orIndex = whereObject.properties.findIndex(
-          (prop): prop is Property => 
-            prop.type === 'Property' && 
-            prop.key.type === 'Identifier' && 
-            prop.key.name === 'OR'
+          (prop): prop is Property =>
+            prop.type === 'Property' && prop.key.type === 'Identifier' && prop.key.name === 'OR',
         );
 
         if (orIndex === -1) {
@@ -218,10 +210,8 @@ const rule: Rule.RuleModule = {
 
       // For active/deleted types
       const deletedAtIndex = whereObject.properties.findIndex(
-        (prop): prop is Property => 
-          prop.type === 'Property' && 
-          prop.key.type === 'Identifier' && 
-          prop.key.name === 'deletedAt'
+        (prop): prop is Property =>
+          prop.type === 'Property' && prop.key.type === 'Identifier' && prop.key.name === 'deletedAt',
       );
 
       // Check if deletedAt exists and is last
@@ -289,10 +279,8 @@ const rule: Rule.RuleModule = {
           }
           // Check if it has { not: null } structure
           const notProp = (deletedAtPropDeleted.value as ObjectExpression).properties.find(
-            (prop): prop is Property => 
-              prop.type === 'Property' && 
-              prop.key.type === 'Identifier' && 
-              prop.key.name === 'not'
+            (prop): prop is Property =>
+              prop.type === 'Property' && prop.key.type === 'Identifier' && prop.key.name === 'not',
           );
           if (!notProp || notProp.value.type !== 'Literal' || notProp.value.value !== null) {
             context.report({
@@ -341,7 +329,7 @@ const rule: Rule.RuleModule = {
 
           const memberExp = node.callee as MemberExpression;
           const method = (memberExp.property as any).name;
-          
+
           // Validate function name
           const type = validateFunctionName(functionName, method);
           if (!type) {
