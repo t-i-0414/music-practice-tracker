@@ -7,13 +7,13 @@ pre-commit:
   parallel: true
   commands:
     sort-package-json:
-      glob: "{package.json,**/package.json}"
+      glob: '{package.json,**/package.json}'
       run: |
         for file in {staged_files}; do
           bunx sort-package-json "$file"
         done
     validate-prisma-schema:
-      glob: "**/prisma/schema.prisma"
+      glob: '**/prisma/schema.prisma'
       run: |
         for file in {staged_files}; do
           scripts/validate-prisma-schema.sh "$file"

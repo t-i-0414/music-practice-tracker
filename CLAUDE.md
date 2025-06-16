@@ -197,12 +197,14 @@ Note: Test setup not yet configured for Mobile package.
 `scripts/validate-prisma-schema.sh` enforces:
 
 1. **ID Fields**
+
    - Field name must be `id`
    - `String` type with `@id` attribute
    - `@db.Uuid` for UUID storage
    - `@default(uuid())` or `@default(dbgenerated("gen_random_uuid()"))`
 
 2. **Timestamps**
+
    - `createdAt`: `DateTime` type with `@default(now())`
    - `updatedAt`: `DateTime` type with `@updatedAt`
 
