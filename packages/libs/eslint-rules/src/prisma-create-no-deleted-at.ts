@@ -1,5 +1,4 @@
 import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
-import * as ts from 'typescript';
 
 type MessageIds = 'createShouldNotHaveDeletedAt';
 
@@ -20,9 +19,6 @@ const rule = createRule<[], MessageIds>({
   defaultOptions: [],
 
   create(context) {
-    const services = ESLintUtils.getParserServices(context);
-    const checker = services.program.getTypeChecker();
-
     // Check if this is a Prisma create method call
     function isPrismaCreateMethod(node: TSESTree.MemberExpression): boolean {
       if (node.property.type !== AST_NODE_TYPES.Identifier) {
@@ -61,12 +57,7 @@ const rule = createRule<[], MessageIds>({
           current = current.object;
         } else if (current.type === AST_NODE_TYPES.Identifier) {
           const name = current.name.toLowerCase();
-          if (
-            name.includes('repository') ||
-            name.includes('prisma') ||
-            name.includes('model') ||
-            name.includes('service')
-          ) {
+          if (name === 'repository' || name === 'prisma' || name.endsWith('repository') || name.endsWith('model')) {
             return true;
           }
           break;
@@ -80,73 +71,27 @@ const rule = createRule<[], MessageIds>({
       return false;
     }
 
-    // Check if a type has deletedAt property
-    function typeHasDeletedAt(type: ts.Type): boolean {
-      if (type.isUnion()) {
-        return type.types.some((t) => typeHasDeletedAt(t));
-      }
-
-      if (type.symbol && type.symbol.declarations) {
-        for (const declaration of type.symbol.declarations) {
-          if (ts.isTypeLiteralNode(declaration) || ts.isInterfaceDeclaration(declaration)) {
-            const members = ts.isTypeLiteralNode(declaration) ? declaration.members : declaration.members;
-            for (const member of members) {
-              if (
-                ts.isPropertySignature(member) &&
-                member.name &&
-                ts.isIdentifier(member.name) &&
-                member.name.text === 'deletedAt'
-              ) {
-                return true;
-              }
-            }
-          }
+    // Check if data contains deletedAt in object literal
+    function checkObjectForDeletedAt(node: TSESTree.ObjectExpression): boolean {
+      for (const property of node.properties) {
+        if (
+          property.type === AST_NODE_TYPES.Property &&
+          property.key.type === AST_NODE_TYPES.Identifier &&
+          property.key.name === 'deletedAt'
+        ) {
+          return true;
         }
       }
-
-      // Check for properties on the type
-      const deletedAtSymbol = type.getProperty('deletedAt');
-      return deletedAtSymbol !== undefined;
+      return false;
     }
 
-    // Check if data contains or might contain deletedAt
-    function checkDataForDeletedAt(node: TSESTree.Expression): boolean {
-      // Handle MemberExpression like params.data or Identifier
-      if (node.type === AST_NODE_TYPES.MemberExpression || node.type === AST_NODE_TYPES.Identifier) {
-        // Get TypeScript node and check type
-        const tsNode = services.esTreeNodeToTSNodeMap.get(node);
-        if (tsNode) {
-          const type = checker.getTypeAtLocation(tsNode);
-          return typeHasDeletedAt(type);
-        }
-        return false; // If we can't determine, assume it doesn't have deletedAt
-      }
-
-      if (node.type === AST_NODE_TYPES.ObjectExpression) {
-        // Check for explicit deletedAt property
-        for (const property of node.properties) {
-          if (
-            property.type === AST_NODE_TYPES.Property &&
-            property.key.type === AST_NODE_TYPES.Identifier &&
-            property.key.name === 'deletedAt'
-          ) {
-            return true;
-          }
-
-          // Check for spread properties that might contain deletedAt
-          if (property.type === AST_NODE_TYPES.SpreadElement) {
-            // Get TypeScript node and check type
-            const tsNode = services.esTreeNodeToTSNodeMap.get(property.argument);
-            if (tsNode) {
-              const type = checker.getTypeAtLocation(tsNode);
-              if (typeHasDeletedAt(type)) {
-                return true;
-              }
-            }
-          }
+    // Check if array contains objects with deletedAt
+    function checkArrayForDeletedAt(node: TSESTree.ArrayExpression): boolean {
+      for (const element of node.elements) {
+        if (element && element.type === AST_NODE_TYPES.ObjectExpression && checkObjectForDeletedAt(element)) {
+          return true;
         }
       }
-
       return false;
     }
 
@@ -158,7 +103,7 @@ const rule = createRule<[], MessageIds>({
 
       const firstArg = node.arguments[0];
 
-      // Pattern 1: create({ data: ... })
+      // Pattern: create({ data: ... })
       if (firstArg.type === AST_NODE_TYPES.ObjectExpression) {
         for (const property of firstArg.properties) {
           if (
@@ -169,32 +114,6 @@ const rule = createRule<[], MessageIds>({
             return property.value as TSESTree.Expression;
           }
         }
-      }
-
-      // Pattern 2: createMany({ data: ... }) or direct data object
-      // For createMany/createManyAndReturn, data might be passed directly
-      if (firstArg.type === AST_NODE_TYPES.ObjectExpression) {
-        // Check if this looks like data object (has properties but no 'data' key)
-        let hasDataKey = false;
-        for (const property of firstArg.properties) {
-          if (
-            property.type === AST_NODE_TYPES.Property &&
-            property.key.type === AST_NODE_TYPES.Identifier &&
-            property.key.name === 'data'
-          ) {
-            hasDataKey = true;
-            break;
-          }
-        }
-        if (!hasDataKey) {
-          // This might be the data object itself
-          return firstArg;
-        }
-      }
-
-      // Pattern 3: create(params) where params is a variable
-      if (firstArg.type !== AST_NODE_TYPES.SpreadElement) {
-        return firstArg as TSESTree.Expression;
       }
 
       return null;
@@ -209,7 +128,18 @@ const rule = createRule<[], MessageIds>({
             return;
           }
 
-          if (checkDataForDeletedAt(dataParam)) {
+          let hasDeletedAt = false;
+
+          // Check object literal
+          if (dataParam.type === AST_NODE_TYPES.ObjectExpression) {
+            hasDeletedAt = checkObjectForDeletedAt(dataParam);
+          }
+          // Check array literal
+          else if (dataParam.type === AST_NODE_TYPES.ArrayExpression) {
+            hasDeletedAt = checkArrayForDeletedAt(dataParam);
+          }
+
+          if (hasDeletedAt) {
             context.report({
               node: node.callee,
               messageId: 'createShouldNotHaveDeletedAt',
