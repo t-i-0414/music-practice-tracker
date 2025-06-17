@@ -1,21 +1,23 @@
-import type { Rule } from 'eslint';
-import type { CallExpression, Identifier, MemberExpression, Node, ObjectExpression } from 'estree';
+import { ESLintUtils, TSESTree, AST_NODE_TYPES } from '@typescript-eslint/utils';
+import * as ts from 'typescript';
 
-type FunctionNode = Node & {
-  id?: Identifier | null;
-  parent?: Node;
-};
+type MessageIds =
+  | 'updateShouldBeDelete'
+  | 'updateShouldBeRestore'
+  | 'updateShouldBeUpdate'
+  | 'deleteShouldHaveDeletedAt'
+  | 'restoreShouldHaveDeletedAtNull'
+  | 'updateShouldNotHaveDeletedAt';
 
-const rule: Rule.RuleModule = {
+const createRule = ESLintUtils.RuleCreator((name) => `https://github.com/music-practice-tracker/rules/${name}`);
+
+const rule = createRule<[], MessageIds>({
+  name: 'prisma-update-naming-convention',
   meta: {
     type: 'problem',
     docs: {
       description: 'Enforce naming convention for Prisma update functions based on deletedAt field',
-      category: 'Best Practices',
-      recommended: true,
     },
-    fixable: undefined,
-    schema: [],
     messages: {
       updateShouldBeDelete:
         'Function "{{functionName}}" calls Prisma update with deletedAt: Date. It should be named starting with "delete"',
@@ -29,11 +31,16 @@ const rule: Rule.RuleModule = {
         'Function "{{functionName}}" starts with "restore" but doesn\'t set deletedAt to null',
       updateShouldNotHaveDeletedAt: 'Function "{{functionName}}" starts with "update" but includes deletedAt field',
     },
+    schema: [],
   },
+  defaultOptions: [],
 
-  create(context: Rule.RuleContext): Rule.RuleListener {
+  create(context) {
+    const services = ESLintUtils.getParserServices(context);
+    const checker = services.program.getTypeChecker();
+
     // Stack to track current function names
-    const functionStack: (string | null)[] = [];
+    const functionStack: string[] = [];
 
     // Get the current function name
     function getCurrentFunctionName(): string | null {
@@ -41,34 +48,23 @@ const rule: Rule.RuleModule = {
     }
 
     // Check if this is a Prisma update method call
-    function isPrismaUpdateMethod(node: Node): node is MemberExpression {
-      if (node.type !== 'MemberExpression') {
-        return false;
-      }
-
-      const property = node.property;
-      if (!property || property.type !== 'Identifier') {
-        return false;
-      }
-
-      // Check for update method
-      if (property.name !== 'update') {
+    function isPrismaUpdateMethod(node: TSESTree.MemberExpression): boolean {
+      if (node.property.type !== AST_NODE_TYPES.Identifier || node.property.name !== 'update') {
         return false;
       }
 
       // Try to trace back to see if this is a Prisma model
-      let current: Node = node.object;
+      let current: TSESTree.Node = node.object;
       while (current) {
-        // Check for patterns like prisma.user, this.user, repository.user, etc.
-        if (current.type === 'MemberExpression') {
-          const memberExp = current as MemberExpression;
+        if (current.type === AST_NODE_TYPES.MemberExpression) {
           const objectName =
-            memberExp.object.type === 'Identifier'
-              ? memberExp.object.name
-              : memberExp.object.type === 'MemberExpression' && memberExp.object.property?.type === 'Identifier'
-                ? memberExp.object.property.name
+            current.object.type === AST_NODE_TYPES.Identifier
+              ? current.object.name
+              : current.object.type === AST_NODE_TYPES.MemberExpression &&
+                  current.object.property.type === AST_NODE_TYPES.Identifier
+                ? current.object.property.name
                 : undefined;
-          const propertyName = memberExp.property?.type === 'Identifier' ? memberExp.property.name : undefined;
+          const propertyName = current.property.type === AST_NODE_TYPES.Identifier ? current.property.name : undefined;
 
           // Common Prisma patterns
           if (
@@ -80,9 +76,8 @@ const rule: Rule.RuleModule = {
           ) {
             return true;
           }
-          current = memberExp.object;
-        } else if (current.type === 'Identifier') {
-          // Check if the identifier looks like a Prisma model (e.g., userRepository)
+          current = current.object;
+        } else if (current.type === AST_NODE_TYPES.Identifier) {
           const name = current.name.toLowerCase();
           if (
             name.includes('repository') ||
@@ -93,8 +88,7 @@ const rule: Rule.RuleModule = {
             return true;
           }
           break;
-        } else if (current.type === 'ThisExpression') {
-          // this.something.update()
+        } else if (current.type === AST_NODE_TYPES.ThisExpression) {
           return true;
         } else {
           break;
@@ -105,56 +99,126 @@ const rule: Rule.RuleModule = {
     }
 
     // Helper to get function name from parent nodes
-    function getFunctionName(node: FunctionNode): string | null {
-      let name = node.id?.name || null;
+    function getFunctionName(node: TSESTree.Node): string | null {
+      if (node.type === AST_NODE_TYPES.FunctionDeclaration && node.id) {
+        return node.id.name;
+      }
 
-      if (!name && node.parent) {
-        if (node.parent.type === 'VariableDeclarator' && node.parent.id?.type === 'Identifier') {
-          name = node.parent.id.name;
-        } else if (node.parent.type === 'Property' && node.parent.key?.type === 'Identifier') {
-          name = node.parent.key.name;
-        } else if (node.parent.type === 'MethodDefinition' && node.parent.key?.type === 'Identifier') {
-          name = node.parent.key.name;
+      if (node.parent) {
+        if (
+          node.parent.type === AST_NODE_TYPES.VariableDeclarator &&
+          node.parent.id?.type === AST_NODE_TYPES.Identifier
+        ) {
+          return node.parent.id.name;
+        } else if (
+          node.parent.type === AST_NODE_TYPES.Property &&
+          node.parent.key?.type === AST_NODE_TYPES.Identifier
+        ) {
+          return node.parent.key.name;
+        } else if (
+          node.parent.type === AST_NODE_TYPES.MethodDefinition &&
+          node.parent.key?.type === AST_NODE_TYPES.Identifier
+        ) {
+          return node.parent.key.name;
         }
       }
 
-      return name;
+      return null;
+    }
+
+    // Check if a type has deletedAt property
+    function typeHasDeletedAt(type: ts.Type): boolean {
+      if (type.isUnion()) {
+        return type.types.some((t) => typeHasDeletedAt(t));
+      }
+
+      if (type.symbol && type.symbol.declarations) {
+        for (const declaration of type.symbol.declarations) {
+          if (ts.isTypeLiteralNode(declaration) || ts.isInterfaceDeclaration(declaration)) {
+            const members = ts.isTypeLiteralNode(declaration) ? declaration.members : declaration.members;
+            for (const member of members) {
+              if (
+                ts.isPropertySignature(member) &&
+                member.name &&
+                ts.isIdentifier(member.name) &&
+                member.name.text === 'deletedAt'
+              ) {
+                return true;
+              }
+            }
+          }
+        }
+      }
+
+      // Check for properties on the type
+      const deletedAtSymbol = type.getProperty('deletedAt');
+      return deletedAtSymbol !== undefined;
     }
 
     // Analyze the data object to find deletedAt field
-    function analyzeDataObject(node: Node): 'delete' | 'restore' | 'update' | null {
-      if (node.type !== 'ObjectExpression') {
+    function analyzeDataObject(node: TSESTree.Expression): 'delete' | 'restore' | 'update' | 'unknown' | null {
+      if (node.type !== AST_NODE_TYPES.ObjectExpression) {
         return null;
       }
 
-      const objectExp = node as ObjectExpression;
+      let hasSpreadFromParam = false;
+      let spreadParamOmitsDeletedAt = false;
 
-      for (const property of objectExp.properties) {
-        if (property.type === 'Property' && property.key.type === 'Identifier' && property.key.name === 'deletedAt') {
+      for (const property of node.properties) {
+        if (
+          property.type === AST_NODE_TYPES.Property &&
+          property.key.type === AST_NODE_TYPES.Identifier &&
+          property.key.name === 'deletedAt'
+        ) {
           const value = property.value;
 
           // Check if deletedAt is null
-          if (value.type === 'Literal' && value.value === null) {
+          if (value.type === AST_NODE_TYPES.Literal && value.value === null) {
             return 'restore';
           }
 
-          // Check if deletedAt is a Date (new Date() or Date value)
-          if (value.type === 'NewExpression' && value.callee.type === 'Identifier' && value.callee.name === 'Date') {
+          // Check if deletedAt is a Date
+          if (
+            value.type === AST_NODE_TYPES.NewExpression &&
+            value.callee.type === AST_NODE_TYPES.Identifier &&
+            value.callee.name === 'Date'
+          ) {
             return 'delete';
           }
 
           // Check if it's a variable/expression that might be a Date
-          if (value.type === 'Identifier' || value.type === 'MemberExpression') {
-            // Assume it's a Date value for delete operation
+          if (value.type === AST_NODE_TYPES.Identifier || value.type === AST_NODE_TYPES.MemberExpression) {
             return 'delete';
           }
         }
 
         // Check for spread properties that might contain deletedAt
-        if (property.type === 'SpreadElement') {
-          // For now, we'll skip analysis of spread elements
-          // This could be enhanced to track variables
+        if (property.type === AST_NODE_TYPES.SpreadElement) {
+          hasSpreadFromParam = true;
+
+          // Get TypeScript node and check type
+          const tsNode = services.esTreeNodeToTSNodeMap.get(property.argument);
+          if (tsNode) {
+            // Check if the type being spread explicitly omits deletedAt
+            const type = checker.getTypeAtLocation(tsNode);
+            if (!typeHasDeletedAt(type)) {
+              spreadParamOmitsDeletedAt = true;
+            } else {
+              // Type has deletedAt, so it might be included
+              return 'unknown';
+            }
+          }
         }
+      }
+
+      // If we have spread from params but they all omit deletedAt, it's safe
+      if (hasSpreadFromParam && spreadParamOmitsDeletedAt) {
+        return 'update';
+      }
+
+      // If we have spread but couldn't determine the type, return unknown
+      if (hasSpreadFromParam) {
+        return 'unknown';
       }
 
       // No deletedAt field found
@@ -162,18 +226,21 @@ const rule: Rule.RuleModule = {
     }
 
     // Find the data parameter in update call
-    function findDataParameter(node: CallExpression): Node | null {
+    function findDataParameter(node: TSESTree.CallExpression): TSESTree.Expression | null {
       if (node.arguments.length === 0) {
         return null;
       }
 
       const firstArg = node.arguments[0];
-      if (firstArg.type === 'ObjectExpression') {
+      if (firstArg.type === AST_NODE_TYPES.ObjectExpression) {
         // Look for data property
-        const objectExp = firstArg as ObjectExpression;
-        for (const property of objectExp.properties) {
-          if (property.type === 'Property' && property.key.type === 'Identifier' && property.key.name === 'data') {
-            return property.value;
+        for (const property of firstArg.properties) {
+          if (
+            property.type === AST_NODE_TYPES.Property &&
+            property.key.type === AST_NODE_TYPES.Identifier &&
+            property.key.name === 'data'
+          ) {
+            return property.value as TSESTree.Expression;
           }
         }
       }
@@ -183,48 +250,60 @@ const rule: Rule.RuleModule = {
 
     return {
       // Track entering/exiting functions
-      FunctionDeclaration(node: FunctionNode) {
-        functionStack.push(node.id?.name || null);
+      FunctionDeclaration(node) {
+        const name = getFunctionName(node);
+        if (name) functionStack.push(name);
       },
       'FunctionDeclaration:exit'() {
         functionStack.pop();
       },
-      FunctionExpression(node: FunctionNode) {
-        functionStack.push(getFunctionName(node));
+      FunctionExpression(node) {
+        const name = getFunctionName(node);
+        if (name) functionStack.push(name);
       },
       'FunctionExpression:exit'() {
         functionStack.pop();
       },
-      ArrowFunctionExpression(node: FunctionNode) {
-        functionStack.push(getFunctionName(node));
+      ArrowFunctionExpression(node) {
+        const name = getFunctionName(node);
+        if (name) functionStack.push(name);
       },
       'ArrowFunctionExpression:exit'() {
         functionStack.pop();
       },
 
       // Check for Prisma update calls
-      CallExpression(node: CallExpression) {
-        if (node.callee && isPrismaUpdateMethod(node.callee)) {
+      CallExpression(node) {
+        if (node.callee.type === AST_NODE_TYPES.MemberExpression && isPrismaUpdateMethod(node.callee)) {
           const functionName = getCurrentFunctionName();
 
           if (!functionName) {
-            // Skip validation if we can't determine the function name
             return;
           }
 
           const dataParam = findDataParameter(node);
           if (!dataParam) {
-            // Skip if we can't find the data parameter
             return;
           }
 
           const expectedPrefix = analyzeDataObject(dataParam);
           if (!expectedPrefix) {
-            // Skip if we can't analyze the data object
             return;
           }
 
           const functionNameLower = functionName.toLowerCase();
+
+          // If we detected that the data might contain deletedAt from parameters, report a warning
+          if (expectedPrefix === 'unknown') {
+            if (functionNameLower.startsWith('update')) {
+              context.report({
+                node: node.callee,
+                messageId: 'updateShouldNotHaveDeletedAt',
+                data: { functionName },
+              });
+            }
+            return;
+          }
 
           // Check naming convention based on deletedAt usage
           if (expectedPrefix === 'delete') {
@@ -277,6 +356,6 @@ const rule: Rule.RuleModule = {
       },
     };
   },
-};
+});
 
 export = rule;

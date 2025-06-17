@@ -1,3 +1,4 @@
+import { StrictOmit } from '@/common/types/strict-omit';
 import { Prisma, User } from '@/generated/prisma';
 import { RepositoryService } from '@/repository/repository.service';
 import { Injectable } from '@nestjs/common';
@@ -92,7 +93,10 @@ export class UserRepository {
     });
   }
 
-  async updateUser(params: { where: Prisma.UserWhereUniqueInput; data: Prisma.UserUpdateInput }): Promise<User> {
+  async updateUser(params: {
+    where: Prisma.UserWhereUniqueInput;
+    data: StrictOmit<Prisma.UserUpdateInput, 'deletedAt'>;
+  }): Promise<User> {
     const { where, data } = params;
     return this.repository.user.update({
       data: {

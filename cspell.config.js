@@ -30,6 +30,7 @@ export default defineConfig({
     'svh',
     'Takuya',
     'tsc',
+    'TSES',
     'turbopack',
     'typesync',
     'vitest',
