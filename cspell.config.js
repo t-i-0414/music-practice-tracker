@@ -27,6 +27,7 @@ export default defineConfig({
     'Kamil',
     'manyandreturn',
     'mau',
+    'mts',
     'num',
     'Myśliwiec',
     'nestframework',
@@ -47,7 +48,13 @@ export default defineConfig({
     'vitest',
   ],
   flagWords: [],
-  ignorePaths: ['**/node_modules/**', '**/generated/**', '**/dist/**', 'packages/apps/backend/prisma/**'],
+  ignorePaths: [
+    '**/node_modules/**',
+    '**/generated/**',
+    '**/dist/**',
+    'packages/apps/backend/prisma/**',
+    '**/coverage/**',
+  ],
   maxNumberOfProblems: 0,
   minWordLength: 3,
 });
