@@ -1,10 +1,8 @@
-import { ESLintUtils, TSESTree, AST_NODE_TYPES } from '@typescript-eslint/utils';
+import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
 import * as ts from 'typescript';
 
 type MessageIds =
-  | 'updateShouldBeDelete'
-  | 'updateShouldBeRestore'
-  | 'updateShouldBeUpdate'
+  | 'invalidUpdateMethodName'
   | 'deleteShouldHaveDeletedAt'
   | 'restoreShouldHaveDeletedAtNull'
   | 'updateShouldNotHaveDeletedAt';
@@ -19,12 +17,8 @@ const rule = createRule<[], MessageIds>({
       description: 'Enforce naming convention for Prisma update functions based on deletedAt field',
     },
     messages: {
-      updateShouldBeDelete:
-        'Function "{{functionName}}" calls Prisma update with deletedAt: Date. It should be named starting with "delete"',
-      updateShouldBeRestore:
-        'Function "{{functionName}}" calls Prisma update with deletedAt: null. It should be named starting with "restore"',
-      updateShouldBeUpdate:
-        'Function "{{functionName}}" calls Prisma update without deletedAt. It should be named starting with "update"',
+      invalidUpdateMethodName:
+        'Prisma {{method}} method {{operation}} must be in a function named "{{expectedPrefix}}{{suffix}}". Current function: "{{functionName}}"',
       deleteShouldHaveDeletedAt:
         'Function "{{functionName}}" starts with "delete" but doesn\'t set deletedAt to a Date value',
       restoreShouldHaveDeletedAtNull:
@@ -48,15 +42,15 @@ const rule = createRule<[], MessageIds>({
     }
 
     // Check if this is a Prisma update method call
-    function isPrismaUpdateMethod(node: TSESTree.MemberExpression): boolean {
+    function isPrismaUpdateMethod(node: TSESTree.MemberExpression): string | null {
       if (node.property.type !== AST_NODE_TYPES.Identifier) {
-        return false;
+        return null;
       }
-      
+
       // Check for update, updateMany, or updateManyAndReturn methods
       const methodName = node.property.name;
       if (methodName !== 'update' && methodName !== 'updateMany' && methodName !== 'updateManyAndReturn') {
-        return false;
+        return null;
       }
 
       // Try to trace back to see if this is a Prisma model
@@ -80,7 +74,7 @@ const rule = createRule<[], MessageIds>({
             propertyName === 'prisma' ||
             propertyName === 'repository'
           ) {
-            return true;
+            return methodName;
           }
           current = current.object;
         } else if (current.type === AST_NODE_TYPES.Identifier) {
@@ -91,17 +85,17 @@ const rule = createRule<[], MessageIds>({
             name.includes('model') ||
             name.includes('service')
           ) {
-            return true;
+            return methodName;
           }
           break;
         } else if (current.type === AST_NODE_TYPES.ThisExpression) {
-          return true;
+          return methodName;
         } else {
           break;
         }
       }
 
-      return false;
+      return null;
     }
 
     // Helper to get function name from parent nodes
@@ -177,7 +171,7 @@ const rule = createRule<[], MessageIds>({
         }
         return 'unknown';
       }
-      
+
       if (node.type !== AST_NODE_TYPES.ObjectExpression) {
         return null;
       }
@@ -269,7 +263,7 @@ const rule = createRule<[], MessageIds>({
       // For updateMany/updateManyAndReturn, check different patterns
       // Pattern 1: updateManyAndReturn({ where: ..., data: ... })
       // Already handled above
-      
+
       // Pattern 2: updateMany({ where: ... }, { deletedAt: ... })
       if (node.arguments.length >= 2) {
         const secondArg = node.arguments[1];
@@ -295,6 +289,47 @@ const rule = createRule<[], MessageIds>({
       }
 
       return null;
+    }
+
+    // Extract suffix from function name (e.g., "User" from "updateUser" or "deleteUser")
+    function extractSuffix(functionName: string): string {
+      // Common prefixes to remove
+      const prefixes = [
+        'updatemanyandreturn',
+        'updatemany',
+        'update',
+        'deletemany',
+        'delete',
+        'restoremany',
+        'restore',
+        'modify',
+        'change',
+        'edit',
+        'set',
+      ];
+
+      let remainingName = functionName;
+      const lowerName = functionName.toLowerCase();
+
+      for (const prefix of prefixes) {
+        if (lowerName.startsWith(prefix)) {
+          remainingName = functionName.substring(prefix.length);
+          break;
+        }
+      }
+
+      // If we have something left after removing prefix, use it
+      if (remainingName && remainingName !== functionName) {
+        return remainingName;
+      }
+
+      // Otherwise, try to extract from the end (e.g., "User" from "myUpdateUser")
+      const match = functionName.match(/([A-Z][a-zA-Z]+)s?$/);
+      if (match) {
+        return match[1];
+      }
+
+      return 'Entity';
     }
 
     return {
@@ -323,7 +358,12 @@ const rule = createRule<[], MessageIds>({
 
       // Check for Prisma update calls
       CallExpression(node) {
-        if (node.callee.type === AST_NODE_TYPES.MemberExpression && isPrismaUpdateMethod(node.callee)) {
+        if (node.callee.type === AST_NODE_TYPES.MemberExpression) {
+          const methodName = isPrismaUpdateMethod(node.callee);
+          if (!methodName) {
+            return;
+          }
+
           const functionName = getCurrentFunctionName();
 
           if (!functionName) {
@@ -355,28 +395,106 @@ const rule = createRule<[], MessageIds>({
           }
 
           // Check naming convention based on deletedAt usage
+          // For operations without deletedAt, expect function name to start with method name
+          // For operations with deletedAt, expect delete/restore prefix regardless of method
           if (expectedPrefix === 'delete') {
-            if (!functionNameLower.startsWith('delete')) {
-              context.report({
-                node: node.callee,
-                messageId: 'updateShouldBeDelete',
-                data: { functionName },
-              });
+            // For updateMany* methods with deletedAt, expect deleteManyX
+            if (methodName.toLowerCase().includes('manyandreturn')) {
+              if (!functionNameLower.startsWith('deletemanyandreturn')) {
+                context.report({
+                  node: node.callee,
+                  messageId: 'invalidUpdateMethodName',
+                  data: {
+                    functionName,
+                    method: methodName,
+                    operation: 'with deletedAt: Date',
+                    expectedPrefix: 'deleteManyAndReturn',
+                  },
+                });
+              }
+            } else if (methodName.toLowerCase().includes('many')) {
+              if (!functionNameLower.startsWith('deletemany')) {
+                context.report({
+                  node: node.callee,
+                  messageId: 'invalidUpdateMethodName',
+                  data: {
+                    functionName,
+                    method: methodName,
+                    operation: 'with deletedAt: Date',
+                    expectedPrefix: 'deleteMany',
+                  },
+                });
+              }
+            } else {
+              // For regular update with deletedAt, expect deleteX
+              if (!functionNameLower.startsWith('delete')) {
+                context.report({
+                  node: node.callee,
+                  messageId: 'invalidUpdateMethodName',
+                  data: {
+                    functionName,
+                    method: methodName,
+                    operation: 'with deletedAt: Date',
+                    expectedPrefix: 'delete',
+                  },
+                });
+              }
             }
           } else if (expectedPrefix === 'restore') {
-            if (!functionNameLower.startsWith('restore')) {
-              context.report({
-                node: node.callee,
-                messageId: 'updateShouldBeRestore',
-                data: { functionName },
-              });
+            // For updateMany* methods with deletedAt: null, expect restoreManyX
+            if (methodName.toLowerCase().includes('manyandreturn')) {
+              if (!functionNameLower.startsWith('restoremanyandreturn')) {
+                context.report({
+                  node: node.callee,
+                  messageId: 'invalidUpdateMethodName',
+                  data: {
+                    functionName,
+                    method: methodName,
+                    operation: 'with deletedAt: null',
+                    expectedPrefix: 'restoreManyAndReturn',
+                  },
+                });
+              }
+            } else if (methodName.toLowerCase().includes('many')) {
+              if (!functionNameLower.startsWith('restoremany')) {
+                context.report({
+                  node: node.callee,
+                  messageId: 'invalidUpdateMethodName',
+                  data: {
+                    functionName,
+                    method: methodName,
+                    operation: 'with deletedAt: null',
+                    expectedPrefix: 'restoreMany',
+                  },
+                });
+              }
+            } else {
+              // For regular update with deletedAt: null, expect restoreX
+              if (!functionNameLower.startsWith('restore')) {
+                context.report({
+                  node: node.callee,
+                  messageId: 'invalidUpdateMethodName',
+                  data: {
+                    functionName,
+                    method: methodName,
+                    operation: 'with deletedAt: null',
+                    expectedPrefix: 'restore',
+                  },
+                });
+              }
             }
           } else if (expectedPrefix === 'update') {
-            if (!functionNameLower.startsWith('update')) {
+            // For update operation without deletedAt, we expect the method name as prefix
+            if (!functionNameLower.startsWith(methodName.toLowerCase())) {
               context.report({
                 node: node.callee,
-                messageId: 'updateShouldBeUpdate',
-                data: { functionName },
+                messageId: 'invalidUpdateMethodName',
+                data: {
+                  functionName,
+                  method: methodName,
+                  operation: 'without deletedAt',
+                  expectedPrefix: methodName,
+                },
               });
             }
           }

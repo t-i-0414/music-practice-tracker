@@ -1,4 +1,4 @@
-import { ESLintUtils, TSESTree, AST_NODE_TYPES } from '@typescript-eslint/utils';
+import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
 import * as ts from 'typescript';
 
 type MessageIds = 'createShouldNotHaveDeletedAt';
@@ -28,7 +28,7 @@ const rule = createRule<[], MessageIds>({
       if (node.property.type !== AST_NODE_TYPES.Identifier) {
         return false;
       }
-      
+
       // Check for create, createMany, or createManyAndReturn methods
       const methodName = node.property.name;
       if (methodName !== 'create' && methodName !== 'createMany' && methodName !== 'createManyAndReturn') {
@@ -121,7 +121,7 @@ const rule = createRule<[], MessageIds>({
         }
         return false; // If we can't determine, assume it doesn't have deletedAt
       }
-      
+
       if (node.type === AST_NODE_TYPES.ObjectExpression) {
         // Check for explicit deletedAt property
         for (const property of node.properties) {
@@ -157,7 +157,7 @@ const rule = createRule<[], MessageIds>({
       }
 
       const firstArg = node.arguments[0];
-      
+
       // Pattern 1: create({ data: ... })
       if (firstArg.type === AST_NODE_TYPES.ObjectExpression) {
         for (const property of firstArg.properties) {
@@ -196,7 +196,7 @@ const rule = createRule<[], MessageIds>({
       if (firstArg.type !== AST_NODE_TYPES.SpreadElement) {
         return firstArg as TSESTree.Expression;
       }
-      
+
       return null;
     }
 

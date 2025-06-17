@@ -7,6 +7,8 @@ import noPrismaDeleteOutsideHardDelete from '@music-practice-tracker/eslint-rule
 import prismaFindNamingConvention from '@music-practice-tracker/eslint-rules/dist/prisma-find-naming-convention.js';
 import prismaUpdateNamingConvention from '@music-practice-tracker/eslint-rules/dist/prisma-update-naming-convention.js';
 import prismaCreateNoDeletedAt from '@music-practice-tracker/eslint-rules/dist/prisma-create-no-deleted-at.js';
+import prismaCreateNamingConvention from '@music-practice-tracker/eslint-rules/dist/prisma-create-naming-convention.js';
+import prismaDeleteNamingConvention from '@music-practice-tracker/eslint-rules/dist/prisma-delete-naming-convention.js';
 
 export default tseslint.config(
   {
@@ -36,6 +38,8 @@ export default tseslint.config(
           'prisma-find-naming-convention': prismaFindNamingConvention,
           'prisma-update-naming-convention': prismaUpdateNamingConvention,
           'prisma-create-no-deleted-at': prismaCreateNoDeletedAt,
+          'prisma-create-naming-convention': prismaCreateNamingConvention,
+          'prisma-delete-naming-convention': prismaDeleteNamingConvention,
         },
       },
     },
@@ -47,6 +51,8 @@ export default tseslint.config(
       'custom-rules/prisma-find-naming-convention': 'error',
       'custom-rules/prisma-update-naming-convention': 'error',
       'custom-rules/prisma-create-no-deleted-at': 'error',
+      'custom-rules/prisma-create-naming-convention': 'error',
+      'custom-rules/prisma-delete-naming-convention': 'error',
     },
   },
 );
