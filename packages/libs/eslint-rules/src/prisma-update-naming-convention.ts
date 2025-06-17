@@ -18,7 +18,7 @@ const rule = createRule<[], MessageIds>({
     },
     messages: {
       invalidUpdateMethodName:
-        'Prisma {{method}} method {{operation}} must be in a function named "{{expectedPrefix}}{{suffix}}". Current function: "{{functionName}}"',
+        'Prisma {{method}} method {{operation}} must be in a function named "{{expectedPrefix}}*". Current function: "{{functionName}}"',
       deleteShouldHaveDeletedAt:
         'Function "{{functionName}}" starts with "delete" but doesn\'t set deletedAt to a Date value',
       restoreShouldHaveDeletedAtNull:
@@ -289,47 +289,6 @@ const rule = createRule<[], MessageIds>({
       }
 
       return null;
-    }
-
-    // Extract suffix from function name (e.g., "User" from "updateUser" or "deleteUser")
-    function extractSuffix(functionName: string): string {
-      // Common prefixes to remove
-      const prefixes = [
-        'updatemanyandreturn',
-        'updatemany',
-        'update',
-        'deletemany',
-        'delete',
-        'restoremany',
-        'restore',
-        'modify',
-        'change',
-        'edit',
-        'set',
-      ];
-
-      let remainingName = functionName;
-      const lowerName = functionName.toLowerCase();
-
-      for (const prefix of prefixes) {
-        if (lowerName.startsWith(prefix)) {
-          remainingName = functionName.substring(prefix.length);
-          break;
-        }
-      }
-
-      // If we have something left after removing prefix, use it
-      if (remainingName && remainingName !== functionName) {
-        return remainingName;
-      }
-
-      // Otherwise, try to extract from the end (e.g., "User" from "myUpdateUser")
-      const match = functionName.match(/([A-Z][a-zA-Z]+)s?$/);
-      if (match) {
-        return match[1];
-      }
-
-      return 'Entity';
     }
 
     return {
