@@ -1,4 +1,5 @@
 import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
+import { isPrismaFindMethod, getFunctionNameExtended } from './utils/prisma-helpers';
 
 type MessageIds =
   | 'invalidFindMethodName'
@@ -38,100 +39,6 @@ const rule = createRule<[], MessageIds>({
     // Get the current function name
     function getCurrentFunctionName(): string | null {
       return functionStack[functionStack.length - 1] || null;
-    }
-
-    // Check if this is a Prisma find method call
-    function isPrismaFindMethod(node: TSESTree.Node): node is TSESTree.MemberExpression {
-      if (node.type !== AST_NODE_TYPES.MemberExpression) {
-        return false;
-      }
-
-      const property = node.property;
-      if (!property || property.type !== AST_NODE_TYPES.Identifier) {
-        return false;
-      }
-
-      // Check for find methods
-      const findMethodNames = ['findUnique', 'findUniqueOrThrow', 'findFirst', 'findFirstOrThrow', 'findMany'];
-
-      if (!findMethodNames.includes(property.name)) {
-        return false;
-      }
-
-      // Try to trace back to see if this is a Prisma model
-      let current: TSESTree.Node = node.object;
-      let foundPrismaIndicator = false;
-
-      while (current) {
-        if (current.type === AST_NODE_TYPES.MemberExpression) {
-          const memberExp = current as TSESTree.MemberExpression;
-          const objectName =
-            memberExp.object.type === AST_NODE_TYPES.Identifier
-              ? memberExp.object.name
-              : memberExp.object.type === AST_NODE_TYPES.MemberExpression && memberExp.object.property?.type === AST_NODE_TYPES.Identifier
-                ? memberExp.object.property.name
-                : undefined;
-          const propertyName = memberExp.property?.type === AST_NODE_TYPES.Identifier ? memberExp.property.name : undefined;
-
-          // Common Prisma patterns
-          if (
-            objectName === 'prisma' ||
-            objectName === 'repository' ||
-            objectName === 'this' ||
-            propertyName === 'prisma' ||
-            propertyName === 'repository'
-          ) {
-            foundPrismaIndicator = true;
-            break;
-          }
-
-          // Check if it's explicitly NOT a Prisma service
-          if (objectName && objectName !== 'this') {
-            const lowerName = objectName.toLowerCase();
-            if (lowerName.includes('prisma') || lowerName.includes('repository') || lowerName.includes('model')) {
-              foundPrismaIndicator = true;
-              break;
-            }
-          }
-          current = memberExp.object;
-        } else if (current.type === AST_NODE_TYPES.Identifier) {
-          const name = current.name.toLowerCase();
-          if (
-            name === 'prisma' ||
-            name === 'repository' ||
-            name.includes('prisma') ||
-            name.includes('repository') ||
-            name.includes('model')
-          ) {
-            foundPrismaIndicator = true;
-          }
-          break;
-        } else if (current.type === AST_NODE_TYPES.ThisExpression) {
-          foundPrismaIndicator = true;
-          break;
-        } else {
-          break;
-        }
-      }
-
-      return foundPrismaIndicator;
-    }
-
-    // Helper to get function name from parent nodes
-    function getFunctionName(node: TSESTree.Node & { id?: TSESTree.Identifier | null; parent?: TSESTree.Node }): string | null {
-      let name = node.id?.name || null;
-
-      if (!name && node.parent) {
-        if (node.parent.type === AST_NODE_TYPES.VariableDeclarator && node.parent.id?.type === AST_NODE_TYPES.Identifier) {
-          name = node.parent.id.name;
-        } else if (node.parent.type === AST_NODE_TYPES.Property && node.parent.key?.type === AST_NODE_TYPES.Identifier) {
-          name = node.parent.key.name;
-        } else if (node.parent.type === AST_NODE_TYPES.MethodDefinition && node.parent.key?.type === AST_NODE_TYPES.Identifier) {
-          name = node.parent.key.name;
-        }
-      }
-
-      return name;
     }
 
     // Check if function name follows the convention
@@ -175,7 +82,9 @@ const rule = createRule<[], MessageIds>({
       const arg = node.arguments[0] as TSESTree.ObjectExpression;
       const whereProperty = arg.properties.find(
         (prop): prop is TSESTree.Property =>
-          prop.type === AST_NODE_TYPES.Property && prop.key.type === AST_NODE_TYPES.Identifier && prop.key.name === 'where',
+          prop.type === AST_NODE_TYPES.Property &&
+          prop.key.type === AST_NODE_TYPES.Identifier &&
+          prop.key.name === 'where',
       );
 
       if (!whereProperty || whereProperty.value.type !== AST_NODE_TYPES.ObjectExpression) {
@@ -198,7 +107,9 @@ const rule = createRule<[], MessageIds>({
         // For 'any' type, check for OR clause
         const orIndex = whereObject.properties.findIndex(
           (prop): prop is TSESTree.Property =>
-            prop.type === AST_NODE_TYPES.Property && prop.key.type === AST_NODE_TYPES.Identifier && prop.key.name === 'OR',
+            prop.type === AST_NODE_TYPES.Property &&
+            prop.key.type === AST_NODE_TYPES.Identifier &&
+            prop.key.name === 'OR',
         );
 
         if (orIndex === -1) {
@@ -228,7 +139,9 @@ const rule = createRule<[], MessageIds>({
       // For active/deleted types
       const deletedAtIndex = whereObject.properties.findIndex(
         (prop): prop is TSESTree.Property =>
-          prop.type === AST_NODE_TYPES.Property && prop.key.type === AST_NODE_TYPES.Identifier && prop.key.name === 'deletedAt',
+          prop.type === AST_NODE_TYPES.Property &&
+          prop.key.type === AST_NODE_TYPES.Identifier &&
+          prop.key.name === 'deletedAt',
       );
 
       // Check if deletedAt exists and is last
@@ -298,7 +211,9 @@ const rule = createRule<[], MessageIds>({
           // Check if it has { not: null } structure
           const notProp = (deletedAtPropDeleted.value as TSESTree.ObjectExpression).properties.find(
             (prop): prop is TSESTree.Property =>
-              prop.type === AST_NODE_TYPES.Property && prop.key.type === AST_NODE_TYPES.Identifier && prop.key.name === 'not',
+              prop.type === AST_NODE_TYPES.Property &&
+              prop.key.type === AST_NODE_TYPES.Identifier &&
+              prop.key.name === 'not',
           );
           if (!notProp || notProp.value.type !== AST_NODE_TYPES.Literal || notProp.value.value !== null) {
             context.report({
@@ -328,13 +243,13 @@ const rule = createRule<[], MessageIds>({
         functionStack.pop();
       },
       FunctionExpression(node) {
-        functionStack.push(getFunctionName(node));
+        functionStack.push(getFunctionNameExtended(node));
       },
       'FunctionExpression:exit'() {
         functionStack.pop();
       },
       ArrowFunctionExpression(node) {
-        functionStack.push(getFunctionName(node));
+        functionStack.push(getFunctionNameExtended(node));
       },
       'ArrowFunctionExpression:exit'() {
         functionStack.pop();

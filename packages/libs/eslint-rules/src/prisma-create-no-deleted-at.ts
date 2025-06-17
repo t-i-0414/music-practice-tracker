@@ -1,4 +1,5 @@
 import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
+import { isPrismaMethodCall, PRISMA_CREATE_METHODS } from './utils/prisma-helpers';
 
 type MessageIds = 'createShouldNotHaveDeletedAt';
 
@@ -19,58 +20,6 @@ const rule = createRule<[], MessageIds>({
   defaultOptions: [],
 
   create(context) {
-    // Check if this is a Prisma create method call
-    function isPrismaCreateMethod(node: TSESTree.MemberExpression): boolean {
-      if (node.property.type !== AST_NODE_TYPES.Identifier) {
-        return false;
-      }
-
-      // Check for create, createMany, or createManyAndReturn methods
-      const methodName = node.property.name;
-      if (methodName !== 'create' && methodName !== 'createMany' && methodName !== 'createManyAndReturn') {
-        return false;
-      }
-
-      // Try to trace back to see if this is a Prisma model
-      let current: TSESTree.Node = node.object;
-      while (current) {
-        if (current.type === AST_NODE_TYPES.MemberExpression) {
-          const objectName =
-            current.object.type === AST_NODE_TYPES.Identifier
-              ? current.object.name
-              : current.object.type === AST_NODE_TYPES.MemberExpression &&
-                  current.object.property.type === AST_NODE_TYPES.Identifier
-                ? current.object.property.name
-                : undefined;
-          const propertyName = current.property.type === AST_NODE_TYPES.Identifier ? current.property.name : undefined;
-
-          // Common Prisma patterns
-          if (
-            objectName === 'prisma' ||
-            objectName === 'repository' ||
-            objectName === 'this' ||
-            propertyName === 'prisma' ||
-            propertyName === 'repository'
-          ) {
-            return true;
-          }
-          current = current.object;
-        } else if (current.type === AST_NODE_TYPES.Identifier) {
-          const name = current.name.toLowerCase();
-          if (name === 'repository' || name === 'prisma' || name.endsWith('repository') || name.endsWith('model')) {
-            return true;
-          }
-          break;
-        } else if (current.type === AST_NODE_TYPES.ThisExpression) {
-          return true;
-        } else {
-          break;
-        }
-      }
-
-      return false;
-    }
-
     // Check if data contains deletedAt in object literal
     function checkObjectForDeletedAt(node: TSESTree.ObjectExpression): boolean {
       for (const property of node.properties) {
@@ -122,7 +71,10 @@ const rule = createRule<[], MessageIds>({
     return {
       // Check for Prisma create calls
       CallExpression(node) {
-        if (node.callee.type === AST_NODE_TYPES.MemberExpression && isPrismaCreateMethod(node.callee)) {
+        if (
+          node.callee.type === AST_NODE_TYPES.MemberExpression &&
+          isPrismaMethodCall(node.callee, PRISMA_CREATE_METHODS)
+        ) {
           const dataParam = findDataParameter(node);
           if (!dataParam) {
             return;

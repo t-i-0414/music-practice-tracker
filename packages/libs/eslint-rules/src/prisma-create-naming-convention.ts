@@ -1,4 +1,5 @@
-import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
+import { AST_NODE_TYPES, ESLintUtils } from '@typescript-eslint/utils';
+import { getFunctionName, isPrismaMethodCall, PRISMA_CREATE_METHODS } from './utils/prisma-helpers';
 
 type MessageIds = 'invalidCreateMethodName';
 
@@ -28,86 +29,6 @@ const rule = createRule<[], MessageIds>({
       return functionStack[functionStack.length - 1] || null;
     }
 
-    // Check if this is a Prisma create method call
-    function isPrismaCreateMethod(node: TSESTree.MemberExpression): string | null {
-      if (node.property.type !== AST_NODE_TYPES.Identifier) {
-        return null;
-      }
-
-      // Check for create, createMany, or createManyAndReturn methods
-      const methodName = node.property.name;
-      if (methodName !== 'create' && methodName !== 'createMany' && methodName !== 'createManyAndReturn') {
-        return null;
-      }
-
-      // Try to trace back to see if this is a Prisma model
-      let current: TSESTree.Node = node.object;
-      while (current) {
-        if (current.type === AST_NODE_TYPES.MemberExpression) {
-          const objectName =
-            current.object.type === AST_NODE_TYPES.Identifier
-              ? current.object.name
-              : current.object.type === AST_NODE_TYPES.MemberExpression &&
-                  current.object.property.type === AST_NODE_TYPES.Identifier
-                ? current.object.property.name
-                : undefined;
-          const propertyName = current.property.type === AST_NODE_TYPES.Identifier ? current.property.name : undefined;
-
-          // Common Prisma patterns
-          if (
-            objectName === 'prisma' ||
-            objectName === 'repository' ||
-            objectName === 'this' ||
-            propertyName === 'prisma' ||
-            propertyName === 'repository'
-          ) {
-            return methodName;
-          }
-          current = current.object;
-        } else if (current.type === AST_NODE_TYPES.Identifier) {
-          const name = current.name.toLowerCase();
-          if (name === 'repository' || name === 'prisma' || name.endsWith('repository') || name.endsWith('model')) {
-            return methodName;
-          }
-          break;
-        } else if (current.type === AST_NODE_TYPES.ThisExpression) {
-          return methodName;
-        } else {
-          break;
-        }
-      }
-
-      return null;
-    }
-
-    // Helper to get function name from parent nodes
-    function getFunctionName(node: TSESTree.Node): string | null {
-      if (node.type === AST_NODE_TYPES.FunctionDeclaration && node.id) {
-        return node.id.name;
-      }
-
-      if (node.parent) {
-        if (
-          node.parent.type === AST_NODE_TYPES.VariableDeclarator &&
-          node.parent.id?.type === AST_NODE_TYPES.Identifier
-        ) {
-          return node.parent.id.name;
-        } else if (
-          node.parent.type === AST_NODE_TYPES.Property &&
-          node.parent.key?.type === AST_NODE_TYPES.Identifier
-        ) {
-          return node.parent.key.name;
-        } else if (
-          node.parent.type === AST_NODE_TYPES.MethodDefinition &&
-          node.parent.key?.type === AST_NODE_TYPES.Identifier
-        ) {
-          return node.parent.key.name;
-        }
-      }
-
-      return null;
-    }
-
     return {
       // Track entering/exiting functions
       FunctionDeclaration(node) {
@@ -135,7 +56,7 @@ const rule = createRule<[], MessageIds>({
       // Check for Prisma create calls
       CallExpression(node) {
         if (node.callee.type === AST_NODE_TYPES.MemberExpression) {
-          const methodName = isPrismaCreateMethod(node.callee);
+          const methodName = isPrismaMethodCall(node.callee, PRISMA_CREATE_METHODS);
           if (!methodName) {
             return;
           }
