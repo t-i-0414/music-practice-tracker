@@ -13,7 +13,7 @@ const rule = createRule<[], MessageIds>({
     },
     messages: {
       invalidDeleteMethodName:
-        'Prisma {{method}} method must be in a function named "{{expectedPrefix}}{{suffix}}". Current function: "{{functionName}}"',
+        'Prisma {{method}} method must be in a function named "{{expectedPrefix}}*". Current function: "{{functionName}}"',
     },
     schema: [],
   },
@@ -67,10 +67,10 @@ const rule = createRule<[], MessageIds>({
         } else if (current.type === AST_NODE_TYPES.Identifier) {
           const name = current.name.toLowerCase();
           if (
-            name.includes('repository') ||
-            name.includes('prisma') ||
-            name.includes('model') ||
-            name.includes('service')
+            name === 'repository' ||
+            name === 'prisma' ||
+            name.endsWith('repository') ||
+            name.endsWith('model')
           ) {
             return methodName;
           }
@@ -111,46 +111,6 @@ const rule = createRule<[], MessageIds>({
       }
 
       return null;
-    }
-
-    // Extract suffix from function name (e.g., "User" from "hardDeleteUser" or "deleteUser")
-    function extractSuffix(functionName: string): string {
-      // Try to extract the entity name from the function name
-      // Common patterns: deleteUser, deleteManyUsers, hardDeleteUser, removeUser, etc.
-
-      // First check if there's a clear entity name at the end
-      const entityMatch = functionName.match(/([A-Z][a-zA-Z]+)s?$/);
-      if (entityMatch) {
-        // Check if we have a prefix before the entity name
-        const beforeEntity = functionName.substring(0, functionName.length - entityMatch[0].length);
-        if (beforeEntity.length > 0) {
-          // Make sure we're not duplicating words like "Delete" in "myDeleteUser"
-          const entityName = entityMatch[1];
-          if (beforeEntity.toLowerCase().endsWith(entityName.toLowerCase())) {
-            // Avoid duplication
-            return entityMatch[0]; // Return with potential 's'
-          }
-          return entityName;
-        }
-      }
-
-      // Fallback: Remove common prefixes
-      const prefixes = ['harddelete', 'delete', 'remove', 'destroy', 'erase'];
-      let remainingName = functionName;
-
-      for (const prefix of prefixes) {
-        if (functionName.toLowerCase().startsWith(prefix)) {
-          remainingName = functionName.substring(prefix.length);
-          break;
-        }
-      }
-
-      // If we have something left after removing prefix, use it
-      if (remainingName && remainingName !== functionName) {
-        return remainingName;
-      }
-
-      return 'Entity';
     }
 
     return {
