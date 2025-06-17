@@ -81,13 +81,13 @@ export class UserRepository {
     });
   }
 
-  async createUser(params: Prisma.UserCreateInput): Promise<User> {
+  async createUser(params: StrictOmit<Prisma.UserCreateInput, 'deletedAt'>): Promise<User> {
     return this.repository.user.create({
       data: params,
     });
   }
 
-  async createManyUsers(params: Prisma.UserCreateInput): Promise<User[]> {
+  async createManyUsers(params: StrictOmit<Prisma.UserCreateInput, 'deletedAt'>): Promise<User[]> {
     return this.repository.user.createManyAndReturn({
       data: params,
     });

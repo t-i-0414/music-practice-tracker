@@ -6,6 +6,7 @@ import tseslint from 'typescript-eslint';
 import noPrismaDeleteOutsideHardDelete from './eslint-rules/dist/no-prisma-delete-outside-hard-delete.js';
 import prismaFindNamingConvention from './eslint-rules/dist/prisma-find-naming-convention.js';
 import prismaUpdateNamingConvention from './eslint-rules/dist/prisma-update-naming-convention.js';
+import prismaCreateNoDeletedAt from './eslint-rules/dist/prisma-create-no-deleted-at.js';
 
 export default tseslint.config(
   {
@@ -34,6 +35,7 @@ export default tseslint.config(
           'no-prisma-delete-outside-hard-delete': noPrismaDeleteOutsideHardDelete,
           'prisma-find-naming-convention': prismaFindNamingConvention,
           'prisma-update-naming-convention': prismaUpdateNamingConvention,
+          'prisma-create-no-deleted-at': prismaCreateNoDeletedAt,
         },
       },
     },
@@ -44,6 +46,7 @@ export default tseslint.config(
       'custom-rules/no-prisma-delete-outside-hard-delete': 'error',
       'custom-rules/prisma-find-naming-convention': 'error',
       'custom-rules/prisma-update-naming-convention': 'error',
+      'custom-rules/prisma-create-no-deleted-at': 'error',
     },
   },
 );
