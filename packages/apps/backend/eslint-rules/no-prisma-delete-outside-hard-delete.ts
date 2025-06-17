@@ -61,31 +61,34 @@ const rule: Rule.RuleModule = {
         // Check for patterns like prisma.user, this.user, repository.user, etc.
         if (current.type === 'MemberExpression') {
           const memberExp = current as MemberExpression;
-          const objectName = memberExp.object.type === 'Identifier' 
-            ? memberExp.object.name 
-            : memberExp.object.type === 'MemberExpression' && memberExp.object.property?.type === 'Identifier'
-              ? memberExp.object.property.name
-              : undefined;
-          const propertyName = memberExp.property?.type === 'Identifier' 
-            ? memberExp.property.name 
-            : undefined;
+          const objectName =
+            memberExp.object.type === 'Identifier'
+              ? memberExp.object.name
+              : memberExp.object.type === 'MemberExpression' && memberExp.object.property?.type === 'Identifier'
+                ? memberExp.object.property.name
+                : undefined;
+          const propertyName = memberExp.property?.type === 'Identifier' ? memberExp.property.name : undefined;
 
           // Common Prisma patterns
-          if (objectName === 'prisma' || 
-              objectName === 'repository' || 
-              objectName === 'this' ||
-              propertyName === 'prisma' ||
-              propertyName === 'repository') {
+          if (
+            objectName === 'prisma' ||
+            objectName === 'repository' ||
+            objectName === 'this' ||
+            propertyName === 'prisma' ||
+            propertyName === 'repository'
+          ) {
             return true;
           }
           current = memberExp.object;
         } else if (current.type === 'Identifier') {
           // Check if the identifier looks like a Prisma model (e.g., userRepository)
           const name = current.name.toLowerCase();
-          if (name.includes('repository') || 
-              name.includes('prisma') || 
-              name.includes('model') ||
-              name.includes('service')) {
+          if (
+            name.includes('repository') ||
+            name.includes('prisma') ||
+            name.includes('model') ||
+            name.includes('service')
+          ) {
             return true;
           }
           break;
@@ -103,7 +106,7 @@ const rule: Rule.RuleModule = {
     // Helper to get function name from parent nodes
     function getFunctionName(node: FunctionNode): string | null {
       let name = node.id?.name || null;
-      
+
       if (!name && node.parent) {
         if (node.parent.type === 'VariableDeclarator' && node.parent.id?.type === 'Identifier') {
           name = node.parent.id.name;
@@ -113,7 +116,7 @@ const rule: Rule.RuleModule = {
           name = node.parent.key.name;
         }
       }
-      
+
       return name;
     }
 

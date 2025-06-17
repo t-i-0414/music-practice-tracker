@@ -1,5 +1,5 @@
 import type { Rule } from 'eslint';
-import type { CallExpression, MemberExpression, Node, Identifier, ObjectExpression, Property } from 'estree';
+import type { CallExpression, Identifier, MemberExpression, Node, ObjectExpression } from 'estree';
 
 type FunctionNode = Node & {
   id?: Identifier | null;
@@ -27,8 +27,7 @@ const rule: Rule.RuleModule = {
         'Function "{{functionName}}" starts with "delete" but doesn\'t set deletedAt to a Date value',
       restoreShouldHaveDeletedAtNull:
         'Function "{{functionName}}" starts with "restore" but doesn\'t set deletedAt to null',
-      updateShouldNotHaveDeletedAt:
-        'Function "{{functionName}}" starts with "update" but includes deletedAt field',
+      updateShouldNotHaveDeletedAt: 'Function "{{functionName}}" starts with "update" but includes deletedAt field',
     },
   },
 
@@ -63,31 +62,34 @@ const rule: Rule.RuleModule = {
         // Check for patterns like prisma.user, this.user, repository.user, etc.
         if (current.type === 'MemberExpression') {
           const memberExp = current as MemberExpression;
-          const objectName = memberExp.object.type === 'Identifier' 
-            ? memberExp.object.name 
-            : memberExp.object.type === 'MemberExpression' && memberExp.object.property?.type === 'Identifier'
-              ? memberExp.object.property.name
-              : undefined;
-          const propertyName = memberExp.property?.type === 'Identifier' 
-            ? memberExp.property.name 
-            : undefined;
+          const objectName =
+            memberExp.object.type === 'Identifier'
+              ? memberExp.object.name
+              : memberExp.object.type === 'MemberExpression' && memberExp.object.property?.type === 'Identifier'
+                ? memberExp.object.property.name
+                : undefined;
+          const propertyName = memberExp.property?.type === 'Identifier' ? memberExp.property.name : undefined;
 
           // Common Prisma patterns
-          if (objectName === 'prisma' || 
-              objectName === 'repository' || 
-              objectName === 'this' ||
-              propertyName === 'prisma' ||
-              propertyName === 'repository') {
+          if (
+            objectName === 'prisma' ||
+            objectName === 'repository' ||
+            objectName === 'this' ||
+            propertyName === 'prisma' ||
+            propertyName === 'repository'
+          ) {
             return true;
           }
           current = memberExp.object;
         } else if (current.type === 'Identifier') {
           // Check if the identifier looks like a Prisma model (e.g., userRepository)
           const name = current.name.toLowerCase();
-          if (name.includes('repository') || 
-              name.includes('prisma') || 
-              name.includes('model') ||
-              name.includes('service')) {
+          if (
+            name.includes('repository') ||
+            name.includes('prisma') ||
+            name.includes('model') ||
+            name.includes('service')
+          ) {
             return true;
           }
           break;
@@ -105,7 +107,7 @@ const rule: Rule.RuleModule = {
     // Helper to get function name from parent nodes
     function getFunctionName(node: FunctionNode): string | null {
       let name = node.id?.name || null;
-      
+
       if (!name && node.parent) {
         if (node.parent.type === 'VariableDeclarator' && node.parent.id?.type === 'Identifier') {
           name = node.parent.id.name;
@@ -115,7 +117,7 @@ const rule: Rule.RuleModule = {
           name = node.parent.key.name;
         }
       }
-      
+
       return name;
     }
 
@@ -126,40 +128,35 @@ const rule: Rule.RuleModule = {
       }
 
       const objectExp = node as ObjectExpression;
-      
+
       for (const property of objectExp.properties) {
-        if (property.type === 'Property' && 
-            property.key.type === 'Identifier' && 
-            property.key.name === 'deletedAt') {
-          
+        if (property.type === 'Property' && property.key.type === 'Identifier' && property.key.name === 'deletedAt') {
           const value = property.value;
-          
+
           // Check if deletedAt is null
           if (value.type === 'Literal' && value.value === null) {
             return 'restore';
           }
-          
+
           // Check if deletedAt is a Date (new Date() or Date value)
-          if (value.type === 'NewExpression' && 
-              value.callee.type === 'Identifier' && 
-              value.callee.name === 'Date') {
+          if (value.type === 'NewExpression' && value.callee.type === 'Identifier' && value.callee.name === 'Date') {
             return 'delete';
           }
-          
+
           // Check if it's a variable/expression that might be a Date
           if (value.type === 'Identifier' || value.type === 'MemberExpression') {
             // Assume it's a Date value for delete operation
             return 'delete';
           }
         }
-        
+
         // Check for spread properties that might contain deletedAt
         if (property.type === 'SpreadElement') {
           // For now, we'll skip analysis of spread elements
           // This could be enhanced to track variables
         }
       }
-      
+
       // No deletedAt field found
       return 'update';
     }
@@ -175,9 +172,7 @@ const rule: Rule.RuleModule = {
         // Look for data property
         const objectExp = firstArg as ObjectExpression;
         for (const property of objectExp.properties) {
-          if (property.type === 'Property' && 
-              property.key.type === 'Identifier' && 
-              property.key.name === 'data') {
+          if (property.type === 'Property' && property.key.type === 'Identifier' && property.key.name === 'data') {
             return property.value;
           }
         }
@@ -211,7 +206,7 @@ const rule: Rule.RuleModule = {
       CallExpression(node: CallExpression) {
         if (node.callee && isPrismaUpdateMethod(node.callee)) {
           const functionName = getCurrentFunctionName();
-          
+
           if (!functionName) {
             // Skip validation if we can't determine the function name
             return;
@@ -230,7 +225,7 @@ const rule: Rule.RuleModule = {
           }
 
           const functionNameLower = functionName.toLowerCase();
-          
+
           // Check naming convention based on deletedAt usage
           if (expectedPrefix === 'delete') {
             if (!functionNameLower.startsWith('delete')) {
