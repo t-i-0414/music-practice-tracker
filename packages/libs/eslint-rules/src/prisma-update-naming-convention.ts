@@ -525,4 +525,4 @@ const rule = createRule<[], MessageIds>({
   },
 });
 
-export = rule;
+export default rule;
