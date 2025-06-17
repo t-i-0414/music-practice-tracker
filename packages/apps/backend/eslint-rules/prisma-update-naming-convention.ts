@@ -49,7 +49,13 @@ const rule = createRule<[], MessageIds>({
 
     // Check if this is a Prisma update method call
     function isPrismaUpdateMethod(node: TSESTree.MemberExpression): boolean {
-      if (node.property.type !== AST_NODE_TYPES.Identifier || node.property.name !== 'update') {
+      if (node.property.type !== AST_NODE_TYPES.Identifier) {
+        return false;
+      }
+      
+      // Check for update, updateMany, or updateManyAndReturn methods
+      const methodName = node.property.name;
+      if (methodName !== 'update' && methodName !== 'updateMany' && methodName !== 'updateManyAndReturn') {
         return false;
       }
 
@@ -157,6 +163,21 @@ const rule = createRule<[], MessageIds>({
 
     // Analyze the data object to find deletedAt field
     function analyzeDataObject(node: TSESTree.Expression): 'delete' | 'restore' | 'update' | 'unknown' | null {
+      // Handle MemberExpression like params.data
+      if (node.type === AST_NODE_TYPES.MemberExpression || node.type === AST_NODE_TYPES.Identifier) {
+        // Get TypeScript node and check type
+        const tsNode = services.esTreeNodeToTSNodeMap.get(node);
+        if (tsNode) {
+          const type = checker.getTypeAtLocation(tsNode);
+          if (typeHasDeletedAt(type)) {
+            return 'unknown'; // Can't determine exact usage without analyzing the value
+          } else {
+            return 'update'; // Type doesn't have deletedAt
+          }
+        }
+        return 'unknown';
+      }
+      
       if (node.type !== AST_NODE_TYPES.ObjectExpression) {
         return null;
       }
@@ -233,13 +254,41 @@ const rule = createRule<[], MessageIds>({
 
       const firstArg = node.arguments[0];
       if (firstArg.type === AST_NODE_TYPES.ObjectExpression) {
-        // Look for data property
+        // Look for data property in the first argument
         for (const property of firstArg.properties) {
           if (
             property.type === AST_NODE_TYPES.Property &&
             property.key.type === AST_NODE_TYPES.Identifier &&
             property.key.name === 'data'
           ) {
+            return property.value as TSESTree.Expression;
+          }
+        }
+      }
+
+      // For updateMany/updateManyAndReturn, check different patterns
+      // Pattern 1: updateManyAndReturn({ where: ..., data: ... })
+      // Already handled above
+      
+      // Pattern 2: updateMany({ where: ... }, { deletedAt: ... })
+      if (node.arguments.length >= 2) {
+        const secondArg = node.arguments[1];
+        if (secondArg.type === AST_NODE_TYPES.ObjectExpression) {
+          // Check if this is the data object directly
+          return secondArg;
+        }
+      }
+
+      // Pattern 3: updateManyAndReturn({ where: params.where, data: params.data })
+      // Check if any data property references a variable
+      if (firstArg.type === AST_NODE_TYPES.ObjectExpression) {
+        for (const property of firstArg.properties) {
+          if (
+            property.type === AST_NODE_TYPES.Property &&
+            property.key.type === AST_NODE_TYPES.Identifier &&
+            property.key.name === 'data'
+          ) {
+            // Return the value even if it's a member expression like params.data
             return property.value as TSESTree.Expression;
           }
         }

@@ -106,7 +106,10 @@ export class UserRepository {
     });
   }
 
-  async updateManyUsers(params: { where: Prisma.UserWhereInput; data: Prisma.UserUpdateInput }): Promise<User[]> {
+  async updateManyUsers(params: {
+    where: Prisma.UserWhereInput;
+    data: StrictOmit<Prisma.UserUpdateInput, 'deletedAt'>;
+  }): Promise<User[]> {
     return this.repository.user.updateManyAndReturn({
       where: params.where,
       data: params.data,
