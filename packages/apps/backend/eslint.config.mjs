@@ -3,14 +3,14 @@ import eslint from '@eslint/js';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
-import noPrismaDeleteOutsideHardDelete from './eslint-rules/dist/no-prisma-delete-outside-hard-delete.js';
-import prismaFindNamingConvention from './eslint-rules/dist/prisma-find-naming-convention.js';
-import prismaUpdateNamingConvention from './eslint-rules/dist/prisma-update-naming-convention.js';
-import prismaCreateNoDeletedAt from './eslint-rules/dist/prisma-create-no-deleted-at.js';
+import noPrismaDeleteOutsideHardDelete from '@music-practice-tracker/eslint-rules/dist/no-prisma-delete-outside-hard-delete.js';
+import prismaFindNamingConvention from '@music-practice-tracker/eslint-rules/dist/prisma-find-naming-convention.js';
+import prismaUpdateNamingConvention from '@music-practice-tracker/eslint-rules/dist/prisma-update-naming-convention.js';
+import prismaCreateNoDeletedAt from '@music-practice-tracker/eslint-rules/dist/prisma-create-no-deleted-at.js';
 
 export default tseslint.config(
   {
-    ignores: ['eslint.config.mjs', 'eslint-rules/**'],
+    ignores: ['eslint.config.mjs'],
   },
   eslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,

@@ -30,7 +30,7 @@ setup-backend-env:
 # Build custom ESLint rules
 build-eslint-rules:
 	@echo "🛠️  Building custom ESLint rules..."
-	cd packages/apps/backend/eslint-rules && bunx tsc
+	cd packages/libs/eslint-rules && bunx tsc
 	@echo "✅ ESLint rules built"
 
 # Setup database with migrations
@@ -42,7 +42,7 @@ setup-database:
 # Clean ESLint rules build artifacts
 clean-eslint-rules:
 	@echo "🧹 Cleaning ESLint rules build artifacts..."
-	rm -rf packages/apps/backend/eslint-rules/dist
+	rm -rf packages/libs/eslint-rules/dist
 	@echo "✅ ESLint rules cleaned"
 
 # Additional useful targets
