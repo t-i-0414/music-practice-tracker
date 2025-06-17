@@ -13,7 +13,7 @@ const rule = createRule<[], MessageIds>({
     },
     messages: {
       invalidCreateMethodName:
-        'Prisma {{method}} method must be in a function named "{{expectedPrefix}}{{suffix}}". Current function: "{{functionName}}"',
+        'Prisma {{method}} method must be in a function named "{{expectedPrefix}}*". Current function: "{{functionName}}"',
     },
     schema: [],
   },
@@ -66,12 +66,7 @@ const rule = createRule<[], MessageIds>({
           current = current.object;
         } else if (current.type === AST_NODE_TYPES.Identifier) {
           const name = current.name.toLowerCase();
-          if (
-            name.includes('repository') ||
-            name.includes('prisma') ||
-            name.includes('model') ||
-            name.includes('service')
-          ) {
+          if (name === 'repository' || name === 'prisma' || name.endsWith('repository') || name.endsWith('model')) {
             return methodName;
           }
           break;
@@ -111,35 +106,6 @@ const rule = createRule<[], MessageIds>({
       }
 
       return null;
-    }
-
-    // Extract suffix from function name (e.g., "User" from "createUser")
-    function extractSuffix(functionName: string): string {
-      // Common prefixes to remove
-      const prefixes = ['createmanyandreturn', 'createmany', 'create', 'add', 'insert', 'new', 'make'];
-
-      let remainingName = functionName;
-      const lowerName = functionName.toLowerCase();
-
-      for (const prefix of prefixes) {
-        if (lowerName.startsWith(prefix)) {
-          remainingName = functionName.substring(prefix.length);
-          break;
-        }
-      }
-
-      // If we have something left after removing prefix, use it
-      if (remainingName && remainingName !== functionName) {
-        return remainingName;
-      }
-
-      // Otherwise, try to extract from the end (e.g., "User" from "myCreateUser")
-      const match = functionName.match(/([A-Z][a-zA-Z]+)s?$/);
-      if (match) {
-        return match[1];
-      }
-
-      return 'Entity';
     }
 
     return {
