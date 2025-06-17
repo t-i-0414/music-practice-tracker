@@ -1,14 +1,9 @@
 // @ts-check
 import eslint from '@eslint/js';
+import customRulesPlugin from '@music-practice-tracker/eslint-rules';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
-import noPrismaDeleteOutsideHardDelete from '@music-practice-tracker/eslint-rules/dist/no-prisma-delete-outside-hard-delete.js';
-import prismaFindNamingConvention from '@music-practice-tracker/eslint-rules/dist/prisma-find-naming-convention.js';
-import prismaUpdateNamingConvention from '@music-practice-tracker/eslint-rules/dist/prisma-update-naming-convention.js';
-import prismaCreateNoDeletedAt from '@music-practice-tracker/eslint-rules/dist/prisma-create-no-deleted-at.js';
-import prismaCreateNamingConvention from '@music-practice-tracker/eslint-rules/dist/prisma-create-naming-convention.js';
-import prismaDeleteNamingConvention from '@music-practice-tracker/eslint-rules/dist/prisma-delete-naming-convention.js';
 
 export default tseslint.config(
   {
@@ -32,22 +27,12 @@ export default tseslint.config(
   },
   {
     plugins: {
-      'custom-rules': {
-        rules: {
-          'no-prisma-delete-outside-hard-delete': noPrismaDeleteOutsideHardDelete,
-          'prisma-find-naming-convention': prismaFindNamingConvention,
-          'prisma-update-naming-convention': prismaUpdateNamingConvention,
-          'prisma-create-no-deleted-at': prismaCreateNoDeletedAt,
-          'prisma-create-naming-convention': prismaCreateNamingConvention,
-          'prisma-delete-naming-convention': prismaDeleteNamingConvention,
-        },
-      },
+      'custom-rules': customRulesPlugin.default,
     },
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-floating-promises': 'warn',
       '@typescript-eslint/no-unsafe-argument': 'warn',
-      'custom-rules/no-prisma-delete-outside-hard-delete': 'error',
       'custom-rules/prisma-find-naming-convention': 'error',
       'custom-rules/prisma-update-naming-convention': 'error',
       'custom-rules/prisma-create-no-deleted-at': 'error',
