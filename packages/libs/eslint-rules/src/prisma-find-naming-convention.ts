@@ -1,24 +1,24 @@
-import type { Rule } from 'eslint';
-import type { CallExpression, Identifier, MemberExpression, Node, ObjectExpression, Property } from 'estree';
+import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
 
-type FunctionNode = Node & {
-  id?: Identifier | null;
-  parent?: Node;
-};
+type MessageIds =
+  | 'invalidFindMethodName'
+  | 'missingDeletedAtFilter'
+  | 'missingAnyIndicator'
+  | 'deletedAtNotLastInWhere'
+  | 'incorrectDeletedAtValue';
 
-const rule: Rule.RuleModule = {
+const createRule = ESLintUtils.RuleCreator((name) => `https://github.com/music-practice-tracker/rules/${name}`);
+
+const rule = createRule<[], MessageIds>({
+  name: 'prisma-find-naming-convention',
   meta: {
     type: 'problem',
     docs: {
       description: 'Enforce naming convention for Prisma find operations',
-      category: 'Best Practices',
-      recommended: true,
     },
-    fixable: undefined,
-    schema: [],
     messages: {
       invalidFindMethodName:
-        'Prisma find method "{{method}}" must be in a function named "{{method}}(Active|Deleted|Any){{suffix}}". Current function: "{{functionName}}"',
+        'Prisma find method "{{method}}" must be in a function named "{{method}}(Active|Deleted|Any)[suffix]". Current function: "{{functionName}}"',
       missingDeletedAtFilter:
         'Function "{{functionName}}" must include deletedAt filter. Use deletedAt: null for active, deletedAt: { not: null } for deleted',
       missingAnyIndicator:
@@ -27,9 +27,11 @@ const rule: Rule.RuleModule = {
       incorrectDeletedAtValue:
         'Function "{{functionName}}" has incorrect deletedAt value. Expected {{expected}} but got {{actual}}',
     },
+    schema: [],
   },
+  defaultOptions: [],
 
-  create(context: Rule.RuleContext): Rule.RuleListener {
+  create(context) {
     // Stack to track current function names
     const functionStack: (string | null)[] = [];
 
@@ -39,13 +41,13 @@ const rule: Rule.RuleModule = {
     }
 
     // Check if this is a Prisma find method call
-    function isPrismaFindMethod(node: Node): node is MemberExpression {
-      if (node.type !== 'MemberExpression') {
+    function isPrismaFindMethod(node: TSESTree.Node): node is TSESTree.MemberExpression {
+      if (node.type !== AST_NODE_TYPES.MemberExpression) {
         return false;
       }
 
       const property = node.property;
-      if (!property || property.type !== 'Identifier') {
+      if (!property || property.type !== AST_NODE_TYPES.Identifier) {
         return false;
       }
 
@@ -57,17 +59,19 @@ const rule: Rule.RuleModule = {
       }
 
       // Try to trace back to see if this is a Prisma model
-      let current: Node = node.object;
+      let current: TSESTree.Node = node.object;
+      let foundPrismaIndicator = false;
+
       while (current) {
-        if (current.type === 'MemberExpression') {
-          const memberExp = current as MemberExpression;
+        if (current.type === AST_NODE_TYPES.MemberExpression) {
+          const memberExp = current as TSESTree.MemberExpression;
           const objectName =
-            memberExp.object.type === 'Identifier'
+            memberExp.object.type === AST_NODE_TYPES.Identifier
               ? memberExp.object.name
-              : memberExp.object.type === 'MemberExpression' && memberExp.object.property?.type === 'Identifier'
+              : memberExp.object.type === AST_NODE_TYPES.MemberExpression && memberExp.object.property?.type === AST_NODE_TYPES.Identifier
                 ? memberExp.object.property.name
                 : undefined;
-          const propertyName = memberExp.property?.type === 'Identifier' ? memberExp.property.name : undefined;
+          const propertyName = memberExp.property?.type === AST_NODE_TYPES.Identifier ? memberExp.property.name : undefined;
 
           // Common Prisma patterns
           if (
@@ -77,40 +81,52 @@ const rule: Rule.RuleModule = {
             propertyName === 'prisma' ||
             propertyName === 'repository'
           ) {
-            return true;
+            foundPrismaIndicator = true;
+            break;
+          }
+
+          // Check if it's explicitly NOT a Prisma service
+          if (objectName && objectName !== 'this') {
+            const lowerName = objectName.toLowerCase();
+            if (lowerName.includes('prisma') || lowerName.includes('repository') || lowerName.includes('model')) {
+              foundPrismaIndicator = true;
+              break;
+            }
           }
           current = memberExp.object;
-        } else if (current.type === 'Identifier') {
+        } else if (current.type === AST_NODE_TYPES.Identifier) {
           const name = current.name.toLowerCase();
           if (
-            name.includes('repository') ||
+            name === 'prisma' ||
+            name === 'repository' ||
             name.includes('prisma') ||
-            name.includes('model') ||
-            name.includes('service')
+            name.includes('repository') ||
+            name.includes('model')
           ) {
-            return true;
+            foundPrismaIndicator = true;
           }
           break;
-        } else if (current.type === 'ThisExpression') {
-          return true;
+        } else if (current.type === AST_NODE_TYPES.ThisExpression) {
+          foundPrismaIndicator = true;
+          break;
         } else {
           break;
         }
       }
 
-      return false;
+      return foundPrismaIndicator;
     }
 
     // Helper to get function name from parent nodes
-    function getFunctionName(node: FunctionNode): string | null {
+    function getFunctionName(node: TSESTree.Node & { id?: TSESTree.Identifier | null; parent?: TSESTree.Node }): string | null {
       let name = node.id?.name || null;
 
       if (!name && node.parent) {
-        if (node.parent.type === 'VariableDeclarator' && node.parent.id?.type === 'Identifier') {
+        if (node.parent.type === AST_NODE_TYPES.VariableDeclarator && node.parent.id?.type === AST_NODE_TYPES.Identifier) {
           name = node.parent.id.name;
-        } else if (node.parent.type === 'Property' && node.parent.key?.type === 'Identifier') {
+        } else if (node.parent.type === AST_NODE_TYPES.Property && node.parent.key?.type === AST_NODE_TYPES.Identifier) {
           name = node.parent.key.name;
-        } else if (node.parent.type === 'MethodDefinition' && node.parent.key?.type === 'Identifier') {
+        } else if (node.parent.type === AST_NODE_TYPES.MethodDefinition && node.parent.key?.type === AST_NODE_TYPES.Identifier) {
           name = node.parent.key.name;
         }
       }
@@ -120,19 +136,20 @@ const rule: Rule.RuleModule = {
 
     // Check if function name follows the convention
     function validateFunctionName(functionName: string, method: string): 'active' | 'deleted' | 'any' | null {
-      // Check if function starts with the find method name
-      if (!functionName.startsWith(method)) {
+      // Case-insensitive check if function starts with the find method name
+      if (!functionName.toLowerCase().startsWith(method.toLowerCase())) {
         return null;
       }
 
       const suffix = functionName.slice(method.length);
 
-      // Check for Active, Deleted, or Any
-      if (suffix.startsWith('Active')) {
+      // Check for Active, Deleted, or Any (case-insensitive)
+      const suffixLower = suffix.toLowerCase();
+      if (suffixLower.startsWith('active')) {
         return 'active';
-      } else if (suffix.startsWith('Deleted')) {
+      } else if (suffixLower.startsWith('deleted')) {
         return 'deleted';
-      } else if (suffix.startsWith('Any')) {
+      } else if (suffixLower.startsWith('any')) {
         return 'any';
       }
 
@@ -140,8 +157,8 @@ const rule: Rule.RuleModule = {
     }
 
     // Check if where clause has correct deletedAt filter
-    function checkWhereClause(node: CallExpression, expectedType: 'active' | 'deleted' | 'any'): boolean {
-      if (!node.arguments[0] || node.arguments[0].type !== 'ObjectExpression') {
+    function checkWhereClause(node: TSESTree.CallExpression, expectedType: 'active' | 'deleted' | 'any'): boolean {
+      if (!node.arguments[0] || node.arguments[0].type !== AST_NODE_TYPES.ObjectExpression) {
         // Any types need a where clause
         if (expectedType === 'any') {
           context.report({
@@ -155,13 +172,13 @@ const rule: Rule.RuleModule = {
         return false;
       }
 
-      const arg = node.arguments[0] as ObjectExpression;
+      const arg = node.arguments[0] as TSESTree.ObjectExpression;
       const whereProperty = arg.properties.find(
-        (prop): prop is Property =>
-          prop.type === 'Property' && prop.key.type === 'Identifier' && prop.key.name === 'where',
+        (prop): prop is TSESTree.Property =>
+          prop.type === AST_NODE_TYPES.Property && prop.key.type === AST_NODE_TYPES.Identifier && prop.key.name === 'where',
       );
 
-      if (!whereProperty || whereProperty.value.type !== 'ObjectExpression') {
+      if (!whereProperty || whereProperty.value.type !== AST_NODE_TYPES.ObjectExpression) {
         if (expectedType === 'any') {
           context.report({
             node: arg,
@@ -175,13 +192,13 @@ const rule: Rule.RuleModule = {
         return expectedType !== 'active' && expectedType !== 'deleted';
       }
 
-      const whereObject = whereProperty.value as ObjectExpression;
+      const whereObject = whereProperty.value as TSESTree.ObjectExpression;
 
       if (expectedType === 'any') {
         // For 'any' type, check for OR clause
         const orIndex = whereObject.properties.findIndex(
-          (prop): prop is Property =>
-            prop.type === 'Property' && prop.key.type === 'Identifier' && prop.key.name === 'OR',
+          (prop): prop is TSESTree.Property =>
+            prop.type === AST_NODE_TYPES.Property && prop.key.type === AST_NODE_TYPES.Identifier && prop.key.name === 'OR',
         );
 
         if (orIndex === -1) {
@@ -210,8 +227,8 @@ const rule: Rule.RuleModule = {
 
       // For active/deleted types
       const deletedAtIndex = whereObject.properties.findIndex(
-        (prop): prop is Property =>
-          prop.type === 'Property' && prop.key.type === 'Identifier' && prop.key.name === 'deletedAt',
+        (prop): prop is TSESTree.Property =>
+          prop.type === AST_NODE_TYPES.Property && prop.key.type === AST_NODE_TYPES.Identifier && prop.key.name === 'deletedAt',
       );
 
       // Check if deletedAt exists and is last
@@ -224,7 +241,7 @@ const rule: Rule.RuleModule = {
       }
 
       switch (expectedType) {
-        case 'active':
+        case 'active': {
           // Should have deletedAt: null
           if (deletedAtIndex === -1) {
             context.report({
@@ -237,8 +254,8 @@ const rule: Rule.RuleModule = {
             return false;
           }
           // Check if deletedAt value is null
-          const deletedAtPropActive = whereObject.properties[deletedAtIndex] as Property;
-          if (deletedAtPropActive.value.type !== 'Literal' || deletedAtPropActive.value.value !== null) {
+          const deletedAtPropActive = whereObject.properties[deletedAtIndex] as TSESTree.Property;
+          if (deletedAtPropActive.value.type !== AST_NODE_TYPES.Literal || deletedAtPropActive.value.value !== null) {
             context.report({
               node: deletedAtPropActive,
               messageId: 'incorrectDeletedAtValue',
@@ -251,7 +268,8 @@ const rule: Rule.RuleModule = {
             return false;
           }
           return true;
-        case 'deleted':
+        }
+        case 'deleted': {
           // Should have deletedAt: { not: null }
           if (deletedAtIndex === -1) {
             context.report({
@@ -264,8 +282,8 @@ const rule: Rule.RuleModule = {
             return false;
           }
           // Check if deletedAt value is { not: null }
-          const deletedAtPropDeleted = whereObject.properties[deletedAtIndex] as Property;
-          if (deletedAtPropDeleted.value.type !== 'ObjectExpression') {
+          const deletedAtPropDeleted = whereObject.properties[deletedAtIndex] as TSESTree.Property;
+          if (deletedAtPropDeleted.value.type !== AST_NODE_TYPES.ObjectExpression) {
             context.report({
               node: deletedAtPropDeleted,
               messageId: 'incorrectDeletedAtValue',
@@ -278,11 +296,11 @@ const rule: Rule.RuleModule = {
             return false;
           }
           // Check if it has { not: null } structure
-          const notProp = (deletedAtPropDeleted.value as ObjectExpression).properties.find(
-            (prop): prop is Property =>
-              prop.type === 'Property' && prop.key.type === 'Identifier' && prop.key.name === 'not',
+          const notProp = (deletedAtPropDeleted.value as TSESTree.ObjectExpression).properties.find(
+            (prop): prop is TSESTree.Property =>
+              prop.type === AST_NODE_TYPES.Property && prop.key.type === AST_NODE_TYPES.Identifier && prop.key.name === 'not',
           );
-          if (!notProp || notProp.value.type !== 'Literal' || notProp.value.value !== null) {
+          if (!notProp || notProp.value.type !== AST_NODE_TYPES.Literal || notProp.value.value !== null) {
             context.report({
               node: deletedAtPropDeleted,
               messageId: 'incorrectDeletedAtValue',
@@ -295,6 +313,7 @@ const rule: Rule.RuleModule = {
             return false;
           }
           return true;
+        }
         default:
           return false;
       }
@@ -302,19 +321,19 @@ const rule: Rule.RuleModule = {
 
     return {
       // Track entering/exiting functions
-      FunctionDeclaration(node: FunctionNode) {
+      FunctionDeclaration(node) {
         functionStack.push(node.id?.name || null);
       },
       'FunctionDeclaration:exit'() {
         functionStack.pop();
       },
-      FunctionExpression(node: FunctionNode) {
+      FunctionExpression(node) {
         functionStack.push(getFunctionName(node));
       },
       'FunctionExpression:exit'() {
         functionStack.pop();
       },
-      ArrowFunctionExpression(node: FunctionNode) {
+      ArrowFunctionExpression(node) {
         functionStack.push(getFunctionName(node));
       },
       'ArrowFunctionExpression:exit'() {
@@ -322,13 +341,13 @@ const rule: Rule.RuleModule = {
       },
 
       // Check for Prisma find calls
-      CallExpression(node: CallExpression) {
+      CallExpression(node) {
         if (node.callee && isPrismaFindMethod(node.callee)) {
           const functionName = getCurrentFunctionName();
           if (!functionName) return; // Skip if not in a function
 
-          const memberExp = node.callee as MemberExpression;
-          const method = (memberExp.property as any).name;
+          const memberExp = node.callee as TSESTree.MemberExpression;
+          const method = (memberExp.property as TSESTree.Identifier).name;
 
           // Validate function name
           const type = validateFunctionName(functionName, method);
@@ -350,6 +369,6 @@ const rule: Rule.RuleModule = {
       },
     };
   },
-};
+});
 
 export default rule;
