@@ -1,5 +1,3 @@
-version: '3.8'
-
 networks:
   music_practice_tracker_net:
     driver: bridge
