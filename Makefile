@@ -1,4 +1,4 @@
-.PHONY: setup install-deps setup-env setup-backend-env build-eslint-rules setup-database clean-eslint-rules
+.PHONY: setup install-deps setup-env setup-backend-env build-eslint-rules generate-prisma-client setup-database clean-eslint-rules
 
 # Main setup target that orchestrates all setup tasks
 setup: install-deps setup-env setup-backend-env build-eslint-rules setup-database
@@ -30,13 +30,18 @@ setup-backend-env:
 # Build custom ESLint rules
 build-eslint-rules:
 	@echo "🛠️  Building custom ESLint rules..."
-	cd packages/libs/eslint-rules && bunx tsc
+	cd packages/libs/eslint-rules && bun run build
 	@echo "✅ ESLint rules built"
+
+generate-prisma-client:
+	@echo "🔄 Generating Prisma client..."
+	cd packages/apps/backend && bun run prisma:generate
+	@echo "✅ Prisma client generated"
 
 # Setup database with migrations
 setup-database:
 	@echo "🗄️  Setting up database..."
-	cd packages/apps/backend && bunx prisma migrate dev
+	cd packages/apps/backend && bun run prisma:migrate:dev
 	@echo "✅ Database setup complete"
 
 # Clean ESLint rules build artifacts
@@ -88,13 +93,13 @@ dev-mobile:
 # Reset database
 db-reset:
 	@echo "🗑️  Resetting database..."
-	cd packages/apps/backend && bunx prisma migrate reset --force
+	cd packages/apps/backend && bun run prisma:reset
 	@echo "✅ Database reset complete"
 
 # Open Prisma Studio
 prisma-studio:
 	@echo "🎨 Opening Prisma Studio..."
-	cd packages/apps/backend && bunx prisma studio
+	cd packages/apps/backend && bun run prisma:studio
 
 # Help target
 .PHONY: help

@@ -5,8 +5,8 @@ import {
   FindUserByIdDto,
   UpdateUserDto,
   UserResponseDto,
-} from '@/modules/user/user.dto';
-import { UserService } from '@/modules/user/user.service';
+} from '@/modules/aggregate/user/user.dto';
+import { UserService } from '@/modules/aggregate/user/user.service';
 import { Body, Delete, Get, HttpCode, HttpStatus, Param, Post, Put } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 
