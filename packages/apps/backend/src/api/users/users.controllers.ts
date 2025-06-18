@@ -5,10 +5,10 @@ import {
   FindUserByIdDto,
   UpdateUserDto,
   UserResponseDto,
-} from '@/services/user/user.dto';
-import { UserService } from '@/services/user/user.service';
-import { Body, Delete, Get, Param, Post, Put, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags, ApiParam, ApiBody } from '@nestjs/swagger';
+} from '@/modules/user/user.dto';
+import { UserService } from '@/modules/user/user.service';
+import { Body, Delete, Get, HttpCode, HttpStatus, Param, Post, Put } from '@nestjs/common';
+import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('users')
 @ApiController('users')
