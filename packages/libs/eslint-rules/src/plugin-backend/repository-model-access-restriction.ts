@@ -26,10 +26,10 @@ const rule = createRule({
         // Check if this is accessing a model through repository
         // Pattern 1: this.repository.user.<method> (dot notation)
         // Pattern 2: this.repository['user'].<method> (bracket notation)
-        
+
         let isRepositoryAccess = false;
         let modelName: string | null = null;
-        
+
         // Check for dot notation: this.repository.model
         if (
           node.object?.type === AST_NODE_TYPES.MemberExpression &&
@@ -56,7 +56,7 @@ const rule = createRule({
           isRepositoryAccess = true;
           modelName = node.object.property.value;
         }
-        
+
         if (!isRepositoryAccess || !modelName) {
           return;
         }
