@@ -3,6 +3,7 @@ import prismaCreateNoDeletedAt from './prisma-create-no-deleted-at';
 import prismaDeleteNamingConvention from './prisma-delete-naming-convention';
 import prismaFindNamingConvention from './prisma-find-naming-convention';
 import prismaUpdateNamingConvention from './prisma-update-naming-convention';
+import repositoryModelAccessRestriction from './repository-model-access-restriction';
 
 const plugin = {
   meta: {
@@ -15,6 +16,7 @@ const plugin = {
     'prisma-delete-naming-convention': prismaDeleteNamingConvention,
     'prisma-find-naming-convention': prismaFindNamingConvention,
     'prisma-update-naming-convention': prismaUpdateNamingConvention,
+    'repository-model-access-restriction': repositoryModelAccessRestriction,
   },
 };
 
