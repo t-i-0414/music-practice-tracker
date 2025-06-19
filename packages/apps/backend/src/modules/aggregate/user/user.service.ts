@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto, DeleteUserByIdDto, FindUserByIdDto, UpdateUserDto, UserResponseDto } from './user.dto';
 import { UserRepository } from './user.repository';
 
@@ -10,8 +10,15 @@ export class UserService {
     return this.repository.createUser(data);
   }
 
-  async findUserById({ id }: FindUserByIdDto): Promise<UserResponseDto | null> {
-    return this.repository.findUniqueActiveUser({ id });
+  async findUserById(dto: FindUserByIdDto): Promise<UserResponseDto | null> {
+    return this.repository.findUniqueActiveUser(dto);
+  }
+
+  async findUserByIdOrFail(dto: FindUserByIdDto): Promise<UserResponseDto> {
+    const user = await this.findUserById(dto);
+    if (!user) throw new NotFoundException(`User ${dto.id} not found`);
+
+    return user;
   }
 
   async updateUserById(data: {
