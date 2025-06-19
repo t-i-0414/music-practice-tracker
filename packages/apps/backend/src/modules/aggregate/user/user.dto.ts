@@ -1,8 +1,8 @@
-import { User } from '@/generated/prisma';
 import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
 import { Exclude, Expose, Type } from 'class-transformer';
 import { IsDate, IsEmail, IsNotEmpty, IsString, IsUUID, MaxLength } from 'class-validator';
 import { MAX_EMAIL_LENGTH, MAX_NAME_LENGTH } from './user.constants';
+import { User } from './user.repository';
 
 class UserBasicDto implements Partial<User> {
   @ApiProperty({
