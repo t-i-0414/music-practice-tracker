@@ -1,5 +1,5 @@
+import rule from '@/plugin-backend/prisma-delete-naming-convention';
 import { RuleTester } from '@typescript-eslint/rule-tester';
-import rule from '../src/prisma-delete-naming-convention';
 
 const ruleTester = new RuleTester();
 

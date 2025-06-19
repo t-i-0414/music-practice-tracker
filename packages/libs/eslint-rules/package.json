@@ -2,7 +2,17 @@
   "name": "@music-practice-tracker/eslint-rules",
   "version": "1.0.0",
   "description": "Custom ESLint rules for Music Practice Tracker",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "lint:check": "eslint",

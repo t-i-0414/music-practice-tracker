@@ -1,6 +1,6 @@
 import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
 import * as ts from 'typescript';
-import { isPrismaUpdateMethod, getFunctionName } from './utils/prisma-helpers';
+import { getFunctionName, isPrismaUpdateMethod } from './utils/prisma-helpers';
 
 type MessageIds =
   | 'invalidUpdateMethodName'

@@ -1,5 +1,5 @@
 import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
-import { isPrismaFindMethod, getFunctionNameExtended } from './utils/prisma-helpers';
+import { getFunctionNameExtended, isPrismaFindMethod } from './utils/prisma-helpers';
 
 type MessageIds =
   | 'invalidFindMethodName'
