@@ -1,6 +1,6 @@
 import { User } from '@/generated/prisma';
 import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Exclude, Expose, Type } from 'class-transformer';
 import { IsDate, IsEmail, IsNotEmpty, IsString, IsUUID, MaxLength } from 'class-validator';
 import { MAX_EMAIL_LENGTH, MAX_NAME_LENGTH } from './user.constants';
 
@@ -54,13 +54,15 @@ class UserBasicDto implements Partial<User> {
 /**
  * User response DTO - Read-only fields returned from API
  */
-export class UserResponseDto extends PickType(UserBasicDto, [
-  'id',
-  'email',
-  'name',
-  'createdAt',
-  'updatedAt',
-] as const) {}
+
+@Exclude()
+export class UserResponseDto {
+  @Expose() id: string;
+  @Expose() email: string;
+  @Expose() name: string;
+  @Expose() createdAt: Date;
+  @Expose() updatedAt: Date;
+}
 
 export class CreateUserDto extends PickType(UserBasicDto, ['email', 'name'] as const) {
   @IsNotEmpty()

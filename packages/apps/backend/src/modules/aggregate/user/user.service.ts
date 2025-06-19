@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 import { CreateUserDto, DeleteUserByIdDto, FindUserByIdDto, UpdateUserDto, UserResponseDto } from './user.dto';
 import { UserRepository } from './user.repository';
 
@@ -7,30 +8,31 @@ export class UserService {
   constructor(private repository: UserRepository) {}
 
   async createUser(data: CreateUserDto): Promise<UserResponseDto> {
-    return this.repository.createUser(data);
-  }
-
-  async findUserById(dto: FindUserByIdDto): Promise<UserResponseDto | null> {
-    return this.repository.findUniqueActiveUser(dto);
+    return plainToInstance(UserResponseDto, await this.repository.createUser(data));
   }
 
   async findUserByIdOrFail(dto: FindUserByIdDto): Promise<UserResponseDto> {
-    const user = await this.findUserById(dto);
+    const user = await this.repository.findUniqueActiveUser(dto);
     if (!user) throw new NotFoundException(`User ${dto.id} not found`);
 
-    return user;
+    return plainToInstance(UserResponseDto, user);
   }
 
   async updateUserById(data: {
     findUserByIdDto: FindUserByIdDto;
     updateUserDto: UpdateUserDto;
   }): Promise<UserResponseDto> {
-    return this.repository.updateUser({
-      where: { id: data.findUserByIdDto.id },
-      data: {
-        ...data.updateUserDto,
-      },
-    });
+    await this.findUserByIdOrFail(data.findUserByIdDto);
+
+    return plainToInstance(
+      UserResponseDto,
+      await this.repository.updateUser({
+        where: { id: data.findUserByIdDto.id },
+        data: {
+          ...data.updateUserDto,
+        },
+      }),
+    );
   }
 
   async deleteUserById({ id }: DeleteUserByIdDto): Promise<void> {
