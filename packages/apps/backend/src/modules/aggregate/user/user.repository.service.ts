@@ -5,7 +5,7 @@ import { Injectable } from '@nestjs/common';
 export { User };
 
 @Injectable()
-export class UserRepository {
+export class UserRepositoryService {
   constructor(private repository: RepositoryService) {}
 
   async findUniqueActiveUser(params: Prisma.UserWhereUniqueInput): Promise<User | null> {

@@ -11,13 +11,13 @@ import {
   UpdateUserInputDto,
 } from './user.input.dto';
 import { UserQueryService } from './user.query.service';
-import { UserRepository } from './user.repository';
+import { UserRepositoryService } from './user.repository.service';
 import { ActiveUserResponseDto, ActiveUsersResponseDto, toActiveUserDto, toActiveUsersDto } from './user.response.dto';
 
 @Injectable()
 export class UserCommandService {
   constructor(
-    private repository: UserRepository,
+    private repository: UserRepositoryService,
     private queryService: UserQueryService,
   ) {}
 

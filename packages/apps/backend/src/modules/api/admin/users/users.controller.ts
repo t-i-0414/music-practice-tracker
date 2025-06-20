@@ -1,5 +1,5 @@
 import { ApiController } from '@/common/decorators/api-controller.decorator';
-import { UserAdminFacade } from '@/modules/aggregate/user/user.admin.facade';
+import { UserAdminFacadeService } from '@/modules/aggregate/user/user.admin.facade.service';
 import {
   CreateManyUsersInputDto,
   CreateUserInputDto,
@@ -22,7 +22,7 @@ import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from 
 @ApiTags('admin/users')
 @ApiController('admin/users')
 export class AdminUsersController {
-  constructor(private readonly userAdminFacade: UserAdminFacade) {}
+  constructor(private readonly userAdminFacade: UserAdminFacadeService) {}
 
   @Get('active_users')
   @ApiOperation({ summary: 'Get users by IDs' })

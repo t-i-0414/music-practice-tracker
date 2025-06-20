@@ -1,5 +1,5 @@
 import { ApiController } from '@/common/decorators/api-controller.decorator';
-import { UserAppFacade } from '@/modules/aggregate/user/user.app.facade';
+import { UserAppFacadeService } from '@/modules/aggregate/user/user.app.facade.service';
 import { CreateUserInputDto, UpdateUserDataDto } from '@/modules/aggregate/user/user.input.dto';
 import { ActiveUserResponseDto } from '@/modules/aggregate/user/user.response.dto';
 import { Body, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Put } from '@nestjs/common';
@@ -8,7 +8,7 @@ import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/s
 @ApiTags('app/users')
 @ApiController('app/users')
 export class AppUsersController {
-  constructor(private readonly userAppFacade: UserAppFacade) {}
+  constructor(private readonly userAppFacade: UserAppFacadeService) {}
 
   @Get(':id')
   @ApiOperation({ summary: 'Get user by ID' })

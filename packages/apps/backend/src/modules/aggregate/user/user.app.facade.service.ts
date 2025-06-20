@@ -5,7 +5,7 @@ import { UserQueryService } from './user.query.service';
 import { ActiveUserResponseDto } from './user.response.dto';
 
 @Injectable()
-export class UserAppFacade {
+export class UserAppFacadeService {
   constructor(
     private readonly userCommandService: UserCommandService,
     private readonly userQueryService: UserQueryService,

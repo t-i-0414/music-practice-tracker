@@ -1,14 +1,20 @@
 import { RepositoryModule } from '@/modules/repository/repository.module';
 import { Module } from '@nestjs/common';
-import { UserAdminFacade } from './user.admin.facade';
-import { UserAppFacade } from './user.app.facade';
+import { UserAdminFacadeService } from './user.admin.facade.service';
+import { UserAppFacadeService } from './user.app.facade.service';
 import { UserCommandService } from './user.command.service';
 import { UserQueryService } from './user.query.service';
-import { UserRepository } from './user.repository';
+import { UserRepositoryService } from './user.repository.service';
 
 @Module({
   imports: [RepositoryModule],
-  providers: [UserRepository, UserQueryService, UserCommandService, UserAdminFacade, UserAppFacade],
-  exports: [UserAdminFacade, UserAppFacade],
+  providers: [
+    UserRepositoryService,
+    UserQueryService,
+    UserCommandService,
+    UserAdminFacadeService,
+    UserAppFacadeService,
+  ],
+  exports: [UserAdminFacadeService, UserAppFacadeService],
 })
 export class UserModule {}

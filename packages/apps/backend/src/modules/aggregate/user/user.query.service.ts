@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { FindManyUsersByIdInputDto, FindUserByIdInputDto } from './user.input.dto';
-import { UserRepository } from './user.repository';
+import { UserRepositoryService } from './user.repository.service';
 import {
   ActiveUserResponseDto,
   ActiveUsersResponseDto,
@@ -18,7 +18,7 @@ import {
 
 @Injectable()
 export class UserQueryService {
-  constructor(private repository: UserRepository) {}
+  constructor(private repository: UserRepositoryService) {}
 
   async findUserByIdOrFail(dto: FindUserByIdInputDto): Promise<ActiveUserResponseDto> {
     const user = await this.repository.findUniqueActiveUser(dto);

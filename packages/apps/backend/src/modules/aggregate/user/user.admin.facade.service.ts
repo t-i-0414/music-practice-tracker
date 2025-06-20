@@ -24,7 +24,7 @@ import {
 } from './user.response.dto';
 
 @Injectable()
-export class UserAdminFacade {
+export class UserAdminFacadeService {
   constructor(
     private readonly userCommandService: UserCommandService,
     private readonly userQueryService: UserQueryService,
