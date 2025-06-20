@@ -1,0 +1,129 @@
+import { ApiProperty, PickType } from '@nestjs/swagger';
+import { Exclude, Expose, plainToInstance, Type } from 'class-transformer';
+import { MAX_EMAIL_LENGTH, MAX_NAME_LENGTH } from './user.constants';
+import { User } from './user.repository';
+
+const activeUserKeys = ['id', 'email', 'name', 'createdAt', 'updatedAt'] satisfies (keyof User)[];
+
+@Exclude()
+class FullUserResponseDto implements User {
+  @ApiProperty({
+    description: 'The user ID',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    format: 'uuid',
+  })
+  @Expose()
+  id: string;
+
+  @ApiProperty({
+    description: 'The user email address',
+    example: 'takuya.iwashiro@takudev.net',
+    format: 'email',
+    maxLength: MAX_EMAIL_LENGTH,
+  })
+  @Expose()
+  email: string;
+
+  @ApiProperty({
+    description: 'The user name',
+    example: 'Takuya Iwashiro',
+    maxLength: MAX_NAME_LENGTH,
+  })
+  @Expose()
+  name: string;
+
+  @ApiProperty({
+    description: 'The user created at timestamp',
+    example: '2024-01-15T09:30:00.000Z',
+    format: 'date-time',
+  })
+  @Type(() => Date)
+  @Expose()
+  createdAt: Date;
+
+  @ApiProperty({
+    description: 'The user updated at timestamp',
+    example: '2024-06-16T14:45:30.123Z',
+    format: 'date-time',
+  })
+  @Type(() => Date)
+  @Expose()
+  updatedAt: Date;
+
+  @ApiProperty({
+    description: 'The user deleted at timestamp',
+    example: '2024-07-20T10:00:00.000Z',
+    format: 'date-time',
+    required: false,
+    nullable: true,
+  })
+  @Type(() => Date)
+  @Expose()
+  deletedAt: Date | null;
+}
+
+/**
+ * User response DTO - Read-only fields returned from API
+ */
+@Exclude()
+export class ActiveUserResponseDto extends PickType(FullUserResponseDto, activeUserKeys) {}
+export function toActiveUserDto(user: unknown): ActiveUserResponseDto {
+  return plainToInstance(ActiveUserResponseDto, user);
+}
+
+export class ActiveUsersResponseDto {
+  @ApiProperty({ type: [ActiveUserResponseDto] })
+  users: ActiveUserResponseDto[];
+}
+export function toActiveUsersDto(users: unknown[]): ActiveUsersResponseDto {
+  return {
+    users: plainToInstance(ActiveUserResponseDto, users),
+  };
+}
+
+/**
+ * Deleted User response DTO - Read-only fields returned from API
+ */
+@Exclude()
+export class DeletedUserResponseDto extends PickType(FullUserResponseDto, [...activeUserKeys, 'deletedAt']) {
+  @ApiProperty({
+    description: 'The user deleted at timestamp',
+    example: '2024-07-20T10:00:00.000Z',
+    format: 'date-time',
+    required: true,
+  })
+  @Type(() => Date)
+  @Expose()
+  deletedAt: Date;
+}
+export function toDeletedUserDto(user: unknown): DeletedUserResponseDto {
+  return plainToInstance(DeletedUserResponseDto, user);
+}
+
+export class DeletedUsersResponseDto {
+  @ApiProperty({ type: [DeletedUserResponseDto] })
+  users: DeletedUserResponseDto[];
+}
+export function toDeletedUsersDto(users: unknown[]): DeletedUsersResponseDto {
+  return {
+    users: plainToInstance(DeletedUserResponseDto, users),
+  };
+}
+
+/**
+ * Any User response DTO - Read-only fields returned from API
+ */
+export class AnyUserResponseDto extends DeletedUserResponseDto {}
+export function toAnyUserDto(user: unknown): AnyUserResponseDto {
+  return plainToInstance(AnyUserResponseDto, user);
+}
+
+export class AnyUsersResponseDto {
+  @ApiProperty({ type: [AnyUserResponseDto] })
+  users: AnyUserResponseDto[];
+}
+export function toAnyUsersDto(users: unknown[]): AnyUsersResponseDto {
+  return {
+    users: plainToInstance(AnyUserResponseDto, users),
+  };
+}

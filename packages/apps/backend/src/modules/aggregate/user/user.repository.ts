@@ -88,7 +88,7 @@ export class UserRepository {
     });
   }
 
-  async createManyAndReturnUsers(params: StrictOmit<Prisma.UserCreateInput, 'deletedAt'>): Promise<User[]> {
+  async createManyAndReturnUsers(params: StrictOmit<Prisma.UserCreateInput, 'deletedAt'>[]): Promise<User[]> {
     return this.repository.user.createManyAndReturn({
       data: params,
     });
@@ -107,37 +107,8 @@ export class UserRepository {
     });
   }
 
-  async updateManyUsers(params: {
-    where: Prisma.UserWhereInput;
-    data: StrictOmit<Prisma.UserUpdateInput, 'deletedAt'>;
-  }): Promise<Prisma.BatchPayload> {
-    return this.repository.user.updateMany({
-      where: params.where,
-      data: params.data,
-    });
-  }
-
-  async updateManyAndReturnUsers(params: {
-    where: Prisma.UserWhereInput;
-    data: StrictOmit<Prisma.UserUpdateInput, 'deletedAt'>;
-  }): Promise<User[]> {
-    return this.repository.user.updateManyAndReturn({
-      where: params.where,
-      data: params.data,
-    });
-  }
-
   async deleteUser(params: Prisma.UserWhereUniqueInput): Promise<void> {
     await this.repository.user.update({
-      where: params,
-      data: {
-        deletedAt: new Date(),
-      },
-    });
-  }
-
-  async deleteManyAndReturnUsers(params: Prisma.UserWhereInput): Promise<User[]> {
-    return await this.repository.user.updateManyAndReturn({
       where: params,
       data: {
         deletedAt: new Date(),

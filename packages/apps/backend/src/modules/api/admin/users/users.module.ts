@@ -1,9 +1,9 @@
 import { UserModule } from '@/modules/aggregate/user/user.module';
 import { Module } from '@nestjs/common';
-import { UsersController } from './users.controller';
+import { AdminUsersController } from './users.controller';
 
 @Module({
   imports: [UserModule],
-  controllers: [UsersController],
+  controllers: [AdminUsersController],
 })
-export class UsersModule {}
+export class AdminUsersModule {}
