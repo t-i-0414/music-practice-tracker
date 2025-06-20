@@ -26,6 +26,28 @@ ruleTester.run('prisma-repository-only-access', rule, {
       `,
       filename: '/project/src/modules/aggregate/user/user.repository.service.ts',
     },
+    // Valid:  Repository file accessing Prisma models
+    {
+      code: `
+        class RepositoryService {
+          async findUser() {
+            return this.repository.user.findUnique();
+          }
+        }
+      `,
+      filename: '/project/src/modules/repository/repository.service.ts',
+    },
+    // Valid:  Repository file accessing Prisma models
+    {
+      code: `
+        class RepositoryService {
+          async findUser() {
+            return this.repository.user.findUnique();
+          }
+        }
+      `,
+      filename: '/project/src/modules/repository/repository.ts',
+    },
     // Valid: Repository file importing PrismaClient
     {
       code: `

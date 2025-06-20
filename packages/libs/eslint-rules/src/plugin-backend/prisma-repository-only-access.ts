@@ -23,7 +23,11 @@ const rule = createRule({
   defaultOptions: [],
   create(context) {
     const filename = context.filename || context.getFilename();
-    const isRepositoryFile = filename.endsWith('.repository.ts') || filename.endsWith('.repository.service.ts');
+    const isRepositoryFile =
+      filename.endsWith('.repository.ts') ||
+      filename.endsWith('.repository.service.ts') ||
+      filename.endsWith('repository.ts') ||
+      filename.endsWith('repository.service.ts');
 
     return {
       // Check imports
