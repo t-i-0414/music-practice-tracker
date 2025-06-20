@@ -1,28 +1,25 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { CreateUserDto, DeleteUserByIdDto, FindUserByIdDto, UpdateUserDto, UserResponseDto } from './user.dto';
+import { UserQueryService } from './user.query.service';
 import { UserRepository } from './user.repository';
 
 @Injectable()
-export class UserService {
-  constructor(private repository: UserRepository) {}
+export class UserCommandService {
+  constructor(
+    private repository: UserRepository,
+    private queryService: UserQueryService,
+  ) {}
 
   async createUser(data: CreateUserDto): Promise<UserResponseDto> {
     return plainToInstance(UserResponseDto, await this.repository.createUser(data));
-  }
-
-  async findUserByIdOrFail(dto: FindUserByIdDto): Promise<UserResponseDto> {
-    const user = await this.repository.findUniqueActiveUser(dto);
-    if (!user) throw new NotFoundException(`User ${dto.id} not found`);
-
-    return plainToInstance(UserResponseDto, user);
   }
 
   async updateUserById(data: {
     findUserByIdDto: FindUserByIdDto;
     updateUserDto: UpdateUserDto;
   }): Promise<UserResponseDto> {
-    await this.findUserByIdOrFail(data.findUserByIdDto);
+    await this.queryService.findUserByIdOrFail(data.findUserByIdDto);
 
     return plainToInstance(
       UserResponseDto,

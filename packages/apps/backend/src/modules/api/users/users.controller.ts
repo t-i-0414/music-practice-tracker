@@ -1,13 +1,17 @@
 import { ApiController } from '@/common/decorators/api-controller.decorator';
+import { UserCommandService } from '@/modules/aggregate/user/user.command.service';
 import { CreateUserDto, UpdateUserDto, UserResponseDto } from '@/modules/aggregate/user/user.dto';
-import { UserService } from '@/modules/aggregate/user/user.service';
+import { UserQueryService } from '@/modules/aggregate/user/user.query.service';
 import { Body, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Put } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('users')
 @ApiController('users')
 export class UsersController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userQueryService: UserQueryService,
+    private readonly userCommandService: UserCommandService,
+  ) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -18,7 +22,7 @@ export class UsersController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   async createUser(@Body() body: CreateUserDto): Promise<UserResponseDto> {
-    return this.userService.createUser(body);
+    return this.userCommandService.createUser(body);
   }
 
   @Get('/:id')
@@ -29,7 +33,7 @@ export class UsersController {
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'User not found' })
   async findUserById(@Param('id', new ParseUUIDPipe()) id: string): Promise<UserResponseDto> {
-    return await this.userService.findUserByIdOrFail({ id });
+    return await this.userQueryService.findUserByIdOrFail({ id });
   }
 
   @Put('/:id')
@@ -44,9 +48,9 @@ export class UsersController {
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() body: UpdateUserDto,
   ): Promise<UserResponseDto> {
-    const user = await this.userService.findUserByIdOrFail({ id });
+    const user = await this.userQueryService.findUserByIdOrFail({ id });
 
-    return this.userService.updateUserById({
+    return this.userCommandService.updateUserById({
       findUserByIdDto: { id: user.id },
       updateUserDto: body,
     });
@@ -61,8 +65,8 @@ export class UsersController {
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'User not found' })
   async deleteUserById(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
-    const user = await this.userService.findUserByIdOrFail({ id });
+    const user = await this.userQueryService.findUserByIdOrFail({ id });
 
-    await this.userService.deleteUserById({ id: user.id });
+    await this.userCommandService.deleteUserById({ id: user.id });
   }
 }

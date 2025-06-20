@@ -1,6 +1,6 @@
 import { UserModule } from '@/modules/aggregate/user/user.module';
 import { Module } from '@nestjs/common';
-import { UsersController } from './users.controllers';
+import { UsersController } from './users.controller';
 
 @Module({
   imports: [UserModule],
