@@ -15,6 +15,17 @@ ruleTester.run('prisma-repository-only-access', rule, {
       `,
       filename: '/project/src/modules/aggregate/user/user.repository.ts',
     },
+    // Valid:  Repository file accessing Prisma models
+    {
+      code: `
+        class RepositoryService {
+          async findUser() {
+            return this.repository.user.findUnique();
+          }
+        }
+      `,
+      filename: '/project/src/modules/aggregate/user/user.repository.service.ts',
+    },
     // Valid: Repository file importing PrismaClient
     {
       code: `
@@ -98,22 +109,6 @@ ruleTester.run('prisma-repository-only-access', rule, {
       errors: [
         {
           messageId: 'invalidPrismaImport',
-        },
-      ],
-    },
-    // Invalid: repository.service.ts is not allowed
-    {
-      code: `
-        class RepositoryService {
-          async findUser() {
-            return this.repository.user.findUnique();
-          }
-        }
-      `,
-      filename: '/project/src/modules/repository/repository.service.ts',
-      errors: [
-        {
-          messageId: 'invalidPrismaAccess',
         },
       ],
     },

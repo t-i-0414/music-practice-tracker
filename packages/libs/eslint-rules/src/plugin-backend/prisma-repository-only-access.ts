@@ -13,15 +13,17 @@ const rule = createRule({
       description: 'Ensure Prisma models are only accessed from repository files',
     },
     messages: {
-      invalidPrismaAccess: 'Prisma models should only be accessed from repository files (*.repository.ts)',
-      invalidPrismaImport: 'PrismaClient should only be imported in repository files (*.repository.ts)',
+      invalidPrismaAccess:
+        'Prisma models should only be accessed from repository files (*.repository.ts | *.repository.service.ts)',
+      invalidPrismaImport:
+        'PrismaClient should only be imported in repository files (*.repository.ts | *.repository.service.ts)',
     },
     schema: [],
   },
   defaultOptions: [],
   create(context) {
     const filename = context.filename || context.getFilename();
-    const isRepositoryFile = filename.endsWith('.repository.ts');
+    const isRepositoryFile = filename.endsWith('.repository.ts') || filename.endsWith('.repository.service.ts');
 
     return {
       // Check imports
