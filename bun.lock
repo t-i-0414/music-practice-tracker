@@ -24,6 +24,8 @@
         "@types/react-dom": "^19.1.6",
         "@types/source-map-support": "^0.5.10",
         "@types/supertest": "^6.0.3",
+        "@typescript-eslint/rule-tester": "^8.34.1",
+        "@typescript-eslint/utils": "^8.34.1",
         "@vitest/coverage-v8": "^3.2.3",
         "cspell": "^9.0.2",
         "dotenv-linter": "^0.2.0",
@@ -119,22 +121,10 @@
     "packages/libs/eslint-config": {
       "name": "@music-practice-tracker/eslint-config",
       "version": "1.0.0",
-      "devDependencies": {
-        "@types/eslint": "^8.56.0",
-        "@types/estree": "^1.0.5",
-        "@typescript-eslint/rule-tester": "^8.34.1",
-        "@typescript-eslint/utils": "^8.34.1",
-      },
     },
     "packages/libs/eslint-rules": {
       "name": "@music-practice-tracker/eslint-rules",
       "version": "1.0.0",
-      "devDependencies": {
-        "@types/eslint": "^8.56.0",
-        "@types/estree": "^1.0.5",
-        "@typescript-eslint/rule-tester": "^8.34.1",
-        "@typescript-eslint/utils": "^8.34.1",
-      },
     },
   },
   "packages": {
@@ -3353,10 +3343,6 @@
     "@jest/transform/jest-regex-util": ["jest-regex-util@29.6.3", "", {}, "sha512-KJJBsRCyyLNWCNBOvZyRDnAIfUiRJ8v+hOBQYGn8gDyF3UegwiP4gwRR3/SDa42g1YbVycTidUF3rKjyLFDWbg=="],
 
     "@jest/types/chalk": ["chalk@4.1.2", "", { "dependencies": { "ansi-styles": "^4.1.0", "supports-color": "^7.1.0" } }, "sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA=="],
-
-    "@music-practice-tracker/eslint-config/@types/eslint": ["@types/eslint@8.56.12", "", { "dependencies": { "@types/estree": "*", "@types/json-schema": "*" } }, "sha512-03ruubjWyOHlmljCVoxSuNDdmfZDzsrrz0P2LeJsOXr+ZwFQ+0yQIwNCwt/GYhV7Z31fgtXJTAEs+FYlEL851g=="],
-
-    "@music-practice-tracker/eslint-rules/@types/eslint": ["@types/eslint@8.56.12", "", { "dependencies": { "@types/estree": "*", "@types/json-schema": "*" } }, "sha512-03ruubjWyOHlmljCVoxSuNDdmfZDzsrrz0P2LeJsOXr+ZwFQ+0yQIwNCwt/GYhV7Z31fgtXJTAEs+FYlEL851g=="],
 
     "@nestjs/cli/commander": ["commander@4.1.1", "", {}, "sha512-NOKm8xhkzAjzFx8B2v5OAHT+u5pRQc2UCa2Vq9jYL/31o2wi9mxBA7LIFs3sV5VSC49z6pEhfbMULvShKj26WA=="],
 
