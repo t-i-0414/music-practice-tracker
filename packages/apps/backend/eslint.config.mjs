@@ -1,7 +1,6 @@
 // @ts-check
 import eslint from '@eslint/js';
 import { pluginBackend } from '@music-practice-tracker/eslint-rules';
-import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
@@ -24,7 +23,6 @@ export default tseslint.config(
   },
   eslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
-  eslintPluginPrettierRecommended,
   {
     plugins: {
       'custom-backend-eslint': pluginBackend,
