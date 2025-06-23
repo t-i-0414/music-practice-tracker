@@ -9,6 +9,7 @@
     "build": "nest build",
     "lint:check": "eslint \"{src,apps,libs,test}/**/*.ts\"",
     "lint:fix": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    "open:swagger-ui": "open http://localhost:3000/api",
     "prisma:db:pull": "prisma db pull",
     "prisma:db:push": "prisma db push",
     "prisma:format": "prisma format",
@@ -27,8 +28,7 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "test:watch": "jest --watch",
-    "type:check": "tsc --noEmit",
-    "open:swagger-ui": "open http://localhost:3000/api"
+    "type:check": "tsc --noEmit"
   },
   "jest": {
     "collectCoverageFrom": [
