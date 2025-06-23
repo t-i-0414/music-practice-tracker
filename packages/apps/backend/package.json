@@ -27,7 +27,8 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "test:watch": "jest --watch",
-    "type:check": "tsc --noEmit"
+    "type:check": "tsc --noEmit",
+    "open:swagger-ui": "open http://localhost:3000/api"
   },
   "jest": {
     "collectCoverageFrom": [
@@ -56,7 +57,7 @@
     "rxjs": "^7.8.1"
   },
   "devDependencies": {
-    "@music-practice-tracker/eslint-rules": "workspace:*",
+    "@music-practice-tracker/eslint-configs": "workspace:*",
     "@nestjs/cli": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.1",

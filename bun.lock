@@ -72,7 +72,7 @@
         "rxjs": "^7.8.1",
       },
       "devDependencies": {
-        "@music-practice-tracker/eslint-rules": "workspace:*",
+        "@music-practice-tracker/eslint-configs": "workspace:*",
         "@nestjs/cli": "^11.0.0",
         "@nestjs/schematics": "^11.0.0",
         "@nestjs/testing": "^11.0.1",
@@ -118,9 +118,12 @@
         "eslint-config-expo": "~9.2.0",
       },
     },
-    "packages/libs/eslint-config": {
-      "name": "@music-practice-tracker/eslint-config",
+    "packages/libs/eslint-configs": {
+      "name": "@music-practice-tracker/eslint-configs",
       "version": "1.0.0",
+      "devDependencies": {
+        "@music-practice-tracker/eslint-rules": "workspace:*",
+      },
     },
     "packages/libs/eslint-rules": {
       "name": "@music-practice-tracker/eslint-rules",
@@ -770,7 +773,7 @@
 
     "@music-practice-tracker/backend": ["@music-practice-tracker/backend@workspace:packages/apps/backend"],
 
-    "@music-practice-tracker/eslint-config": ["@music-practice-tracker/eslint-config@workspace:packages/libs/eslint-config"],
+    "@music-practice-tracker/eslint-configs": ["@music-practice-tracker/eslint-configs@workspace:packages/libs/eslint-configs"],
 
     "@music-practice-tracker/eslint-rules": ["@music-practice-tracker/eslint-rules@workspace:packages/libs/eslint-rules"],
 

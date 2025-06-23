@@ -22,10 +22,5 @@ async function bootstrap() {
 
   const port = process.env.PORT ?? 3000;
   await app.listen(port);
-
-  if (isDevelopment()) {
-    console.log(`Application is running on: http://localhost:${port}`);
-    console.log(`Swagger UI is available at: http://localhost:${port}/api`);
-  }
 }
 void bootstrap();
