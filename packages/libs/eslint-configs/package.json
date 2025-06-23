@@ -1,5 +1,5 @@
 {
-  "name": "@music-practice-tracker/eslint-config",
+  "name": "@music-practice-tracker/eslint-configs",
   "version": "1.0.0",
   "description": "Custom ESLint rules for Music Practice Tracker",
   "type": "module",

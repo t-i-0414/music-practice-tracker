@@ -6,8 +6,8 @@ setup:
 	@echo "🔧 Setting up the environment..."
 	@${MAKE} setup-env
 	bun install
-	@make -C packages/libs/eslint-config setup
-	@make -C packages/libs/eslint-config build
+	@make -C packages/libs/eslint-configs setup
+	@make -C packages/libs/eslint-configs build
 	@make -C packages/libs/eslint-rules setup
 	@make -C packages/libs/eslint-rules build
 	@make -C packages/apps/backend setup
