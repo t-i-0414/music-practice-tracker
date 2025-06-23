@@ -1,5 +1,4 @@
 import eslint from '@eslint/js';
-import { pluginBackend } from '@music-practice-tracker/eslint-rules';
 import prettierConfig from 'eslint-config-prettier';
 import globals from 'globals';
 import tseslint, { type ConfigArray } from 'typescript-eslint';
@@ -18,9 +17,6 @@ const config: ConfigArray = tseslint.config(
         tsconfigRootDir: import.meta.dirname,
       },
     },
-    plugins: {
-      'custom-backend-eslint': pluginBackend,
-    },
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-floating-promises': 'error',
@@ -36,15 +32,6 @@ const config: ConfigArray = tseslint.config(
       'prefer-const': 'error',
       'no-var': 'error',
       eqeqeq: ['error', 'always'],
-
-      // pluginBackend
-      'custom-backend-eslint/prisma-find-naming-convention': 'error',
-      'custom-backend-eslint/prisma-update-naming-convention': 'error',
-      'custom-backend-eslint/prisma-create-no-deleted-at': 'error',
-      'custom-backend-eslint/prisma-create-naming-convention': 'error',
-      'custom-backend-eslint/prisma-delete-naming-convention': 'error',
-      'custom-backend-eslint/prisma-repository-only-access': 'error',
-      'custom-backend-eslint/repository-model-access-restriction': 'error',
     },
     ignores: ['**/dist/**', '**/coverage/**', '**/generated/**', '**/.turbo/**', '**/node_modules/**'],
   },

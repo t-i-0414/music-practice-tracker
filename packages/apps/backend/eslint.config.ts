@@ -1,9 +1,9 @@
-import { baseEslintConfig } from '@music-practice-tracker/eslint-configs';
+import { backendEslintConfig } from '@music-practice-tracker/eslint-configs';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 const config = tseslint.config({
-  extends: [baseEslintConfig],
+  extends: [backendEslintConfig],
   languageOptions: {
     globals: {
       ...globals.node,
