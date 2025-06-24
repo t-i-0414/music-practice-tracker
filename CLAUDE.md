@@ -162,29 +162,67 @@ Note: Test setup not yet configured for Mobile package.
 
 ## Architecture
 
-### Backend Structure
+### Backend Structure (Domain-Driven Design)
 
 - **NestJS** framework with modular architecture
 - **Prisma ORM** for database operations
 - **PostgreSQL** database
-- **API modules** located in `src/api/` (e.g., users module)
-- **Repository pattern** implemented in `src/repository/`
-- **Service layer** in `src/services/` handles business logic
-- **Common utilities** in `src/common/` (decorators, etc.)
 - **Path aliases**: `@/*` maps to `./src/*`, `@/generated/*` maps to `./generated/*`
 
 ### Module Organization
 
 - **AppModule**: Root module importing ApiModule
-- **ApiModule**: Groups all API-related modules
-- **UserModule**: Handles user-related functionality
-- **RepositoryModule**: Provides database access services
+- **ApiModule**: Groups all API-related modules, organized by access type:
+  - `src/modules/api/admin/` - Admin API endpoints
+  - `src/modules/api/app/` - Application API endpoints
+- **Aggregate Modules**: Domain modules in `src/modules/aggregate/` containing:
+  - **Command Service**: Write operations (create, update, delete)
+  - **Query Service**: Read operations with OrFail pattern
+  - **Facade Services**: Orchestration layer for Admin/App APIs
+  - **Repository Service**: Data access layer (one per aggregate)
+  - **DTOs**: Input/Response types specific to the aggregate
+- **RepositoryModule**: Provides centralized database connection
+
+### Service Layer Pattern
+
+Each aggregate follows a strict service separation:
+
+```typescript
+// Query Service: Read operations
+class UserQueryService {
+  findUserByIdOrFail() // Throws NotFoundException if not found
+  findManyUsers()
+  findDeletedUserByIdOrFail()
+}
+
+// Command Service: Write operations
+class UserCommandService {
+  createUser()
+  updateUserById() // Validates existence via QueryService
+  deleteUserById() // Soft delete
+  hardDeleteUserById() // Permanent delete
+  restoreUserById() // Undelete
+}
+
+// Facade Services: API orchestration
+class UserAppFacadeService {} // App API operations
+class UserAdminFacadeService {} // Admin API operations with extended permissions
+```
 
 ### Repository Pattern
 
-- `RepositoryService` extends PrismaClient and manages database connection
-- Individual repositories (e.g., `UserRepository`) encapsulate data access logic
-- Services use repositories to separate business logic from data access
+- **Strict Access Control**: Only `*.repository.ts` or `*.repository.service.ts` files can access Prisma (enforced by ESLint)
+- **Naming Convention**: Repository methods must follow specific patterns:
+  - `findUnique*/findMany*` for queries
+  - `create*/createMany*` for creation
+  - `update*/updateMany*` for updates
+  - `delete*/deleteMany*` for soft deletes
+  - `hardDelete*` for permanent deletion
+  - `restore*` for undeleting
+- **Soft Delete Pattern**: All repositories implement active/deleted/any variants:
+  - `findUniqueActiveUser` (deletedAt: null)
+  - `findUniqueDeletedUser` (deletedAt: not null)
+  - `findUniqueAnyUser` (both)
 
 ### Database Schema
 
@@ -197,18 +235,21 @@ Note: Test setup not yet configured for Mobile package.
 `scripts/validate-prisma-schema.sh` enforces:
 
 1. **ID Fields**
-
    - Field name must be `id`
    - `String` type with `@id` attribute
    - `@db.Uuid` for UUID storage
-   - `@default(uuid())` or `@default(dbgenerated("gen_random_uuid()"))`
+   - `@default(dbgenerated("gen_random_uuid()"))`
 
 2. **Timestamps**
-
    - `createdAt`: `DateTime` type with `@default(now())`
    - `updatedAt`: `DateTime` type with `@updatedAt`
+   - `deletedAt`: `DateTime?` for soft delete support
 
-3. **Constraints**
+3. **Required Indexes**
+   - `@@index([createdAt])`
+   - `@@index([deletedAt])`
+
+4. **Constraints**
    - No composite primary keys (`@@id`)
    - All models must have the above fields
 
@@ -224,13 +265,13 @@ Note: Test setup not yet configured for Mobile package.
 
 ### Frontend Applications
 
-- **Admin**: Next.js 15 with TypeScript
-- **Mobile**: Expo 53 with React Native and Expo Router for navigation
+- **Admin**: Next.js 15 with TypeScript and Turbopack
+- **Mobile**: React Native with Expo 53 and Expo Router for navigation
 
 ### Shared Libraries
 
-- Currently no shared libraries in `packages/libs/`
-- Shared dependencies managed at root level
+- `packages/libs/eslint-configs/` - Shared ESLint configurations
+- `packages/libs/eslint-rules/` - Custom ESLint rules for enforcing architecture
 
 ## Key Technologies
 
@@ -243,6 +284,18 @@ Note: Test setup not yet configured for Mobile package.
 - **Linting**: ESLint with Prettier
 - **Git hooks**: Lefthook for pre-commit checks
 - **Commits**: commitlint for Conventional commits
+
+## Custom ESLint Rules
+
+The project enforces architectural patterns through custom ESLint rules:
+
+1. **prisma-repository-only-access**: Prisma can only be accessed from repository files
+2. **prisma-create-naming-convention**: Create methods must start with "create"
+3. **prisma-find-naming-convention**: Find methods must follow naming patterns
+4. **prisma-update-naming-convention**: Update methods must follow naming patterns
+5. **prisma-delete-naming-convention**: Delete methods must follow naming patterns
+6. **prisma-create-no-deleted-at**: Cannot set deletedAt during creation
+7. **repository-model-access-restriction**: Enforces repository boundaries
 
 ## Git Hook Configuration
 
@@ -267,3 +320,8 @@ Located in root `scripts/` directory:
 - `postinstall.sh`: Post-installation setup
 - `type_check.sh`: Type checks all packages
 - `type_sync_and_install.sh`: Type synchronization and installation
+
+## Type Safety Utilities
+
+- **StrictOmit**: Custom type utility providing stricter TypeScript omit behavior
+- Used to prevent setting certain fields (e.g., deletedAt) in create/update operations
