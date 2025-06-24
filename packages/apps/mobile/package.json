@@ -9,7 +9,7 @@
     "dev:ios": "expo start --ios",
     "dev:web": "expo start --web",
     "lint:check": "eslint",
-    "lint:fix": "eslint lint --fix",
+    "lint:fix": "eslint --fix",
     "reset-project": "node ./scripts/reset-project.js",
     "type:check": "tsc --noEmit"
   },
