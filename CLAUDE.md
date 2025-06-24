@@ -190,18 +190,18 @@ Each aggregate follows a strict service separation:
 ```typescript
 // Query Service: Read operations
 class UserQueryService {
-  findUserByIdOrFail() // Throws NotFoundException if not found
-  findManyUsers()
-  findDeletedUserByIdOrFail()
+  findUserByIdOrFail(); // Throws NotFoundException if not found
+  findManyUsers();
+  findDeletedUserByIdOrFail();
 }
 
 // Command Service: Write operations
 class UserCommandService {
-  createUser()
-  updateUserById() // Validates existence via QueryService
-  deleteUserById() // Soft delete
-  hardDeleteUserById() // Permanent delete
-  restoreUserById() // Undelete
+  createUser();
+  updateUserById(); // Validates existence via QueryService
+  deleteUserById(); // Soft delete
+  hardDeleteUserById(); // Permanent delete
+  restoreUserById(); // Undo soft delete
 }
 
 // Facade Services: API orchestration
@@ -218,7 +218,7 @@ class UserAdminFacadeService {} // Admin API operations with extended permission
   - `update*/updateMany*` for updates
   - `delete*/deleteMany*` for soft deletes
   - `hardDelete*` for permanent deletion
-  - `restore*` for undeleting
+  - `restore*` for undoing soft deletes
 - **Soft Delete Pattern**: All repositories implement active/deleted/any variants:
   - `findUniqueActiveUser` (deletedAt: null)
   - `findUniqueDeletedUser` (deletedAt: not null)
@@ -235,17 +235,20 @@ class UserAdminFacadeService {} // Admin API operations with extended permission
 `scripts/validate-prisma-schema.sh` enforces:
 
 1. **ID Fields**
+
    - Field name must be `id`
    - `String` type with `@id` attribute
    - `@db.Uuid` for UUID storage
    - `@default(dbgenerated("gen_random_uuid()"))`
 
 2. **Timestamps**
+
    - `createdAt`: `DateTime` type with `@default(now())`
    - `updatedAt`: `DateTime` type with `@updatedAt`
    - `deletedAt`: `DateTime?` for soft delete support
 
 3. **Required Indexes**
+
    - `@@index([createdAt])`
    - `@@index([deletedAt])`
 
