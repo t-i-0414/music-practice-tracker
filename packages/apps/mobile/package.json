@@ -4,13 +4,13 @@
   "private": true,
   "main": "expo-router/entry",
   "scripts": {
+    "lint:check": "eslint",
+    "lint:fix": "eslint --fix",
+    "reset-project": "node ./scripts/reset-project.js",
     "start:dev": "expo start",
     "start:dev:android": "expo start --android",
     "start:dev:ios": "expo start --ios",
     "start:dev:web": "expo start --web",
-    "lint:check": "eslint",
-    "lint:fix": "eslint --fix",
-    "reset-project": "node ./scripts/reset-project.js",
     "type:check": "tsc --noEmit"
   },
   "dependencies": {
