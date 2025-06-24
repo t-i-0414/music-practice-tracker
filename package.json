@@ -6,11 +6,14 @@
     "packages/libs/*"
   ],
   "scripts": {
+    "ci:temp": "run-s cspell format:check lint:check type:check test",
     "cspell": "cspell '**'",
     "format:check": "prettier --check .",
     "format:fix": "prettier --write . && bun run format:prisma",
     "format:prisma": "cd packages/apps/backend && bun run prisma:format && cd -",
     "postinstall": "sh scripts/postinstall.sh",
+    "lint:check": "sh scripts/lint_check.sh",
+    "test": "sh scripts/test.sh",
     "type:check": "sh scripts/type_check.sh",
     "type:sync": "sh scripts/type_sync_and_install.sh"
   },
