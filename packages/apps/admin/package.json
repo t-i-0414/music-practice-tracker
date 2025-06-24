@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "dev": "next dev --turbopack",
     "lint:check": "next lint",
     "lint:fix": "next lint --fix",
-    "start": "next start",
+    "start:dev": "next dev --turbopack",
+    "start:prod": "next start",
     "type:check": "tsc --noEmit"
   },
   "dependencies": {
