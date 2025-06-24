@@ -1,5 +1,5 @@
-// https://docs.expo.dev/guides/using-eslint/
 import { createBaseConfig } from '@music-practice-tracker/eslint-configs';
+// https://docs.expo.dev/guides/using-eslint/
 import expoConfig from 'eslint-config-expo/flat.js';
 import { globalIgnores } from 'eslint/config';
 import tseslint from 'typescript-eslint';
