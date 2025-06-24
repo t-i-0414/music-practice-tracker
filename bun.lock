@@ -113,6 +113,7 @@
       },
       "devDependencies": {
         "@babel/core": "^7.25.2",
+        "@music-practice-tracker/eslint-configs": "workspace:*",
         "@types/babel__core": "~7.20.5",
         "@types/react-native-web": "~0.19.1",
         "eslint-config-expo": "~9.2.0",

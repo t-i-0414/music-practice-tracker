@@ -8,9 +8,8 @@
     "dev:android": "expo start --android",
     "dev:ios": "expo start --ios",
     "dev:web": "expo start --web",
-    "lint": "run-p lint:**",
-    "lint:check": "expo lint",
-    "lint:fix": "expo lint --fix",
+    "lint:check": "eslint",
+    "lint:fix": "eslint lint --fix",
     "reset-project": "node ./scripts/reset-project.js",
     "type:check": "tsc --noEmit"
   },
@@ -42,6 +41,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
+    "@music-practice-tracker/eslint-configs": "workspace:*",
     "@types/babel__core": "~7.20.5",
     "@types/react-native-web": "~0.19.1",
     "eslint-config-expo": "~9.2.0"
