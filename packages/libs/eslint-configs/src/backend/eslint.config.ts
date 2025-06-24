@@ -1,11 +1,19 @@
 import { pluginBackend } from '@music-practice-tracker/eslint-rules';
 import prettierConfig from 'eslint-config-prettier';
+import globals from 'globals';
 import tseslint, { type ConfigArray } from 'typescript-eslint';
 import baseConfig from '../base/eslint.config.js';
 
 const config: ConfigArray = tseslint.config(
   {
     extends: [baseConfig],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+        ...globals.jest,
+      },
+      sourceType: 'commonjs',
+    },
     plugins: {
       'custom-backend-eslint': pluginBackend,
     },
