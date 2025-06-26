@@ -4,7 +4,9 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { isDevelopment } from './common/utils/environment';
 
-async function bootstrap() {
+const PORT_NUMBER = 3000;
+
+async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
@@ -20,7 +22,7 @@ async function bootstrap() {
     SwaggerModule.setup('api', app, document);
   }
 
-  const port = process.env.PORT ?? 3000;
+  const port = process.env.PORT ?? PORT_NUMBER;
   await app.listen(port);
 }
 void bootstrap();

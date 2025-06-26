@@ -16,59 +16,57 @@ import { ActiveUserResponseDto, ActiveUsersResponseDto, toActiveUserDto, toActiv
 
 @Injectable()
 export class UserCommandService {
-  constructor(
+  public constructor(
     private repository: UserRepositoryService,
     private queryService: UserQueryService,
   ) {}
 
-  async createUser(dto: CreateUserInputDto): Promise<ActiveUserResponseDto> {
+  public async createUser(dto: CreateUserInputDto): Promise<ActiveUserResponseDto> {
     return toActiveUserDto(await this.repository.createUser(dto));
   }
 
-  async createManyAndReturnUsers({ users }: CreateManyUsersInputDto): Promise<ActiveUsersResponseDto> {
+  public async createManyAndReturnUsers({ users }: CreateManyUsersInputDto): Promise<ActiveUsersResponseDto> {
     const createdUsers = await this.repository.createManyAndReturnUsers(users);
     return toActiveUsersDto(createdUsers);
   }
 
-  async updateUserById({ id, data }: UpdateUserInputDto): Promise<ActiveUserResponseDto> {
+  public async updateUserById({ id, data }: UpdateUserInputDto): Promise<ActiveUserResponseDto> {
     await this.queryService.findUserByIdOrFail({ id });
 
     return toActiveUserDto(
       await this.repository.updateUser({
         where: { id },
-        data: {
-          ...data,
-        },
+        data,
       }),
     );
   }
 
-  async deleteUserById({ id }: DeleteUserByIdInputDto): Promise<void> {
+  public async deleteUserById({ id }: DeleteUserByIdInputDto): Promise<void> {
     await this.repository.deleteUser({ id });
   }
 
-  async deleteManyUsersById({ ids }: DeleteManyUsersInputDto): Promise<void> {
+  public async deleteManyUsersById({ ids }: DeleteManyUsersInputDto): Promise<void> {
     await this.repository.deleteManyUsers({
       id: { in: ids },
     });
   }
 
-  async hardDeleteUserById({ id }: HardDeleteUserByIdInputDto): Promise<void> {
+  public async hardDeleteUserById({ id }: HardDeleteUserByIdInputDto): Promise<void> {
     await this.repository.hardDeleteUser({ id });
   }
 
-  async hardDeleteManyUsersById({ ids }: HardDeleteManyUsersInputDto): Promise<void> {
+  public async hardDeleteManyUsersById({ ids }: HardDeleteManyUsersInputDto): Promise<void> {
     await this.repository.hardDeleteManyUsers({
       id: { in: ids },
     });
   }
 
-  async restoreUserById({ id }: RestoreUserByIdInputDto): Promise<ActiveUserResponseDto> {
+  public async restoreUserById({ id }: RestoreUserByIdInputDto): Promise<ActiveUserResponseDto> {
     const restoredUser = await this.repository.restoreUser({ id });
     return toActiveUserDto(restoredUser);
   }
 
-  async restoreManyUsersById({ ids }: RestoreManyUsersInputDto): Promise<ActiveUsersResponseDto> {
+  public async restoreManyUsersById({ ids }: RestoreManyUsersInputDto): Promise<ActiveUsersResponseDto> {
     const restoredUsers = await this.repository.restoreManyAndReturnUsers({
       id: { in: ids },
     });

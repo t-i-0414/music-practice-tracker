@@ -2,13 +2,13 @@ import { StrictOmit } from '@/common/types/strict-omit';
 import { Prisma, User } from '@/generated/prisma';
 import { RepositoryService } from '@/modules/repository/repository.service';
 import { Injectable } from '@nestjs/common';
-export { User };
+export type { User };
 
 @Injectable()
 export class UserRepositoryService {
-  constructor(private repository: RepositoryService) {}
+  public constructor(private repository: RepositoryService) {}
 
-  async findUniqueActiveUser(params: Prisma.UserWhereUniqueInput): Promise<User | null> {
+  public async findUniqueActiveUser(params: Prisma.UserWhereUniqueInput): Promise<User | null> {
     return this.repository.user.findUnique({
       where: {
         ...params,
@@ -17,7 +17,7 @@ export class UserRepositoryService {
     });
   }
 
-  async findUniqueDeletedUser(params: Prisma.UserWhereUniqueInput): Promise<User | null> {
+  public async findUniqueDeletedUser(params: Prisma.UserWhereUniqueInput): Promise<User | null> {
     return this.repository.user.findUnique({
       where: {
         ...params,
@@ -25,7 +25,7 @@ export class UserRepositoryService {
       },
     });
   }
-  async findUniqueAnyUser(params: Prisma.UserWhereUniqueInput): Promise<User | null> {
+  public async findUniqueAnyUser(params: Prisma.UserWhereUniqueInput): Promise<User | null> {
     return this.repository.user.findUnique({
       where: {
         ...params,
@@ -34,7 +34,7 @@ export class UserRepositoryService {
     });
   }
 
-  async findManyActiveUsers(params: {
+  public async findManyActiveUsers(params: {
     skip?: number;
     take?: number;
     cursor?: Prisma.UserWhereUniqueInput;
@@ -50,7 +50,7 @@ export class UserRepositoryService {
     });
   }
 
-  async findManyDeletedUsers(params: {
+  public async findManyDeletedUsers(params: {
     skip?: number;
     take?: number;
     cursor?: Prisma.UserWhereUniqueInput;
@@ -66,7 +66,7 @@ export class UserRepositoryService {
     });
   }
 
-  async findManyAnyUsers(params: {
+  public async findManyAnyUsers(params: {
     skip?: number;
     take?: number;
     cursor?: Prisma.UserWhereUniqueInput;
@@ -82,19 +82,19 @@ export class UserRepositoryService {
     });
   }
 
-  async createUser(params: StrictOmit<Prisma.UserCreateInput, 'deletedAt'>): Promise<User> {
+  public async createUser(params: StrictOmit<Prisma.UserCreateInput, 'deletedAt'>): Promise<User> {
     return this.repository.user.create({
       data: params,
     });
   }
 
-  async createManyAndReturnUsers(params: StrictOmit<Prisma.UserCreateInput, 'deletedAt'>[]): Promise<User[]> {
+  public async createManyAndReturnUsers(params: StrictOmit<Prisma.UserCreateInput, 'deletedAt'>[]): Promise<User[]> {
     return this.repository.user.createManyAndReturn({
       data: params,
     });
   }
 
-  async updateUser(params: {
+  public async updateUser(params: {
     where: Prisma.UserWhereUniqueInput;
     data: StrictOmit<Prisma.UserUpdateInput, 'deletedAt'>;
   }): Promise<User> {
@@ -107,7 +107,7 @@ export class UserRepositoryService {
     });
   }
 
-  async deleteUser(params: Prisma.UserWhereUniqueInput): Promise<void> {
+  public async deleteUser(params: Prisma.UserWhereUniqueInput): Promise<void> {
     await this.repository.user.update({
       where: params,
       data: {
@@ -116,7 +116,7 @@ export class UserRepositoryService {
     });
   }
 
-  async deleteManyUsers(params: Prisma.UserWhereInput): Promise<void> {
+  public async deleteManyUsers(params: Prisma.UserWhereInput): Promise<void> {
     await this.repository.user.updateMany({
       where: params,
       data: {
@@ -125,19 +125,19 @@ export class UserRepositoryService {
     });
   }
 
-  async hardDeleteUser(params: Prisma.UserWhereUniqueInput): Promise<void> {
+  public async hardDeleteUser(params: Prisma.UserWhereUniqueInput): Promise<void> {
     await this.repository.user.delete({
       where: params,
     });
   }
 
-  async hardDeleteManyUsers(params: Prisma.UserWhereInput): Promise<void> {
+  public async hardDeleteManyUsers(params: Prisma.UserWhereInput): Promise<void> {
     await this.repository.user.deleteMany({
       where: params,
     });
   }
 
-  async restoreUser(params: Prisma.UserWhereUniqueInput): Promise<User> {
+  public async restoreUser(params: Prisma.UserWhereUniqueInput): Promise<User> {
     return this.repository.user.update({
       where: params,
       data: {
@@ -146,7 +146,7 @@ export class UserRepositoryService {
     });
   }
 
-  async restoreManyAndReturnUsers(params: Prisma.UserWhereInput): Promise<User[]> {
+  public async restoreManyAndReturnUsers(params: Prisma.UserWhereInput): Promise<User[]> {
     return this.repository.user.updateManyAndReturn({
       where: params,
       data: {

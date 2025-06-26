@@ -8,7 +8,7 @@ import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/s
 @ApiTags('app/users')
 @ApiController('app/users')
 export class AppUsersController {
-  constructor(private readonly userAppFacade: UserAppFacadeService) {}
+  public constructor(private readonly userAppFacade: UserAppFacadeService) {}
 
   @Get(':id')
   @ApiOperation({ summary: 'Get user by ID' })
@@ -17,7 +17,7 @@ export class AppUsersController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'User not found' })
-  async findUserById(@Param('id', new ParseUUIDPipe()) id: string): Promise<ActiveUserResponseDto> {
+  public async findUserById(@Param('id', new ParseUUIDPipe()) id: string): Promise<ActiveUserResponseDto> {
     return this.userAppFacade.findUserById({ id });
   }
 
@@ -29,7 +29,7 @@ export class AppUsersController {
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
-  async createUser(@Body() body: CreateUserInputDto): Promise<ActiveUserResponseDto> {
+  public async createUser(@Body() body: CreateUserInputDto): Promise<ActiveUserResponseDto> {
     return this.userAppFacade.createUser(body);
   }
 
@@ -38,7 +38,7 @@ export class AppUsersController {
   @ApiParam({ name: 'id', description: 'User ID', example: '123e4567-e89b-12d3-a456-426614174000' })
   @ApiBody({ type: UpdateUserDataDto })
   @ApiResponse({ status: 200, description: 'User updated successfully', type: ActiveUserResponseDto })
-  async updateUser(
+  public async updateUser(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() data: UpdateUserDataDto,
   ): Promise<ActiveUserResponseDto> {
@@ -50,7 +50,7 @@ export class AppUsersController {
   @ApiParam({ name: 'id', description: 'User ID' })
   @ApiResponse({ status: 204, description: 'User deleted successfully' })
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteUser(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
+  public async deleteUser(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
     return this.userAppFacade.deleteUserById({ id });
   }
 }

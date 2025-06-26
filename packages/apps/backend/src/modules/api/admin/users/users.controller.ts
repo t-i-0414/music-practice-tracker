@@ -22,7 +22,7 @@ import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from 
 @ApiTags('admin/users')
 @ApiController('admin/users')
 export class AdminUsersController {
-  constructor(private readonly userAdminFacade: UserAdminFacadeService) {}
+  public constructor(private readonly userAdminFacade: UserAdminFacadeService) {}
 
   @Get('active_users')
   @ApiOperation({ summary: 'Get users by IDs' })
@@ -39,7 +39,7 @@ export class AdminUsersController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Users not found' })
-  async findManyUsers(@Query('ids') ids: string[]): Promise<ActiveUsersResponseDto> {
+  public async findManyUsers(@Query('ids') ids: string[]): Promise<ActiveUsersResponseDto> {
     return this.userAdminFacade.findManyUsers({ ids });
   }
 
@@ -50,7 +50,7 @@ export class AdminUsersController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'User not found' })
-  async findUserById(@Param('id', new ParseUUIDPipe()) id: string): Promise<ActiveUserResponseDto> {
+  public async findUserById(@Param('id', new ParseUUIDPipe()) id: string): Promise<ActiveUserResponseDto> {
     return this.userAdminFacade.findUserById({ id });
   }
 
@@ -69,7 +69,7 @@ export class AdminUsersController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Users not found' })
-  async findManyDeletedUsers(@Query('ids') ids: string[]): Promise<DeletedUsersResponseDto> {
+  public async findManyDeletedUsers(@Query('ids') ids: string[]): Promise<DeletedUsersResponseDto> {
     return this.userAdminFacade.findManyDeletedUsers({ ids });
   }
 
@@ -80,7 +80,7 @@ export class AdminUsersController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'User not found' })
-  async findDeletedUserById(@Param('id', new ParseUUIDPipe()) id: string): Promise<DeletedUserResponseDto> {
+  public async findDeletedUserById(@Param('id', new ParseUUIDPipe()) id: string): Promise<DeletedUserResponseDto> {
     return this.userAdminFacade.findDeletedUserById({ id });
   }
 
@@ -99,7 +99,7 @@ export class AdminUsersController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Users not found' })
-  async findManyAnyUsers(@Query('ids') ids: string[]): Promise<AnyUsersResponseDto> {
+  public async findManyAnyUsers(@Query('ids') ids: string[]): Promise<AnyUsersResponseDto> {
     return this.userAdminFacade.findManyAnyUsers({ ids });
   }
 
@@ -110,7 +110,7 @@ export class AdminUsersController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'User not found' })
-  async findAnyUserById(@Param('id', new ParseUUIDPipe()) id: string): Promise<AnyUserResponseDto> {
+  public async findAnyUserById(@Param('id', new ParseUUIDPipe()) id: string): Promise<AnyUserResponseDto> {
     return this.userAdminFacade.findAnyUserById({ id });
   }
 
@@ -122,7 +122,7 @@ export class AdminUsersController {
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
-  async createUser(@Body() body: CreateUserInputDto): Promise<ActiveUserResponseDto> {
+  public async createUser(@Body() body: CreateUserInputDto): Promise<ActiveUserResponseDto> {
     return this.userAdminFacade.createUser(body);
   }
 
@@ -131,7 +131,7 @@ export class AdminUsersController {
   @ApiOperation({ summary: 'Create multiple users' })
   @ApiBody({ type: CreateManyUsersInputDto })
   @ApiResponse({ status: 201, description: 'Users created successfully', type: ActiveUsersResponseDto })
-  async createManyUsers(@Body() body: CreateManyUsersInputDto): Promise<ActiveUsersResponseDto> {
+  public async createManyUsers(@Body() body: CreateManyUsersInputDto): Promise<ActiveUsersResponseDto> {
     return this.userAdminFacade.createManyAndReturnUsers(body);
   }
 
@@ -140,7 +140,7 @@ export class AdminUsersController {
   @ApiParam({ name: 'id', description: 'User ID', example: '123e4567-e89b-12d3-a456-426614174000' })
   @ApiBody({ type: UpdateUserDataDto })
   @ApiResponse({ status: 200, description: 'User updated successfully', type: ActiveUserResponseDto })
-  async updateUser(
+  public async updateUser(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() data: UpdateUserDataDto,
   ): Promise<ActiveUserResponseDto> {
@@ -152,7 +152,7 @@ export class AdminUsersController {
   @ApiParam({ name: 'id', description: 'User ID' })
   @ApiResponse({ status: 204, description: 'User deleted successfully' })
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteUser(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
+  public async deleteUser(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
     return this.userAdminFacade.deleteUserById({ id });
   }
 
@@ -161,7 +161,7 @@ export class AdminUsersController {
   @ApiBody({ type: DeleteManyUsersInputDto })
   @ApiResponse({ status: 204, description: 'Users deleted successfully' })
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteManyUsers(@Body() body: DeleteManyUsersInputDto): Promise<void> {
+  public async deleteManyUsers(@Body() body: DeleteManyUsersInputDto): Promise<void> {
     return this.userAdminFacade.deleteManyUsersById(body);
   }
 
@@ -170,7 +170,7 @@ export class AdminUsersController {
   @ApiParam({ name: 'id', description: 'User ID' })
   @ApiResponse({ status: 204, description: 'User permanently deleted' })
   @HttpCode(HttpStatus.NO_CONTENT)
-  async hardDeleteUser(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
+  public async hardDeleteUser(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
     return this.userAdminFacade.hardDeleteUserById({ id });
   }
 
@@ -179,7 +179,7 @@ export class AdminUsersController {
   @ApiBody({ type: HardDeleteManyUsersInputDto })
   @ApiResponse({ status: 204, description: 'Users permanently deleted' })
   @HttpCode(HttpStatus.NO_CONTENT)
-  async hardDeleteManyUsers(@Body() body: HardDeleteManyUsersInputDto): Promise<void> {
+  public async hardDeleteManyUsers(@Body() body: HardDeleteManyUsersInputDto): Promise<void> {
     return this.userAdminFacade.hardDeleteManyUsersById(body);
   }
 
@@ -187,7 +187,7 @@ export class AdminUsersController {
   @ApiOperation({ summary: 'Restore a soft-deleted user by ID' })
   @ApiParam({ name: 'id', description: 'User ID' })
   @ApiResponse({ status: 200, description: 'User restored successfully', type: ActiveUserResponseDto })
-  async restoreUser(@Param('id', new ParseUUIDPipe()) id: string): Promise<ActiveUserResponseDto> {
+  public async restoreUser(@Param('id', new ParseUUIDPipe()) id: string): Promise<ActiveUserResponseDto> {
     return this.userAdminFacade.restoreUserById({ id });
   }
 
@@ -204,7 +204,7 @@ export class AdminUsersController {
     },
   })
   @ApiResponse({ status: 200, description: 'Users restored successfully', type: ActiveUsersResponseDto })
-  async restoreManyUsers(@Body() body: RestoreManyUsersInputDto): Promise<ActiveUsersResponseDto> {
+  public async restoreManyUsers(@Body() body: RestoreManyUsersInputDto): Promise<ActiveUsersResponseDto> {
     return this.userAdminFacade.restoreManyUsersById(body);
   }
 }

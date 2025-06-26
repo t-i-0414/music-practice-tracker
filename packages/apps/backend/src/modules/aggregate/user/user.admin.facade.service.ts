@@ -25,68 +25,68 @@ import {
 
 @Injectable()
 export class UserAdminFacadeService {
-  constructor(
+  public constructor(
     private readonly userCommandService: UserCommandService,
     private readonly userQueryService: UserQueryService,
   ) {}
 
-  async findUserById(dto: FindUserByIdInputDto): Promise<ActiveUserResponseDto> {
+  public async findUserById(dto: FindUserByIdInputDto): Promise<ActiveUserResponseDto> {
     return await this.userQueryService.findUserByIdOrFail(dto);
   }
 
-  async findDeletedUserById(dto: FindUserByIdInputDto): Promise<DeletedUserResponseDto> {
+  public async findDeletedUserById(dto: FindUserByIdInputDto): Promise<DeletedUserResponseDto> {
     return await this.userQueryService.findDeletedUserByIdOrFail(dto);
   }
 
-  async findAnyUserById(dto: FindUserByIdInputDto): Promise<AnyUserResponseDto> {
+  public async findAnyUserById(dto: FindUserByIdInputDto): Promise<AnyUserResponseDto> {
     return await this.userQueryService.findAnyUserByIdOrFail(dto);
   }
 
-  async findManyUsers(dto: FindManyUsersByIdInputDto): Promise<ActiveUsersResponseDto> {
+  public async findManyUsers(dto: FindManyUsersByIdInputDto): Promise<ActiveUsersResponseDto> {
     return await this.userQueryService.findManyUsers(dto);
   }
 
-  async findManyDeletedUsers(dto: FindManyUsersByIdInputDto): Promise<DeletedUsersResponseDto> {
+  public async findManyDeletedUsers(dto: FindManyUsersByIdInputDto): Promise<DeletedUsersResponseDto> {
     return await this.userQueryService.findManyDeletedUsers(dto);
   }
 
-  async findManyAnyUsers(dto: FindManyUsersByIdInputDto): Promise<AnyUsersResponseDto> {
+  public async findManyAnyUsers(dto: FindManyUsersByIdInputDto): Promise<AnyUsersResponseDto> {
     return await this.userQueryService.findManyAnyUsers(dto);
   }
 
-  async createUser(dto: CreateUserInputDto): Promise<ActiveUserResponseDto> {
+  public async createUser(dto: CreateUserInputDto): Promise<ActiveUserResponseDto> {
     return await this.userCommandService.createUser(dto);
   }
 
-  async createManyAndReturnUsers(dto: CreateManyUsersInputDto): Promise<ActiveUsersResponseDto> {
+  public async createManyAndReturnUsers(dto: CreateManyUsersInputDto): Promise<ActiveUsersResponseDto> {
     return await this.userCommandService.createManyAndReturnUsers(dto);
   }
 
-  async updateUserById(dto: UpdateUserInputDto): Promise<ActiveUserResponseDto> {
+  public async updateUserById(dto: UpdateUserInputDto): Promise<ActiveUserResponseDto> {
     return await this.userCommandService.updateUserById(dto);
   }
 
-  async deleteUserById(dto: DeleteUserByIdInputDto): Promise<void> {
-    return await this.userCommandService.deleteUserById(dto);
+  public async deleteUserById(dto: DeleteUserByIdInputDto): Promise<void> {
+    await this.userCommandService.deleteUserById(dto);
   }
 
-  async deleteManyUsersById({ ids }: DeleteManyUsersInputDto): Promise<void> {
-    return await this.userCommandService.deleteManyUsersById({ ids });
+  public async deleteManyUsersById({ ids }: DeleteManyUsersInputDto): Promise<void> {
+    await this.userCommandService.deleteManyUsersById({ ids });
   }
 
-  async hardDeleteUserById({ id }: HardDeleteUserByIdInputDto): Promise<void> {
-    return await this.userCommandService.hardDeleteUserById({ id });
+  public async hardDeleteUserById({ id }: HardDeleteUserByIdInputDto): Promise<void> {
+    await this.userCommandService.hardDeleteUserById({ id });
   }
 
-  async hardDeleteManyUsersById({ ids }: HardDeleteManyUsersInputDto): Promise<void> {
-    return await this.userCommandService.hardDeleteManyUsersById({ ids });
+  public async hardDeleteManyUsersById({ ids }: HardDeleteManyUsersInputDto): Promise<void> {
+    await this.userCommandService.hardDeleteManyUsersById({ ids });
   }
 
-  async restoreUserById({ id }: RestoreUserByIdInputDto): Promise<ActiveUserResponseDto> {
+  public async restoreUserById({ id }: RestoreUserByIdInputDto): Promise<ActiveUserResponseDto> {
     return await this.userCommandService.restoreUserById({ id });
   }
 
-  async restoreManyUsersById({ ids }: RestoreManyUsersInputDto): Promise<ActiveUsersResponseDto> {
+  public async restoreManyUsersById({ ids }: RestoreManyUsersInputDto): Promise<ActiveUsersResponseDto> {
     return await this.userCommandService.restoreManyUsersById({ ids });
   }
 }

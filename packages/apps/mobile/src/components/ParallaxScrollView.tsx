@@ -5,6 +5,7 @@ import Animated, { interpolate, useAnimatedRef, useAnimatedStyle, useScrollViewO
 import { ThemedView } from '@/components/ThemedView';
 import { useBottomTabOverflow } from '@/components/ui/TabBarBackground';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import React from 'react';
 
 const HEADER_HEIGHT = 250;
 
@@ -13,23 +14,38 @@ type Props = PropsWithChildren<{
   headerBackgroundColor: { dark: string; light: string };
 }>;
 
-export default function ParallaxScrollView({ children, headerImage, headerBackgroundColor }: Props) {
+export default function ParallaxScrollView({ children, headerImage, headerBackgroundColor }: Props): React.JSX.Element {
   const colorScheme = useColorScheme() ?? 'light';
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const scrollOffset = useScrollViewOffset(scrollRef);
   const bottom = useBottomTabOverflow();
   const headerAnimatedStyle = useAnimatedStyle(() => {
+    const HEADER_OUTPUT_START_POSITION_DIVIDER = 2;
+    const HEADER_OUTPUT_END_POSITION_RATE = 0.75;
+    const MIDDLE_POSITION = 0;
+    const OUTPUT_RANGE_FIRST_INDEX = 2;
+    const OUTPUT_RANGE_SECOND_INDEX = 1;
+    const OUTPUT_RANGE_THIRD_INDEX = 1;
+
     return {
       transform: [
         {
           translateY: interpolate(
             scrollOffset.value,
-            [-HEADER_HEIGHT, 0, HEADER_HEIGHT],
-            [-HEADER_HEIGHT / 2, 0, HEADER_HEIGHT * 0.75],
+            [-HEADER_HEIGHT, MIDDLE_POSITION, HEADER_HEIGHT],
+            [
+              -HEADER_HEIGHT / HEADER_OUTPUT_START_POSITION_DIVIDER,
+              MIDDLE_POSITION,
+              HEADER_HEIGHT * HEADER_OUTPUT_END_POSITION_RATE,
+            ],
           ),
         },
         {
-          scale: interpolate(scrollOffset.value, [-HEADER_HEIGHT, 0, HEADER_HEIGHT], [2, 1, 1]),
+          scale: interpolate(
+            scrollOffset.value,
+            [-HEADER_HEIGHT, MIDDLE_POSITION, HEADER_HEIGHT],
+            [OUTPUT_RANGE_FIRST_INDEX, OUTPUT_RANGE_SECOND_INDEX, OUTPUT_RANGE_THIRD_INDEX],
+          ),
         },
       ],
     };

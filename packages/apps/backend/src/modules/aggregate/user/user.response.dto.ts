@@ -13,7 +13,7 @@ class FullUserResponseDto implements User {
     format: 'uuid',
   })
   @Expose()
-  id: string;
+  public id: string;
 
   @ApiProperty({
     description: 'The user email address',
@@ -22,7 +22,7 @@ class FullUserResponseDto implements User {
     maxLength: MAX_EMAIL_LENGTH,
   })
   @Expose()
-  email: string;
+  public email: string;
 
   @ApiProperty({
     description: 'The user name',
@@ -30,7 +30,7 @@ class FullUserResponseDto implements User {
     maxLength: MAX_NAME_LENGTH,
   })
   @Expose()
-  name: string;
+  public name: string;
 
   @ApiProperty({
     description: 'The user created at timestamp',
@@ -39,7 +39,7 @@ class FullUserResponseDto implements User {
   })
   @Type(() => Date)
   @Expose()
-  createdAt: Date;
+  public createdAt: Date;
 
   @ApiProperty({
     description: 'The user updated at timestamp',
@@ -48,7 +48,7 @@ class FullUserResponseDto implements User {
   })
   @Type(() => Date)
   @Expose()
-  updatedAt: Date;
+  public updatedAt: Date;
 
   @ApiProperty({
     description: 'The user deleted at timestamp',
@@ -59,7 +59,7 @@ class FullUserResponseDto implements User {
   })
   @Type(() => Date)
   @Expose()
-  deletedAt: Date | null;
+  public deletedAt: Date | null;
 }
 
 /**
@@ -73,7 +73,7 @@ export function toActiveUserDto(user: unknown): ActiveUserResponseDto {
 
 export class ActiveUsersResponseDto {
   @ApiProperty({ type: [ActiveUserResponseDto] })
-  users: ActiveUserResponseDto[];
+  public users: ActiveUserResponseDto[];
 }
 export function toActiveUsersDto(users: unknown[]): ActiveUsersResponseDto {
   return {
@@ -94,7 +94,7 @@ export class DeletedUserResponseDto extends PickType(FullUserResponseDto, [...ac
   })
   @Type(() => Date)
   @Expose()
-  deletedAt: Date;
+  public deletedAt: Date;
 }
 export function toDeletedUserDto(user: unknown): DeletedUserResponseDto {
   return plainToInstance(DeletedUserResponseDto, user);
@@ -102,7 +102,7 @@ export function toDeletedUserDto(user: unknown): DeletedUserResponseDto {
 
 export class DeletedUsersResponseDto {
   @ApiProperty({ type: [DeletedUserResponseDto] })
-  users: DeletedUserResponseDto[];
+  public users: DeletedUserResponseDto[];
 }
 export function toDeletedUsersDto(users: unknown[]): DeletedUsersResponseDto {
   return {
@@ -120,7 +120,7 @@ export function toAnyUserDto(user: unknown): AnyUserResponseDto {
 
 export class AnyUsersResponseDto {
   @ApiProperty({ type: [AnyUserResponseDto] })
-  users: AnyUserResponseDto[];
+  public users: AnyUserResponseDto[];
 }
 export function toAnyUsersDto(users: unknown[]): AnyUsersResponseDto {
   return {

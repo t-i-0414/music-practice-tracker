@@ -21,7 +21,7 @@ export class FindUserByIdInputDto {
   })
   @IsUUID()
   @IsNotEmpty()
-  id: string;
+  public id: string;
 }
 
 export class FindManyUsersByIdInputDto {
@@ -35,7 +35,7 @@ export class FindManyUsersByIdInputDto {
   @IsArray()
   @IsUUID('all', { each: true })
   @ArrayNotEmpty()
-  ids: string[];
+  public ids: string[];
 }
 
 export class CreateUserInputDto {
@@ -48,7 +48,7 @@ export class CreateUserInputDto {
   @IsEmail()
   @MaxLength(MAX_EMAIL_LENGTH)
   @IsNotEmpty()
-  email: string;
+  public email: string;
 
   @ApiProperty({
     description: 'The user name',
@@ -58,7 +58,7 @@ export class CreateUserInputDto {
   @IsString()
   @MaxLength(MAX_NAME_LENGTH)
   @IsNotEmpty()
-  name: string;
+  public name: string;
 }
 
 export class CreateManyUsersInputDto {
@@ -71,7 +71,7 @@ export class CreateManyUsersInputDto {
   @ValidateNested({ each: true })
   @Type(() => CreateUserInputDto)
   @ArrayNotEmpty()
-  users: CreateUserInputDto[];
+  public users: CreateUserInputDto[];
 }
 
 export class UpdateUserDataDto extends PartialType(CreateUserInputDto) {}
@@ -84,7 +84,7 @@ export class UpdateUserInputDto {
   })
   @IsUUID()
   @IsNotEmpty()
-  id: string;
+  public id: string;
 
   @ApiProperty({
     description: 'Fields to update',
@@ -94,7 +94,7 @@ export class UpdateUserInputDto {
   @Type(() => UpdateUserDataDto)
   @IsNotEmpty()
   @IsNotEmptyObject()
-  data: UpdateUserDataDto;
+  public data: UpdateUserDataDto;
 }
 
 export class DeleteUserByIdInputDto extends FindUserByIdInputDto {}

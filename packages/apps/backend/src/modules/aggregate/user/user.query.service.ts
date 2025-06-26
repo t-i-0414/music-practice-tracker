@@ -18,30 +18,30 @@ import {
 
 @Injectable()
 export class UserQueryService {
-  constructor(private repository: UserRepositoryService) {}
+  public constructor(private repository: UserRepositoryService) {}
 
-  async findUserByIdOrFail(dto: FindUserByIdInputDto): Promise<ActiveUserResponseDto> {
+  public async findUserByIdOrFail(dto: FindUserByIdInputDto): Promise<ActiveUserResponseDto> {
     const user = await this.repository.findUniqueActiveUser(dto);
     if (!user) throw new NotFoundException(`User ${dto.id} not found`);
 
     return toActiveUserDto(user);
   }
 
-  async findDeletedUserByIdOrFail(dto: FindUserByIdInputDto): Promise<DeletedUserResponseDto> {
+  public async findDeletedUserByIdOrFail(dto: FindUserByIdInputDto): Promise<DeletedUserResponseDto> {
     const user = await this.repository.findUniqueDeletedUser(dto);
     if (!user) throw new NotFoundException(`Deleted user ${dto.id} not found`);
 
     return toDeletedUserDto(user);
   }
 
-  async findAnyUserByIdOrFail(dto: FindUserByIdInputDto): Promise<AnyUserResponseDto> {
+  public async findAnyUserByIdOrFail(dto: FindUserByIdInputDto): Promise<AnyUserResponseDto> {
     const user = await this.repository.findUniqueAnyUser(dto);
     if (!user) throw new NotFoundException(`User ${dto.id} not found`);
 
     return toAnyUserDto(user);
   }
 
-  async findManyUsers(dto: FindManyUsersByIdInputDto): Promise<ActiveUsersResponseDto> {
+  public async findManyUsers(dto: FindManyUsersByIdInputDto): Promise<ActiveUsersResponseDto> {
     const users = await this.repository.findManyActiveUsers({
       where: {
         id: { in: dto.ids },
@@ -51,7 +51,7 @@ export class UserQueryService {
     return toActiveUsersDto(users);
   }
 
-  async findManyDeletedUsers(dto: FindManyUsersByIdInputDto): Promise<DeletedUsersResponseDto> {
+  public async findManyDeletedUsers(dto: FindManyUsersByIdInputDto): Promise<DeletedUsersResponseDto> {
     const users = await this.repository.findManyDeletedUsers({
       where: {
         id: { in: dto.ids },
@@ -61,7 +61,7 @@ export class UserQueryService {
     return toDeletedUsersDto(users);
   }
 
-  async findManyAnyUsers(dto: FindManyUsersByIdInputDto): Promise<AnyUsersResponseDto> {
+  public async findManyAnyUsers(dto: FindManyUsersByIdInputDto): Promise<AnyUsersResponseDto> {
     const users = await this.repository.findManyAnyUsers({
       where: {
         id: { in: dto.ids },

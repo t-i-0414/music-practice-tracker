@@ -6,8 +6,9 @@ import 'react-native-reanimated';
 
 import SpaceMono from '@/assets/fonts/SpaceMono-Regular.ttf';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import React from 'react';
 
-export default function RootLayout() {
+export default function RootLayout(): React.JSX.Element | null {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono,

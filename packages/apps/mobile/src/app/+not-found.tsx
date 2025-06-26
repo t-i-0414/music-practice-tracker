@@ -3,8 +3,9 @@ import { StyleSheet } from 'react-native';
 
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import React from 'react';
 
-export default function NotFoundScreen() {
+export default function NotFoundScreen(): React.JSX.Element {
   return (
     <>
       <Stack.Screen options={{ title: 'Oops!' }} />
