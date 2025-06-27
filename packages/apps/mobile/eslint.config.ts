@@ -11,7 +11,7 @@ const config = tseslint.config(
   {
     extends: [expoConfig, baseConfig],
   },
-  globalIgnores([...(baseConfig[FIRST_BASE_CONFIG_INDEX].ignores || []), 'scripts/reset-project.js']),
+  globalIgnores([...(baseConfig[FIRST_BASE_CONFIG_INDEX].ignores ?? []), 'scripts/reset-project.js']),
 );
 
 export default config;
