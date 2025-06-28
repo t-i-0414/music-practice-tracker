@@ -12,15 +12,15 @@ export class UserAppFacadeService {
   ) {}
 
   public async findUserById(dto: FindUserByIdInputDto): Promise<ActiveUserResponseDto> {
-    return await this.userQueryService.findUserByIdOrFail(dto);
+    return this.userQueryService.findUserByIdOrFail(dto);
   }
 
   public async createUser(dto: CreateUserInputDto): Promise<ActiveUserResponseDto> {
-    return await this.userCommandService.createUser(dto);
+    return this.userCommandService.createUser(dto);
   }
 
   public async updateUserById(dto: UpdateUserInputDto): Promise<ActiveUserResponseDto> {
-    return await this.userCommandService.updateUserById(dto);
+    return this.userCommandService.updateUserById(dto);
   }
 
   public async deleteUserById(dto: DeleteUserByIdInputDto): Promise<void> {
