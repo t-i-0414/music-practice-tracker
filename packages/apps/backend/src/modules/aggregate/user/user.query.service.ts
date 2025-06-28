@@ -18,7 +18,7 @@ import {
 
 @Injectable()
 export class UserQueryService {
-  public constructor(private repository: UserRepositoryService) {}
+  public constructor(private readonly repository: UserRepositoryService) {}
 
   public async findUserByIdOrFail(dto: FindUserByIdInputDto): Promise<ActiveUserResponseDto> {
     const user = await this.repository.findUniqueActiveUser(dto);
