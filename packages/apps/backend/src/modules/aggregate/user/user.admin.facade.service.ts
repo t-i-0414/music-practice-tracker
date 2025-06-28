@@ -31,39 +31,39 @@ export class UserAdminFacadeService {
   ) {}
 
   public async findUserById(dto: FindUserByIdInputDto): Promise<ActiveUserResponseDto> {
-    return await this.userQueryService.findUserByIdOrFail(dto);
+    return this.userQueryService.findUserByIdOrFail(dto);
   }
 
   public async findDeletedUserById(dto: FindUserByIdInputDto): Promise<DeletedUserResponseDto> {
-    return await this.userQueryService.findDeletedUserByIdOrFail(dto);
+    return this.userQueryService.findDeletedUserByIdOrFail(dto);
   }
 
   public async findAnyUserById(dto: FindUserByIdInputDto): Promise<AnyUserResponseDto> {
-    return await this.userQueryService.findAnyUserByIdOrFail(dto);
+    return this.userQueryService.findAnyUserByIdOrFail(dto);
   }
 
   public async findManyUsers(dto: FindManyUsersByIdInputDto): Promise<ActiveUsersResponseDto> {
-    return await this.userQueryService.findManyUsers(dto);
+    return this.userQueryService.findManyUsers(dto);
   }
 
   public async findManyDeletedUsers(dto: FindManyUsersByIdInputDto): Promise<DeletedUsersResponseDto> {
-    return await this.userQueryService.findManyDeletedUsers(dto);
+    return this.userQueryService.findManyDeletedUsers(dto);
   }
 
   public async findManyAnyUsers(dto: FindManyUsersByIdInputDto): Promise<AnyUsersResponseDto> {
-    return await this.userQueryService.findManyAnyUsers(dto);
+    return this.userQueryService.findManyAnyUsers(dto);
   }
 
   public async createUser(dto: CreateUserInputDto): Promise<ActiveUserResponseDto> {
-    return await this.userCommandService.createUser(dto);
+    return this.userCommandService.createUser(dto);
   }
 
   public async createManyAndReturnUsers(dto: CreateManyUsersInputDto): Promise<ActiveUsersResponseDto> {
-    return await this.userCommandService.createManyAndReturnUsers(dto);
+    return this.userCommandService.createManyAndReturnUsers(dto);
   }
 
   public async updateUserById(dto: UpdateUserInputDto): Promise<ActiveUserResponseDto> {
-    return await this.userCommandService.updateUserById(dto);
+    return this.userCommandService.updateUserById(dto);
   }
 
   public async deleteUserById(dto: DeleteUserByIdInputDto): Promise<void> {
@@ -83,10 +83,10 @@ export class UserAdminFacadeService {
   }
 
   public async restoreUserById({ id }: RestoreUserByIdInputDto): Promise<ActiveUserResponseDto> {
-    return await this.userCommandService.restoreUserById({ id });
+    return this.userCommandService.restoreUserById({ id });
   }
 
   public async restoreManyUsersById({ ids }: RestoreManyUsersInputDto): Promise<ActiveUsersResponseDto> {
-    return await this.userCommandService.restoreManyUsersById({ ids });
+    return this.userCommandService.restoreManyUsersById({ ids });
   }
 }
