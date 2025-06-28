@@ -6,7 +6,7 @@ export type { User };
 
 @Injectable()
 export class UserRepositoryService {
-  public constructor(private repository: RepositoryService) {}
+  public constructor(private readonly repository: RepositoryService) {}
 
   public async findUniqueActiveUser(params: Prisma.UserWhereUniqueInput): Promise<User | null> {
     return this.repository.user.findUnique({

@@ -17,8 +17,8 @@ import { ActiveUserResponseDto, ActiveUsersResponseDto, toActiveUserDto, toActiv
 @Injectable()
 export class UserCommandService {
   public constructor(
-    private repository: UserRepositoryService,
-    private queryService: UserQueryService,
+    private readonly repository: UserRepositoryService,
+    private readonly queryService: UserQueryService,
   ) {}
 
   public async createUser(dto: CreateUserInputDto): Promise<ActiveUserResponseDto> {
