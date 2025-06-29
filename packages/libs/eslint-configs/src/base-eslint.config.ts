@@ -41,6 +41,12 @@ export const createBaseConfig = ({ includesTsEslintPlugin = true } = {}): Config
         'func-name-matching': 'error',
         'func-names': ['error', 'as-needed'],
         'grouped-accessor-pairs': ['error', 'getBeforeSet'],
+        'guard-for-in': 'error',
+        'logical-assignment-operators': ['error', 'always'],
+        'no-alert': 'error',
+        'no-bitwise': 'error',
+        'no-caller': 'error',
+        'no-console': 'error',
 
         // TypeScript-specific rules
         '@typescript-eslint/adjacent-overload-signatures': 'error',
