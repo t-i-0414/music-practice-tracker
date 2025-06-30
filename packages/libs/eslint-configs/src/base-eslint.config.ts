@@ -1,5 +1,6 @@
 import eslint from '@eslint/js';
 import prettierConfig from 'eslint-config-prettier';
+import reactPlugin from 'eslint-plugin-react';
 import { globalIgnores } from 'eslint/config';
 import globals from 'globals';
 import tseslint, { type ConfigArray } from 'typescript-eslint';
@@ -8,6 +9,8 @@ export const createBaseConfig = ({ includesTsEslintPlugin = true } = {}): Config
   tseslint.config(
     eslint.configs.recommended,
     ...(includesTsEslintPlugin ? tseslint.configs.recommendedTypeChecked : []),
+    reactPlugin.configs.flat.recommended,
+    reactPlugin.configs.flat['jsx-runtime'],
     {
       languageOptions: {
         globals: {
@@ -17,11 +20,17 @@ export const createBaseConfig = ({ includesTsEslintPlugin = true } = {}): Config
           ecmaVersion: 'latest',
           projectService: true,
           tsconfigRootDir: import.meta.dirname,
+          ecmaFeatures: {
+            jsx: true,
+          },
         },
       },
     },
     {
       files: ['**/*.ts', '**/*.tsx', '**/*.mts', '**/*.cts', '**/*.js', '**/*.jsx', '**/*.mjs', '**/*.cjs'],
+      plugins: {
+        reactPlugin,
+      },
       rules: {
         // Base ESLint rules
         'array-callback-return': 'error',
@@ -199,6 +208,24 @@ export const createBaseConfig = ({ includesTsEslintPlugin = true } = {}): Config
         '@typescript-eslint/unbound-method': 'error',
         '@typescript-eslint/unified-signatures': 'error',
         '@typescript-eslint/use-unknown-in-catch-callback-variable': 'error',
+
+        // React-specific rules
+        'react/jsx-no-useless-fragment': 'error',
+        'react/jsx-no-leaked-render': ['error', { validStrategies: ['ternary'] }],
+        'react/no-unstable-nested-components': 'error',
+        'react/no-array-index-key': 'error',
+        'react/prefer-stateless-function': ['error', { ignorePureComponents: true }],
+        'react/no-redundant-should-component-update': 'error',
+        'react/no-access-state-in-setstate': 'error',
+        'react/jsx-boolean-value': ['error', 'never'],
+        'react/self-closing-comp': 'error',
+        'react/function-component-definition': [
+          'error',
+          {
+            namedComponents: 'arrow-function',
+            unnamedComponents: 'arrow-function',
+          },
+        ],
       },
     },
     globalIgnores(['**/dist/**', '**/coverage/**', '**/generated/**', '**/.turbo/**', '**/node_modules/**']),

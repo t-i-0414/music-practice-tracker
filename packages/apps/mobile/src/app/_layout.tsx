@@ -6,9 +6,9 @@ import 'react-native-reanimated';
 
 import SpaceMono from '@/assets/fonts/SpaceMono-Regular.ttf';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import React from 'react';
+import type React from 'react';
 
-export default function RootLayout(): React.JSX.Element | null {
+const RootLayout: React.FC = () => {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono,
@@ -28,4 +28,5 @@ export default function RootLayout(): React.JSX.Element | null {
       <StatusBar style='auto' />
     </ThemeProvider>
   );
-}
+};
+export default RootLayout;

@@ -3,7 +3,8 @@
 import { DEFAULT_ICON_SIZE } from '@/constants/Size';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { type SymbolViewProps, type SymbolWeight } from 'expo-symbols';
-import React, { type ComponentProps } from 'react';
+import type React from 'react';
+import { type ComponentProps } from 'react';
 import { type OpaqueColorValue, type StyleProp, type TextStyle } from 'react-native';
 
 type IconMapping = Record<SymbolViewProps['name'], ComponentProps<typeof MaterialIcons>['name']>;
@@ -28,17 +29,12 @@ const MAPPING: Partial<IconMapping> = {
  * This ensures a consistent look across platforms, and optimal resource usage.
  * Icon `name`s are based on SF Symbols and require manual mapping to Material Icons.
  */
-export function IconSymbol({
-  name,
-  size = DEFAULT_ICON_SIZE,
-  color,
-  style,
-}: {
+export const IconSymbol: React.FC<{
   name: IconSymbolName;
   size?: number;
   color: string | OpaqueColorValue;
   style?: StyleProp<TextStyle>;
   weight?: SymbolWeight;
-}): React.JSX.Element {
-  return <MaterialIcons color={color} size={size} name={MAPPING[name]} style={style} />;
-}
+}> = ({ name, size = DEFAULT_ICON_SIZE, color, style }) => (
+  <MaterialIcons color={color} size={size} name={MAPPING[name]} style={style} />
+);

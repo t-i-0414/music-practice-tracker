@@ -1,23 +1,32 @@
 import { Tabs } from 'expo-router';
-import React from 'react';
+import type React from 'react';
 import { Platform } from 'react-native';
 
 import { HapticTab } from '@/components/HapticTab';
 import { IconSymbol } from '@/components/ui/IconSymbol';
-import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { type BottomTabBarButtonProps } from '@react-navigation/bottom-tabs';
+import { useCallback } from 'react';
 
-export default function TabLayout(): React.JSX.Element {
+const TabLayout: React.FC = () => {
   const colorScheme = useColorScheme();
+  const renderHapticTab = useCallback((props: BottomTabBarButtonProps) => <HapticTab {...props} />, []);
+  const renderHouseIcon = useCallback(
+    ({ color }: { color: string }) => <IconSymbol size={28} name='house.fill' color={color} />,
+    [],
+  );
+  const renderHouseIconWithColorScheme = useCallback(
+    ({ color }: { color: string }) => <IconSymbol size={28} name='paperplane.fill' color={color} />,
+    [],
+  );
 
   return (
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
+        tabBarButton: renderHapticTab,
         tabBarStyle: Platform.select({
           ios: {
             // Use a transparent background on iOS to show the blur effect
@@ -31,7 +40,7 @@ export default function TabLayout(): React.JSX.Element {
         name='index'
         options={{
           title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name='house.fill' color={color} />,
+          tabBarIcon: renderHouseIcon,
         }}
       />
       <Tabs.Screen
@@ -39,9 +48,10 @@ export default function TabLayout(): React.JSX.Element {
         options={{
           title: 'Explore',
           // cspell:ignore paperplane
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name='paperplane.fill' color={color} />,
+          tabBarIcon: renderHouseIconWithColorScheme,
         }}
       />
     </Tabs>
   );
-}
+};
+export default TabLayout;
