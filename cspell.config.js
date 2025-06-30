@@ -37,6 +37,7 @@ export default defineConfig({
     'Pressable',
     'restoremany',
     'restoremanyandreturn',
+    'setstate',
     'svh',
     'Takuya',
     'tsc',

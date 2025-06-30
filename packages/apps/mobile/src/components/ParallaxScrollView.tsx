@@ -3,9 +3,8 @@ import { StyleSheet } from 'react-native';
 import Animated, { interpolate, useAnimatedRef, useAnimatedStyle, useScrollViewOffset } from 'react-native-reanimated';
 
 import { ThemedView } from '@/components/ThemedView';
-import { useBottomTabOverflow } from '@/components/ui/TabBarBackground';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import React from 'react';
+import type React from 'react';
 
 const HEADER_HEIGHT = 250;
 
@@ -14,11 +13,11 @@ type Props = PropsWithChildren<{
   headerBackgroundColor: { dark: string; light: string };
 }>;
 
-export default function ParallaxScrollView({ children, headerImage, headerBackgroundColor }: Props): React.JSX.Element {
+const ParallaxScrollView: React.FC<Props> = ({ children, headerImage, headerBackgroundColor }) => {
   const colorScheme = useColorScheme() ?? 'light';
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const scrollOffset = useScrollViewOffset(scrollRef);
-  const bottom = useBottomTabOverflow();
+  const FIRST_TAB_INDEX = 0;
   const headerAnimatedStyle = useAnimatedStyle(() => {
     const HEADER_OUTPUT_START_POSITION_DIVIDER = 2;
     const HEADER_OUTPUT_END_POSITION_RATE = 0.75;
@@ -56,8 +55,8 @@ export default function ParallaxScrollView({ children, headerImage, headerBackgr
       <Animated.ScrollView
         ref={scrollRef}
         scrollEventThrottle={16}
-        scrollIndicatorInsets={{ bottom }}
-        contentContainerStyle={{ paddingBottom: bottom }}
+        scrollIndicatorInsets={{ bottom: FIRST_TAB_INDEX }}
+        contentContainerStyle={{ paddingBottom: FIRST_TAB_INDEX }}
       >
         <Animated.View
           style={[styles.header, { backgroundColor: headerBackgroundColor[colorScheme] }, headerAnimatedStyle]}
@@ -68,7 +67,7 @@ export default function ParallaxScrollView({ children, headerImage, headerBackgr
       </Animated.ScrollView>
     </ThemedView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -85,3 +84,4 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
 });
+export default ParallaxScrollView;

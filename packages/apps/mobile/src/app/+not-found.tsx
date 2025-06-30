@@ -3,21 +3,20 @@ import { StyleSheet } from 'react-native';
 
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import React from 'react';
+import type React from 'react';
 
-export default function NotFoundScreen(): React.JSX.Element {
-  return (
-    <>
-      <Stack.Screen options={{ title: 'Oops!' }} />
-      <ThemedView style={styles.container}>
-        <ThemedText type='title'>This screen does not exist.</ThemedText>
-        <Link href='/' style={styles.link}>
-          <ThemedText type='link'>Go to home screen!</ThemedText>
-        </Link>
-      </ThemedView>
-    </>
-  );
-}
+const NotFoundScreen: React.FC = () => (
+  <>
+    <Stack.Screen options={{ title: 'Oops!' }} />
+    <ThemedView style={styles.container}>
+      <ThemedText type='title'>This screen does not exist.</ThemedText>
+      <Link href='/' style={styles.link}>
+        <ThemedText type='link'>Go to home screen!</ThemedText>
+      </Link>
+    </ThemedView>
+  </>
+);
+export default NotFoundScreen;
 
 const styles = StyleSheet.create({
   container: {
