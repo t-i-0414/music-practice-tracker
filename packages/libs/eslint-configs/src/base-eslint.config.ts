@@ -19,6 +19,9 @@ export const createBaseConfig = ({ includesTsEslintPlugin = true } = {}): Config
           tsconfigRootDir: import.meta.dirname,
         },
       },
+    },
+    {
+      files: ['**/*.ts', '**/*.tsx', '**/*.mts', '**/*.cts', '**/*.js', '**/*.jsx', '**/*.mjs', '**/*.cjs'],
       rules: {
         // Base ESLint rules
         'array-callback-return': 'error',
