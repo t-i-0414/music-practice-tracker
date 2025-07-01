@@ -1,7 +1,6 @@
 import { baseReactNativeConfig } from '@music-practice-tracker/eslint-configs';
-// https://docs.expo.dev/guides/using-eslint/
-import expoConfig from 'eslint-config-expo/flat.js';
 import { globalIgnores } from 'eslint/config';
+import expoConfig from 'eslint-config-expo/flat.js';
 import tseslint from 'typescript-eslint';
 
 const config = tseslint.config(

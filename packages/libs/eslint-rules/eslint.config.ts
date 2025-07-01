@@ -2,6 +2,8 @@ import eslint from '@eslint/js';
 import { globalIgnores } from 'eslint/config';
 import prettierConfig from 'eslint-config-prettier';
 import importPlugin from 'eslint-plugin-import';
+import jestPlugin from 'eslint-plugin-jest';
+import jestDomPlugin from 'eslint-plugin-jest-dom';
 import globals from 'globals';
 import tseslint, { type ConfigArray, configs } from 'typescript-eslint';
 
@@ -286,6 +288,20 @@ export const createBaseConfig = ({ includesTsEslintPlugin = true, includeImportP
           },
         },
       },
+    },
+    {
+      files: [
+        '**/*.spec.ts',
+        '**/*.spec.tsx',
+        '**/*.spec.mts',
+        '**/*.spec.cts',
+        '**/*.spec.js',
+        '**/*.spec.jsx',
+        '**/*.spec.mjs',
+        '**/*.spec.cjs',
+      ],
+      ...jestPlugin.configs['flat/all'],
+      ...jestDomPlugin.configs['flat/recommended'],
     },
     globalIgnores(['**/dist/**', '**/coverage/**', '**/generated/**', '**/.turbo/**', '**/node_modules/**']),
     prettierConfig,
