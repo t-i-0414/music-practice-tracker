@@ -1,14 +1,14 @@
 import eslint from '@eslint/js';
+import { globalIgnores } from 'eslint/config';
 import prettierConfig from 'eslint-config-prettier';
 import importPlugin from 'eslint-plugin-import';
-import { globalIgnores } from 'eslint/config';
 import globals from 'globals';
-import tseslint, { type ConfigArray } from 'typescript-eslint';
+import tseslint, { type ConfigArray, configs } from 'typescript-eslint';
 
 export const createBaseConfig = ({ includesTsEslintPlugin = true, includeImportPlugin = true } = {}): ConfigArray =>
   tseslint.config(
     eslint.configs.recommended,
-    ...(includesTsEslintPlugin ? tseslint.configs.recommendedTypeChecked : []),
+    ...(includesTsEslintPlugin ? configs.recommendedTypeChecked : []),
     {
       languageOptions: {
         globals: {
@@ -263,6 +263,33 @@ export const createBaseConfig = ({ includesTsEslintPlugin = true, includeImportP
         '@typescript-eslint/unbound-method': 'error',
         '@typescript-eslint/unified-signatures': 'error',
         '@typescript-eslint/use-unknown-in-catch-callback-variable': 'error',
+
+        // Import plugin rules
+        'import/order': [
+          'error',
+          {
+            groups: ['builtin', 'external', 'parent', 'sibling', 'index', 'object'],
+            pathGroups: [
+              {
+                pattern: '{react,react-dom/**,react-router-dom}',
+                group: 'builtin',
+                position: 'before',
+              },
+              {
+                pattern: '@/**',
+                group: 'internal',
+                position: 'after',
+              },
+            ],
+            pathGroupsExcludedImportTypes: ['builtin'],
+            alphabetize: {
+              order: 'asc',
+              caseInsensitive: true,
+            },
+            warnOnUnassignedImports: true,
+            'newlines-between': 'always',
+          },
+        ],
       },
       settings: {
         'import/resolver': {

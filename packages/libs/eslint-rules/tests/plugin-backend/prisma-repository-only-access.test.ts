@@ -1,5 +1,6 @@
-import rule from '@/plugin-backend/prisma-repository-only-access';
 import { RuleTester } from '@typescript-eslint/rule-tester';
+
+import rule from '@/plugin-backend/prisma-repository-only-access';
 const ruleTester = new RuleTester();
 
 ruleTester.run('prisma-repository-only-access', rule, {

@@ -2,6 +2,7 @@ import { pluginBackend } from '@music-practice-tracker/eslint-rules';
 import prettierConfig from 'eslint-config-prettier';
 import globals from 'globals';
 import tseslint, { type ConfigArray } from 'typescript-eslint';
+
 import { createBaseConfig } from './base.config';
 
 export const createBackendConfig = ({ includesTsEslintPlugin = true, includeImportPlugin = true } = {}): ConfigArray =>

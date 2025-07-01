@@ -1,5 +1,6 @@
-import rule from '@/plugin-backend/prisma-create-naming-convention';
 import { RuleTester } from '@typescript-eslint/rule-tester';
+
+import rule from '@/plugin-backend/prisma-create-naming-convention';
 const ruleTester = new RuleTester();
 
 ruleTester.run('prisma-create-naming-convention', rule, {

@@ -1,5 +1,6 @@
-import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
+import { AST_NODE_TYPES, ESLintUtils, type TSESTree } from '@typescript-eslint/utils';
 import * as ts from 'typescript';
+
 import { getFunctionName, isPrismaUpdateMethod } from './utils/prisma-helpers';
 
 type MessageIds =
@@ -48,7 +49,7 @@ const rule = createRule<[], MessageIds>({
         return type.types.some((t) => typeHasDeletedAt(t));
       }
 
-      if (type.symbol && type.symbol.declarations) {
+      if (type.symbol?.declarations) {
         for (const declaration of type.symbol.declarations) {
           if (ts.isTypeLiteralNode(declaration) || ts.isInterfaceDeclaration(declaration)) {
             const members = ts.isTypeLiteralNode(declaration) ? declaration.members : declaration.members;
@@ -101,7 +102,7 @@ const rule = createRule<[], MessageIds>({
           property.key.type === AST_NODE_TYPES.Identifier &&
           property.key.name === 'deletedAt'
         ) {
-          const value = property.value;
+          const { value } = property;
 
           // Check if deletedAt is null
           if (value.type === AST_NODE_TYPES.Literal && value.value === null) {

@@ -1,5 +1,6 @@
-import rule from '@/plugin-backend/repository-model-access-restriction';
 import { RuleTester } from '@typescript-eslint/rule-tester';
+
+import rule from '@/plugin-backend/repository-model-access-restriction';
 const ruleTester = new RuleTester();
 
 ruleTester.run('repository-model-access-restriction', rule, {
