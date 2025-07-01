@@ -1,13 +1,14 @@
-import { Tabs } from 'expo-router';
 import type React from 'react';
+import { useCallback } from 'react';
+
+import { type BottomTabBarButtonProps } from '@react-navigation/bottom-tabs';
+import { Tabs } from 'expo-router';
 import { Platform } from 'react-native';
 
 import { HapticTab } from '@/components/HapticTab';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { type BottomTabBarButtonProps } from '@react-navigation/bottom-tabs';
-import { useCallback } from 'react';
 
 const TabLayout: React.FC = () => {
   const colorScheme = useColorScheme();

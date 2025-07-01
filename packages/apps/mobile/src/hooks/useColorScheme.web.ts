@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+
 import { type ColorSchemeName, useColorScheme as useRNColorScheme } from 'react-native';
 
 /**

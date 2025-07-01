@@ -1,11 +1,12 @@
 import eslint from '@eslint/js';
 import prettierConfig from 'eslint-config-prettier';
+import importPlugin from 'eslint-plugin-import';
 import reactPlugin from 'eslint-plugin-react';
 import { globalIgnores } from 'eslint/config';
 import globals from 'globals';
 import tseslint, { type ConfigArray } from 'typescript-eslint';
 
-export const createBaseConfig = ({ includesTsEslintPlugin = true } = {}): ConfigArray =>
+export const createBaseConfig = ({ includesTsEslintPlugin = true, includeImportPlugin = true } = {}): ConfigArray =>
   tseslint.config(
     eslint.configs.recommended,
     ...(includesTsEslintPlugin ? tseslint.configs.recommendedTypeChecked : []),
@@ -28,6 +29,7 @@ export const createBaseConfig = ({ includesTsEslintPlugin = true } = {}): Config
     },
     {
       files: ['**/*.ts', '**/*.tsx', '**/*.mts', '**/*.cts', '**/*.js', '**/*.jsx', '**/*.mjs', '**/*.cjs'],
+      extends: includeImportPlugin ? [importPlugin.flatConfigs.recommended, importPlugin.flatConfigs.typescript] : [],
       plugins: {
         reactPlugin,
       },
@@ -271,6 +273,33 @@ export const createBaseConfig = ({ includesTsEslintPlugin = true } = {}): Config
         '@typescript-eslint/unified-signatures': 'error',
         '@typescript-eslint/use-unknown-in-catch-callback-variable': 'error',
 
+        // Import plugin rules
+        'import/order': [
+          'error',
+          {
+            groups: ['builtin', 'external', 'parent', 'sibling', 'index', 'object'],
+            pathGroups: [
+              {
+                pattern: '{react,react-dom/**,react-router-dom}',
+                group: 'builtin',
+                position: 'before',
+              },
+              {
+                pattern: '@/**',
+                group: 'internal',
+                position: 'after',
+              },
+            ],
+            pathGroupsExcludedImportTypes: ['builtin'],
+            alphabetize: {
+              order: 'asc',
+              caseInsensitive: true,
+            },
+            warnOnUnassignedImports: true,
+            'newlines-between': 'always',
+          },
+        ],
+
         // React-specific rules
         'react/jsx-no-useless-fragment': 'error',
         'react/jsx-no-leaked-render': ['error', { validStrategies: ['ternary'] }],
@@ -288,6 +317,13 @@ export const createBaseConfig = ({ includesTsEslintPlugin = true } = {}): Config
             unnamedComponents: 'arrow-function',
           },
         ],
+      },
+      settings: {
+        'import/resolver': {
+          typescript: {
+            project: './tsconfig.json',
+          },
+        },
       },
     },
     globalIgnores(['**/dist/**', '**/coverage/**', '**/generated/**', '**/.turbo/**', '**/node_modules/**']),

@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+
 import { UserCommandService } from './user.command.service';
 import {
   CreateManyUsersInputDto,

@@ -1,9 +1,10 @@
+import { Body, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Put } from '@nestjs/common';
+import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+
 import { ApiController } from '@/common/decorators/api-controller.decorator';
 import { UserAppFacadeService } from '@/modules/aggregate/user/user.app.facade.service';
 import { CreateUserInputDto, UpdateUserDataDto } from '@/modules/aggregate/user/user.input.dto';
 import { ActiveUserResponseDto } from '@/modules/aggregate/user/user.response.dto';
-import { Body, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Put } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('app/users')
 @ApiController('app/users')
