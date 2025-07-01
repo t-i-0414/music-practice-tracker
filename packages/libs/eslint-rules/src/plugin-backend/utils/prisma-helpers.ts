@@ -1,4 +1,4 @@
-import { TSESTree, AST_NODE_TYPES } from '@typescript-eslint/types';
+import { type TSESTree, AST_NODE_TYPES } from '@typescript-eslint/types';
 
 export const PRISMA_CREATE_METHODS = ['create', 'createMany', 'createManyAndReturn'] as const;
 export const PRISMA_UPDATE_METHODS = ['update', 'updateMany', 'updateManyAndReturn'] as const;
@@ -154,7 +154,7 @@ export function isPrismaFindMethod(node: TSESTree.Node): node is TSESTree.Member
     return false;
   }
 
-  const property = node.property;
+  const { property } = node;
   if (!property || property.type !== AST_NODE_TYPES.Identifier) {
     return false;
   }

@@ -2,6 +2,7 @@ import prettierConfig from 'eslint-config-prettier';
 import reactPlugin from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 import tseslint, { type ConfigArray } from 'typescript-eslint';
+
 import { createBaseConfig } from './base.config';
 
 export const createBaseReactConfig = ({

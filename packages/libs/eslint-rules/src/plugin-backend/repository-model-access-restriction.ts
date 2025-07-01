@@ -1,6 +1,7 @@
+import * as path from 'path';
+
 import { AST_NODE_TYPES } from '@typescript-eslint/types';
 import { ESLintUtils } from '@typescript-eslint/utils';
-import * as path from 'path';
 
 const createRule = ESLintUtils.RuleCreator(
   (name) => `https://github.com/music-practice-tracker/eslint-rules/blob/main/docs/${name}.md`,
@@ -126,7 +127,7 @@ const rule = createRule({
               messageId: 'invalidModelAccess',
               data: {
                 repositoryName: topLevelAggregate,
-                modelName: modelName,
+                modelName,
               },
             });
           }
@@ -139,7 +140,7 @@ const rule = createRule({
             messageId: 'invalidModelAccess',
             data: {
               repositoryName: repositoryDir.join('/'),
-              modelName: modelName,
+              modelName,
             },
           });
         }

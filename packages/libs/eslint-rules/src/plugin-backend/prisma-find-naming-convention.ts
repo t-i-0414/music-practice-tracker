@@ -1,4 +1,5 @@
-import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
+import { AST_NODE_TYPES, ESLintUtils, type TSESTree } from '@typescript-eslint/utils';
+
 import { getFunctionNameExtended, isPrismaFindMethod } from './utils/prisma-helpers';
 
 type MessageIds =
@@ -79,7 +80,7 @@ const rule = createRule<[], MessageIds>({
         return false;
       }
 
-      const arg = node.arguments[0] as TSESTree.ObjectExpression;
+      const arg = node.arguments[0];
       const whereProperty = arg.properties.find(
         (prop): prop is TSESTree.Property =>
           prop.type === AST_NODE_TYPES.Property &&
@@ -101,7 +102,7 @@ const rule = createRule<[], MessageIds>({
         return expectedType !== 'active' && expectedType !== 'deleted';
       }
 
-      const whereObject = whereProperty.value as TSESTree.ObjectExpression;
+      const whereObject = whereProperty.value;
 
       if (expectedType === 'any') {
         // For 'any' type, check for OR clause
@@ -209,7 +210,7 @@ const rule = createRule<[], MessageIds>({
             return false;
           }
           // Check if it has { not: null } structure
-          const notProp = (deletedAtPropDeleted.value as TSESTree.ObjectExpression).properties.find(
+          const notProp = deletedAtPropDeleted.value.properties.find(
             (prop): prop is TSESTree.Property =>
               prop.type === AST_NODE_TYPES.Property &&
               prop.key.type === AST_NODE_TYPES.Identifier &&
@@ -261,7 +262,7 @@ const rule = createRule<[], MessageIds>({
           const functionName = getCurrentFunctionName();
           if (!functionName) return; // Skip if not in a function
 
-          const memberExp = node.callee as TSESTree.MemberExpression;
+          const memberExp = node.callee;
           const method = (memberExp.property as TSESTree.Identifier).name;
 
           // Validate function name

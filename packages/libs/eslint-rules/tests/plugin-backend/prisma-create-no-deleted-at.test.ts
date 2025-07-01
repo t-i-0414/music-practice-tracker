@@ -1,5 +1,6 @@
-import rule from '@/plugin-backend/prisma-create-no-deleted-at';
 import { RuleTester } from '@typescript-eslint/rule-tester';
+
+import rule from '@/plugin-backend/prisma-create-no-deleted-at';
 
 const ruleTester = new RuleTester();
 

@@ -1,4 +1,5 @@
 import { AST_NODE_TYPES, ESLintUtils } from '@typescript-eslint/utils';
+
 import { getFunctionName, isPrismaMethodCall, PRISMA_DELETE_METHODS } from './utils/prisma-helpers';
 
 type MessageIds = 'invalidDeleteMethodName';

@@ -1,3 +1,6 @@
+import { AST_NODE_TYPES, type TSESTree } from '@typescript-eslint/types';
+import { describe, expect, it } from 'vitest';
+
 import {
   PRISMA_CREATE_METHODS,
   PRISMA_DELETE_METHODS,
@@ -9,8 +12,6 @@ import {
   isPrismaMethodCall,
   isPrismaUpdateMethod,
 } from '@/plugin-backend/utils/prisma-helpers';
-import { AST_NODE_TYPES, TSESTree } from '@typescript-eslint/types';
-import { describe, expect, it } from 'vitest';
 
 describe('prisma-helpers', () => {
   describe('constants', () => {

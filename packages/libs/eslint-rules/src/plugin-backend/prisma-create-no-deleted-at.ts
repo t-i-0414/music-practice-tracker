@@ -1,4 +1,5 @@
-import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
+import { AST_NODE_TYPES, ESLintUtils, type TSESTree } from '@typescript-eslint/utils';
+
 import { isPrismaMethodCall, PRISMA_CREATE_METHODS } from './utils/prisma-helpers';
 
 type MessageIds = 'createShouldNotHaveDeletedAt';
