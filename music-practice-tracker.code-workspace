@@ -1,0 +1,20 @@
+{
+  "folders": [
+    {
+      "name": "root",
+      "path": ".",
+    },
+    {
+      "name": "backend",
+      "path": "./packages/apps/backend",
+    },
+    {
+      "name": "admin",
+      "path": "./packages/apps/admin",
+    },
+    {
+      "name": "mobile",
+      "path": "./packages/apps/mobile",
+    },
+  ],
+}
