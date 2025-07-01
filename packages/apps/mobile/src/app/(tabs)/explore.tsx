@@ -1,3 +1,5 @@
+import type React from 'react';
+
 import { Image } from 'expo-image';
 import { Platform, StyleSheet } from 'react-native';
 
@@ -8,7 +10,6 @@ import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
-import type React from 'react';
 
 const TabTwoScreen: React.FC = () => (
   <ParallaxScrollView

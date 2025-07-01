@@ -1,3 +1,5 @@
+import type React from 'react';
+
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
@@ -6,7 +8,6 @@ import 'react-native-reanimated';
 
 import SpaceMono from '@/assets/fonts/SpaceMono-Regular.ttf';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import type React from 'react';
 
 const RootLayout: React.FC = () => {
   const colorScheme = useColorScheme();

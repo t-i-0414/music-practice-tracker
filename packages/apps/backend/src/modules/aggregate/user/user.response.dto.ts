@@ -1,5 +1,6 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
 import { Exclude, Expose, plainToInstance, Type } from 'class-transformer';
+
 import { MAX_EMAIL_LENGTH, MAX_NAME_LENGTH } from './user.constants';
 import { User } from './user.repository.service';
 

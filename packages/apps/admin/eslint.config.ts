@@ -11,7 +11,7 @@ const compat = new FlatCompat({
 });
 
 const nextEslintConfig = [...compat.extends('next/core-web-vitals', 'next/typescript', 'prettier')];
-const baseConfig = createBaseConfig({ includesTsEslintPlugin: false });
+const baseConfig = createBaseConfig({ includesTsEslintPlugin: false, includeImportPlugin: false });
 
 const config = tseslint.config({
   extends: [nextEslintConfig, baseConfig],

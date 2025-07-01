@@ -1,6 +1,7 @@
+import type React from 'react';
+
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { BlurView } from 'expo-blur';
-import type React from 'react';
 import { StyleSheet } from 'react-native';
 
 const BlurTabBarBackground: React.FC = () => (

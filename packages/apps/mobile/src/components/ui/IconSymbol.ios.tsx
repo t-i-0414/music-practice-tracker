@@ -1,7 +1,9 @@
-import { DEFAULT_ICON_SIZE } from '@/constants/Size';
-import { SymbolView, type SymbolViewProps, type SymbolWeight } from 'expo-symbols';
 import type React from 'react';
+
+import { SymbolView, type SymbolViewProps, type SymbolWeight } from 'expo-symbols';
 import { type StyleProp, type ViewStyle } from 'react-native';
+
+import { DEFAULT_ICON_SIZE } from '@/constants/Size';
 
 export const IconSymbol: React.FC<{
   name: SymbolViewProps['name'];

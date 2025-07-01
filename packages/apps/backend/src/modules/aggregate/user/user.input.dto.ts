@@ -11,6 +11,7 @@ import {
   MaxLength,
   ValidateNested,
 } from 'class-validator';
+
 import { MAX_EMAIL_LENGTH, MAX_NAME_LENGTH } from './user.constants';
 
 export class FindUserByIdInputDto {
