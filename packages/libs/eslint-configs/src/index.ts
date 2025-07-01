@@ -1,4 +1,15 @@
-import backendEslintConfig from './backend-eslint.config.js';
-import baseEslintConfig, { createBaseConfig } from './base-eslint.config.js';
+import backendEslintConfig, { createBackendConfig } from './backend.config';
+import baseReactNativeConfig, { createBaseReactNativeConfig } from './base-react-native.config';
+import baseReactConfig, { createBaseReactConfig } from './base-react.config';
+import baseEslintConfig, { createBaseConfig } from './base.config';
 
-export { backendEslintConfig, baseEslintConfig, createBaseConfig };
+export {
+  backendEslintConfig,
+  baseEslintConfig,
+  baseReactConfig,
+  baseReactNativeConfig,
+  createBackendConfig,
+  createBaseConfig,
+  createBaseReactConfig,
+  createBaseReactNativeConfig,
+};

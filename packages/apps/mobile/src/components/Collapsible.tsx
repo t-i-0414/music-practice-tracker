@@ -38,13 +38,13 @@ export const Collapsible: React.FC<PropsWithChildren & { title: string }> = ({ c
 };
 
 const styles = StyleSheet.create({
-  heading: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
   content: {
-    marginTop: 6,
     marginLeft: 24,
+    marginTop: 6,
+  },
+  heading: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 6,
   },
 });
