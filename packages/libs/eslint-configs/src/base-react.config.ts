@@ -1,6 +1,7 @@
 import prettierConfig from 'eslint-config-prettier';
 import reactPlugin from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
+import testingLibraryPlugin from 'eslint-plugin-testing-library';
 import tseslint, { type ConfigArray } from 'typescript-eslint';
 
 import { createBaseConfig } from './base.config';
@@ -50,6 +51,19 @@ export const createBaseReactConfig = ({
           version: 'detect',
         },
       },
+    },
+    {
+      files: [
+        '**/*.spec.ts',
+        '**/*.spec.tsx',
+        '**/*.spec.mts',
+        '**/*.spec.cts',
+        '**/*.spec.js',
+        '**/*.spec.jsx',
+        '**/*.spec.mjs',
+        '**/*.spec.cjs',
+      ],
+      ...testingLibraryPlugin.configs['flat/react'],
     },
     prettierConfig,
   );
