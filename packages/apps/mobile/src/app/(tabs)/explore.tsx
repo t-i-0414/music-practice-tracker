@@ -52,7 +52,7 @@ const TabTwoScreen: React.FC = () => (
         For static images, you can use the <ThemedText type='defaultSemiBold'>@2x</ThemedText> and{' '}
         <ThemedText type='defaultSemiBold'>@3x</ThemedText> suffixes to provide files for different screen densities
       </ThemedText>
-      <Image source={reactLogo} style={{ alignSelf: 'center' }} />
+      <Image source={reactLogo} style={styles.alignSelfCenter} />
       <ExternalLink href='https://reactnative.dev/docs/images'>
         <ThemedText type='link'>Learn more</ThemedText>
       </ExternalLink>
@@ -60,7 +60,7 @@ const TabTwoScreen: React.FC = () => (
     <Collapsible title='Custom fonts'>
       <ThemedText>
         Open <ThemedText type='defaultSemiBold'>app/_layout.tsx</ThemedText> to see how to load{' '}
-        <ThemedText style={{ fontFamily: 'SpaceMono' }}>custom fonts such as this one.</ThemedText>
+        <ThemedText style={styles.spaceMono}>custom fonts such as this one.</ThemedText>
       </ThemedText>
       <ExternalLink href='https://docs.expo.dev/versions/latest/sdk/font'>
         <ThemedText type='link'>Learn more</ThemedText>
@@ -96,12 +96,20 @@ const TabTwoScreen: React.FC = () => (
 );
 export default TabTwoScreen;
 
+const baseColor = '#808080';
+
 const styles = StyleSheet.create({
+  alignSelfCenter: {
+    alignSelf: 'center',
+  },
   headerImage: {
-    color: '#808080',
     bottom: -90,
+    color: baseColor,
     left: -35,
     position: 'absolute',
+  },
+  spaceMono: {
+    fontFamily: 'SpaceMono',
   },
   titleContainer: {
     flexDirection: 'row',

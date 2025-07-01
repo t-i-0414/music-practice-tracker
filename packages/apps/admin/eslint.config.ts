@@ -1,8 +1,9 @@
-import { FlatCompat } from '@eslint/eslintrc';
-import { createBaseConfig } from '@music-practice-tracker/eslint-configs';
 import { dirname } from 'path';
-import tseslint from 'typescript-eslint';
 import { fileURLToPath } from 'url';
+
+import { FlatCompat } from '@eslint/eslintrc';
+import { baseReactConfig } from '@music-practice-tracker/eslint-configs';
+import tseslint from 'typescript-eslint';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -11,10 +12,8 @@ const compat = new FlatCompat({
 });
 
 const nextEslintConfig = [...compat.extends('next/core-web-vitals', 'next/typescript', 'prettier')];
-const baseConfig = createBaseConfig({ includesTsEslintPlugin: false, includeImportPlugin: false });
-
 const config = tseslint.config({
-  extends: [nextEslintConfig, baseConfig],
+  extends: [nextEslintConfig, baseReactConfig],
 });
 
 export default config;
