@@ -1,20 +1,28 @@
 {
   "folders": [
     {
-      "name": "root",
+      "name": "project root",
       "path": ".",
     },
     {
-      "name": "backend",
+      "name": "apps/backend",
       "path": "./packages/apps/backend",
     },
     {
-      "name": "admin",
+      "name": "apps/mobile",
+      "path": "./packages/apps/mobile",
+    },
+    {
+      "name": "apps/admin",
       "path": "./packages/apps/admin",
     },
     {
-      "name": "mobile",
-      "path": "./packages/apps/mobile",
+      "name": "libs/eslint-configs",
+      "path": "./packages/libs/eslint-configs",
+    },
+    {
+      "name": "libs/eslint-rules",
+      "path": "./packages/libs/eslint-rules",
     },
   ],
 }
