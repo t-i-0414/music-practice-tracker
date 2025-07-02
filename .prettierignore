@@ -9,3 +9,5 @@
 **/log/**
 **/cache/**
 **/generated/**
+packages/apps/mobile/.expo
+packages/apps/mobile/expo-env.d.ts
