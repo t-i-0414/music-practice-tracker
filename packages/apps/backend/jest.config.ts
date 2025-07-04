@@ -6,15 +6,16 @@ const config: Config = {
   coverageDirectory: '../coverage',
   moduleFileExtensions: ['js', 'json', 'ts'],
   moduleNameMapper: {
-    '^@/generated/(.*)$': '<rootDir>/../generated/$1',
-    '^@/(.*)$': '<rootDir>/$1',
+    '^@/generated/(.*)$': '<rootDir>/generated/$1',
+    '^@/(.*)$': '<rootDir>/src/$1',
   },
-  rootDir: 'src',
+  rootDir: '.',
   testEnvironment: 'node',
   testRegex: '.*\\.spec\\.ts$',
   transform: {
-    '^.+\\.(t|j)s$': 'ts-jest',
+    '^.+\\.ts$': 'ts-jest',
   },
+  testPathIgnorePatterns: ['/node_modules/', '/dist/', '/coverage/', '/generated/'],
 };
 
 export default config;
