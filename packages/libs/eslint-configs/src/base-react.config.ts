@@ -1,4 +1,4 @@
-import prettierConfig from 'eslint-config-prettier';
+import prettierConfig from 'eslint-config-prettier/flat';
 import reactPlugin from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 import testingLibraryPlugin from 'eslint-plugin-testing-library';

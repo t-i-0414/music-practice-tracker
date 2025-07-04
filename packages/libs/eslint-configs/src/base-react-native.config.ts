@@ -1,5 +1,5 @@
 import { FlatCompat } from '@eslint/eslintrc';
-import prettierConfig from 'eslint-config-prettier';
+import prettierConfig from 'eslint-config-prettier/flat';
 import tseslint, { type ConfigArray } from 'typescript-eslint';
 
 import { createBaseReactConfig } from './base-react.config';

@@ -1,9 +1,8 @@
 import eslint from '@eslint/js';
+import vitestPlugin from '@vitest/eslint-plugin';
 import { globalIgnores } from 'eslint/config';
-import prettierConfig from 'eslint-config-prettier';
+import prettierConfig from 'eslint-config-prettier/flat';
 import importPlugin from 'eslint-plugin-import';
-import jestPlugin from 'eslint-plugin-jest';
-import jestDomPlugin from 'eslint-plugin-jest-dom';
 import globals from 'globals';
 import tseslint, { type ConfigArray, configs } from 'typescript-eslint';
 
@@ -300,8 +299,7 @@ export const createBaseConfig = ({ includesTsEslintPlugin = true, includeImportP
         '**/*.spec.mjs',
         '**/*.spec.cjs',
       ],
-      ...jestPlugin.configs['flat/all'],
-      ...jestDomPlugin.configs['flat/recommended'],
+      ...vitestPlugin.configs.all,
     },
     globalIgnores(['**/dist/**', '**/coverage/**', '**/generated/**', '**/.turbo/**', '**/node_modules/**']),
     prettierConfig,

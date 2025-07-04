@@ -1,9 +1,16 @@
 import { pluginBackend } from '@music-practice-tracker/eslint-rules';
-import prettierConfig from 'eslint-config-prettier';
+import vitestPlugin from '@vitest/eslint-plugin';
+import prettierConfig from 'eslint-config-prettier/flat';
+import jestPlugin from 'eslint-plugin-jest';
 import globals from 'globals';
 import tseslint, { type ConfigArray } from 'typescript-eslint';
 
-import { createBaseConfig } from './base.config';
+import { createBaseConfig, testFilePatterns } from './base.config';
+
+const vitestRules = Object.keys(vitestPlugin.rules).reduce<Record<string, 'off'>>((acc, rule) => {
+  acc[`vitest/${rule}`] = 'off';
+  return acc;
+}, {});
 
 export const createBackendConfig = ({ includesTsEslintPlugin = true, includeImportPlugin = true } = {}): ConfigArray =>
   tseslint.config(
@@ -28,6 +35,14 @@ export const createBackendConfig = ({ includesTsEslintPlugin = true, includeImpo
         'custom-backend-eslint/prisma-repository-only-access': 'error',
         'custom-backend-eslint/repository-model-access-restriction': 'error',
       },
+    },
+    {
+      files: testFilePatterns,
+      plugins: {
+        vitest: vitestPlugin,
+      },
+      ...jestPlugin.configs['flat/all'],
+      rules: vitestRules,
     },
     prettierConfig,
   );
