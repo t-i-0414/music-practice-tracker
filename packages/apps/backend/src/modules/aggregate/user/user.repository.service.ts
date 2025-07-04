@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { StrictOmit } from '@/common/types/strict-omit';
+import { StrictOmit } from '@/types/strict-omit';
 import { Prisma, User } from '@/generated/prisma';
 import { RepositoryService } from '@/modules/repository/repository.service';
 export type { User };

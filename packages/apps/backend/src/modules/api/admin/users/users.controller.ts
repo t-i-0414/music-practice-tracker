@@ -1,7 +1,7 @@
 import { Body, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Put, Query } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-import { ApiController } from '@/common/decorators/api-controller.decorator';
+import { ApiController } from '@/decorators/api-controller.decorator';
 import { UserAdminFacadeService } from '@/modules/aggregate/user/user.admin.facade.service';
 import {
   CreateManyUsersInputDto,

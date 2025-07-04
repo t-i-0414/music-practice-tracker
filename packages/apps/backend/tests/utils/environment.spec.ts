@@ -1,4 +1,4 @@
-import { getEnvironment, isDevelopment, isProduction, isTest } from './environment';
+import { getEnvironment, isDevelopment, isProduction, isTest } from '../../src/utils/environment';
 
 describe('Environment utilities', () => {
   const originalEnv = process.env.NODE_ENV;

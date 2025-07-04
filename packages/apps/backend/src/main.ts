@@ -3,7 +3,7 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 import { AppModule } from './app.module';
-import { isDevelopment } from './common/utils/environment';
+import { isDevelopment } from './utils/environment';
 
 const PORT_NUMBER = 3000;
 

@@ -309,6 +309,16 @@ export const createBaseConfig = ({ includesTsEslintPlugin = true, includeImportP
     {
       files: testFilePatterns,
       ...vitestPlugin.configs.all,
+      rules: {
+        '@typescript-eslint/init-declarations': 'off',
+        '@typescript-eslint/explicit-function-return-type': 'off',
+        '@typescript-eslint/consistent-type-assertions': 'off',
+        '@typescript-eslint/no-unsafe-member-access': 'off',
+        '@typescript-eslint/no-unsafe-type-assertion': 'off',
+        '@typescript-eslint/no-unsafe-call': 'off',
+        '@typescript-eslint/no-explicit-any': 'off',
+        '@typescript-eslint/no-unsafe-assignment': 'off',
+      },
     },
     globalIgnores(['**/dist/**', '**/coverage/**', '**/generated/**', '**/.turbo/**', '**/node_modules/**']),
     prettierConfig,
