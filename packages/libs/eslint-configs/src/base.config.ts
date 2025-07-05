@@ -310,6 +310,7 @@ export const createBaseConfig = ({ includesTsEslintPlugin = true, includeImportP
       files: testFilePatterns,
       ...vitestPlugin.configs.all,
       rules: {
+        // TypeScript-specific rules
         '@typescript-eslint/init-declarations': 'off',
         '@typescript-eslint/explicit-function-return-type': 'off',
         '@typescript-eslint/consistent-type-assertions': 'off',
@@ -322,6 +323,7 @@ export const createBaseConfig = ({ includesTsEslintPlugin = true, includeImportP
         '@typescript-eslint/no-magic-numbers': 'off',
         '@typescript-eslint/max-params': 'off',
         '@typescript-eslint/explicit-member-accessibility': 'off',
+        '@typescript-eslint/no-misused-spread': 'off',
       },
     },
     globalIgnores(['**/dist/**', '**/coverage/**', '**/generated/**', '**/.turbo/**', '**/node_modules/**']),

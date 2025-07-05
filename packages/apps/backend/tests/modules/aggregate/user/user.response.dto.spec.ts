@@ -121,7 +121,6 @@ describe('User Response DTOs', () => {
 
       expect(result.users).toHaveLength(3);
       expect(result.users[0].id).toBe(mockActiveUser.id);
-      // plainToInstance passes through null/undefined
       expect(result.users[1]).toBeNull();
       expect(result.users[2]).toBeUndefined();
     });
@@ -216,8 +215,6 @@ describe('User Response DTOs', () => {
       expect(result.createdAt).toEqual(mockDeletedUser.createdAt);
       expect(result.updatedAt).toEqual(mockDeletedUser.updatedAt);
       expect(result.deletedAt).toEqual(mockDeletedUser.deletedAt);
-      // Note: AnyUserResponseDto extends DeletedUserResponseDto which doesn't exclude extraField
-      // The @Exclude decorator only works with plainToInstance transformation
     });
 
     it('should handle active user (null deletedAt)', () => {
@@ -243,7 +240,6 @@ describe('User Response DTOs', () => {
 
       const result = toAnyUserDto(userWithExtraFields);
 
-      // The actual exclusion happens via plainToInstance and decorators
       expect(result.id).toBe(mockDeletedUser.id);
       expect(result.email).toBe(mockDeletedUser.email);
     });
@@ -277,7 +273,6 @@ describe('User Response DTOs', () => {
       expect(result.users).toHaveLength(5);
       expect(result.users[0].id).toBe(mockActiveUser.id);
       expect(result.users[1].id).toBe(mockDeletedUser.id);
-      // plainToInstance passes through null/undefined
       expect(result.users[2]).toBeNull();
       expect(result.users[3]).toBeUndefined();
       expect(result.users[4].id).toBe('minimal-user');
@@ -288,7 +283,6 @@ describe('User Response DTOs', () => {
     it('ActiveUserResponseDto should be a properly instantiated class', () => {
       const dto = new ActiveUserResponseDto();
 
-      // ActiveUserResponseDto is created via PickType and class-transformer
       expect(dto).toBeDefined();
       expect(dto.constructor.name).toBe('ActiveUserResponseDto');
     });
@@ -296,7 +290,6 @@ describe('User Response DTOs', () => {
     it('DeletedUserResponseDto should be a PickType with deletedAt', () => {
       const dto = new DeletedUserResponseDto();
 
-      // The deletedAt property is explicitly defined in the class
       expect(dto).toHaveProperty('deletedAt');
       expect(dto.deletedAt).toBeUndefined();
     });
@@ -415,12 +408,10 @@ describe('User Response DTOs', () => {
       const deletedDto = toDeletedUserDto(complexUser);
       const anyDto = toAnyUserDto(complexUser);
 
-      // All DTOs should have the same base properties
       expect(activeDto.id).toBe(complexUser.id);
       expect(deletedDto.id).toBe(complexUser.id);
       expect(anyDto.id).toBe(complexUser.id);
 
-      // Check date preservation
       expect(activeDto.createdAt.getTime()).toBe(complexUser.createdAt.getTime());
       expect(deletedDto.createdAt.getTime()).toBe(complexUser.createdAt.getTime());
       expect(anyDto.createdAt.getTime()).toBe(complexUser.createdAt.getTime());
@@ -456,7 +447,6 @@ describe('User Response DTOs', () => {
 
       const result = toDeletedUserDto(userWithBooleanDates);
 
-      // class-transformer will attempt to convert these to dates
       expect(result.createdAt).toBeInstanceOf(Date);
       expect(result.updatedAt).toBeInstanceOf(Date);
       expect(result.deletedAt).toBeInstanceOf(Date);
@@ -473,7 +463,6 @@ describe('User Response DTOs', () => {
 
       const result = toActiveUserDto(userWithNumbers);
 
-      // class-transformer doesn't automatically convert numbers to strings
       expect(result.id).toBe(12345);
       expect(result.name).toBe(67890);
       expect(result.email).toBe(11111);
