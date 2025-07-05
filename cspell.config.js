@@ -18,6 +18,7 @@ export default defineConfig({
     'deletemany',
     'deletemanyandreturn',
     'Dto',
+    'golevelup',
     'harddelete',
     'harddeletemany',
     'healthcheck',
