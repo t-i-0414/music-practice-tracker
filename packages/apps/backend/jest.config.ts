@@ -19,6 +19,7 @@ const config: Config = {
   moduleFileExtensions: ['js', 'json', 'ts'],
   moduleNameMapper: {
     '^@/generated/(.*)$': '<rootDir>/generated/$1',
+    '^@/tests/(.*)$': '<rootDir>/tests/$1',
     '^@/(.*)$': '<rootDir>/src/$1',
   },
   rootDir: '.',

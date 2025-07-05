@@ -19,7 +19,8 @@
     "noFallthroughCasesInSwitch": false,
     "paths": {
       "@/*": ["./src/*"],
-      "@/generated/*": ["./generated/*"]
+      "@/generated/*": ["./generated/*"],
+      "@/tests/*": ["./tests/*"]
     }
   }
 }
