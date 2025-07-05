@@ -29,7 +29,7 @@ const config: Config = {
     '^.+\\.ts$': 'ts-jest',
   },
   testPathIgnorePatterns: ignorePatterns,
-  coveragePathIgnorePatterns: ignorePatterns,
+  coveragePathIgnorePatterns: [...ignorePatterns, '/tests/'],
 };
 
 export default config;
