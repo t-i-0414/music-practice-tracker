@@ -171,4 +171,4 @@ dist
 .claude/*.local.*
 
 # Local IDE Settings
-.vscode/settings.json
+**/.vscode/settings.json
