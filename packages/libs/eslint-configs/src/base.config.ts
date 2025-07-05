@@ -320,6 +320,8 @@ export const createBaseConfig = ({ includesTsEslintPlugin = true, includeImportP
         '@typescript-eslint/no-unsafe-assignment': 'off',
         '@typescript-eslint/unbound-method': 'off',
         '@typescript-eslint/no-magic-numbers': 'off',
+        '@typescript-eslint/max-params': 'off',
+        '@typescript-eslint/explicit-member-accessibility': 'off',
       },
     },
     globalIgnores(['**/dist/**', '**/coverage/**', '**/generated/**', '**/.turbo/**', '**/node_modules/**']),
