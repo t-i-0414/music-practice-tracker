@@ -1,6 +1,18 @@
 // jest.config.ts
 import type { Config } from 'jest';
 
+const ignorePatterns = [
+  '/node_modules/',
+  '/dist/',
+  '/coverage/',
+  '/generated/',
+  'eslint.config.ts',
+  'jest.config.ts',
+  'jest.e2e.config.ts',
+  'main.ts',
+  'app.module.ts',
+];
+
 const config: Config = {
   collectCoverageFrom: ['**/*.(t|j)s'],
   coverageDirectory: '../coverage',
@@ -15,7 +27,8 @@ const config: Config = {
   transform: {
     '^.+\\.ts$': 'ts-jest',
   },
-  testPathIgnorePatterns: ['/node_modules/', '/dist/', '/coverage/', '/generated/'],
+  testPathIgnorePatterns: ignorePatterns,
+  coveragePathIgnorePatterns: ignorePatterns,
 };
 
 export default config;
