@@ -1,3 +1,5 @@
+import { randomUUID } from 'crypto';
+
 import { ClassSerializerInterceptor, type INestApplication, ValidationPipe } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Test, type TestingModule } from '@nestjs/testing';
@@ -29,7 +31,7 @@ describe('App API - /api/users', () => {
     it('should create a user', () => {
       const createDto = {
         name: 'Test User',
-        email: `test-${Date.now()}@example.com`,
+        email: `test-${randomUUID()}@example.com`,
       };
 
       return request(app.getHttpServer())
@@ -67,7 +69,7 @@ describe('App API - /api/users', () => {
     it('should update user data', async () => {
       const createDto = {
         name: 'Original User',
-        email: `original-${Date.now()}@example.com`,
+        email: `original-${randomUUID()}@example.com`,
       };
 
       const createResponse = await request(app.getHttpServer()).post('/api/users').send(createDto).expect(201);
@@ -93,7 +95,7 @@ describe('App API - /api/users', () => {
     it('should delete a user', async () => {
       const createDto = {
         name: 'To Delete User',
-        email: `delete-${Date.now()}@example.com`,
+        email: `delete-${randomUUID()}@example.com`,
       };
 
       const createResponse = await request(app.getHttpServer()).post('/api/users').send(createDto).expect(201);

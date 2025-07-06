@@ -54,7 +54,7 @@ describe('Admin API - /api/users', () => {
     it('should create a user', () => {
       const createDto = {
         name: 'Admin Test User',
-        email: `admin-test-${Date.now()}@example.com`,
+        email: `admin-test-${randomUUID()}@example.com`,
       };
 
       return request(app.getHttpServer())
@@ -75,8 +75,8 @@ describe('Admin API - /api/users', () => {
     it('should create multiple users', () => {
       const createDto = {
         users: [
-          { name: 'Bulk User 1', email: `bulk1-${Date.now()}@example.com` },
-          { name: 'Bulk User 2', email: `bulk2-${Date.now()}@example.com` },
+          { name: 'Bulk User 1', email: `bulk1-${randomUUID()}@example.com` },
+          { name: 'Bulk User 2', email: `bulk2-${randomUUID()}@example.com` },
         ],
       };
 
@@ -97,7 +97,7 @@ describe('Admin API - /api/users', () => {
     it('should soft delete a user', async () => {
       const createResponse = await request(app.getHttpServer())
         .post('/api/users')
-        .send({ name: 'To Delete', email: `delete-${Date.now()}@example.com` })
+        .send({ name: 'To Delete', email: `delete-${randomUUID()}@example.com` })
         .expect(201);
 
       const userId = createResponse.body.id;
@@ -114,7 +114,7 @@ describe('Admin API - /api/users', () => {
     it('should restore a soft-deleted user', async () => {
       const createResponse = await request(app.getHttpServer())
         .post('/api/users')
-        .send({ name: 'To Restore', email: `restore-${Date.now()}@example.com` })
+        .send({ name: 'To Restore', email: `restore-${randomUUID()}@example.com` })
         .expect(201);
 
       const userId = createResponse.body.id;
@@ -137,7 +137,7 @@ describe('Admin API - /api/users', () => {
     it('should permanently delete a user', async () => {
       const createResponse = await request(app.getHttpServer())
         .post('/api/users')
-        .send({ name: 'To Hard Delete', email: `hard-delete-${Date.now()}@example.com` })
+        .send({ name: 'To Hard Delete', email: `hard-delete-${randomUUID()}@example.com` })
         .expect(201);
 
       const userId = createResponse.body.id;
@@ -152,12 +152,12 @@ describe('Admin API - /api/users', () => {
     it('should soft delete multiple users', async () => {
       const user1 = await request(app.getHttpServer())
         .post('/api/users')
-        .send({ name: 'Bulk Delete 1', email: `bulk-del1-${Date.now()}@example.com` })
+        .send({ name: 'Bulk Delete 1', email: `bulk-del1-${randomUUID()}@example.com` })
         .expect(201);
 
       const user2 = await request(app.getHttpServer())
         .post('/api/users')
-        .send({ name: 'Bulk Delete 2', email: `bulk-del2-${Date.now()}@example.com` })
+        .send({ name: 'Bulk Delete 2', email: `bulk-del2-${randomUUID()}@example.com` })
         .expect(201);
 
       await request(app.getHttpServer())
@@ -175,12 +175,12 @@ describe('Admin API - /api/users', () => {
     it('should restore multiple soft-deleted users', async () => {
       const user1 = await request(app.getHttpServer())
         .post('/api/users')
-        .send({ name: 'Bulk Restore 1', email: `bulk-res1-${Date.now()}@example.com` })
+        .send({ name: 'Bulk Restore 1', email: `bulk-res1-${randomUUID()}@example.com` })
         .expect(201);
 
       const user2 = await request(app.getHttpServer())
         .post('/api/users')
-        .send({ name: 'Bulk Restore 2', email: `bulk-res2-${Date.now()}@example.com` })
+        .send({ name: 'Bulk Restore 2', email: `bulk-res2-${randomUUID()}@example.com` })
         .expect(201);
 
       await request(app.getHttpServer())
@@ -203,7 +203,7 @@ describe('Admin API - /api/users', () => {
     it('should find both active and deleted users', async () => {
       const createResponse = await request(app.getHttpServer())
         .post('/api/users')
-        .send({ name: 'Any User', email: `any-${Date.now()}@example.com` })
+        .send({ name: 'Any User', email: `any-${randomUUID()}@example.com` })
         .expect(201);
 
       const userId = createResponse.body.id;
