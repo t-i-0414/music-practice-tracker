@@ -5,7 +5,7 @@ import { UserCommandService } from '@/modules/aggregate/user/user.command.servic
 import { UserQueryService } from '@/modules/aggregate/user/user.query.service';
 import { UserRepositoryService } from '@/modules/aggregate/user/user.repository.service';
 import * as ResponseDtoModule from '@/modules/aggregate/user/user.response.dto';
-import { createMockUser } from '@/tests/helper/create-mock-user';
+import { createMockUser } from '@/tests/helpers/create-mock-user';
 
 jest.mock('@/modules/aggregate/user/user.response.dto', () => ({
   toActiveUserDto: jest.fn(),

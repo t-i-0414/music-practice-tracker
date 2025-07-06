@@ -8,6 +8,7 @@ import tseslint, { type ConfigArray, configs } from 'typescript-eslint';
 
 const extensions = ['ts', 'tsx', 'mts', 'cts', 'js', 'jsx', 'mjs', 'cjs'];
 export const testFilePatterns = extensions.flatMap((ext) => [
+  '**/tests/**',
   `**/*.spec.${ext}`,
   `**/*.test.${ext}`,
   `**/specs.${ext}`,
@@ -324,6 +325,8 @@ export const createBaseConfig = ({ includesTsEslintPlugin = true, includeImportP
         '@typescript-eslint/max-params': 'off',
         '@typescript-eslint/explicit-member-accessibility': 'off',
         '@typescript-eslint/no-misused-spread': 'off',
+        '@typescript-eslint/no-unsafe-return': 'off',
+        '@typescript-eslint/no-unsafe-argument': 'off',
       },
     },
     globalIgnores(['**/dist/**', '**/coverage/**', '**/generated/**', '**/.turbo/**', '**/node_modules/**']),
