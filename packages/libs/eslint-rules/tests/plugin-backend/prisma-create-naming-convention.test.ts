@@ -5,7 +5,6 @@ const ruleTester = new RuleTester();
 
 ruleTester.run('prisma-create-naming-convention', rule, {
   valid: [
-    // create method in correctly named function
     {
       code: `
             async function createUser() {
@@ -15,7 +14,6 @@ ruleTester.run('prisma-create-naming-convention', rule, {
             }
           `,
     },
-    // createMany method in correctly named function
     {
       code: `
             async function createManyUsers() {
@@ -25,7 +23,6 @@ ruleTester.run('prisma-create-naming-convention', rule, {
             }
           `,
     },
-    // createManyAndReturn method in correctly named function
     {
       code: `
             async function createManyAndReturnUsers() {
@@ -35,7 +32,6 @@ ruleTester.run('prisma-create-naming-convention', rule, {
             }
           `,
     },
-    // Repository pattern
     {
       code: `
             class UserRepository {
@@ -47,7 +43,6 @@ ruleTester.run('prisma-create-naming-convention', rule, {
             }
           `,
     },
-    // Arrow function with correct name
     {
       code: `
             const createPost = async () => {
@@ -57,7 +52,6 @@ ruleTester.run('prisma-create-naming-convention', rule, {
             };
           `,
     },
-    // Method in object literal
     {
       code: `
             const userService = {
@@ -69,7 +63,6 @@ ruleTester.run('prisma-create-naming-convention', rule, {
             };
           `,
     },
-    // Case insensitive matching
     {
       code: `
             async function CreateUser() {
@@ -79,7 +72,6 @@ ruleTester.run('prisma-create-naming-convention', rule, {
             }
           `,
     },
-    // Different prisma access patterns
     {
       code: `
             async function createUser() {
@@ -98,7 +90,6 @@ ruleTester.run('prisma-create-naming-convention', rule, {
             }
           `,
     },
-    // Not a Prisma create call
     {
       code: `
             async function addUser() {
@@ -108,7 +99,6 @@ ruleTester.run('prisma-create-naming-convention', rule, {
             }
           `,
     },
-    // Create call outside of function
     {
       code: `
             const user = await prisma.user.create({
@@ -118,7 +108,6 @@ ruleTester.run('prisma-create-naming-convention', rule, {
     },
   ],
   invalid: [
-    // create method in incorrectly named function
     {
       code: `
             async function addUser() {
@@ -138,7 +127,6 @@ ruleTester.run('prisma-create-naming-convention', rule, {
         },
       ],
     },
-    // createMany in function not starting with createMany
     {
       code: `
             async function insertManyUsers() {
@@ -158,7 +146,6 @@ ruleTester.run('prisma-create-naming-convention', rule, {
         },
       ],
     },
-    // createManyAndReturn in function not starting with createManyAndReturn
     {
       code: `
             async function getManyUsers() {
@@ -178,7 +165,6 @@ ruleTester.run('prisma-create-naming-convention', rule, {
         },
       ],
     },
-    // Class method with wrong name
     {
       code: `
             class UserService {
@@ -200,7 +186,6 @@ ruleTester.run('prisma-create-naming-convention', rule, {
         },
       ],
     },
-    // Arrow function with wrong name
     {
       code: `
             const savePost = async () => {
@@ -220,7 +205,6 @@ ruleTester.run('prisma-create-naming-convention', rule, {
         },
       ],
     },
-    // Repository pattern with wrong method name
     {
       code: `
             class UserRepository {
@@ -242,7 +226,6 @@ ruleTester.run('prisma-create-naming-convention', rule, {
         },
       ],
     },
-    // Multiple errors in the same code
     {
       code: `
             async function insertUser() {

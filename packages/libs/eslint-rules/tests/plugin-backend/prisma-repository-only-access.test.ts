@@ -5,7 +5,6 @@ const ruleTester = new RuleTester();
 
 ruleTester.run('prisma-repository-only-access', rule, {
   valid: [
-    // Valid: Repository file accessing Prisma models
     {
       code: `
         class UserRepository {
@@ -16,7 +15,6 @@ ruleTester.run('prisma-repository-only-access', rule, {
       `,
       filename: '/project/src/modules/aggregate/user/user.repository.ts',
     },
-    // Valid:  Repository file accessing Prisma models
     {
       code: `
         class RepositoryService {
@@ -27,7 +25,6 @@ ruleTester.run('prisma-repository-only-access', rule, {
       `,
       filename: '/project/src/modules/aggregate/user/user.repository.service.ts',
     },
-    // Valid:  Repository file accessing Prisma models
     {
       code: `
         class RepositoryService {
@@ -38,7 +35,6 @@ ruleTester.run('prisma-repository-only-access', rule, {
       `,
       filename: '/project/src/modules/repository/repository.service.ts',
     },
-    // Valid:  Repository file accessing Prisma models
     {
       code: `
         class RepositoryService {
@@ -49,7 +45,6 @@ ruleTester.run('prisma-repository-only-access', rule, {
       `,
       filename: '/project/src/modules/repository/repository.ts',
     },
-    // Valid: Repository file importing PrismaClient
     {
       code: `
         import { PrismaClient } from '@prisma/client';
@@ -59,7 +54,6 @@ ruleTester.run('prisma-repository-only-access', rule, {
       `,
       filename: '/project/src/modules/aggregate/user/user.repository.ts',
     },
-    // Valid: DTO importing Prisma types only
     {
       code: `
         import type { User } from '@prisma/client';
@@ -67,7 +61,6 @@ ruleTester.run('prisma-repository-only-access', rule, {
       `,
       filename: '/project/src/modules/aggregate/user/user.dto.ts',
     },
-    // Valid: Service using repository (not direct Prisma access)
     {
       code: `
         class UserService {
@@ -78,7 +71,6 @@ ruleTester.run('prisma-repository-only-access', rule, {
       `,
       filename: '/project/src/modules/aggregate/user/user.service.ts',
     },
-    // Valid: Type-only import with specific type specifier
     {
       code: `
         import { type User, type Prisma } from '@prisma/client';
@@ -88,7 +80,6 @@ ruleTester.run('prisma-repository-only-access', rule, {
     },
   ],
   invalid: [
-    // Invalid: Service accessing Prisma directly
     {
       code: `
         class UserService {
@@ -104,7 +95,6 @@ ruleTester.run('prisma-repository-only-access', rule, {
         },
       ],
     },
-    // Invalid: Controller accessing Prisma
     {
       code: `
         class UserController {
@@ -120,7 +110,6 @@ ruleTester.run('prisma-repository-only-access', rule, {
         },
       ],
     },
-    // Invalid: Service importing PrismaClient
     {
       code: `
         import { PrismaClient } from '@prisma/client';
@@ -135,7 +124,6 @@ ruleTester.run('prisma-repository-only-access', rule, {
         },
       ],
     },
-    // Invalid: Service using PrismaClient methods
     {
       code: `
         class UserService {
@@ -151,7 +139,6 @@ ruleTester.run('prisma-repository-only-access', rule, {
         },
       ],
     },
-    // Invalid: Importing from generated prisma
     {
       code: `
         import { User } from '@/generated/prisma';

@@ -4,12 +4,8 @@ import rule from '@/plugin-backend/prisma-create-no-deleted-at';
 
 const ruleTester = new RuleTester();
 
-// Note: This rule requires type information for full functionality.
-// These tests cover the basic object literal cases without type checking.
-
 ruleTester.run('prisma-create-no-deleted-at', rule, {
   valid: [
-    // Basic create without deletedAt
     {
       code: `
         async function createUser() {
@@ -22,7 +18,6 @@ ruleTester.run('prisma-create-no-deleted-at', rule, {
         }
       `,
     },
-    // createMany without deletedAt
     {
       code: `
         async function createManyUsers() {
@@ -35,7 +30,6 @@ ruleTester.run('prisma-create-no-deleted-at', rule, {
         }
       `,
     },
-    // createManyAndReturn without deletedAt
     {
       code: `
         async function createManyAndReturnUsers() {
@@ -48,7 +42,6 @@ ruleTester.run('prisma-create-no-deleted-at', rule, {
         }
       `,
     },
-    // Repository pattern without deletedAt
     {
       code: `
         class UserRepository {
@@ -63,7 +56,6 @@ ruleTester.run('prisma-create-no-deleted-at', rule, {
         }
       `,
     },
-    // Non-Prisma create call
     {
       code: `
         async function createUser() {
@@ -75,7 +67,6 @@ ruleTester.run('prisma-create-no-deleted-at', rule, {
         }
       `,
     },
-    // Create with include/select
     {
       code: `
         async function createPost() {
@@ -93,7 +84,6 @@ ruleTester.run('prisma-create-no-deleted-at', rule, {
     },
   ],
   invalid: [
-    // Direct deletedAt in create
     {
       code: `
         async function createUser() {
@@ -111,7 +101,6 @@ ruleTester.run('prisma-create-no-deleted-at', rule, {
         },
       ],
     },
-    // deletedAt in createMany with array
     {
       code: `
         async function createManyUsers() {
@@ -129,7 +118,6 @@ ruleTester.run('prisma-create-no-deleted-at', rule, {
         },
       ],
     },
-    // deletedAt in createManyAndReturn
     {
       code: `
         async function createManyAndReturnUsers() {
@@ -147,7 +135,6 @@ ruleTester.run('prisma-create-no-deleted-at', rule, {
         },
       ],
     },
-    // Repository pattern with deletedAt
     {
       code: `
         class UserRepository {
@@ -167,7 +154,6 @@ ruleTester.run('prisma-create-no-deleted-at', rule, {
         },
       ],
     },
-    // Arrow function with deletedAt
     {
       code: `
         const createPost = async () => {
@@ -185,7 +171,6 @@ ruleTester.run('prisma-create-no-deleted-at', rule, {
         },
       ],
     },
-    // Method in object literal with deletedAt
     {
       code: `
         const userService = {
@@ -205,7 +190,6 @@ ruleTester.run('prisma-create-no-deleted-at', rule, {
         },
       ],
     },
-    // Using this.prisma with deletedAt
     {
       code: `
         class UserService {

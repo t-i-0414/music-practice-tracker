@@ -28,9 +28,9 @@
     "test": "jest --config ./tests/jest.config.ts",
     "test:cov": "jest --config ./tests/jest.config.ts --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --config ./tests/jest.config.ts --runInBand",
-    "test:e2e": "jest --config ./tests/jest.e2e.config.ts",
-    "test:integration": "jest --config ./tests/jest.config.ts --testRegex=\\.integration\\.spec\\.ts$",
-    "test:unit": "jest --config ./tests/jest.config.ts --testPathIgnorePatterns=\\.integration\\.spec\\.ts$",
+    "test:e2e": "jest --config ./tests/jest.config.ts --testMatch=\"<rootDir>/tests/e2e/**/*.spec.ts\"",
+    "test:integration": "jest --config ./tests/jest.config.ts --testMatch=\"<rootDir>/tests/integration/**/*.spec.ts\"",
+    "test:unit": "jest --config ./tests/jest.config.ts --testMatch=\"<rootDir>/tests/unit/**/*.spec.ts\"",
     "test:watch": "jest --config ./tests/jest.config.ts --watch",
     "type:check": "tsc --noEmit"
   },
@@ -50,9 +50,11 @@
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.1",
     "@types/express": "^5.0.0",
+    "@types/supertest": "^6.0.3",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
-    "prisma": "^6.11.1"
+    "prisma": "^6.11.1",
+    "supertest": "^7.1.1"
   },
   "prisma": {
     "schema": "./prisma"

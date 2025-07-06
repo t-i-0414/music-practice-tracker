@@ -6,7 +6,6 @@ const ruleTester = new RuleTester();
 
 ruleTester.run('prisma-find-naming-convention', rule, {
   valid: [
-    // findUnique with Active suffix
     {
       code: `
         async function findUniqueActiveUser() {
@@ -19,7 +18,6 @@ ruleTester.run('prisma-find-naming-convention', rule, {
         }
       `,
     },
-    // findUnique with Deleted suffix
     {
       code: `
         async function findUniqueDeletedUser() {
@@ -32,7 +30,6 @@ ruleTester.run('prisma-find-naming-convention', rule, {
         }
       `,
     },
-    // findUnique with Any suffix
     {
       code: `
         async function findUniqueAnyUser() {
@@ -48,7 +45,6 @@ ruleTester.run('prisma-find-naming-convention', rule, {
         }
       `,
     },
-    // findUniqueOrThrow with Active suffix
     {
       code: `
         async function findUniqueOrThrowActivePost() {
@@ -61,7 +57,6 @@ ruleTester.run('prisma-find-naming-convention', rule, {
         }
       `,
     },
-    // findFirst with Active suffix
     {
       code: `
         async function findFirstActiveComment() {
@@ -74,7 +69,6 @@ ruleTester.run('prisma-find-naming-convention', rule, {
         }
       `,
     },
-    // findFirstOrThrow with Deleted suffix
     {
       code: `
         async function findFirstOrThrowDeletedOrder() {
@@ -87,7 +81,6 @@ ruleTester.run('prisma-find-naming-convention', rule, {
         }
       `,
     },
-    // findMany with Active suffix
     {
       code: `
         async function findManyActiveUsers() {
@@ -100,7 +93,6 @@ ruleTester.run('prisma-find-naming-convention', rule, {
         }
       `,
     },
-    // findMany with Deleted suffix
     {
       code: `
         async function findManyDeletedPosts() {
@@ -113,7 +105,6 @@ ruleTester.run('prisma-find-naming-convention', rule, {
         }
       `,
     },
-    // findMany with Any suffix
     {
       code: `
         async function findManyAnyComments() {
@@ -129,7 +120,6 @@ ruleTester.run('prisma-find-naming-convention', rule, {
         }
       `,
     },
-    // Repository pattern with correct naming
     {
       code: `
         class UserRepository {
@@ -144,7 +134,6 @@ ruleTester.run('prisma-find-naming-convention', rule, {
         }
       `,
     },
-    // Arrow function with correct name
     {
       code: `
         const findFirstActiveProduct = async (name: string) => {
@@ -157,7 +146,6 @@ ruleTester.run('prisma-find-naming-convention', rule, {
         };
       `,
     },
-    // Method in object literal
     {
       code: `
         const userService = {
@@ -172,7 +160,6 @@ ruleTester.run('prisma-find-naming-convention', rule, {
         };
       `,
     },
-    // Case insensitive matching
     {
       code: `
         async function FindUniqueActiveUser() {
@@ -185,7 +172,6 @@ ruleTester.run('prisma-find-naming-convention', rule, {
         }
       `,
     },
-    // Different prisma access patterns
     {
       code: `
         async function findFirstActiveUser() {
@@ -210,7 +196,6 @@ ruleTester.run('prisma-find-naming-convention', rule, {
         }
       `,
     },
-    // findUnique with additional suffix after Active/Deleted/Any
     {
       code: `
         async function findUniqueActiveUserById(id: number) {
@@ -235,7 +220,6 @@ ruleTester.run('prisma-find-naming-convention', rule, {
         }
       `,
     },
-    // Not a Prisma find call
     {
       code: `
         async function findUser() {
@@ -245,7 +229,6 @@ ruleTester.run('prisma-find-naming-convention', rule, {
         }
       `,
     },
-    // Find call outside of function
     {
       code: `
         const user = await prisma.user.findUnique({
@@ -253,7 +236,6 @@ ruleTester.run('prisma-find-naming-convention', rule, {
         });
       `,
     },
-    // Empty where clause for non-Any types (no deletedAt required)
     {
       code: `
         async function findManyActiveUsers() {
@@ -261,7 +243,6 @@ ruleTester.run('prisma-find-naming-convention', rule, {
         }
       `,
     },
-    // Without where clause for non-Any types
     {
       code: `
         async function findFirstActivePost() {
@@ -273,7 +254,6 @@ ruleTester.run('prisma-find-naming-convention', rule, {
     },
   ],
   invalid: [
-    // findUnique without Active/Deleted/Any suffix
     {
       code: `
         async function findUniqueUser() {
@@ -292,7 +272,6 @@ ruleTester.run('prisma-find-naming-convention', rule, {
         },
       ],
     },
-    // findUniqueOrThrow with wrong prefix
     {
       code: `
         async function getUserOrThrow() {
@@ -311,7 +290,6 @@ ruleTester.run('prisma-find-naming-convention', rule, {
         },
       ],
     },
-    // findFirst with wrong name
     {
       code: `
         async function getFirstComment() {
@@ -330,7 +308,6 @@ ruleTester.run('prisma-find-naming-convention', rule, {
         },
       ],
     },
-    // findMany with wrong name
     {
       code: `
         async function getAllUsers() {
@@ -349,7 +326,6 @@ ruleTester.run('prisma-find-naming-convention', rule, {
         },
       ],
     },
-    // Active function missing deletedAt filter
     {
       code: `
         async function findUniqueActiveUser() {
@@ -367,7 +343,6 @@ ruleTester.run('prisma-find-naming-convention', rule, {
         },
       ],
     },
-    // Deleted function missing deletedAt filter
     {
       code: `
         async function findManyDeletedPosts() {
@@ -385,7 +360,6 @@ ruleTester.run('prisma-find-naming-convention', rule, {
         },
       ],
     },
-    // Active function with wrong deletedAt value
     {
       code: `
         async function findFirstActiveComment() {
@@ -408,7 +382,6 @@ ruleTester.run('prisma-find-naming-convention', rule, {
         },
       ],
     },
-    // Deleted function with wrong deletedAt value
     {
       code: `
         async function findManyDeletedOrders() {
@@ -431,7 +404,6 @@ ruleTester.run('prisma-find-naming-convention', rule, {
         },
       ],
     },
-    // Any function missing OR clause
     {
       code: `
         async function findUniqueAnyUser() {
@@ -449,7 +421,6 @@ ruleTester.run('prisma-find-naming-convention', rule, {
         },
       ],
     },
-    // Any function without where clause
     {
       code: `
         async function findManyAnyComments() {
@@ -465,7 +436,6 @@ ruleTester.run('prisma-find-naming-convention', rule, {
         },
       ],
     },
-    // deletedAt not last in where clause
     {
       code: `
         async function findUniqueActiveUser() {
@@ -483,7 +453,6 @@ ruleTester.run('prisma-find-naming-convention', rule, {
         },
       ],
     },
-    // OR not last in where clause for Any
     {
       code: `
         async function findManyAnyPosts() {
@@ -504,7 +473,6 @@ ruleTester.run('prisma-find-naming-convention', rule, {
         },
       ],
     },
-    // Class method with wrong name
     {
       code: `
         class UserService {
@@ -525,7 +493,6 @@ ruleTester.run('prisma-find-naming-convention', rule, {
         },
       ],
     },
-    // Arrow function with wrong name
     {
       code: `
         const fetchPost = async (id: number) => {
@@ -544,7 +511,6 @@ ruleTester.run('prisma-find-naming-convention', rule, {
         },
       ],
     },
-    // Repository pattern with wrong method name
     {
       code: `
         class UserRepository {
@@ -565,7 +531,6 @@ ruleTester.run('prisma-find-naming-convention', rule, {
         },
       ],
     },
-    // Multiple errors in the same code
     {
       code: `
         async function getUser() {
@@ -613,7 +578,6 @@ ruleTester.run('prisma-find-naming-convention', rule, {
         },
       ],
     },
-    // Deleted function with incorrect deletedAt structure
     {
       code: `
         async function findUniqueDeletedUser() {

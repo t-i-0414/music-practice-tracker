@@ -6,7 +6,6 @@ const ruleTester = new RuleTester();
 
 ruleTester.run('prisma-delete-naming-convention', rule, {
   valid: [
-    // delete method in correctly named function
     {
       code: `
         async function hardDeleteUser() {
@@ -16,7 +15,6 @@ ruleTester.run('prisma-delete-naming-convention', rule, {
         }
       `,
     },
-    // deleteMany method in correctly named function
     {
       code: `
         async function hardDeleteManyUsers() {
@@ -26,7 +24,6 @@ ruleTester.run('prisma-delete-naming-convention', rule, {
         }
       `,
     },
-    // Repository pattern with correct naming
     {
       code: `
         class UserRepository {
@@ -38,7 +35,6 @@ ruleTester.run('prisma-delete-naming-convention', rule, {
         }
       `,
     },
-    // Arrow function with correct name
     {
       code: `
         const hardDeletePost = async (id: number) => {
@@ -48,7 +44,6 @@ ruleTester.run('prisma-delete-naming-convention', rule, {
         };
       `,
     },
-    // Method in object literal
     {
       code: `
         const userService = {
@@ -60,7 +55,6 @@ ruleTester.run('prisma-delete-naming-convention', rule, {
         };
       `,
     },
-    // Case insensitive matching
     {
       code: `
         async function HardDeleteUser() {
@@ -70,7 +64,6 @@ ruleTester.run('prisma-delete-naming-convention', rule, {
         }
       `,
     },
-    // Different prisma access patterns
     {
       code: `
         async function hardDeleteUser() {
@@ -89,7 +82,6 @@ ruleTester.run('prisma-delete-naming-convention', rule, {
         }
       `,
     },
-    // deleteMany with correct prefix
     {
       code: `
         async function hardDeleteManyPosts() {
@@ -99,7 +91,6 @@ ruleTester.run('prisma-delete-naming-convention', rule, {
         }
       `,
     },
-    // Not a Prisma delete call
     {
       code: `
         async function removeUser() {
@@ -109,7 +100,6 @@ ruleTester.run('prisma-delete-naming-convention', rule, {
         }
       `,
     },
-    // Delete call outside of function
     {
       code: `
         const result = await prisma.user.delete({
@@ -117,7 +107,6 @@ ruleTester.run('prisma-delete-naming-convention', rule, {
         });
       `,
     },
-    // hardDelete with additional suffix
     {
       code: `
         async function hardDeleteUserById(id: number) {
@@ -127,7 +116,6 @@ ruleTester.run('prisma-delete-naming-convention', rule, {
         }
       `,
     },
-    // hardDeleteMany with additional suffix
     {
       code: `
         async function hardDeleteManyInactiveUsers() {
@@ -139,7 +127,6 @@ ruleTester.run('prisma-delete-naming-convention', rule, {
     },
   ],
   invalid: [
-    // delete method in incorrectly named function
     {
       code: `
         async function deleteUser() {
@@ -159,7 +146,6 @@ ruleTester.run('prisma-delete-naming-convention', rule, {
         },
       ],
     },
-    // deleteMany in function not starting with hardDeleteMany
     {
       code: `
         async function removeManyUsers() {
@@ -179,7 +165,6 @@ ruleTester.run('prisma-delete-naming-convention', rule, {
         },
       ],
     },
-    // Class method with wrong name
     {
       code: `
         class UserService {
@@ -201,7 +186,6 @@ ruleTester.run('prisma-delete-naming-convention', rule, {
         },
       ],
     },
-    // Arrow function with wrong name
     {
       code: `
         const deletePost = async (id: number) => {
@@ -221,7 +205,6 @@ ruleTester.run('prisma-delete-naming-convention', rule, {
         },
       ],
     },
-    // Repository pattern with wrong method name
     {
       code: `
         class UserRepository {
@@ -243,7 +226,6 @@ ruleTester.run('prisma-delete-naming-convention', rule, {
         },
       ],
     },
-    // deleteMany with wrong prefix
     {
       code: `
         async function deleteManyUsers() {
@@ -263,7 +245,6 @@ ruleTester.run('prisma-delete-naming-convention', rule, {
         },
       ],
     },
-    // Multiple errors in the same code
     {
       code: `
         async function removeUser() {
@@ -297,7 +278,6 @@ ruleTester.run('prisma-delete-naming-convention', rule, {
         },
       ],
     },
-    // Soft delete naming should not be used for Prisma delete
     {
       code: `
         async function softDeleteUser() {
