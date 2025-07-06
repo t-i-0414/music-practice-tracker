@@ -15,7 +15,6 @@ const ignorePatterns = [
 
 const config: Config = {
   collectCoverageFrom: ['**/*.(t|j)s'],
-  coverageDirectory: '../coverage',
   moduleFileExtensions: ['js', 'json', 'ts'],
   moduleNameMapper: {
     '^@/generated/(.*)$': '<rootDir>/generated/$1',
@@ -29,7 +28,16 @@ const config: Config = {
     '^.+\\.ts$': 'ts-jest',
   },
   testPathIgnorePatterns: ignorePatterns,
+  coverageDirectory: '../coverage',
   coveragePathIgnorePatterns: [...ignorePatterns, '/tests/'],
+  coverageThreshold: {
+    global: {
+      branches: 95,
+      functions: 95,
+      lines: 95,
+      statements: 95,
+    },
+  },
 };
 
 export default config;
