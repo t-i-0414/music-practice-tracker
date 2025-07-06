@@ -17,7 +17,7 @@ export const createBaseReactNativeConfig = ({
     {
       extends: [createBaseReactConfig({ includesTsEslintPlugin, includeImportPlugin, includeReactHooks })],
       rules: {
-        'react-native/no-raw-text': 'off',
+        'react-native/no-raw-text': 'off', // Because this rule does not work with flat config yet
       },
     },
     prettierConfig,
