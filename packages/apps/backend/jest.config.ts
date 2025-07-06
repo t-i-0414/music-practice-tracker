@@ -10,7 +10,7 @@ const ignorePatterns = [
   'jest.config.ts',
   'jest.e2e.config.ts',
   'main.ts',
-  'app.module.ts',
+  '\\.module\\.ts$',
 ];
 
 const config: Config = {
