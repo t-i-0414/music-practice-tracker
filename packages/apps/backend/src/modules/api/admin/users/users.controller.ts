@@ -148,15 +148,6 @@ export class AdminUsersController {
     return this.userAdminFacade.updateUserById({ id, data });
   }
 
-  @Delete(':id')
-  @ApiOperation({ summary: 'Delete a user by ID (soft)' })
-  @ApiParam({ name: 'id', description: 'User ID' })
-  @ApiResponse({ status: 204, description: 'User deleted successfully' })
-  @HttpCode(HttpStatus.NO_CONTENT)
-  public async deleteUser(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
-    return this.userAdminFacade.deleteUserById({ id });
-  }
-
   @Delete('bulk')
   @ApiOperation({ summary: 'Delete multiple users by IDs (soft)' })
   @ApiBody({ type: DeleteManyUsersInputDto })
@@ -164,15 +155,6 @@ export class AdminUsersController {
   @HttpCode(HttpStatus.NO_CONTENT)
   public async deleteManyUsers(@Body() body: DeleteManyUsersInputDto): Promise<void> {
     return this.userAdminFacade.deleteManyUsersById(body);
-  }
-
-  @Delete('hard/:id')
-  @ApiOperation({ summary: 'Hard delete a user by ID' })
-  @ApiParam({ name: 'id', description: 'User ID' })
-  @ApiResponse({ status: 204, description: 'User permanently deleted' })
-  @HttpCode(HttpStatus.NO_CONTENT)
-  public async hardDeleteUser(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
-    return this.userAdminFacade.hardDeleteUserById({ id });
   }
 
   @Delete('hard/bulk')
@@ -184,12 +166,22 @@ export class AdminUsersController {
     return this.userAdminFacade.hardDeleteManyUsersById(body);
   }
 
-  @Put(':id/restore')
-  @ApiOperation({ summary: 'Restore a soft-deleted user by ID' })
+  @Delete('hard/:id')
+  @ApiOperation({ summary: 'Hard delete a user by ID' })
   @ApiParam({ name: 'id', description: 'User ID' })
-  @ApiResponse({ status: 200, description: 'User restored successfully', type: ActiveUserResponseDto })
-  public async restoreUser(@Param('id', new ParseUUIDPipe()) id: string): Promise<ActiveUserResponseDto> {
-    return this.userAdminFacade.restoreUserById({ id });
+  @ApiResponse({ status: 204, description: 'User permanently deleted' })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  public async hardDeleteUser(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
+    return this.userAdminFacade.hardDeleteUserById({ id });
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Delete a user by ID (soft)' })
+  @ApiParam({ name: 'id', description: 'User ID' })
+  @ApiResponse({ status: 204, description: 'User deleted successfully' })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  public async deleteUser(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
+    return this.userAdminFacade.deleteUserById({ id });
   }
 
   @Put('restore/bulk')
@@ -207,5 +199,13 @@ export class AdminUsersController {
   @ApiResponse({ status: 200, description: 'Users restored successfully', type: ActiveUsersResponseDto })
   public async restoreManyUsers(@Body() body: RestoreManyUsersInputDto): Promise<ActiveUsersResponseDto> {
     return this.userAdminFacade.restoreManyUsersById(body);
+  }
+
+  @Put(':id/restore')
+  @ApiOperation({ summary: 'Restore a soft-deleted user by ID' })
+  @ApiParam({ name: 'id', description: 'User ID' })
+  @ApiResponse({ status: 200, description: 'User restored successfully', type: ActiveUserResponseDto })
+  public async restoreUser(@Param('id', new ParseUUIDPipe()) id: string): Promise<ActiveUserResponseDto> {
+    return this.userAdminFacade.restoreUserById({ id });
   }
 }
