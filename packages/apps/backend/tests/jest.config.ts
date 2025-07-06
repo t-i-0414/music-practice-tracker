@@ -1,4 +1,3 @@
-// jest.config.ts
 import type { Config } from 'jest';
 
 const ignorePatterns = [
@@ -23,6 +22,7 @@ const config: Config = {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
   rootDir: '..',
+  setupFiles: ['<rootDir>/tests/jest-env.setup.ts'],
   setupFilesAfterEnv: ['<rootDir>/tests/jest.setup.ts'],
   testEnvironment: 'node',
   testRegex: '.*\\.spec\\.ts$',

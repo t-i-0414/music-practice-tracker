@@ -40,6 +40,37 @@ services:
     security_opt:
       - no-new-privileges:true
 
+  postgres-test:
+    image: postgres:15-alpine
+    container_name: music-practice-tracker-test-db
+    networks:
+      - music_practice_tracker_net
+    environment:
+      POSTGRES_DB: music_practice_tracker_test
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_INITDB_ARGS: '--auth-host=scram-sha-256'
+    ports:
+      - '15433:5432'
+    volumes:
+      - music-practice-tracker-test-db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d music_practice_tracker_test']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+    security_opt:
+      - no-new-privileges:true
+
 volumes:
   music-practice-tracker-db-data:
+    driver: local
+  music-practice-tracker-test-db-data:
     driver: local

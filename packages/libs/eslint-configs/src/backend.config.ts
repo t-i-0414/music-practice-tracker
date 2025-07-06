@@ -7,7 +7,17 @@ import tseslint, { type ConfigArray } from 'typescript-eslint';
 
 import { createBaseConfig, testFilePatterns } from './base.config';
 
-const vitestRules = Object.keys(vitestPlugin.rules).reduce<Record<string, 'off'>>((acc, rule) => {
+const enabledBackendPluginRules = Object.keys(pluginBackend.rules).reduce<Record<string, 'error'>>((acc, rule) => {
+  acc[`custom-backend-eslint/${rule}`] = 'error';
+  return acc;
+}, {});
+
+const disabledBackendPluginRules = Object.keys(pluginBackend.rules).reduce<Record<string, 'off'>>((acc, rule) => {
+  acc[`custom-backend-eslint/${rule}`] = 'off';
+  return acc;
+}, {});
+
+const disabledVitestRules = Object.keys(vitestPlugin.rules).reduce<Record<string, 'off'>>((acc, rule) => {
   acc[`vitest/${rule}`] = 'off';
   return acc;
 }, {});
@@ -26,15 +36,7 @@ export const createBackendConfig = ({ includesTsEslintPlugin = true, includeImpo
       plugins: {
         'custom-backend-eslint': pluginBackend,
       },
-      rules: {
-        'custom-backend-eslint/prisma-find-naming-convention': 'error',
-        'custom-backend-eslint/prisma-update-naming-convention': 'error',
-        'custom-backend-eslint/prisma-create-no-deleted-at': 'error',
-        'custom-backend-eslint/prisma-create-naming-convention': 'error',
-        'custom-backend-eslint/prisma-delete-naming-convention': 'error',
-        'custom-backend-eslint/prisma-repository-only-access': 'error',
-        'custom-backend-eslint/repository-model-access-restriction': 'error',
-      },
+      rules: enabledBackendPluginRules,
     },
     {
       files: testFilePatterns,
@@ -42,7 +44,10 @@ export const createBackendConfig = ({ includesTsEslintPlugin = true, includeImpo
         vitest: vitestPlugin,
       },
       ...jestPlugin.configs['flat/all'],
-      rules: vitestRules,
+      rules: {
+        ...disabledVitestRules,
+        ...disabledBackendPluginRules,
+      },
     },
     prettierConfig,
   );

@@ -9,6 +9,7 @@ setup:
 	bun install
 	bun run prisma:generate
 	bun run prisma:migrate:dev
+	bun run prisma:migrate:test
 	bun run prisma:validate
 	@echo "✅ Backend environment setup complete!"
 
