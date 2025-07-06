@@ -6,8 +6,8 @@ import { UserAppFacadeService } from '@/modules/aggregate/user/user.app.facade.s
 import { CreateUserInputDto, UpdateUserDataDto } from '@/modules/aggregate/user/user.input.dto';
 import { ActiveUserResponseDto } from '@/modules/aggregate/user/user.response.dto';
 
-@ApiTags('app/users')
-@ApiController('app/users')
+@ApiTags('users')
+@ApiController('users')
 export class AppUsersController {
   public constructor(private readonly userAppFacade: UserAppFacadeService) {}
 

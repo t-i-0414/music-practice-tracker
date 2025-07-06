@@ -4,6 +4,7 @@
   "private": true,
   "main": "expo-router/entry",
   "scripts": {
+    "gen:api-types": "openapi-typescript http://localhost:3000/api-json -o generated/types/api.d.ts",
     "lint:check": "eslint",
     "lint:fix": "eslint --fix",
     "reset-project": "node ./scripts/reset-project.js",

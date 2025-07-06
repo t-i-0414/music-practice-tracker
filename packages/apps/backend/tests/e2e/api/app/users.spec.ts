@@ -3,14 +3,14 @@ import { Reflector } from '@nestjs/core';
 import { Test, type TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
 
-import { AppModule } from '@/app.module';
+import { AppApiModule } from '@/modules/api/app/app.module';
 
-describe('App API - /api/app/users', () => {
+describe('App API - /api/users', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
+      imports: [AppApiModule],
     }).compile();
 
     app = moduleFixture.createNestApplication();
@@ -25,7 +25,7 @@ describe('App API - /api/app/users', () => {
     await app.close();
   });
 
-  describe('POST /api/app/users', () => {
+  describe('POST /api/users', () => {
     it('should create a user', () => {
       const createDto = {
         name: 'Test User',
@@ -33,7 +33,7 @@ describe('App API - /api/app/users', () => {
       };
 
       return request(app.getHttpServer())
-        .post('/api/app/users')
+        .post('/api/users')
         .send(createDto)
         .expect(201)
         .expect((res) => {
@@ -51,26 +51,26 @@ describe('App API - /api/app/users', () => {
         email: 'invalid-email',
       };
 
-      return request(app.getHttpServer()).post('/api/app/users').send(invalidDto).expect(400);
+      return request(app.getHttpServer()).post('/api/users').send(invalidDto).expect(400);
     });
   });
 
-  describe('GET /api/app/users/:id', () => {
+  describe('GET /api/users/:id', () => {
     it('should return 400 for invalid UUID', () =>
-      request(app.getHttpServer()).get('/api/app/users/invalid-uuid').expect(400));
+      request(app.getHttpServer()).get('/api/users/invalid-uuid').expect(400));
 
     it('should return 404 for non-existent user', () =>
-      request(app.getHttpServer()).get('/api/app/users/00000000-0000-0000-0000-000000000000').expect(404));
+      request(app.getHttpServer()).get('/api/users/00000000-0000-0000-0000-000000000000').expect(404));
   });
 
-  describe('PUT /api/app/users/:id', () => {
+  describe('PUT /api/users/:id', () => {
     it('should update user data', async () => {
       const createDto = {
         name: 'Original User',
         email: `original-${Date.now()}@example.com`,
       };
 
-      const createResponse = await request(app.getHttpServer()).post('/api/app/users').send(createDto).expect(201);
+      const createResponse = await request(app.getHttpServer()).post('/api/users').send(createDto).expect(201);
 
       const userId = createResponse.body.id;
 
@@ -79,7 +79,7 @@ describe('App API - /api/app/users', () => {
       };
 
       return request(app.getHttpServer())
-        .put(`/api/app/users/${userId}`)
+        .put(`/api/users/${userId}`)
         .send(updateDto)
         .expect(200)
         .expect((res) => {
@@ -89,20 +89,20 @@ describe('App API - /api/app/users', () => {
     });
   });
 
-  describe('DELETE /api/app/users/:id', () => {
+  describe('DELETE /api/users/:id', () => {
     it('should delete a user', async () => {
       const createDto = {
         name: 'To Delete User',
         email: `delete-${Date.now()}@example.com`,
       };
 
-      const createResponse = await request(app.getHttpServer()).post('/api/app/users').send(createDto).expect(201);
+      const createResponse = await request(app.getHttpServer()).post('/api/users').send(createDto).expect(201);
 
       const userId = createResponse.body.id;
 
-      await request(app.getHttpServer()).delete(`/api/app/users/${userId}`).expect(204);
+      await request(app.getHttpServer()).delete(`/api/users/${userId}`).expect(204);
 
-      await request(app.getHttpServer()).get(`/api/app/users/${userId}`).expect(404);
+      await request(app.getHttpServer()).get(`/api/users/${userId}`).expect(404);
     });
   });
 });

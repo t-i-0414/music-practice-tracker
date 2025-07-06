@@ -2,14 +2,15 @@ import { ClassSerializerInterceptor, type INestApplication, ValidationPipe } fro
 import { Reflector } from '@nestjs/core';
 import { Test, type TestingModule } from '@nestjs/testing';
 
-import { AppModule } from '@/app.module';
+import { AdminApiModule } from '@/modules/api/admin.module';
+import { AppApiModule } from '@/modules/api/app.module';
 
 export async function createTestApp(): Promise<{
   app: INestApplication;
   module: TestingModule;
 }> {
   const module = await Test.createTestingModule({
-    imports: [AppModule],
+    imports: [AppApiModule, AdminApiModule],
   }).compile();
 
   const app = module.createNestApplication();

@@ -20,8 +20,8 @@ import {
   DeletedUsersResponseDto,
 } from '@/modules/aggregate/user/user.response.dto';
 
-@ApiTags('admin/users')
-@ApiController('admin/users')
+@ApiTags('users')
+@ApiController('users')
 export class AdminUsersController {
   public constructor(private readonly userAdminFacade: UserAdminFacadeService) {}
 

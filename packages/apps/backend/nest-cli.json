@@ -4,5 +4,15 @@
   "sourceRoot": "src",
   "compilerOptions": {
     "deleteOutDir": true
+  },
+  "projects": {
+    "admin-api": {
+      "type": "application",
+      "entryFile": "admin-api.main"
+    },
+    "app-api": {
+      "type": "application",
+      "entryFile": "app-api.main"
+    }
   }
 }

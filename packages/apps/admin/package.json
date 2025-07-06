@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "next build",
+    "gen:api-types": "openapi-typescript http://localhost:3001/api-json -o generated/types/api.d.ts",
     "lint:check": "next lint",
     "lint:fix": "next lint --fix",
     "start:dev": "next dev --turbopack",
