@@ -5,13 +5,12 @@ import { UserQueryService } from '@/modules/aggregate/user/user.query.service';
 import { UserRepositoryService } from '@/modules/aggregate/user/user.repository.service';
 import * as ResponseDtoModule from '@/modules/aggregate/user/user.response.dto';
 import {
-  cleanupMocks,
-  createMockUser,
+  activeUserFixture,
   createMockUserRepositoryService,
   createTestModule,
-  mockActiveUser,
-  mockDeletedUser,
-  TEST_UUIDS,
+  createUserEntity,
+  deletedUserFixture,
+  USER_FIXTURE_IDS,
 } from '@/tests/helpers';
 
 jest.mock('@/modules/aggregate/user/user.response.dto', () => ({
@@ -27,9 +26,27 @@ describe('UserQueryService', () => {
   let service: UserQueryService;
   let mockRepositoryService: ReturnType<typeof createMockUserRepositoryService>;
 
+  const activeUserFixtureEntity = createUserEntity({
+    id: USER_FIXTURE_IDS.ACTIVE,
+    name: activeUserFixture.name,
+    email: activeUserFixture.email,
+    createdAt: activeUserFixture.createdAt,
+    updatedAt: activeUserFixture.updatedAt,
+    deletedAt: null,
+  });
+
+  const deletedUserFixtureEntity = createUserEntity({
+    id: USER_FIXTURE_IDS.DELETED,
+    name: deletedUserFixture.name,
+    email: deletedUserFixture.email,
+    createdAt: deletedUserFixture.createdAt,
+    updatedAt: deletedUserFixture.updatedAt,
+    deletedAt: deletedUserFixture.deletedAt,
+  });
+
   beforeEach(async () => {
     mockRepositoryService = createMockUserRepositoryService();
-    
+
     const module: TestingModule = await createTestModule({
       providers: [
         UserQueryService,
@@ -43,22 +60,18 @@ describe('UserQueryService', () => {
     service = module.get<UserQueryService>(UserQueryService);
   });
 
-  afterEach(() => {
-    cleanupMocks();
-  });
-
   describe('findUserByIdOrFail', () => {
-    const mockDto = { id: TEST_UUIDS.ACTIVE_USER };
-    const mockResponseDto = { id: TEST_UUIDS.ACTIVE_USER, name: mockActiveUser.name };
+    const mockDto = { id: USER_FIXTURE_IDS.ACTIVE };
+    const mockResponseDto = { id: USER_FIXTURE_IDS.ACTIVE, name: activeUserFixture.name };
 
     it('should return active user when found', async () => {
-      mockRepositoryService.findUniqueActiveUser.mockResolvedValue(mockActiveUser);
+      mockRepositoryService.findUniqueActiveUser.mockResolvedValue(activeUserFixtureEntity);
       (ResponseDtoModule.toActiveUserDto as jest.Mock).mockReturnValue(mockResponseDto);
 
       const result = await service.findUserByIdOrFail(mockDto);
 
       expect(mockRepositoryService.findUniqueActiveUser).toHaveBeenCalledWith(mockDto);
-      expect(ResponseDtoModule.toActiveUserDto).toHaveBeenCalledWith(mockActiveUser);
+      expect(ResponseDtoModule.toActiveUserDto).toHaveBeenCalledWith(activeUserFixtureEntity);
       expect(result).toBe(mockResponseDto);
     });
 
@@ -82,21 +95,21 @@ describe('UserQueryService', () => {
   });
 
   describe('findDeletedUserByIdOrFail', () => {
-    const mockDto = { id: TEST_UUIDS.DELETED_USER };
+    const mockDto = { id: USER_FIXTURE_IDS.DELETED };
     const mockResponseDto = {
-      id: mockDeletedUser.id,
-      name: mockDeletedUser.name,
-      deletedAt: mockDeletedUser.deletedAt,
+      id: deletedUserFixture.id,
+      name: deletedUserFixture.name,
+      deletedAt: deletedUserFixture.deletedAt,
     };
 
     it('should return deleted user when found', async () => {
-      mockRepositoryService.findUniqueDeletedUser.mockResolvedValue(mockDeletedUser);
+      mockRepositoryService.findUniqueDeletedUser.mockResolvedValue(deletedUserFixtureEntity);
       (ResponseDtoModule.toDeletedUserDto as jest.Mock).mockReturnValue(mockResponseDto);
 
       const result = await service.findDeletedUserByIdOrFail(mockDto);
 
       expect(mockRepositoryService.findUniqueDeletedUser).toHaveBeenCalledWith(mockDto);
-      expect(ResponseDtoModule.toDeletedUserDto).toHaveBeenCalledWith(mockDeletedUser);
+      expect(ResponseDtoModule.toDeletedUserDto).toHaveBeenCalledWith(deletedUserFixtureEntity);
       expect(result).toBe(mockResponseDto);
     });
 
@@ -120,37 +133,37 @@ describe('UserQueryService', () => {
   });
 
   describe('findAnyUserByIdOrFail', () => {
-    const mockDto = { id: TEST_UUIDS.ACTIVE_USER };
+    const mockDto = { id: USER_FIXTURE_IDS.ACTIVE };
     const mockResponseDto = {
-      id: mockActiveUser.id,
-      name: mockActiveUser.name,
+      id: activeUserFixture.id,
+      name: activeUserFixture.name,
       deletedAt: null,
     };
 
     it('should return active user when found', async () => {
-      mockRepositoryService.findUniqueAnyUser.mockResolvedValue(mockActiveUser);
+      mockRepositoryService.findUniqueAnyUser.mockResolvedValue(activeUserFixtureEntity);
       (ResponseDtoModule.toAnyUserDto as jest.Mock).mockReturnValue(mockResponseDto);
 
       const result = await service.findAnyUserByIdOrFail(mockDto);
 
       expect(mockRepositoryService.findUniqueAnyUser).toHaveBeenCalledWith(mockDto);
-      expect(ResponseDtoModule.toAnyUserDto).toHaveBeenCalledWith(mockActiveUser);
+      expect(ResponseDtoModule.toAnyUserDto).toHaveBeenCalledWith(activeUserFixtureEntity);
       expect(result).toBe(mockResponseDto);
     });
 
     it('should return deleted user when found', async () => {
       const deletedResponseDto = {
-        id: mockDeletedUser.id,
-        name: mockDeletedUser.name,
-        deletedAt: mockDeletedUser.deletedAt,
+        id: deletedUserFixture.id,
+        name: deletedUserFixture.name,
+        deletedAt: deletedUserFixture.deletedAt,
       };
-      mockRepositoryService.findUniqueAnyUser.mockResolvedValue(mockDeletedUser);
+      mockRepositoryService.findUniqueAnyUser.mockResolvedValue(deletedUserFixtureEntity);
       (ResponseDtoModule.toAnyUserDto as jest.Mock).mockReturnValue(deletedResponseDto);
 
-      const result = await service.findAnyUserByIdOrFail({ id: TEST_UUIDS.DELETED_USER });
+      const result = await service.findAnyUserByIdOrFail({ id: USER_FIXTURE_IDS.DELETED });
 
-      expect(mockRepositoryService.findUniqueAnyUser).toHaveBeenCalledWith({ id: TEST_UUIDS.DELETED_USER });
-      expect(ResponseDtoModule.toAnyUserDto).toHaveBeenCalledWith(mockDeletedUser);
+      expect(mockRepositoryService.findUniqueAnyUser).toHaveBeenCalledWith({ id: USER_FIXTURE_IDS.DELETED });
+      expect(ResponseDtoModule.toAnyUserDto).toHaveBeenCalledWith(deletedUserFixtureEntity);
       expect(result).toBe(deletedResponseDto);
     });
 
@@ -175,10 +188,7 @@ describe('UserQueryService', () => {
 
   describe('findManyUsers', () => {
     const mockDto = { ids: ['id1', 'id2', 'id3'] };
-    const mockUsers = [
-      createMockUser({ id: 'id1' }),
-      createMockUser({ id: 'id2' }),
-    ];
+    const mockUsers = [createUserEntity({ id: 'id1' }), createUserEntity({ id: 'id2' })];
     const mockResponseDto = { users: mockUsers };
 
     it('should return active users when found', async () => {
@@ -234,8 +244,8 @@ describe('UserQueryService', () => {
   describe('findManyDeletedUsers', () => {
     const mockDto = { ids: ['id1', 'id2', 'id3'] };
     const mockUsers = [
-      createMockUser({ id: 'id1', deletedAt: new Date('2024-01-03') }),
-      createMockUser({ id: 'id2', deletedAt: new Date('2024-01-03') }),
+      createUserEntity({ id: 'id1', deletedAt: new Date('2024-01-03') }),
+      createUserEntity({ id: 'id2', deletedAt: new Date('2024-01-03') }),
     ];
     const mockResponseDto = { users: mockUsers };
 
@@ -292,8 +302,8 @@ describe('UserQueryService', () => {
   describe('findManyAnyUsers', () => {
     const mockDto = { ids: ['id1', 'id2', 'id3'] };
     const mockUsers = [
-      createMockUser({ id: 'id1' }),
-      createMockUser({ id: 'id2', deletedAt: new Date('2024-01-03') }),
+      createUserEntity({ id: 'id1' }),
+      createUserEntity({ id: 'id2', deletedAt: new Date('2024-01-03') }),
     ];
     const mockResponseDto = { users: mockUsers };
 
@@ -364,8 +374,8 @@ describe('UserQueryService', () => {
     it('should handle concurrent requests properly', async () => {
       const dto1 = { id: 'id1' };
       const dto2 = { id: 'id2' };
-      const user1 = createMockUser({ id: 'id1' });
-      const user2 = createMockUser({ id: 'id2' });
+      const user1 = createUserEntity({ id: 'id1' });
+      const user2 = createUserEntity({ id: 'id2' });
 
       mockRepositoryService.findUniqueActiveUser.mockResolvedValueOnce(user1).mockResolvedValueOnce(user2);
 
@@ -388,7 +398,7 @@ describe('UserQueryService', () => {
     it('should handle large batch queries efficiently', async () => {
       const largeIds = Array.from({ length: 1000 }, (_, i) => `id${i}`);
       const mockDto = { ids: largeIds };
-      const mockUsers = largeIds.slice(0, 500).map((id) => createMockUser({ id }));
+      const mockUsers = largeIds.slice(0, 500).map((id) => createUserEntity({ id }));
 
       mockRepositoryService.findManyActiveUsers.mockResolvedValue(mockUsers);
       (ResponseDtoModule.toActiveUsersDto as jest.Mock).mockReturnValue({ users: mockUsers });
@@ -403,7 +413,7 @@ describe('UserQueryService', () => {
 
     it('should maintain data consistency across different find methods', async () => {
       const userId = 'consistent-id';
-      const consistentUser = createMockUser({ id: userId });
+      const consistentUser = createUserEntity({ id: userId });
 
       // Setup all methods to return the same user
       mockRepositoryService.findUniqueActiveUser.mockResolvedValue(consistentUser);

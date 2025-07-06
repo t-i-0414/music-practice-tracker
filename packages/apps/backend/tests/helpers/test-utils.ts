@@ -1,5 +1,6 @@
 import { HttpStatus, ValidationPipe, type INestApplication } from '@nestjs/common';
 import { Test, type TestingModule } from '@nestjs/testing';
+import { type ValidationError } from 'class-validator';
 import * as request from 'supertest';
 
 export async function createTestModule(
@@ -8,13 +9,35 @@ export async function createTestModule(
   return Test.createTestingModule(moduleMetadata).compile();
 }
 
-// Setup integration test app with common configurations
 export async function setupTestApp(module: TestingModule): Promise<INestApplication> {
   const app = module.createNestApplication();
   app.useGlobalPipes(new ValidationPipe());
   app.useLogger(false);
   await app.init();
   return app;
+}
+
+export function setupIntegrationTest(): {
+  getApp(): INestApplication | undefined;
+  setApp(app: INestApplication): void;
+} {
+  let appInstance: INestApplication | undefined;
+
+  afterEach(async () => {
+    if (appInstance) {
+      await appInstance.close();
+      appInstance = undefined;
+    }
+  });
+
+  return {
+    getApp(): INestApplication | undefined {
+      return appInstance;
+    },
+    setApp(newApp: INestApplication): void {
+      appInstance = newApp;
+    },
+  };
 }
 
 type HttpTester = {
@@ -88,10 +111,6 @@ export const expectNoContentResponse = async (responsePromise: request.Test): Pr
   expect(response.body).toEqual({});
 };
 
-export function cleanupMocks(): void {
-  jest.clearAllMocks();
-}
-
 const DEFAULT_CONCURRENT_COUNT = 3;
 
 export async function testConcurrentRequests<T>(
@@ -108,3 +127,12 @@ export async function testConcurrentRequests<T>(
 
   return results.map((r) => r.body) as T[];
 }
+
+export const getValidationErrorMessages = (errors: ValidationError[]): string[] =>
+  errors.flatMap((error) => {
+    const messages = error.constraints ? Object.values(error.constraints) : [];
+    if (error.children && error.children.length > 0) {
+      messages.push(...getValidationErrorMessages(error.children));
+    }
+    return messages;
+  });

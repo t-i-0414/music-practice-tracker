@@ -1,4 +1,3 @@
-import { cleanupMocks } from '@/tests/helpers';
 import { getEnvironment, isDevelopment, isProduction, isTest } from '@/utils/environment';
 
 describe('Environment Utilities', () => {
@@ -9,7 +8,6 @@ describe('Environment Utilities', () => {
   });
 
   afterEach(() => {
-    cleanupMocks();
     if (originalEnv !== undefined) {
       process.env.NODE_ENV = originalEnv;
     } else {

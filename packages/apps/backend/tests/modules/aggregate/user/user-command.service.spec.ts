@@ -5,7 +5,7 @@ import { UserCommandService } from '@/modules/aggregate/user/user.command.servic
 import { UserQueryService } from '@/modules/aggregate/user/user.query.service';
 import { UserRepositoryService } from '@/modules/aggregate/user/user.repository.service';
 import * as ResponseDtoModule from '@/modules/aggregate/user/user.response.dto';
-import { createMockUser } from '@/tests/helpers/create-mock-user';
+import { createUserEntity } from '@/tests/helpers';
 
 jest.mock('@/modules/aggregate/user/user.response.dto', () => ({
   toActiveUserDto: jest.fn(),
@@ -21,7 +21,7 @@ describe('UserCommandService', () => {
   let repositoryService: jest.Mocked<UserRepositoryService>;
   let queryService: jest.Mocked<UserQueryService>;
 
-  const mockActiveUserDto = {
+  const activeUserFixtureDto = {
     id: '123e4567-e89b-12d3-a456-426614174000',
     name: 'Test User',
     email: 'test@example.com',
@@ -29,8 +29,8 @@ describe('UserCommandService', () => {
     updatedAt: new Date('2024-01-02'),
   };
 
-  const mockActiveUsersDto = {
-    users: [mockActiveUserDto],
+  const activeUserFixturesDto = {
+    users: [activeUserFixtureDto],
   };
 
   beforeEach(async () => {
@@ -89,33 +89,33 @@ describe('UserCommandService', () => {
   });
 
   describe('createUser', () => {
-    const createUserInput = {
+    const createUserInputFixture = {
       name: 'New User',
       email: 'new@example.com',
     };
 
     it('should create a user and return mapped DTO', async () => {
-      const createdUser = createMockUser({
+      const createdUser = createUserEntity({
         id: '123e4567-e89b-12d3-a456-426614174000',
-        ...createUserInput,
+        ...createUserInputFixture,
       });
 
       repositoryService.createUser.mockResolvedValue(createdUser);
-      (ResponseDtoModule.toActiveUserDto as jest.Mock).mockReturnValue(mockActiveUserDto);
+      (ResponseDtoModule.toActiveUserDto as jest.Mock).mockReturnValue(activeUserFixtureDto);
 
-      const result = await service.createUser(createUserInput);
+      const result = await service.createUser(createUserInputFixture);
 
-      expect(repositoryService.createUser).toHaveBeenCalledWith(createUserInput);
+      expect(repositoryService.createUser).toHaveBeenCalledWith(createUserInputFixture);
       expect(repositoryService.createUser).toHaveBeenCalledTimes(1);
       expect(ResponseDtoModule.toActiveUserDto).toHaveBeenCalledWith(createdUser);
-      expect(result).toBe(mockActiveUserDto);
+      expect(result).toBe(activeUserFixtureDto);
     });
 
     it('should handle repository errors', async () => {
       const error = new Error('Database error');
       repositoryService.createUser.mockRejectedValue(error);
 
-      await expect(service.createUser(createUserInput)).rejects.toThrow(error);
+      await expect(service.createUser(createUserInputFixture)).rejects.toThrow(error);
       expect(ResponseDtoModule.toActiveUserDto).not.toHaveBeenCalled();
     });
 
@@ -123,7 +123,7 @@ describe('UserCommandService', () => {
       const duplicateError = new Error('Unique constraint violation');
       repositoryService.createUser.mockRejectedValue(duplicateError);
 
-      await expect(service.createUser(createUserInput)).rejects.toThrow(duplicateError);
+      await expect(service.createUser(createUserInputFixture)).rejects.toThrow(duplicateError);
     });
 
     it('should pass through all user properties', async () => {
@@ -132,9 +132,9 @@ describe('UserCommandService', () => {
         email: 'detailed@example.com',
       };
 
-      const createdUser = createMockUser(detailedInput);
+      const createdUser = createUserEntity(detailedInput);
       repositoryService.createUser.mockResolvedValue(createdUser);
-      (ResponseDtoModule.toActiveUserDto as jest.Mock).mockReturnValue(mockActiveUserDto);
+      (ResponseDtoModule.toActiveUserDto as jest.Mock).mockReturnValue(activeUserFixtureDto);
 
       await service.createUser(detailedInput);
 
@@ -152,21 +152,21 @@ describe('UserCommandService', () => {
 
     it('should create multiple users and return mapped DTOs', async () => {
       const createdUsers = createManyInput.users.map((user, index) =>
-        createMockUser({
+        createUserEntity({
           id: `id-${index}`,
           ...user,
         }),
       );
 
       repositoryService.createManyAndReturnUsers.mockResolvedValue(createdUsers);
-      (ResponseDtoModule.toActiveUsersDto as jest.Mock).mockReturnValue(mockActiveUsersDto);
+      (ResponseDtoModule.toActiveUsersDto as jest.Mock).mockReturnValue(activeUserFixturesDto);
 
       const result = await service.createManyAndReturnUsers(createManyInput);
 
       expect(repositoryService.createManyAndReturnUsers).toHaveBeenCalledWith(createManyInput.users);
       expect(repositoryService.createManyAndReturnUsers).toHaveBeenCalledTimes(1);
       expect(ResponseDtoModule.toActiveUsersDto).toHaveBeenCalledWith(createdUsers);
-      expect(result).toBe(mockActiveUsersDto);
+      expect(result).toBe(activeUserFixturesDto);
     });
 
     it('should handle empty array', async () => {
@@ -188,7 +188,7 @@ describe('UserCommandService', () => {
         })),
       };
 
-      const createdUsers = largeInput.users.map((user, i) => createMockUser({ id: `id-${i}`, ...user }));
+      const createdUsers = largeInput.users.map((user, i) => createUserEntity({ id: `id-${i}`, ...user }));
 
       repositoryService.createManyAndReturnUsers.mockResolvedValue(createdUsers);
       (ResponseDtoModule.toActiveUsersDto as jest.Mock).mockReturnValue({ users: createdUsers });
@@ -217,12 +217,12 @@ describe('UserCommandService', () => {
     };
 
     it('should verify user exists then update and return mapped DTO', async () => {
-      const existingUser = createMockUser({ id: updateInput.id });
+      const existingUser = createUserEntity({ id: updateInput.id });
       const updatedUser = { ...existingUser, ...updateInput.data };
 
       queryService.findUserByIdOrFail.mockResolvedValue(existingUser);
       repositoryService.updateUser.mockResolvedValue(updatedUser);
-      (ResponseDtoModule.toActiveUserDto as jest.Mock).mockReturnValue(mockActiveUserDto);
+      (ResponseDtoModule.toActiveUserDto as jest.Mock).mockReturnValue(activeUserFixtureDto);
 
       const result = await service.updateUserById(updateInput);
 
@@ -233,7 +233,7 @@ describe('UserCommandService', () => {
         data: updateInput.data,
       });
       expect(ResponseDtoModule.toActiveUserDto).toHaveBeenCalledWith(updatedUser);
-      expect(result).toBe(mockActiveUserDto);
+      expect(result).toBe(activeUserFixtureDto);
     });
 
     it('should throw NotFoundException if user does not exist', async () => {
@@ -253,12 +253,12 @@ describe('UserCommandService', () => {
         },
       };
 
-      const existingUser = createMockUser({ id: partialUpdateInput.id });
+      const existingUser = createUserEntity({ id: partialUpdateInput.id });
       const updatedUser = { ...existingUser, ...partialUpdateInput.data };
 
       queryService.findUserByIdOrFail.mockResolvedValue(existingUser);
       repositoryService.updateUser.mockResolvedValue(updatedUser);
-      (ResponseDtoModule.toActiveUserDto as jest.Mock).mockReturnValue(mockActiveUserDto);
+      (ResponseDtoModule.toActiveUserDto as jest.Mock).mockReturnValue(activeUserFixtureDto);
 
       await service.updateUserById(partialUpdateInput);
 
@@ -274,10 +274,10 @@ describe('UserCommandService', () => {
         data: {},
       };
 
-      const existingUser = createMockUser({ id: emptyUpdateInput.id });
+      const existingUser = createUserEntity({ id: emptyUpdateInput.id });
       queryService.findUserByIdOrFail.mockResolvedValue(existingUser);
       repositoryService.updateUser.mockResolvedValue(existingUser);
-      (ResponseDtoModule.toActiveUserDto as jest.Mock).mockReturnValue(mockActiveUserDto);
+      (ResponseDtoModule.toActiveUserDto as jest.Mock).mockReturnValue(activeUserFixtureDto);
 
       await service.updateUserById(emptyUpdateInput);
 
@@ -288,7 +288,7 @@ describe('UserCommandService', () => {
     });
 
     it('should handle repository update errors', async () => {
-      const existingUser = createMockUser({ id: updateInput.id });
+      const existingUser = createUserEntity({ id: updateInput.id });
       queryService.findUserByIdOrFail.mockResolvedValue(existingUser);
 
       const updateError = new Error('Update failed');
@@ -452,20 +452,20 @@ describe('UserCommandService', () => {
     const restoreInput = { id: '123e4567-e89b-12d3-a456-426614174000' };
 
     it('should restore a soft-deleted user and return mapped DTO', async () => {
-      const restoredUser = createMockUser({
+      const restoredUser = createUserEntity({
         id: restoreInput.id,
         deletedAt: null,
       });
 
       repositoryService.restoreUser.mockResolvedValue(restoredUser);
-      (ResponseDtoModule.toActiveUserDto as jest.Mock).mockReturnValue(mockActiveUserDto);
+      (ResponseDtoModule.toActiveUserDto as jest.Mock).mockReturnValue(activeUserFixtureDto);
 
       const result = await service.restoreUserById(restoreInput);
 
       expect(repositoryService.restoreUser).toHaveBeenCalledWith({ id: restoreInput.id });
       expect(repositoryService.restoreUser).toHaveBeenCalledTimes(1);
       expect(ResponseDtoModule.toActiveUserDto).toHaveBeenCalledWith(restoredUser);
-      expect(result).toBe(mockActiveUserDto);
+      expect(result).toBe(activeUserFixtureDto);
     });
 
     it('should handle non-existent user restoration', async () => {
@@ -477,17 +477,17 @@ describe('UserCommandService', () => {
     });
 
     it('should handle already active user restoration', async () => {
-      const activeUser = createMockUser({
+      const activeUser = createUserEntity({
         id: restoreInput.id,
         deletedAt: null,
       });
 
       repositoryService.restoreUser.mockResolvedValue(activeUser);
-      (ResponseDtoModule.toActiveUserDto as jest.Mock).mockReturnValue(mockActiveUserDto);
+      (ResponseDtoModule.toActiveUserDto as jest.Mock).mockReturnValue(activeUserFixtureDto);
 
       const result = await service.restoreUserById(restoreInput);
 
-      expect(result).toBe(mockActiveUserDto);
+      expect(result).toBe(activeUserFixtureDto);
     });
   });
 
@@ -498,14 +498,14 @@ describe('UserCommandService', () => {
 
     it('should restore multiple soft-deleted users and return mapped DTOs', async () => {
       const restoredUsers = restoreManyInput.ids.map((id) =>
-        createMockUser({
+        createUserEntity({
           id,
           deletedAt: null,
         }),
       );
 
       repositoryService.restoreManyAndReturnUsers.mockResolvedValue(restoredUsers);
-      (ResponseDtoModule.toActiveUsersDto as jest.Mock).mockReturnValue(mockActiveUsersDto);
+      (ResponseDtoModule.toActiveUsersDto as jest.Mock).mockReturnValue(activeUserFixturesDto);
 
       const result = await service.restoreManyUsersById(restoreManyInput);
 
@@ -514,7 +514,7 @@ describe('UserCommandService', () => {
       });
       expect(repositoryService.restoreManyAndReturnUsers).toHaveBeenCalledTimes(1);
       expect(ResponseDtoModule.toActiveUsersDto).toHaveBeenCalledWith(restoredUsers);
-      expect(result).toBe(mockActiveUsersDto);
+      expect(result).toBe(activeUserFixturesDto);
     });
 
     it('should handle empty array', async () => {
@@ -531,8 +531,8 @@ describe('UserCommandService', () => {
 
     it('should handle partial restoration (some users not found)', async () => {
       const partialRestoredUsers = [
-        createMockUser({ id: 'id1', deletedAt: null }),
-        createMockUser({ id: 'id3', deletedAt: null }),
+        createUserEntity({ id: 'id1', deletedAt: null }),
+        createUserEntity({ id: 'id3', deletedAt: null }),
       ];
 
       repositoryService.restoreManyAndReturnUsers.mockResolvedValue(partialRestoredUsers);
@@ -562,7 +562,7 @@ describe('UserCommandService', () => {
       }));
 
       repositoryService.createUser.mockImplementation((input) =>
-        Promise.resolve(createMockUser({ id: `id-${Math.random()}`, name: input.name, email: input.email })),
+        Promise.resolve(createUserEntity({ id: `id-${Math.random()}`, name: input.name, email: input.email })),
       );
       (ResponseDtoModule.toActiveUserDto as jest.Mock).mockImplementation((user: unknown) => ({
         ...(user as Record<string, unknown>),
@@ -577,14 +577,14 @@ describe('UserCommandService', () => {
     });
 
     it('should handle mixed operations concurrently', async () => {
-      const user = createMockUser();
+      const user = createUserEntity();
 
       repositoryService.createUser.mockResolvedValue(user);
       repositoryService.updateUser.mockResolvedValue(user);
       repositoryService.deleteUser.mockResolvedValue(undefined);
       repositoryService.restoreUser.mockResolvedValue(user);
       queryService.findUserByIdOrFail.mockResolvedValue(user);
-      (ResponseDtoModule.toActiveUserDto as jest.Mock).mockReturnValue(mockActiveUserDto);
+      (ResponseDtoModule.toActiveUserDto as jest.Mock).mockReturnValue(activeUserFixtureDto);
 
       const [createResult, updateResult, _, restoreResult] = await Promise.all([
         service.createUser({ name: 'Test', email: 'test@example.com' }),
@@ -593,9 +593,9 @@ describe('UserCommandService', () => {
         service.restoreUserById({ id: 'id3' }),
       ]);
 
-      expect(createResult).toBe(mockActiveUserDto);
-      expect(updateResult).toBe(mockActiveUserDto);
-      expect(restoreResult).toBe(mockActiveUserDto);
+      expect(createResult).toBe(activeUserFixtureDto);
+      expect(updateResult).toBe(activeUserFixtureDto);
+      expect(restoreResult).toBe(activeUserFixtureDto);
     });
   });
 
@@ -621,7 +621,7 @@ describe('UserCommandService', () => {
     });
 
     it('should not mask errors with transformation errors', async () => {
-      const user = createMockUser();
+      const user = createUserEntity();
       repositoryService.createUser.mockResolvedValue(user);
 
       const transformError = new Error('DTO transformation failed');

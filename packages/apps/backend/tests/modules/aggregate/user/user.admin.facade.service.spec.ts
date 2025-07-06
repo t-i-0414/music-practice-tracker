@@ -16,57 +16,20 @@ import type {
   UpdateUserInputDto,
 } from '@/modules/aggregate/user/user.input.dto';
 import { UserQueryService } from '@/modules/aggregate/user/user.query.service';
-import type {
-  ActiveUserResponseDto,
-  ActiveUsersResponseDto,
-  AnyUserResponseDto,
-  AnyUsersResponseDto,
-  DeletedUserResponseDto,
-  DeletedUsersResponseDto,
-} from '@/modules/aggregate/user/user.response.dto';
+import type { ActiveUserResponseDto, AnyUserResponseDto } from '@/modules/aggregate/user/user.response.dto';
+import {
+  activeUserFixture,
+  activeUsersResponseFixture,
+  anyUserFixture,
+  anyUsersResponseFixture,
+  deletedUserFixture,
+  deletedUsersResponseFixture,
+} from '@/tests/helpers';
 
 describe('UserAdminFacadeService', () => {
   let service: UserAdminFacadeService;
   let commandService: jest.Mocked<UserCommandService>;
   let queryService: jest.Mocked<UserQueryService>;
-
-  const mockActiveUserResponse: ActiveUserResponseDto = {
-    id: '123e4567-e89b-12d3-a456-426614174000',
-    name: 'Test User',
-    email: 'test@example.com',
-    createdAt: new Date('2024-01-01'),
-    updatedAt: new Date('2024-01-02'),
-  };
-
-  const mockDeletedUserResponse: DeletedUserResponseDto = {
-    id: '223e4567-e89b-12d3-a456-426614174001',
-    name: 'Deleted User',
-    email: 'deleted@example.com',
-    createdAt: new Date('2024-01-01'),
-    updatedAt: new Date('2024-01-02'),
-    deletedAt: new Date('2024-01-03'),
-  };
-
-  const mockAnyUserResponse: AnyUserResponseDto = {
-    id: '323e4567-e89b-12d3-a456-426614174002',
-    name: 'Any User',
-    email: 'any@example.com',
-    createdAt: new Date('2024-01-01'),
-    updatedAt: new Date('2024-01-02'),
-    deletedAt: new Date('2024-01-03'),
-  };
-
-  const mockActiveUsersResponse: ActiveUsersResponseDto = {
-    users: [mockActiveUserResponse],
-  };
-
-  const mockDeletedUsersResponse: DeletedUsersResponseDto = {
-    users: [mockDeletedUserResponse],
-  };
-
-  const mockAnyUsersResponse: AnyUsersResponseDto = {
-    users: [mockAnyUserResponse],
-  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -105,10 +68,6 @@ describe('UserAdminFacadeService', () => {
     queryService = module.get(UserQueryService);
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
   describe('Service initialization', () => {
     it('should be defined', () => {
       expect(service).toBeDefined();
@@ -125,13 +84,13 @@ describe('UserAdminFacadeService', () => {
       const mockInput: FindUserByIdInputDto = { id: '123e4567-e89b-12d3-a456-426614174000' };
 
       it('should delegate to UserQueryService.findUserByIdOrFail', async () => {
-        queryService.findUserByIdOrFail.mockResolvedValue(mockActiveUserResponse);
+        queryService.findUserByIdOrFail.mockResolvedValue(activeUserFixture);
 
         const result = await service.findUserById(mockInput);
 
         expect(queryService.findUserByIdOrFail).toHaveBeenCalledWith(mockInput);
         expect(queryService.findUserByIdOrFail).toHaveBeenCalledTimes(1);
-        expect(result).toBe(mockActiveUserResponse);
+        expect(result).toBe(activeUserFixture);
       });
 
       it('should propagate errors from query service', async () => {
@@ -146,17 +105,17 @@ describe('UserAdminFacadeService', () => {
       const mockInput: FindUserByIdInputDto = { id: '223e4567-e89b-12d3-a456-426614174001' };
 
       it('should delegate to UserQueryService.findDeletedUserByIdOrFail', async () => {
-        queryService.findDeletedUserByIdOrFail.mockResolvedValue(mockDeletedUserResponse);
+        queryService.findDeletedUserByIdOrFail.mockResolvedValue(deletedUserFixture);
 
         const result = await service.findDeletedUserById(mockInput);
 
         expect(queryService.findDeletedUserByIdOrFail).toHaveBeenCalledWith(mockInput);
         expect(queryService.findDeletedUserByIdOrFail).toHaveBeenCalledTimes(1);
-        expect(result).toBe(mockDeletedUserResponse);
+        expect(result).toBe(deletedUserFixture);
       });
 
       it('should return deleted users with deletedAt timestamp', async () => {
-        queryService.findDeletedUserByIdOrFail.mockResolvedValue(mockDeletedUserResponse);
+        queryService.findDeletedUserByIdOrFail.mockResolvedValue(deletedUserFixture);
 
         const result = await service.findDeletedUserById(mockInput);
 
@@ -169,18 +128,18 @@ describe('UserAdminFacadeService', () => {
       const mockInput: FindUserByIdInputDto = { id: '323e4567-e89b-12d3-a456-426614174002' };
 
       it('should delegate to UserQueryService.findAnyUserByIdOrFail', async () => {
-        queryService.findAnyUserByIdOrFail.mockResolvedValue(mockAnyUserResponse);
+        queryService.findAnyUserByIdOrFail.mockResolvedValue(anyUserFixture);
 
         const result = await service.findAnyUserById(mockInput);
 
         expect(queryService.findAnyUserByIdOrFail).toHaveBeenCalledWith(mockInput);
         expect(queryService.findAnyUserByIdOrFail).toHaveBeenCalledTimes(1);
-        expect(result).toBe(mockAnyUserResponse);
+        expect(result).toBe(anyUserFixture);
       });
 
       it('should handle users with different deletion dates', async () => {
         const recentlyDeleted: AnyUserResponseDto = {
-          ...mockAnyUserResponse,
+          ...anyUserFixture,
           deletedAt: new Date('2024-12-01'),
         };
         queryService.findAnyUserByIdOrFail.mockResolvedValue(recentlyDeleted);
@@ -189,7 +148,7 @@ describe('UserAdminFacadeService', () => {
         expect(recentResult.deletedAt).toEqual(new Date('2024-12-01'));
 
         const olderDeleted: AnyUserResponseDto = {
-          ...mockAnyUserResponse,
+          ...anyUserFixture,
           deletedAt: new Date('2023-01-01'),
         };
         queryService.findAnyUserByIdOrFail.mockResolvedValue(olderDeleted);
@@ -203,13 +162,13 @@ describe('UserAdminFacadeService', () => {
       const mockInput: FindManyUsersByIdInputDto = { ids: ['id1', 'id2', 'id3'] };
 
       it('should delegate to UserQueryService.findManyUsers', async () => {
-        queryService.findManyUsers.mockResolvedValue(mockActiveUsersResponse);
+        queryService.findManyUsers.mockResolvedValue(activeUsersResponseFixture);
 
         const result = await service.findManyUsers(mockInput);
 
         expect(queryService.findManyUsers).toHaveBeenCalledWith(mockInput);
         expect(queryService.findManyUsers).toHaveBeenCalledTimes(1);
-        expect(result).toBe(mockActiveUsersResponse);
+        expect(result).toBe(activeUsersResponseFixture);
       });
 
       it('should handle empty results', async () => {
@@ -225,13 +184,13 @@ describe('UserAdminFacadeService', () => {
       const mockInput: FindManyUsersByIdInputDto = { ids: ['id1', 'id2'] };
 
       it('should delegate to UserQueryService.findManyDeletedUsers', async () => {
-        queryService.findManyDeletedUsers.mockResolvedValue(mockDeletedUsersResponse);
+        queryService.findManyDeletedUsers.mockResolvedValue(deletedUsersResponseFixture);
 
         const result = await service.findManyDeletedUsers(mockInput);
 
         expect(queryService.findManyDeletedUsers).toHaveBeenCalledWith(mockInput);
         expect(queryService.findManyDeletedUsers).toHaveBeenCalledTimes(1);
-        expect(result).toBe(mockDeletedUsersResponse);
+        expect(result).toBe(deletedUsersResponseFixture);
       });
     });
 
@@ -239,13 +198,13 @@ describe('UserAdminFacadeService', () => {
       const mockInput: FindManyUsersByIdInputDto = { ids: ['id1', 'id2'] };
 
       it('should delegate to UserQueryService.findManyAnyUsers', async () => {
-        queryService.findManyAnyUsers.mockResolvedValue(mockAnyUsersResponse);
+        queryService.findManyAnyUsers.mockResolvedValue(anyUsersResponseFixture);
 
         const result = await service.findManyAnyUsers(mockInput);
 
         expect(queryService.findManyAnyUsers).toHaveBeenCalledWith(mockInput);
         expect(queryService.findManyAnyUsers).toHaveBeenCalledTimes(1);
-        expect(result).toBe(mockAnyUsersResponse);
+        expect(result).toBe(anyUsersResponseFixture);
       });
     });
   });
@@ -258,13 +217,13 @@ describe('UserAdminFacadeService', () => {
       };
 
       it('should delegate to UserCommandService.createUser', async () => {
-        commandService.createUser.mockResolvedValue(mockActiveUserResponse);
+        commandService.createUser.mockResolvedValue(activeUserFixture);
 
         const result = await service.createUser(mockInput);
 
         expect(commandService.createUser).toHaveBeenCalledWith(mockInput);
         expect(commandService.createUser).toHaveBeenCalledTimes(1);
-        expect(result).toBe(mockActiveUserResponse);
+        expect(result).toBe(activeUserFixture);
       });
     });
 
@@ -277,13 +236,13 @@ describe('UserAdminFacadeService', () => {
       };
 
       it('should delegate to UserCommandService.createManyAndReturnUsers', async () => {
-        commandService.createManyAndReturnUsers.mockResolvedValue(mockActiveUsersResponse);
+        commandService.createManyAndReturnUsers.mockResolvedValue(activeUsersResponseFixture);
 
         const result = await service.createManyAndReturnUsers(mockInput);
 
         expect(commandService.createManyAndReturnUsers).toHaveBeenCalledWith(mockInput);
         expect(commandService.createManyAndReturnUsers).toHaveBeenCalledTimes(1);
-        expect(result).toBe(mockActiveUsersResponse);
+        expect(result).toBe(activeUsersResponseFixture);
       });
     });
 
@@ -294,13 +253,13 @@ describe('UserAdminFacadeService', () => {
       };
 
       it('should delegate to UserCommandService.updateUserById', async () => {
-        commandService.updateUserById.mockResolvedValue(mockActiveUserResponse);
+        commandService.updateUserById.mockResolvedValue(activeUserFixture);
 
         const result = await service.updateUserById(mockInput);
 
         expect(commandService.updateUserById).toHaveBeenCalledWith(mockInput);
         expect(commandService.updateUserById).toHaveBeenCalledTimes(1);
-        expect(result).toBe(mockActiveUserResponse);
+        expect(result).toBe(activeUserFixture);
       });
     });
 
@@ -384,17 +343,17 @@ describe('UserAdminFacadeService', () => {
       const mockInput: RestoreUserByIdInputDto = { id: '123e4567-e89b-12d3-a456-426614174000' };
 
       it('should delegate to UserCommandService.restoreUserById', async () => {
-        commandService.restoreUserById.mockResolvedValue(mockActiveUserResponse);
+        commandService.restoreUserById.mockResolvedValue(activeUserFixture);
 
         const result = await service.restoreUserById(mockInput);
 
         expect(commandService.restoreUserById).toHaveBeenCalledWith(mockInput);
         expect(commandService.restoreUserById).toHaveBeenCalledTimes(1);
-        expect(result).toBe(mockActiveUserResponse);
+        expect(result).toBe(activeUserFixture);
       });
 
       it('should destructure and pass id correctly', async () => {
-        commandService.restoreUserById.mockResolvedValue(mockActiveUserResponse);
+        commandService.restoreUserById.mockResolvedValue(activeUserFixture);
 
         await service.restoreUserById({ id: 'restore-id' });
 
@@ -406,13 +365,13 @@ describe('UserAdminFacadeService', () => {
       const mockInput: RestoreManyUsersInputDto = { ids: ['id1', 'id2'] };
 
       it('should delegate to UserCommandService.restoreManyUsersById', async () => {
-        commandService.restoreManyUsersById.mockResolvedValue(mockActiveUsersResponse);
+        commandService.restoreManyUsersById.mockResolvedValue(activeUsersResponseFixture);
 
         const result = await service.restoreManyUsersById(mockInput);
 
         expect(commandService.restoreManyUsersById).toHaveBeenCalledWith(mockInput);
         expect(commandService.restoreManyUsersById).toHaveBeenCalledTimes(1);
-        expect(result).toBe(mockActiveUsersResponse);
+        expect(result).toBe(activeUsersResponseFixture);
       });
     });
   });
@@ -449,8 +408,8 @@ describe('UserAdminFacadeService', () => {
     });
 
     it('should not add business logic, only delegate', async () => {
-      queryService.findUserByIdOrFail.mockResolvedValue(mockActiveUserResponse);
-      commandService.createUser.mockResolvedValue(mockActiveUserResponse);
+      queryService.findUserByIdOrFail.mockResolvedValue(activeUserFixture);
+      commandService.createUser.mockResolvedValue(activeUserFixture);
 
       const start1 = Date.now();
       await service.findUserById({ id: 'test' });
@@ -503,9 +462,9 @@ describe('UserAdminFacadeService', () => {
 
   describe('Concurrent Operations', () => {
     it('should handle multiple concurrent queries', async () => {
-      queryService.findUserByIdOrFail.mockResolvedValue(mockActiveUserResponse);
-      queryService.findDeletedUserByIdOrFail.mockResolvedValue(mockDeletedUserResponse);
-      queryService.findAnyUserByIdOrFail.mockResolvedValue(mockAnyUserResponse);
+      queryService.findUserByIdOrFail.mockResolvedValue(activeUserFixture);
+      queryService.findDeletedUserByIdOrFail.mockResolvedValue(deletedUserFixture);
+      queryService.findAnyUserByIdOrFail.mockResolvedValue(anyUserFixture);
 
       const [active, deleted, any] = await Promise.all([
         service.findUserById({ id: 'id1' }),
@@ -513,15 +472,15 @@ describe('UserAdminFacadeService', () => {
         service.findAnyUserById({ id: 'id3' }),
       ]);
 
-      expect(active).toBe(mockActiveUserResponse);
-      expect(deleted).toBe(mockDeletedUserResponse);
-      expect(any).toBe(mockAnyUserResponse);
+      expect(active).toBe(activeUserFixture);
+      expect(deleted).toBe(deletedUserFixture);
+      expect(any).toBe(anyUserFixture);
     });
 
     it('should handle mixed queries and commands concurrently', async () => {
-      queryService.findUserByIdOrFail.mockResolvedValue(mockActiveUserResponse);
-      commandService.createUser.mockResolvedValue(mockActiveUserResponse);
-      commandService.updateUserById.mockResolvedValue(mockActiveUserResponse);
+      queryService.findUserByIdOrFail.mockResolvedValue(activeUserFixture);
+      commandService.createUser.mockResolvedValue(activeUserFixture);
+      commandService.updateUserById.mockResolvedValue(activeUserFixture);
       commandService.deleteUserById.mockResolvedValue(undefined);
 
       const results = await Promise.all([
@@ -531,9 +490,9 @@ describe('UserAdminFacadeService', () => {
         service.deleteUserById({ id: 'id3' }),
       ]);
 
-      expect(results[0]).toBe(mockActiveUserResponse);
-      expect(results[1]).toBe(mockActiveUserResponse);
-      expect(results[2]).toBe(mockActiveUserResponse);
+      expect(results[0]).toBe(activeUserFixture);
+      expect(results[1]).toBe(activeUserFixture);
+      expect(results[2]).toBe(activeUserFixture);
       expect(results[3]).toBeUndefined();
     });
   });
@@ -548,7 +507,7 @@ describe('UserAdminFacadeService', () => {
         },
       };
 
-      commandService.updateUserById.mockResolvedValue(mockActiveUserResponse);
+      commandService.updateUserById.mockResolvedValue(activeUserFixture);
 
       await service.updateUserById(complexInput);
 
@@ -575,7 +534,7 @@ describe('UserAdminFacadeService', () => {
 
   describe('Performance', () => {
     it('should handle high-volume operations efficiently', async () => {
-      commandService.createUser.mockResolvedValue(mockActiveUserResponse);
+      commandService.createUser.mockResolvedValue(activeUserFixture);
 
       const iterations = 1000;
       const start = Date.now();

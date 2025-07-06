@@ -14,37 +14,38 @@ import {
   toDeletedUserDto,
   toDeletedUsersDto,
 } from '@/modules/aggregate/user/user.response.dto';
+import { createUserEntity } from '@/tests/helpers';
 
 describe('User Response DTOs', () => {
   const mockDate = new Date('2024-01-01T00:00:00.000Z');
   const mockUpdatedDate = new Date('2024-01-02T00:00:00.000Z');
   const mockDeletedDate = new Date('2024-01-03T00:00:00.000Z');
 
-  const mockActiveUser = {
+  const activeUserFixture = createUserEntity({
     id: '123e4567-e89b-12d3-a456-426614174000',
     name: 'Test User',
     email: 'test@example.com',
     createdAt: mockDate,
     updatedAt: mockUpdatedDate,
     deletedAt: null,
-    extraField: 'should be excluded',
-  };
+  });
 
-  const mockDeletedUser = {
-    ...mockActiveUser,
+  const deletedUserFixture = createUserEntity({
+    ...activeUserFixture,
     deletedAt: mockDeletedDate,
-  };
+  });
 
   describe('toActiveUserDto', () => {
     it('should convert a user object to ActiveUserResponseDto', () => {
-      const result = toActiveUserDto(mockActiveUser);
+      const userWithExtraField = { ...activeUserFixture, extraField: 'should be excluded' };
+      const result = toActiveUserDto(userWithExtraField);
 
       expect(result).toBeInstanceOf(ActiveUserResponseDto);
-      expect(result.id).toBe(mockActiveUser.id);
-      expect(result.name).toBe(mockActiveUser.name);
-      expect(result.email).toBe(mockActiveUser.email);
-      expect(result.createdAt).toEqual(mockActiveUser.createdAt);
-      expect(result.updatedAt).toEqual(mockActiveUser.updatedAt);
+      expect(result.id).toBe(activeUserFixture.id);
+      expect(result.name).toBe(activeUserFixture.name);
+      expect(result.email).toBe(activeUserFixture.email);
+      expect(result.createdAt).toEqual(activeUserFixture.createdAt);
+      expect(result.updatedAt).toEqual(activeUserFixture.updatedAt);
       expect(result).not.toHaveProperty('deletedAt');
       expect(result).not.toHaveProperty('extraField');
     });
@@ -63,7 +64,7 @@ describe('User Response DTOs', () => {
 
     it('should handle date string inputs', () => {
       const userWithStringDates = {
-        ...mockActiveUser,
+        ...activeUserFixture,
         createdAt: '2024-01-01T00:00:00.000Z',
         updatedAt: '2024-01-02T00:00:00.000Z',
       };
@@ -79,7 +80,7 @@ describe('User Response DTOs', () => {
 
     it('should exclude properties not in active user keys', () => {
       const userWithExtraFields = {
-        ...mockActiveUser,
+        ...activeUserFixture,
         password: 'secret',
         internalField: 'internal',
         deletedAt: mockDeletedDate,
@@ -95,7 +96,7 @@ describe('User Response DTOs', () => {
 
   describe('toActiveUsersDto', () => {
     it('should convert an array of users to ActiveUsersResponseDto', () => {
-      const users = [mockActiveUser, { ...mockActiveUser, id: 'another-id' }];
+      const users = [activeUserFixture, { ...activeUserFixture, id: 'another-id' }];
       const result = toActiveUsersDto(users);
 
       expect(result).toBeInstanceOf(Object);
@@ -103,7 +104,7 @@ describe('User Response DTOs', () => {
       expect(result.users).toHaveLength(2);
       expect(result.users[0]).toBeInstanceOf(ActiveUserResponseDto);
       expect(result.users[1]).toBeInstanceOf(ActiveUserResponseDto);
-      expect(result.users[0].id).toBe(mockActiveUser.id);
+      expect(result.users[0].id).toBe(activeUserFixture.id);
       expect(result.users[1].id).toBe('another-id');
     });
 
@@ -116,11 +117,11 @@ describe('User Response DTOs', () => {
     });
 
     it('should handle array with null values', () => {
-      const users = [mockActiveUser, null, undefined];
+      const users = [activeUserFixture, null, undefined];
       const result = toActiveUsersDto(users);
 
       expect(result.users).toHaveLength(3);
-      expect(result.users[0].id).toBe(mockActiveUser.id);
+      expect(result.users[0].id).toBe(activeUserFixture.id);
       expect(result.users[1]).toBeNull();
       expect(result.users[2]).toBeUndefined();
     });
@@ -128,20 +129,20 @@ describe('User Response DTOs', () => {
 
   describe('toDeletedUserDto', () => {
     it('should convert a deleted user object to DeletedUserResponseDto', () => {
-      const result = toDeletedUserDto(mockDeletedUser);
+      const result = toDeletedUserDto(deletedUserFixture);
 
       expect(result).toBeInstanceOf(DeletedUserResponseDto);
-      expect(result.id).toBe(mockDeletedUser.id);
-      expect(result.name).toBe(mockDeletedUser.name);
-      expect(result.email).toBe(mockDeletedUser.email);
-      expect(result.createdAt).toEqual(mockDeletedUser.createdAt);
-      expect(result.updatedAt).toEqual(mockDeletedUser.updatedAt);
-      expect(result.deletedAt).toEqual(mockDeletedUser.deletedAt);
+      expect(result.id).toBe(deletedUserFixture.id);
+      expect(result.name).toBe(deletedUserFixture.name);
+      expect(result.email).toBe(deletedUserFixture.email);
+      expect(result.createdAt).toEqual(deletedUserFixture.createdAt);
+      expect(result.updatedAt).toEqual(deletedUserFixture.updatedAt);
+      expect(result.deletedAt).toEqual(deletedUserFixture.deletedAt);
       expect(result).not.toHaveProperty('extraField');
     });
 
     it('should handle user with null deletedAt', () => {
-      const result = toDeletedUserDto(mockActiveUser);
+      const result = toDeletedUserDto(activeUserFixture);
 
       expect(result).toBeInstanceOf(DeletedUserResponseDto);
       expect(result.deletedAt).toBeNull();
@@ -149,7 +150,7 @@ describe('User Response DTOs', () => {
 
     it('should handle date string for deletedAt', () => {
       const userWithStringDate = {
-        ...mockDeletedUser,
+        ...deletedUserFixture,
         deletedAt: '2024-01-03T00:00:00.000Z',
       };
 
@@ -161,7 +162,7 @@ describe('User Response DTOs', () => {
 
     it('should exclude extra properties', () => {
       const userWithExtraFields = {
-        ...mockDeletedUser,
+        ...deletedUserFixture,
         password: 'secret',
         internalField: 'internal',
       };
@@ -175,7 +176,7 @@ describe('User Response DTOs', () => {
 
   describe('toDeletedUsersDto', () => {
     it('should convert an array of deleted users to DeletedUsersResponseDto', () => {
-      const users = [mockDeletedUser, { ...mockDeletedUser, id: 'another-id' }];
+      const users = [deletedUserFixture, { ...deletedUserFixture, id: 'another-id' }];
       const result = toDeletedUsersDto(users);
 
       expect(result).toBeInstanceOf(Object);
@@ -188,7 +189,7 @@ describe('User Response DTOs', () => {
     });
 
     it('should handle mixed active and deleted users', () => {
-      const users = [mockActiveUser, mockDeletedUser];
+      const users = [activeUserFixture, deletedUserFixture];
       const result = toDeletedUsersDto(users);
 
       expect(result.users).toHaveLength(2);
@@ -206,22 +207,22 @@ describe('User Response DTOs', () => {
 
   describe('toAnyUserDto', () => {
     it('should convert any user object to AnyUserResponseDto', () => {
-      const result = toAnyUserDto(mockDeletedUser);
+      const result = toAnyUserDto(deletedUserFixture);
 
       expect(result).toBeInstanceOf(AnyUserResponseDto);
-      expect(result.id).toBe(mockDeletedUser.id);
-      expect(result.name).toBe(mockDeletedUser.name);
-      expect(result.email).toBe(mockDeletedUser.email);
-      expect(result.createdAt).toEqual(mockDeletedUser.createdAt);
-      expect(result.updatedAt).toEqual(mockDeletedUser.updatedAt);
-      expect(result.deletedAt).toEqual(mockDeletedUser.deletedAt);
+      expect(result.id).toBe(deletedUserFixture.id);
+      expect(result.name).toBe(deletedUserFixture.name);
+      expect(result.email).toBe(deletedUserFixture.email);
+      expect(result.createdAt).toEqual(deletedUserFixture.createdAt);
+      expect(result.updatedAt).toEqual(deletedUserFixture.updatedAt);
+      expect(result.deletedAt).toEqual(deletedUserFixture.deletedAt);
     });
 
     it('should handle active user (null deletedAt)', () => {
-      const result = toAnyUserDto(mockActiveUser);
+      const result = toAnyUserDto(activeUserFixture);
 
       expect(result).toBeInstanceOf(AnyUserResponseDto);
-      expect(result.id).toBe(mockActiveUser.id);
+      expect(result.id).toBe(activeUserFixture.id);
       expect(result.deletedAt).toBeNull();
     });
 
@@ -233,21 +234,21 @@ describe('User Response DTOs', () => {
 
     it('should transform and expose only allowed properties', () => {
       const userWithExtraFields = {
-        ...mockDeletedUser,
+        ...deletedUserFixture,
         password: 'secret',
         internalField: 'internal',
       };
 
       const result = toAnyUserDto(userWithExtraFields);
 
-      expect(result.id).toBe(mockDeletedUser.id);
-      expect(result.email).toBe(mockDeletedUser.email);
+      expect(result.id).toBe(deletedUserFixture.id);
+      expect(result.email).toBe(deletedUserFixture.email);
     });
   });
 
   describe('toAnyUsersDto', () => {
     it('should convert an array of any users to AnyUsersResponseDto', () => {
-      const users = [mockActiveUser, mockDeletedUser];
+      const users = [activeUserFixture, deletedUserFixture];
       const result = toAnyUsersDto(users);
 
       expect(result).toBeInstanceOf(Object);
@@ -267,12 +268,12 @@ describe('User Response DTOs', () => {
     });
 
     it('should handle array with various user states', () => {
-      const users = [mockActiveUser, mockDeletedUser, null, undefined, { id: 'minimal-user' }];
+      const users = [activeUserFixture, deletedUserFixture, null, undefined, { id: 'minimal-user' }];
       const result = toAnyUsersDto(users);
 
       expect(result.users).toHaveLength(5);
-      expect(result.users[0].id).toBe(mockActiveUser.id);
-      expect(result.users[1].id).toBe(mockDeletedUser.id);
+      expect(result.users[0].id).toBe(activeUserFixture.id);
+      expect(result.users[1].id).toBe(deletedUserFixture.id);
       expect(result.users[2]).toBeNull();
       expect(result.users[3]).toBeUndefined();
       expect(result.users[4].id).toBe('minimal-user');
@@ -357,7 +358,7 @@ describe('User Response DTOs', () => {
   describe('Edge cases', () => {
     it('should handle deeply nested extra properties', () => {
       const userWithNestedProps = {
-        ...mockActiveUser,
+        ...activeUserFixture,
         nested: {
           deep: {
             property: 'should be excluded',
@@ -371,7 +372,7 @@ describe('User Response DTOs', () => {
 
     it('should handle array properties', () => {
       const userWithArrays = {
-        ...mockActiveUser,
+        ...activeUserFixture,
         roles: ['admin', 'user'],
         permissions: [{ name: 'read' }, { name: 'write' }],
       };
@@ -383,7 +384,7 @@ describe('User Response DTOs', () => {
 
     it('should handle numeric strings as IDs', () => {
       const userWithNumericId = {
-        ...mockActiveUser,
+        ...activeUserFixture,
         id: '12345',
       };
 

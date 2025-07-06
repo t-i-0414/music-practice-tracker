@@ -12,37 +12,39 @@ import type {
 } from '@/modules/aggregate/user/user.input.dto';
 import { AdminUsersController } from '@/modules/api/admin/users/users.controller';
 import {
-  cleanupMocks,
+  activeUserFixture,
+  activeUserJsonFixture,
+  activeUsersResponseFixture,
+  activeUsersResponseJsonFixture,
+  anyUserFixture,
+  anyUserJsonFixture,
+  anyUsersResponseFixture,
+  anyUsersResponseJsonFixture,
   createHttpTester,
   createMockUserAdminFacadeService,
   createTestModule,
-  createUserInput,
+  createUserInputFixture,
+  deletedUserFixture,
+  deletedUserJsonFixture,
+  deletedUsersResponseFixture,
+  deletedUsersResponseJsonFixture,
   expectBadRequestError,
   expectInternalServerError,
   expectJsonResponse,
   expectNoContentResponse,
   expectNotFoundError,
   expectUuidValidationError,
-  mockActiveUser,
-  mockActiveUserJson,
-  mockActiveUsersResponse,
-  mockActiveUsersResponseJson,
-  mockAnyUser,
-  mockAnyUserJson,
-  mockAnyUsersResponse,
-  mockAnyUsersResponseJson,
-  mockDeletedUser,
-  mockDeletedUserJson,
-  mockDeletedUsersResponse,
-  mockDeletedUsersResponseJson,
+  setupIntegrationTest,
   setupTestApp,
-  TEST_UUIDS,
   testConcurrentRequests,
-  testUserIds,
-  updateUserInput,
+  testUserIdsFixture,
+  updateUserInputFixture,
+  USER_FIXTURE_IDS,
 } from '@/tests/helpers';
 
 describe('AdminUsersController', () => {
+  const { setApp } = setupIntegrationTest();
+
   let app: INestApplication;
   let controller: AdminUsersController;
   let facadeService: jest.Mocked<UserAdminFacadeService>;
@@ -62,14 +64,10 @@ describe('AdminUsersController', () => {
     });
 
     app = await setupTestApp(module);
+    setApp(app);
     httpTester = createHttpTester(app);
     controller = module.get<AdminUsersController>(AdminUsersController);
     facadeService = module.get(UserAdminFacadeService);
-  });
-
-  afterEach(async () => {
-    cleanupMocks();
-    await app.close();
   });
 
   describe('Controller setup', () => {
@@ -90,11 +88,11 @@ describe('AdminUsersController', () => {
   describe('GET /api/admin/users/active_users', () => {
     it('should return active users by IDs', async () => {
       const ids = ['id1', 'id2'];
-      facadeService.findManyUsers.mockResolvedValue(mockActiveUsersResponse);
+      facadeService.findManyUsers.mockResolvedValue(activeUsersResponseFixture);
 
       await expectJsonResponse(
         httpTester.get('/api/admin/users/active_users').query({ ids }),
-        mockActiveUsersResponseJson,
+        activeUsersResponseJsonFixture,
       );
 
       expect(facadeService.findManyUsers).toHaveBeenCalledWith({ ids });
@@ -108,11 +106,11 @@ describe('AdminUsersController', () => {
     });
 
     it('should handle single id in query', async () => {
-      facadeService.findManyUsers.mockResolvedValue(mockActiveUsersResponse);
+      facadeService.findManyUsers.mockResolvedValue(activeUsersResponseFixture);
 
       await expectJsonResponse(
         httpTester.get('/api/admin/users/active_users').query({ ids: 'single-id' }),
-        mockActiveUsersResponseJson,
+        activeUsersResponseJsonFixture,
       );
 
       expect(facadeService.findManyUsers).toHaveBeenCalledWith({ ids: 'single-id' });
@@ -129,19 +127,19 @@ describe('AdminUsersController', () => {
   });
 
   describe('GET /api/admin/users/active_users/:id', () => {
-    const validUUID = TEST_UUIDS.ACTIVE_USER;
+    const validUUID = USER_FIXTURE_IDS.ACTIVE;
 
     it('should return active user by ID', async () => {
-      facadeService.findUserById.mockResolvedValue(mockActiveUser);
+      facadeService.findUserById.mockResolvedValue(activeUserFixture);
 
-      await expectJsonResponse(httpTester.get(`/api/admin/users/active_users/${validUUID}`), mockActiveUserJson);
+      await expectJsonResponse(httpTester.get(`/api/admin/users/active_users/${validUUID}`), activeUserJsonFixture);
 
       expect(facadeService.findUserById).toHaveBeenCalledWith({ id: validUUID });
       expect(facadeService.findUserById).toHaveBeenCalledTimes(1);
     });
 
     it('should validate UUID format', async () => {
-      await expectUuidValidationError(httpTester.get(`/api/admin/users/active_users/${TEST_UUIDS.INVALID}`));
+      await expectUuidValidationError(httpTester.get(`/api/admin/users/active_users/${USER_FIXTURE_IDS.INVALID}`));
 
       expect(facadeService.findUserById).not.toHaveBeenCalled();
     });
@@ -156,11 +154,11 @@ describe('AdminUsersController', () => {
   describe('GET /api/admin/users/deleted_users', () => {
     it('should return deleted users by IDs', async () => {
       const ids = ['id1', 'id2'];
-      facadeService.findManyDeletedUsers.mockResolvedValue(mockDeletedUsersResponse);
+      facadeService.findManyDeletedUsers.mockResolvedValue(deletedUsersResponseFixture);
 
       const response = await httpTester.get('/api/admin/users/deleted_users').query({ ids }).expect(HttpStatus.OK);
 
-      expect(response.body).toEqual(mockDeletedUsersResponseJson);
+      expect(response.body).toEqual(deletedUsersResponseJsonFixture);
       expect(facadeService.findManyDeletedUsers).toHaveBeenCalledWith({ ids });
       expect(facadeService.findManyDeletedUsers).toHaveBeenCalledTimes(1);
     });
@@ -170,16 +168,16 @@ describe('AdminUsersController', () => {
     const validUUID = '123e4567-e89b-12d3-a456-426614174000';
 
     it('should return deleted user by ID', async () => {
-      facadeService.findDeletedUserById.mockResolvedValue(mockDeletedUser);
+      facadeService.findDeletedUserById.mockResolvedValue(deletedUserFixture);
 
       const response = await httpTester.get(`/api/admin/users/deleted_users/${validUUID}`).expect(HttpStatus.OK);
 
-      expect(response.body).toEqual(mockDeletedUserJson);
+      expect(response.body).toEqual(deletedUserJsonFixture);
       expect(facadeService.findDeletedUserById).toHaveBeenCalledWith({ id: validUUID });
     });
 
     it('should have deletedAt field in response', async () => {
-      facadeService.findDeletedUserById.mockResolvedValue(mockDeletedUser);
+      facadeService.findDeletedUserById.mockResolvedValue(deletedUserFixture);
 
       const response = await httpTester.get(`/api/admin/users/deleted_users/${validUUID}`).expect(HttpStatus.OK);
 
@@ -191,11 +189,11 @@ describe('AdminUsersController', () => {
   describe('GET /api/admin/users/any_users', () => {
     it('should return any users by IDs', async () => {
       const ids = ['id1', 'id2'];
-      facadeService.findManyAnyUsers.mockResolvedValue(mockAnyUsersResponse);
+      facadeService.findManyAnyUsers.mockResolvedValue(anyUsersResponseFixture);
 
       const response = await httpTester.get('/api/admin/users/any_users').query({ ids }).expect(HttpStatus.OK);
 
-      expect(response.body).toEqual(mockAnyUsersResponseJson);
+      expect(response.body).toEqual(anyUsersResponseJsonFixture);
       expect(facadeService.findManyAnyUsers).toHaveBeenCalledWith({ ids });
     });
   });
@@ -204,26 +202,26 @@ describe('AdminUsersController', () => {
     const validUUID = '123e4567-e89b-12d3-a456-426614174000';
 
     it('should return any user by ID', async () => {
-      facadeService.findAnyUserById.mockResolvedValue(mockAnyUser);
+      facadeService.findAnyUserById.mockResolvedValue(anyUserFixture);
 
       const response = await httpTester.get(`/api/admin/users/any_users/${validUUID}`).expect(HttpStatus.OK);
 
-      expect(response.body).toEqual(mockAnyUserJson);
+      expect(response.body).toEqual(anyUserJsonFixture);
       expect(facadeService.findAnyUserById).toHaveBeenCalledWith({ id: validUUID });
     });
   });
 
   describe('POST /api/admin/users', () => {
     it('should create a new user', async () => {
-      facadeService.createUser.mockResolvedValue(mockActiveUser);
+      facadeService.createUser.mockResolvedValue(activeUserFixture);
 
       await expectJsonResponse(
-        httpTester.post('/api/admin/users').send(createUserInput),
-        mockActiveUserJson,
+        httpTester.post('/api/admin/users').send(createUserInputFixture),
+        activeUserJsonFixture,
         HttpStatus.CREATED,
       );
 
-      expect(facadeService.createUser).toHaveBeenCalledWith(createUserInput);
+      expect(facadeService.createUser).toHaveBeenCalledWith(createUserInputFixture);
       expect(facadeService.createUser).toHaveBeenCalledTimes(1);
     });
 
@@ -258,11 +256,11 @@ describe('AdminUsersController', () => {
         ],
       };
 
-      facadeService.createManyAndReturnUsers.mockResolvedValue(mockActiveUsersResponse);
+      facadeService.createManyAndReturnUsers.mockResolvedValue(activeUsersResponseFixture);
 
       const response = await httpTester.post('/api/admin/users/bulk').send(createManyDto).expect(HttpStatus.CREATED);
 
-      expect(response.body).toEqual(mockActiveUsersResponseJson);
+      expect(response.body).toEqual(activeUsersResponseJsonFixture);
       expect(facadeService.createManyAndReturnUsers).toHaveBeenCalledWith(createManyDto);
     });
 
@@ -278,10 +276,10 @@ describe('AdminUsersController', () => {
   });
 
   describe('PUT /api/admin/users/:id', () => {
-    const validUUID = TEST_UUIDS.ACTIVE_USER;
+    const validUUID = USER_FIXTURE_IDS.ACTIVE;
 
     it('should update a user', async () => {
-      const updatedUser = { ...mockActiveUser, name: updateUserInput.name };
+      const updatedUser = { ...activeUserFixture, name: updateUserInputFixture.name };
       const updatedUserJson = {
         ...updatedUser,
         createdAt: updatedUser.createdAt.toISOString(),
@@ -289,17 +287,20 @@ describe('AdminUsersController', () => {
       };
       facadeService.updateUserById.mockResolvedValue(updatedUser);
 
-      await expectJsonResponse(httpTester.put(`/api/admin/users/${validUUID}`).send(updateUserInput), updatedUserJson);
+      await expectJsonResponse(
+        httpTester.put(`/api/admin/users/${validUUID}`).send(updateUserInputFixture),
+        updatedUserJson,
+      );
 
       expect(facadeService.updateUserById).toHaveBeenCalledWith({
         id: validUUID,
-        data: updateUserInput,
+        data: updateUserInputFixture,
       });
     });
 
     it('should validate UUID format', async () => {
       await expectUuidValidationError(
-        httpTester.put(`/api/admin/users/${TEST_UUIDS.INVALID}`).send({ name: 'Updated' }),
+        httpTester.put(`/api/admin/users/${USER_FIXTURE_IDS.INVALID}`).send({ name: 'Updated' }),
       );
     });
 
@@ -308,7 +309,7 @@ describe('AdminUsersController', () => {
         email: 'newemail@example.com',
       };
 
-      facadeService.updateUserById.mockResolvedValue(mockActiveUser);
+      facadeService.updateUserById.mockResolvedValue(activeUserFixture);
 
       await httpTester.put(`/api/admin/users/${validUUID}`).send(partialUpdate).expect(HttpStatus.OK);
 
@@ -326,7 +327,7 @@ describe('AdminUsersController', () => {
   });
 
   describe('DELETE /api/admin/users/:id', () => {
-    const validUUID = TEST_UUIDS.ACTIVE_USER;
+    const validUUID = USER_FIXTURE_IDS.ACTIVE;
 
     it('should soft delete a user', async () => {
       facadeService.deleteUserById.mockResolvedValue(undefined);
@@ -344,7 +345,7 @@ describe('AdminUsersController', () => {
     });
 
     it('should validate UUID format', async () => {
-      await expectUuidValidationError(httpTester.delete(`/api/admin/users/${TEST_UUIDS.INVALID}`));
+      await expectUuidValidationError(httpTester.delete(`/api/admin/users/${USER_FIXTURE_IDS.INVALID}`));
 
       expect(facadeService.deleteUserById).not.toHaveBeenCalled();
     });
@@ -353,7 +354,7 @@ describe('AdminUsersController', () => {
   describe('DELETE /api/admin/users/bulk', () => {
     it('should soft delete multiple users', async () => {
       const deleteDto: DeleteManyUsersInputDto = {
-        ids: testUserIds,
+        ids: testUserIdsFixture,
       };
 
       facadeService.deleteManyUsersById.mockResolvedValue(undefined);
@@ -412,11 +413,11 @@ describe('AdminUsersController', () => {
     const validUUID = '123e4567-e89b-12d3-a456-426614174000';
 
     it('should restore a soft-deleted user', async () => {
-      facadeService.restoreUserById.mockResolvedValue(mockActiveUser);
+      facadeService.restoreUserById.mockResolvedValue(activeUserFixture);
 
       const response = await httpTester.put(`/api/admin/users/${validUUID}/restore`).expect(HttpStatus.OK);
 
-      expect(response.body).toEqual(mockActiveUserJson);
+      expect(response.body).toEqual(activeUserJsonFixture);
       expect(facadeService.restoreUserById).toHaveBeenCalledWith({ id: validUUID });
     });
 
@@ -437,11 +438,11 @@ describe('AdminUsersController', () => {
         ids: ['123e4567-e89b-12d3-a456-426614174000', '223e4567-e89b-12d3-a456-426614174001'],
       };
 
-      facadeService.restoreManyUsersById.mockResolvedValue(mockActiveUsersResponse);
+      facadeService.restoreManyUsersById.mockResolvedValue(activeUsersResponseFixture);
 
       const response = await httpTester.put('/api/admin/users/restore/bulk').send(restoreDto).expect(HttpStatus.OK);
 
-      expect(response.body).toEqual(mockActiveUsersResponseJson);
+      expect(response.body).toEqual(activeUsersResponseJsonFixture);
       expect(facadeService.restoreManyUsersById).toHaveBeenCalledWith(restoreDto);
     });
 
@@ -458,12 +459,12 @@ describe('AdminUsersController', () => {
 
   describe('Controller method delegation', () => {
     it('should delegate all query methods correctly', async () => {
-      facadeService.findUserById.mockResolvedValue(mockActiveUser);
-      facadeService.findDeletedUserById.mockResolvedValue(mockDeletedUser);
-      facadeService.findAnyUserById.mockResolvedValue(mockAnyUser);
-      facadeService.findManyUsers.mockResolvedValue(mockActiveUsersResponse);
-      facadeService.findManyDeletedUsers.mockResolvedValue(mockDeletedUsersResponse);
-      facadeService.findManyAnyUsers.mockResolvedValue(mockAnyUsersResponse);
+      facadeService.findUserById.mockResolvedValue(activeUserFixture);
+      facadeService.findDeletedUserById.mockResolvedValue(deletedUserFixture);
+      facadeService.findAnyUserById.mockResolvedValue(anyUserFixture);
+      facadeService.findManyUsers.mockResolvedValue(activeUsersResponseFixture);
+      facadeService.findManyDeletedUsers.mockResolvedValue(deletedUsersResponseFixture);
+      facadeService.findManyAnyUsers.mockResolvedValue(anyUsersResponseFixture);
 
       const id = '123e4567-e89b-12d3-a456-426614174000';
       const ids = ['id1', 'id2'];
@@ -488,15 +489,15 @@ describe('AdminUsersController', () => {
     });
 
     it('should delegate all command methods correctly', async () => {
-      facadeService.createUser.mockResolvedValue(mockActiveUser);
-      facadeService.createManyAndReturnUsers.mockResolvedValue(mockActiveUsersResponse);
-      facadeService.updateUserById.mockResolvedValue(mockActiveUser);
+      facadeService.createUser.mockResolvedValue(activeUserFixture);
+      facadeService.createManyAndReturnUsers.mockResolvedValue(activeUsersResponseFixture);
+      facadeService.updateUserById.mockResolvedValue(activeUserFixture);
       facadeService.deleteUserById.mockResolvedValue(undefined);
       facadeService.deleteManyUsersById.mockResolvedValue(undefined);
       facadeService.hardDeleteUserById.mockResolvedValue(undefined);
       facadeService.hardDeleteManyUsersById.mockResolvedValue(undefined);
-      facadeService.restoreUserById.mockResolvedValue(mockActiveUser);
-      facadeService.restoreManyUsersById.mockResolvedValue(mockActiveUsersResponse);
+      facadeService.restoreUserById.mockResolvedValue(activeUserFixture);
+      facadeService.restoreManyUsersById.mockResolvedValue(activeUsersResponseFixture);
 
       const createDto: CreateUserInputDto = { name: 'Test', email: 'test@example.com' };
       const createManyDto: CreateManyUsersInputDto = { users: [createDto] };
@@ -570,13 +571,13 @@ describe('AdminUsersController', () => {
 
     it('should handle special characters in UUIDs', async () => {
       const upperCaseUUID = '123E4567-E89B-12D3-A456-426614174000';
-      facadeService.findUserById.mockResolvedValue(mockActiveUser);
+      facadeService.findUserById.mockResolvedValue(activeUserFixture);
 
       await httpTester.get(`/api/admin/users/active_users/${upperCaseUUID}`).expect(HttpStatus.OK);
     });
 
     it('should handle concurrent requests', async () => {
-      facadeService.createUser.mockResolvedValue(mockActiveUser);
+      facadeService.createUser.mockResolvedValue(activeUserFixture);
 
       await testConcurrentRequests(
         (i) => httpTester.post('/api/admin/users').send({ name: `User ${i}`, email: `user${i}@example.com` }),
@@ -590,10 +591,10 @@ describe('AdminUsersController', () => {
 
   describe('Response structure', () => {
     it('should return proper JSON response for active users', async () => {
-      facadeService.findUserById.mockResolvedValue(mockActiveUser);
+      facadeService.findUserById.mockResolvedValue(activeUserFixture);
 
       const response = await httpTester
-        .get(`/api/admin/users/active_users/${mockActiveUser.id}`)
+        .get(`/api/admin/users/active_users/${activeUserFixture.id}`)
         .expect('Content-Type', /json/u)
         .expect(HttpStatus.OK);
 
@@ -606,10 +607,10 @@ describe('AdminUsersController', () => {
     });
 
     it('should return proper JSON response for deleted users', async () => {
-      facadeService.findDeletedUserById.mockResolvedValue(mockDeletedUser);
+      facadeService.findDeletedUserById.mockResolvedValue(deletedUserFixture);
 
       const response = await httpTester
-        .get(`/api/admin/users/deleted_users/${mockDeletedUser.id}`)
+        .get(`/api/admin/users/deleted_users/${deletedUserFixture.id}`)
         .expect('Content-Type', /json/u)
         .expect(HttpStatus.OK);
 
@@ -619,7 +620,7 @@ describe('AdminUsersController', () => {
     it('should return empty body for NO_CONTENT responses', async () => {
       facadeService.deleteUserById.mockResolvedValue(undefined);
 
-      await expectNoContentResponse(httpTester.delete(`/api/admin/users/${mockActiveUser.id}`));
+      await expectNoContentResponse(httpTester.delete(`/api/admin/users/${activeUserFixture.id}`));
     });
   });
 });

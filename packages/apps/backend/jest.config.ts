@@ -9,6 +9,7 @@ const ignorePatterns = [
   'eslint.config.ts',
   'jest.config.ts',
   'jest.e2e.config.ts',
+  'jest.setup.ts',
   'main.ts',
   '\\.module\\.ts$',
 ];
@@ -22,6 +23,7 @@ const config: Config = {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
   rootDir: '.',
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   testEnvironment: 'node',
   testRegex: '.*\\.spec\\.ts$',
   transform: {

@@ -1,6 +1,9 @@
 import { type User } from '@/modules/aggregate/user/user.repository.service';
 
-export const createMockUser = (overrides: Partial<User> = {}): User => ({
+/**
+ * Prisma User エンティティを作成するファクトリー関数
+ */
+export const createUserEntity = (overrides: Partial<User> = {}): User => ({
   id: 'user-id',
   name: 'Mock User',
   email: 'mock@example.com',

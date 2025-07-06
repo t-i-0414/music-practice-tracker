@@ -2,24 +2,25 @@ import { Test, type TestingModule } from '@nestjs/testing';
 
 import { UserRepositoryService, type User } from '@/modules/aggregate/user/user.repository.service';
 import { RepositoryService } from '@/modules/repository/repository.service';
+import { createUserEntity } from '@/tests/helpers';
 
 describe('UserRepositoryService', () => {
   let service: UserRepositoryService;
 
-  const mockUser: User = {
+  const mockUser: User = createUserEntity({
     id: '123e4567-e89b-12d3-a456-426614174000',
     name: 'Test User',
     email: 'test@example.com',
     createdAt: new Date('2024-01-01T00:00:00.000Z'),
     updatedAt: new Date('2024-01-01T00:00:00.000Z'),
     deletedAt: null,
-  };
+  });
 
-  const mockDeletedUser: User = {
+  const deletedUserFixture: User = createUserEntity({
     ...mockUser,
     id: '123e4567-e89b-12d3-a456-426614174001',
     deletedAt: new Date('2024-01-02T00:00:00.000Z'),
-  };
+  });
 
   const mockRepositoryService = {
     user: {
@@ -83,8 +84,8 @@ describe('UserRepositoryService', () => {
 
   describe('findUniqueDeletedUser', () => {
     it('should find a deleted user by id', async () => {
-      const params = { id: mockDeletedUser.id };
-      mockRepositoryService.user.findUnique.mockResolvedValue(mockDeletedUser);
+      const params = { id: deletedUserFixture.id };
+      mockRepositoryService.user.findUnique.mockResolvedValue(deletedUserFixture);
 
       const result = await service.findUniqueDeletedUser(params);
 
@@ -94,7 +95,7 @@ describe('UserRepositoryService', () => {
           deletedAt: { not: null },
         },
       });
-      expect(result).toEqual(mockDeletedUser);
+      expect(result).toEqual(deletedUserFixture);
     });
 
     it('should return null when deleted user is not found', async () => {
@@ -187,11 +188,11 @@ describe('UserRepositoryService', () => {
       const params = {
         skip: 0,
         take: 10,
-        cursor: { id: mockDeletedUser.id },
+        cursor: { id: deletedUserFixture.id },
         where: { name: { contains: 'Test' } },
         orderBy: { createdAt: 'desc' as const },
       };
-      const mockUsers = [mockDeletedUser];
+      const mockUsers = [deletedUserFixture];
       mockRepositoryService.user.findMany.mockResolvedValue(mockUsers);
 
       const result = await service.findManyDeletedUsers(params);
@@ -208,7 +209,7 @@ describe('UserRepositoryService', () => {
 
     it('should find many deleted users without optional parameters', async () => {
       const params = {};
-      const mockUsers = [mockDeletedUser];
+      const mockUsers = [deletedUserFixture];
       mockRepositoryService.user.findMany.mockResolvedValue(mockUsers);
 
       const result = await service.findManyDeletedUsers(params);
@@ -231,7 +232,7 @@ describe('UserRepositoryService', () => {
         where: { name: { contains: 'Test' } },
         orderBy: { createdAt: 'desc' as const },
       };
-      const mockUsers = [mockUser, mockDeletedUser];
+      const mockUsers = [mockUser, deletedUserFixture];
       mockRepositoryService.user.findMany.mockResolvedValue(mockUsers);
 
       const result = await service.findManyAnyUsers(params);
@@ -248,7 +249,7 @@ describe('UserRepositoryService', () => {
 
     it('should find many users without optional parameters', async () => {
       const params = {};
-      const mockUsers = [mockUser, mockDeletedUser];
+      const mockUsers = [mockUser, deletedUserFixture];
       mockRepositoryService.user.findMany.mockResolvedValue(mockUsers);
 
       const result = await service.findManyAnyUsers(params);
@@ -482,8 +483,8 @@ describe('UserRepositoryService', () => {
 
   describe('restoreUser', () => {
     it('should restore a soft deleted user', async () => {
-      const params = { id: mockDeletedUser.id };
-      const restoredUser = { ...mockDeletedUser, deletedAt: null };
+      const params = { id: deletedUserFixture.id };
+      const restoredUser = { ...deletedUserFixture, deletedAt: null };
       mockRepositoryService.user.update.mockResolvedValue(restoredUser);
 
       const result = await service.restoreUser(params);
@@ -498,7 +499,7 @@ describe('UserRepositoryService', () => {
     });
 
     it('should handle database error during restore', async () => {
-      const params = { id: mockDeletedUser.id };
+      const params = { id: deletedUserFixture.id };
       const error = new Error('Database error');
       mockRepositoryService.user.update.mockRejectedValue(error);
 
@@ -510,8 +511,8 @@ describe('UserRepositoryService', () => {
     it('should restore many users and return them', async () => {
       const params = { deletedAt: { not: null } };
       const restoredUsers = [
-        { ...mockDeletedUser, deletedAt: null },
-        { ...mockDeletedUser, id: 'another-id', deletedAt: null },
+        { ...deletedUserFixture, deletedAt: null },
+        { ...deletedUserFixture, id: 'another-id', deletedAt: null },
       ];
       mockRepositoryService.user.updateManyAndReturn.mockResolvedValue(restoredUsers);
 
@@ -530,7 +531,7 @@ describe('UserRepositoryService', () => {
       const params = {
         AND: [{ deletedAt: { not: null } }, { email: { contains: '@example.com' } }],
       };
-      const restoredUsers = [{ ...mockDeletedUser, deletedAt: null }];
+      const restoredUsers = [{ ...deletedUserFixture, deletedAt: null }];
       mockRepositoryService.user.updateManyAndReturn.mockResolvedValue(restoredUsers);
 
       const result = await service.restoreManyAndReturnUsers(params);

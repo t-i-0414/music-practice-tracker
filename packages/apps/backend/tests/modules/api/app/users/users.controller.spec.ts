@@ -8,27 +8,29 @@ import { UserAppFacadeService } from '@/modules/aggregate/user/user.app.facade.s
 import type { CreateUserInputDto, UpdateUserDataDto } from '@/modules/aggregate/user/user.input.dto';
 import { AppUsersController } from '@/modules/api/app/users/users.controller';
 import {
-  cleanupMocks,
+  activeUserFixture,
+  activeUserJsonFixture,
   createHttpTester,
   createMockUserAppFacadeService,
   createTestModule,
-  createUserInput,
+  createUserInputFixture,
   expectBadRequestError,
   expectInternalServerError,
   expectJsonResponse,
   expectNoContentResponse,
   expectNotFoundError,
   expectUuidValidationError,
-  mockActiveUser,
-  mockActiveUserJson,
+  setupIntegrationTest,
   setupTestApp,
-  TEST_UUIDS,
   testConcurrentRequests,
-  updateUserEmailInput,
-  updateUserInput,
+  updateUserEmailInputFixture,
+  updateUserInputFixture,
+  USER_FIXTURE_IDS,
 } from '@/tests/helpers';
 
 describe('AppUsersController', () => {
+  const { setApp } = setupIntegrationTest();
+
   let app: INestApplication;
   let controller: AppUsersController;
   let facadeService: jest.Mocked<UserAppFacadeService>;
@@ -36,7 +38,7 @@ describe('AppUsersController', () => {
 
   beforeEach(async () => {
     const mockFacadeService = createMockUserAppFacadeService();
-    
+
     const module: TestingModule = await createTestModule({
       controllers: [AppUsersController],
       providers: [
@@ -48,14 +50,10 @@ describe('AppUsersController', () => {
     });
 
     app = await setupTestApp(module);
+    setApp(app);
     httpTester = createHttpTester(app);
     controller = module.get<AppUsersController>(AppUsersController);
     facadeService = module.get(UserAppFacadeService);
-  });
-
-  afterEach(async () => {
-    cleanupMocks();
-    await app.close();
   });
 
   describe('Controller setup', () => {
@@ -74,24 +72,19 @@ describe('AppUsersController', () => {
   });
 
   describe('GET /api/app/users/:id', () => {
-    const validUUID = TEST_UUIDS.ACTIVE_USER;
+    const validUUID = USER_FIXTURE_IDS.ACTIVE;
 
     it('should return user by ID', async () => {
-      facadeService.findUserById.mockResolvedValue(mockActiveUser);
+      facadeService.findUserById.mockResolvedValue(activeUserFixture);
 
-      await expectJsonResponse(
-        httpTester.get(`/api/app/users/${validUUID}`),
-        mockActiveUserJson,
-      );
+      await expectJsonResponse(httpTester.get(`/api/app/users/${validUUID}`), activeUserJsonFixture);
 
       expect(facadeService.findUserById).toHaveBeenCalledWith({ id: validUUID });
       expect(facadeService.findUserById).toHaveBeenCalledTimes(1);
     });
 
     it('should validate UUID format', async () => {
-      await expectUuidValidationError(
-        httpTester.get(`/api/app/users/${TEST_UUIDS.INVALID}`),
-      );
+      await expectUuidValidationError(httpTester.get(`/api/app/users/${USER_FIXTURE_IDS.INVALID}`));
 
       expect(facadeService.findUserById).not.toHaveBeenCalled();
     });
@@ -99,34 +92,28 @@ describe('AppUsersController', () => {
     it('should handle user not found', async () => {
       facadeService.findUserById.mockRejectedValue(new NotFoundException('User not found'));
 
-      await expectNotFoundError(
-        httpTester.get(`/api/app/users/${validUUID}`),
-        'User not found',
-      );
+      await expectNotFoundError(httpTester.get(`/api/app/users/${validUUID}`), 'User not found');
     });
 
     it('should handle special characters in UUIDs', async () => {
       const upperCaseUUID = '123E4567-E89B-12D3-A456-426614174000';
-      facadeService.findUserById.mockResolvedValue(mockActiveUser);
+      facadeService.findUserById.mockResolvedValue(activeUserFixture);
 
-      await expectJsonResponse(
-        httpTester.get(`/api/app/users/${upperCaseUUID}`),
-        mockActiveUserJson,
-      );
+      await expectJsonResponse(httpTester.get(`/api/app/users/${upperCaseUUID}`), activeUserJsonFixture);
     });
   });
 
   describe('POST /api/app/users', () => {
     it('should create a new user', async () => {
-      facadeService.createUser.mockResolvedValue(mockActiveUser);
+      facadeService.createUser.mockResolvedValue(activeUserFixture);
 
       await expectJsonResponse(
-        httpTester.post('/api/app/users').send(createUserInput),
-        mockActiveUserJson,
+        httpTester.post('/api/app/users').send(createUserInputFixture),
+        activeUserJsonFixture,
         HttpStatus.CREATED,
       );
 
-      expect(facadeService.createUser).toHaveBeenCalledWith(createUserInput);
+      expect(facadeService.createUser).toHaveBeenCalledWith(createUserInputFixture);
       expect(facadeService.createUser).toHaveBeenCalledTimes(1);
     });
 
@@ -135,9 +122,7 @@ describe('AppUsersController', () => {
         email: 'invalid-email',
       };
 
-      await expectBadRequestError(
-        httpTester.post('/api/app/users').send(invalidDto),
-      );
+      await expectBadRequestError(httpTester.post('/api/app/users').send(invalidDto));
 
       expect(facadeService.createUser).not.toHaveBeenCalled();
     });
@@ -150,15 +135,11 @@ describe('AppUsersController', () => {
 
       facadeService.createUser.mockRejectedValue(new Error('Email already exists'));
 
-      await expectInternalServerError(
-        httpTester.post('/api/app/users').send(createDto),
-      );
+      await expectInternalServerError(httpTester.post('/api/app/users').send(createDto));
     });
 
     it('should handle empty body', async () => {
-      await expectBadRequestError(
-        httpTester.post('/api/app/users').send({}),
-      );
+      await expectBadRequestError(httpTester.post('/api/app/users').send({}));
 
       expect(facadeService.createUser).not.toHaveBeenCalled();
     });
@@ -168,19 +149,17 @@ describe('AppUsersController', () => {
         name: 'User Without Email',
       };
 
-      await expectBadRequestError(
-        httpTester.post('/api/app/users').send(incompleteDto),
-      );
+      await expectBadRequestError(httpTester.post('/api/app/users').send(incompleteDto));
 
       expect(facadeService.createUser).not.toHaveBeenCalled();
     });
   });
 
   describe('PUT /api/app/users/:id', () => {
-    const validUUID = TEST_UUIDS.ACTIVE_USER;
+    const validUUID = USER_FIXTURE_IDS.ACTIVE;
 
     it('should update a user', async () => {
-      const updatedUser = { ...mockActiveUser, name: updateUserInput.name };
+      const updatedUser = { ...activeUserFixture, name: updateUserInputFixture.name };
       const updatedUserJson = {
         ...updatedUser,
         createdAt: updatedUser.createdAt.toISOString(),
@@ -189,35 +168,35 @@ describe('AppUsersController', () => {
       facadeService.updateUserById.mockResolvedValue(updatedUser);
 
       await expectJsonResponse(
-        httpTester.put(`/api/app/users/${validUUID}`).send(updateUserInput),
+        httpTester.put(`/api/app/users/${validUUID}`).send(updateUserInputFixture),
         updatedUserJson,
       );
 
       expect(facadeService.updateUserById).toHaveBeenCalledWith({
         id: validUUID,
-        data: updateUserInput,
+        data: updateUserInputFixture,
       });
     });
 
     it('should validate UUID format', async () => {
       await expectUuidValidationError(
-        httpTester.put(`/api/app/users/${TEST_UUIDS.INVALID}`).send({ name: 'Updated' }),
+        httpTester.put(`/api/app/users/${USER_FIXTURE_IDS.INVALID}`).send({ name: 'Updated' }),
       );
 
       expect(facadeService.updateUserById).not.toHaveBeenCalled();
     });
 
     it('should handle partial updates', async () => {
-      facadeService.updateUserById.mockResolvedValue(mockActiveUser);
+      facadeService.updateUserById.mockResolvedValue(activeUserFixture);
 
       await expectJsonResponse(
-        httpTester.put(`/api/app/users/${validUUID}`).send(updateUserEmailInput),
-        mockActiveUserJson,
+        httpTester.put(`/api/app/users/${validUUID}`).send(updateUserEmailInputFixture),
+        activeUserJsonFixture,
       );
 
       expect(facadeService.updateUserById).toHaveBeenCalledWith({
         id: validUUID,
-        data: updateUserEmailInput,
+        data: updateUserEmailInputFixture,
       });
     });
 
@@ -231,12 +210,9 @@ describe('AppUsersController', () => {
     });
 
     it('should handle empty update data', async () => {
-      facadeService.updateUserById.mockResolvedValue(mockActiveUser);
+      facadeService.updateUserById.mockResolvedValue(activeUserFixture);
 
-      await expectJsonResponse(
-        httpTester.put(`/api/app/users/${validUUID}`).send({}),
-        mockActiveUserJson,
-      );
+      await expectJsonResponse(httpTester.put(`/api/app/users/${validUUID}`).send({}), activeUserJsonFixture);
 
       expect(facadeService.updateUserById).toHaveBeenCalledWith({
         id: validUUID,
@@ -250,12 +226,9 @@ describe('AppUsersController', () => {
         email: 'completely.new@example.com',
       };
 
-      facadeService.updateUserById.mockResolvedValue(mockActiveUser);
+      facadeService.updateUserById.mockResolvedValue(activeUserFixture);
 
-      await expectJsonResponse(
-        httpTester.put(`/api/app/users/${validUUID}`).send(fullUpdate),
-        mockActiveUserJson,
-      );
+      await expectJsonResponse(httpTester.put(`/api/app/users/${validUUID}`).send(fullUpdate), activeUserJsonFixture);
 
       expect(facadeService.updateUserById).toHaveBeenCalledWith({
         id: validUUID,
@@ -265,14 +238,12 @@ describe('AppUsersController', () => {
   });
 
   describe('DELETE /api/app/users/:id', () => {
-    const validUUID = TEST_UUIDS.ACTIVE_USER;
+    const validUUID = USER_FIXTURE_IDS.ACTIVE;
 
     it('should soft delete a user', async () => {
       facadeService.deleteUserById.mockResolvedValue(undefined);
 
-      await expectNoContentResponse(
-        httpTester.delete(`/api/app/users/${validUUID}`),
-      );
+      await expectNoContentResponse(httpTester.delete(`/api/app/users/${validUUID}`));
 
       expect(facadeService.deleteUserById).toHaveBeenCalledWith({ id: validUUID });
       expect(facadeService.deleteUserById).toHaveBeenCalledTimes(1);
@@ -281,15 +252,11 @@ describe('AppUsersController', () => {
     it('should return no content even if user not found', async () => {
       facadeService.deleteUserById.mockResolvedValue(undefined);
 
-      await expectNoContentResponse(
-        httpTester.delete(`/api/app/users/${validUUID}`),
-      );
+      await expectNoContentResponse(httpTester.delete(`/api/app/users/${validUUID}`));
     });
 
     it('should validate UUID format', async () => {
-      await expectUuidValidationError(
-        httpTester.delete(`/api/app/users/${TEST_UUIDS.INVALID}`),
-      );
+      await expectUuidValidationError(httpTester.delete(`/api/app/users/${USER_FIXTURE_IDS.INVALID}`));
 
       expect(facadeService.deleteUserById).not.toHaveBeenCalled();
     });
@@ -297,17 +264,15 @@ describe('AppUsersController', () => {
     it('should handle deletion errors gracefully', async () => {
       facadeService.deleteUserById.mockRejectedValue(new Error('Database error'));
 
-      await expectInternalServerError(
-        httpTester.delete(`/api/app/users/${validUUID}`),
-      );
+      await expectInternalServerError(httpTester.delete(`/api/app/users/${validUUID}`));
     });
   });
 
   describe('Controller method delegation', () => {
     it('should delegate all methods correctly', async () => {
-      facadeService.findUserById.mockResolvedValue(mockActiveUser);
-      facadeService.createUser.mockResolvedValue(mockActiveUser);
-      facadeService.updateUserById.mockResolvedValue(mockActiveUser);
+      facadeService.findUserById.mockResolvedValue(activeUserFixture);
+      facadeService.createUser.mockResolvedValue(activeUserFixture);
+      facadeService.updateUserById.mockResolvedValue(activeUserFixture);
       facadeService.deleteUserById.mockResolvedValue(undefined);
 
       const id = '123e4567-e89b-12d3-a456-426614174000';
@@ -340,20 +305,16 @@ describe('AppUsersController', () => {
     });
 
     it('should handle validation pipe errors', async () => {
-      await expectUuidValidationError(
-        httpTester.get('/api/app/users/not-a-uuid'),
-      );
+      await expectUuidValidationError(httpTester.get('/api/app/users/not-a-uuid'));
     });
   });
 
   describe('Edge cases', () => {
     it('should handle concurrent requests', async () => {
-      facadeService.createUser.mockResolvedValue(mockActiveUser);
+      facadeService.createUser.mockResolvedValue(activeUserFixture);
 
       await testConcurrentRequests(
-        (i) => httpTester
-          .post('/api/app/users')
-          .send({ name: `User ${i}`, email: `user${i}@example.com` }),
+        (i) => httpTester.post('/api/app/users').send({ name: `User ${i}`, email: `user${i}@example.com` }),
         3,
         HttpStatus.CREATED,
       );
@@ -379,10 +340,10 @@ describe('AppUsersController', () => {
 
   describe('Response structure', () => {
     it('should return proper JSON response for user', async () => {
-      facadeService.findUserById.mockResolvedValue(mockActiveUser);
+      facadeService.findUserById.mockResolvedValue(activeUserFixture);
 
       const response = await request(app.getHttpServer() as Server)
-        .get(`/api/app/users/${mockActiveUser.id}`)
+        .get(`/api/app/users/${activeUserFixture.id}`)
         .expect('Content-Type', /json/u)
         .expect(HttpStatus.OK);
 
@@ -398,7 +359,7 @@ describe('AppUsersController', () => {
       facadeService.deleteUserById.mockResolvedValue(undefined);
 
       const response = await request(app.getHttpServer() as Server)
-        .delete(`/api/app/users/${mockActiveUser.id}`)
+        .delete(`/api/app/users/${activeUserFixture.id}`)
         .expect(HttpStatus.NO_CONTENT);
 
       expect(response.body).toEqual({});
@@ -411,7 +372,7 @@ describe('AppUsersController', () => {
       facadeService.findUserById.mockRejectedValue(sensitiveError);
 
       const response = await request(app.getHttpServer() as Server)
-        .get(`/api/app/users/${mockActiveUser.id}`)
+        .get(`/api/app/users/${activeUserFixture.id}`)
         .expect(HttpStatus.INTERNAL_SERVER_ERROR);
 
       expect(response.body.message).toBe('Internal server error');

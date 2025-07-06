@@ -10,15 +10,14 @@ import type {
 import { UserQueryService } from '@/modules/aggregate/user/user.query.service';
 import type { ActiveUserResponseDto } from '@/modules/aggregate/user/user.response.dto';
 import {
-  cleanupMocks,
-  createMockUser,
+  activeUserFixture,
   createMockUserCommandService,
   createMockUserQueryService,
   createTestModule,
-  createUserInput,
-  mockActiveUser,
-  TEST_UUIDS,
-  updateUserInput,
+  createUserEntity,
+  createUserInputFixture,
+  updateUserInputFixture,
+  USER_FIXTURE_IDS,
 } from '@/tests/helpers';
 
 describe('UserAppFacadeService', () => {
@@ -26,8 +25,8 @@ describe('UserAppFacadeService', () => {
   let commandService: jest.Mocked<UserCommandService>;
   let queryService: jest.Mocked<UserQueryService>;
 
-  const mockCreatedUser = createMockUser({
-    id: TEST_UUIDS.ANOTHER_USER,
+  const mockCreatedUser = createUserEntity({
+    id: USER_FIXTURE_IDS.ANOTHER,
     name: 'New User',
     email: 'new@example.com',
     createdAt: new Date('2024-01-03'),
@@ -35,7 +34,7 @@ describe('UserAppFacadeService', () => {
   });
 
   const mockUpdatedUser: ActiveUserResponseDto = {
-    ...mockActiveUser,
+    ...activeUserFixture,
     name: 'Updated User',
     updatedAt: new Date('2024-01-04'),
   };
@@ -43,7 +42,7 @@ describe('UserAppFacadeService', () => {
   beforeEach(async () => {
     const mockCommandService = createMockUserCommandService();
     const mockQueryService = createMockUserQueryService();
-    
+
     const module: TestingModule = await createTestModule({
       providers: [
         UserAppFacadeService,
@@ -63,10 +62,6 @@ describe('UserAppFacadeService', () => {
     queryService = module.get(UserQueryService);
   });
 
-  afterEach(() => {
-    cleanupMocks();
-  });
-
   describe('Service initialization', () => {
     it('should be defined', () => {
       expect(service).toBeDefined();
@@ -80,21 +75,21 @@ describe('UserAppFacadeService', () => {
 
   describe('findUserById', () => {
     const mockInput: FindUserByIdInputDto = {
-      id: TEST_UUIDS.ACTIVE_USER,
+      id: USER_FIXTURE_IDS.ACTIVE,
     };
 
     it('should delegate to UserQueryService.findUserByIdOrFail', async () => {
-      queryService.findUserByIdOrFail.mockResolvedValue(mockActiveUser);
+      queryService.findUserByIdOrFail.mockResolvedValue(activeUserFixture);
 
       const result = await service.findUserById(mockInput);
 
       expect(queryService.findUserByIdOrFail).toHaveBeenCalledWith(mockInput);
       expect(queryService.findUserByIdOrFail).toHaveBeenCalledTimes(1);
-      expect(result).toBe(mockActiveUser);
+      expect(result).toBe(activeUserFixture);
     });
 
     it('should not call any command service methods', async () => {
-      queryService.findUserByIdOrFail.mockResolvedValue(mockActiveUser);
+      queryService.findUserByIdOrFail.mockResolvedValue(activeUserFixture);
 
       await service.findUserById(mockInput);
 
@@ -116,9 +111,9 @@ describe('UserAppFacadeService', () => {
     it('should delegate to UserCommandService.createUser', async () => {
       commandService.createUser.mockResolvedValue(mockCreatedUser);
 
-      const result = await service.createUser(createUserInput);
+      const result = await service.createUser(createUserInputFixture);
 
-      expect(commandService.createUser).toHaveBeenCalledWith(createUserInput);
+      expect(commandService.createUser).toHaveBeenCalledWith(createUserInputFixture);
       expect(commandService.createUser).toHaveBeenCalledTimes(1);
       expect(result).toBe(mockCreatedUser);
     });
@@ -126,7 +121,7 @@ describe('UserAppFacadeService', () => {
     it('should not call any query service methods', async () => {
       commandService.createUser.mockResolvedValue(mockCreatedUser);
 
-      await service.createUser(createUserInput);
+      await service.createUser(createUserInputFixture);
 
       expect(queryService.findUserByIdOrFail).not.toHaveBeenCalled();
     });
@@ -135,22 +130,22 @@ describe('UserAppFacadeService', () => {
       const error = new Error('Email already exists');
       commandService.createUser.mockRejectedValue(error);
 
-      await expect(service.createUser(createUserInput)).rejects.toThrow(error);
-      expect(commandService.createUser).toHaveBeenCalledWith(createUserInput);
+      await expect(service.createUser(createUserInputFixture)).rejects.toThrow(error);
+      expect(commandService.createUser).toHaveBeenCalledWith(createUserInputFixture);
     });
 
     it('should handle validation errors', async () => {
       const validationError = new Error('Invalid email format');
       commandService.createUser.mockRejectedValue(validationError);
 
-      await expect(service.createUser(createUserInput)).rejects.toThrow(validationError);
+      await expect(service.createUser(createUserInputFixture)).rejects.toThrow(validationError);
     });
   });
 
   describe('updateUserById', () => {
     const mockInput: UpdateUserInputDto = {
-      id: TEST_UUIDS.ACTIVE_USER,
-      data: updateUserInput,
+      id: USER_FIXTURE_IDS.ACTIVE,
+      data: updateUserInputFixture,
     };
 
     it('should delegate to UserCommandService.updateUserById', async () => {
@@ -173,14 +168,14 @@ describe('UserAppFacadeService', () => {
 
     it('should handle partial updates', async () => {
       const partialUpdateInput: UpdateUserInputDto = {
-        id: TEST_UUIDS.ACTIVE_USER,
+        id: USER_FIXTURE_IDS.ACTIVE,
         data: {
           email: 'newemail@example.com',
         },
       };
 
-      const updatedUser = createMockUser({
-        ...mockActiveUser,
+      const updatedUser = createUserEntity({
+        ...activeUserFixture,
         email: 'newemail@example.com',
       });
       commandService.updateUserById.mockResolvedValue(updatedUser);
@@ -194,7 +189,7 @@ describe('UserAppFacadeService', () => {
 
   describe('deleteUserById', () => {
     const mockInput: DeleteUserByIdInputDto = {
-      id: TEST_UUIDS.ACTIVE_USER,
+      id: USER_FIXTURE_IDS.ACTIVE,
     };
 
     it('should delegate to UserCommandService.deleteUserById', async () => {
@@ -252,7 +247,7 @@ describe('UserAppFacadeService', () => {
     });
 
     it('should handle concurrent requests independently', async () => {
-      queryService.findUserByIdOrFail.mockResolvedValue(mockActiveUser);
+      queryService.findUserByIdOrFail.mockResolvedValue(activeUserFixture);
       commandService.createUser.mockResolvedValue(mockCreatedUser);
       commandService.updateUserById.mockResolvedValue(mockUpdatedUser);
       commandService.deleteUserById.mockResolvedValue(undefined);
@@ -271,7 +266,7 @@ describe('UserAppFacadeService', () => {
       expect(commandService.updateUserById).toHaveBeenCalledTimes(1);
       expect(commandService.deleteUserById).toHaveBeenCalledTimes(1);
 
-      expect(findResult).toBe(mockActiveUser);
+      expect(findResult).toBe(activeUserFixture);
       expect(createResult).toBe(mockCreatedUser);
       expect(updateResult).toBe(mockUpdatedUser);
     });
@@ -315,7 +310,7 @@ describe('UserAppFacadeService', () => {
   describe('Integration with DTOs', () => {
     it('should pass through complex input DTOs correctly', async () => {
       const complexUpdateDto: UpdateUserInputDto = {
-        id: TEST_UUIDS.ACTIVE_USER,
+        id: USER_FIXTURE_IDS.ACTIVE,
         data: {
           name: 'Complex Update',
           email: 'complex@example.com',

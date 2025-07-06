@@ -1,5 +1,5 @@
 import { plainToInstance } from 'class-transformer';
-import { validate, type ValidationError } from 'class-validator';
+import { validate } from 'class-validator';
 
 import { MAX_EMAIL_LENGTH, MAX_NAME_LENGTH } from '@/modules/aggregate/user/user.constants';
 import {
@@ -16,20 +16,11 @@ import {
   UpdateUserDataDto,
   UpdateUserInputDto,
 } from '@/modules/aggregate/user/user.input.dto';
+import { getValidationErrorMessages } from '@/tests/helpers';
 
 const validUUID = '123e4567-e89b-12d3-a456-426614174000';
 const validUUID2 = '223e4567-e89b-12d3-a456-426614174001';
 const invalidUUID = '123e4567-e89b-12d3-a456';
-
-// Helper function to extract validation error messages
-const getErrorMessages = (errors: ValidationError[]): string[] =>
-  errors.flatMap((error) => {
-    const messages = error.constraints ? Object.values(error.constraints) : [];
-    if (error.children && error.children.length > 0) {
-      messages.push(...getErrorMessages(error.children));
-    }
-    return messages;
-  });
 
 describe('User Input DTOs', () => {
   describe('CreateUserInputDto', () => {
@@ -67,7 +58,7 @@ describe('User Input DTOs', () => {
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
 
-      const messages = getErrorMessages(errors);
+      const messages = getValidationErrorMessages(errors);
       expect(messages).toContain('email must be an email');
       expect(messages).toContain('email should not be empty');
       expect(messages).toContain('name must be a string');
@@ -91,7 +82,7 @@ describe('User Input DTOs', () => {
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
 
-      const messages = getErrorMessages(errors);
+      const messages = getValidationErrorMessages(errors);
       expect(messages).toContain('email must be an email');
       expect(messages).toContain('email should not be empty');
       expect(messages).toContain('name should not be empty');
@@ -126,7 +117,7 @@ describe('User Input DTOs', () => {
         });
         const errors = await validate(dto);
         expect(errors.length).toBeGreaterThan(0);
-        const messages = getErrorMessages(errors);
+        const messages = getValidationErrorMessages(errors);
         expect(messages).toContain('email must be an email');
       });
       await Promise.all(validationPromises);
@@ -140,7 +131,7 @@ describe('User Input DTOs', () => {
       });
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      const messages = getErrorMessages(errors);
+      const messages = getValidationErrorMessages(errors);
       expect(messages.some((msg) => msg.includes('must be shorter than or equal to'))).toBe(true);
     });
 
@@ -170,7 +161,7 @@ describe('User Input DTOs', () => {
       });
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      const messages = getErrorMessages(errors);
+      const messages = getValidationErrorMessages(errors);
       expect(messages.some((msg) => msg.includes('must be shorter than or equal to'))).toBe(true);
     });
 
@@ -244,7 +235,7 @@ describe('User Input DTOs', () => {
       const dto = plainToInstance(CreateManyUsersInputDto, { users: [] });
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      const messages = getErrorMessages(errors);
+      const messages = getValidationErrorMessages(errors);
       expect(messages).toContain('users should not be empty');
     });
 
@@ -344,7 +335,7 @@ describe('User Input DTOs', () => {
       });
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      const messages = getErrorMessages(errors);
+      const messages = getValidationErrorMessages(errors);
       expect(messages.some((msg) => msg.toLowerCase().includes('empty'))).toBe(true);
     });
 
@@ -354,7 +345,7 @@ describe('User Input DTOs', () => {
       });
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      const messages = getErrorMessages(errors);
+      const messages = getValidationErrorMessages(errors);
       expect(messages).toContain('id must be a UUID');
       expect(messages).toContain('id should not be empty');
     });
@@ -383,7 +374,7 @@ describe('User Input DTOs', () => {
       });
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      const messages = getErrorMessages(errors);
+      const messages = getValidationErrorMessages(errors);
       expect(messages).toContain('id must be a UUID');
     });
 
@@ -461,7 +452,7 @@ describe('User Input DTOs', () => {
       });
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      const messages = getErrorMessages(errors);
+      const messages = getValidationErrorMessages(errors);
       expect(messages).toContain('name should not be empty');
     });
 
@@ -481,7 +472,7 @@ describe('User Input DTOs', () => {
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
 
-      const messages = getErrorMessages(errors);
+      const messages = getValidationErrorMessages(errors);
       expect(messages.some((msg) => msg.includes('email must be an email'))).toBe(true);
       expect(messages.some((msg) => msg.includes('must be shorter than or equal to'))).toBe(true);
     });
@@ -504,7 +495,7 @@ describe('User Input DTOs', () => {
       // PartialType makes fields optional, so null might be treated as undefined
       // This test documents the actual behavior
       if (errors.length > 0) {
-        const messages = getErrorMessages(errors);
+        const messages = getValidationErrorMessages(errors);
         expect(messages.some((msg) => msg.includes('must be') || msg.includes('should not be empty'))).toBe(true);
       } else {
         // If null is allowed, ensure the values are null
@@ -549,7 +540,7 @@ describe('User Input DTOs', () => {
           const input = plainToInstance(dto, {});
           const errors = await validate(input);
           expect(errors.length).toBeGreaterThan(0);
-          const messages = getErrorMessages(errors);
+          const messages = getValidationErrorMessages(errors);
           expect(messages).toContain('id must be a UUID');
           expect(messages).toContain('id should not be empty');
         });
@@ -580,7 +571,7 @@ describe('User Input DTOs', () => {
             const input = plainToInstance(dto, { id: invalidId });
             const errors = await validate(input);
             expect(errors.length).toBeGreaterThan(0);
-            const messages = getErrorMessages(errors);
+            const messages = getValidationErrorMessages(errors);
             expect(messages).toContain('id must be a UUID');
           });
           await Promise.all(validationPromises);
@@ -653,7 +644,7 @@ describe('User Input DTOs', () => {
           const input = plainToInstance(dto, { ids: [] });
           const errors = await validate(input);
           expect(errors.length).toBeGreaterThan(0);
-          const messages = getErrorMessages(errors);
+          const messages = getValidationErrorMessages(errors);
           expect(messages).toContain('ids should not be empty');
         });
 
@@ -681,7 +672,7 @@ describe('User Input DTOs', () => {
           });
           const errors = await validate(input);
           expect(errors.length).toBeGreaterThan(0);
-          const messages = getErrorMessages(errors);
+          const messages = getValidationErrorMessages(errors);
           expect(messages.some((msg) => msg.includes('each value in ids must be a UUID'))).toBe(true);
         });
 

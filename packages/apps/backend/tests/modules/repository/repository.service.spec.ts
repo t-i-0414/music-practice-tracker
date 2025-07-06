@@ -1,7 +1,7 @@
 import { type TestingModule } from '@nestjs/testing';
 
 import { RepositoryService } from '@/modules/repository/repository.service';
-import { cleanupMocks, createTestModule } from '@/tests/helpers';
+import { createTestModule } from '@/tests/helpers';
 
 describe('RepositoryService', () => {
   let service: RepositoryService;
@@ -14,10 +14,6 @@ describe('RepositoryService', () => {
 
     service = module.get<RepositoryService>(RepositoryService);
     connectSpy = jest.spyOn(service, '$connect').mockResolvedValue();
-  });
-
-  afterEach(() => {
-    cleanupMocks();
   });
 
   describe('Constructor and inheritance', () => {
