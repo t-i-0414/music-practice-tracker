@@ -1,17 +1,9 @@
 import type { Config } from 'jest';
 
-const ignorePatterns = [
-  '/node_modules/',
-  '/dist/',
-  '/coverage/',
-  '/generated/',
-  'eslint.config.ts',
-  'jest.config.ts',
-  'jest.setup.ts',
-];
+const ignorePatterns = ['/node_modules/', '/dist/', '/coverage/', '/generated/'];
 
 const config: Config = {
-  collectCoverageFrom: ['**/*.ts'],
+  collectCoverageFrom: ['<rootDir>/src/**/*.ts'],
   moduleFileExtensions: ['js', 'json', 'ts'],
   moduleNameMapper: {
     '^@/generated/(.*)$': '<rootDir>/generated/$1',
@@ -27,8 +19,8 @@ const config: Config = {
     '^.+\\.ts$': 'ts-jest',
   },
   testPathIgnorePatterns: ignorePatterns,
-  coverageDirectory: './coverage',
-  coveragePathIgnorePatterns: [...ignorePatterns, 'main.ts', '\\.module\\.ts$', '/tests/'],
+  coverageDirectory: '<rootDir>/coverage',
+  coveragePathIgnorePatterns: [...ignorePatterns, 'main.ts', '.*\\.module\\.ts$'],
   coverageThreshold: {
     global: {
       branches: 95,
