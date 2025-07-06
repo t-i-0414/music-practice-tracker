@@ -29,7 +29,7 @@
     "test:cov": "jest --config ./tests/jest.config.ts --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --config ./tests/jest.config.ts --runInBand",
     "test:e2e": "jest --config ./tests/jest.e2e.config.ts",
-    "test:integration": "jest --config ./tests/jest.config.ts --testPathPattern=\\.integration\\.spec\\.ts$",
+    "test:integration": "jest --config ./tests/jest.config.ts --testRegex=\\.integration\\.spec\\.ts$",
     "test:unit": "jest --config ./tests/jest.config.ts --testPathIgnorePatterns=\\.integration\\.spec\\.ts$",
     "test:watch": "jest --config ./tests/jest.config.ts --watch",
     "type:check": "tsc --noEmit"
