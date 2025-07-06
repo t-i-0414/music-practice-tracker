@@ -89,9 +89,11 @@
         "@nestjs/schematics": "^11.0.0",
         "@nestjs/testing": "^11.0.1",
         "@types/express": "^5.0.0",
+        "@types/supertest": "^6.0.3",
         "class-transformer": "^0.5.1",
         "class-validator": "^0.14.2",
         "prisma": "^6.11.1",
+        "supertest": "^7.1.1",
       },
     },
     "packages/apps/mobile": {
