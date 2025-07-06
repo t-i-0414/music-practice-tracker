@@ -1,60 +1,60 @@
 import type { Server } from 'http';
 
-import { HttpStatus, NotFoundException, ValidationPipe, type INestApplication } from '@nestjs/common';
-import { Test, type TestingModule } from '@nestjs/testing';
+import { HttpStatus, NotFoundException, type INestApplication } from '@nestjs/common';
+import { type TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
 
 import { UserAppFacadeService } from '@/modules/aggregate/user/user.app.facade.service';
 import type { CreateUserInputDto, UpdateUserDataDto } from '@/modules/aggregate/user/user.input.dto';
-import type { ActiveUserResponseDto } from '@/modules/aggregate/user/user.response.dto';
 import { AppUsersController } from '@/modules/api/app/users/users.controller';
+import {
+  cleanupMocks,
+  createHttpTester,
+  createMockUserAppFacadeService,
+  createTestModule,
+  createUserInput,
+  expectBadRequestError,
+  expectInternalServerError,
+  expectJsonResponse,
+  expectNoContentResponse,
+  expectNotFoundError,
+  expectUuidValidationError,
+  mockActiveUser,
+  mockActiveUserJson,
+  setupTestApp,
+  TEST_UUIDS,
+  testConcurrentRequests,
+  updateUserEmailInput,
+  updateUserInput,
+} from '@/tests/helpers';
 
 describe('AppUsersController', () => {
   let app: INestApplication;
   let controller: AppUsersController;
   let facadeService: jest.Mocked<UserAppFacadeService>;
-
-  const mockActiveUser: ActiveUserResponseDto = {
-    id: '123e4567-e89b-12d3-a456-426614174000',
-    name: 'Test User',
-    email: 'test@example.com',
-    createdAt: new Date('2024-01-01'),
-    updatedAt: new Date('2024-01-02'),
-  };
-
-  const mockActiveUserJson = {
-    ...mockActiveUser,
-    createdAt: mockActiveUser.createdAt.toISOString(),
-    updatedAt: mockActiveUser.updatedAt.toISOString(),
-  };
+  let httpTester: ReturnType<typeof createHttpTester>;
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
+    const mockFacadeService = createMockUserAppFacadeService();
+    
+    const module: TestingModule = await createTestModule({
       controllers: [AppUsersController],
       providers: [
         {
           provide: UserAppFacadeService,
-          useValue: {
-            findUserById: jest.fn(),
-            createUser: jest.fn(),
-            updateUserById: jest.fn(),
-            deleteUserById: jest.fn(),
-          },
+          useValue: mockFacadeService,
         },
       ],
-    }).compile();
+    });
 
-    app = module.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe());
-    app.useLogger(false);
-    await app.init();
-
+    app = await setupTestApp(module);
+    httpTester = createHttpTester(app);
     controller = module.get<AppUsersController>(AppUsersController);
     facadeService = module.get(UserAppFacadeService);
   });
 
   afterEach(async () => {
-    jest.clearAllMocks();
+    cleanupMocks();
     await app.close();
   });
 
@@ -74,24 +74,24 @@ describe('AppUsersController', () => {
   });
 
   describe('GET /api/app/users/:id', () => {
-    const validUUID = '123e4567-e89b-12d3-a456-426614174000';
+    const validUUID = TEST_UUIDS.ACTIVE_USER;
 
     it('should return user by ID', async () => {
       facadeService.findUserById.mockResolvedValue(mockActiveUser);
 
-      const response = await request(app.getHttpServer() as Server)
-        .get(`/api/app/users/${validUUID}`)
-        .expect(HttpStatus.OK);
+      await expectJsonResponse(
+        httpTester.get(`/api/app/users/${validUUID}`),
+        mockActiveUserJson,
+      );
 
-      expect(response.body).toEqual(mockActiveUserJson);
       expect(facadeService.findUserById).toHaveBeenCalledWith({ id: validUUID });
       expect(facadeService.findUserById).toHaveBeenCalledTimes(1);
     });
 
     it('should validate UUID format', async () => {
-      await request(app.getHttpServer() as Server)
-        .get('/api/app/users/invalid-uuid')
-        .expect(HttpStatus.BAD_REQUEST);
+      await expectUuidValidationError(
+        httpTester.get(`/api/app/users/${TEST_UUIDS.INVALID}`),
+      );
 
       expect(facadeService.findUserById).not.toHaveBeenCalled();
     });
@@ -99,37 +99,34 @@ describe('AppUsersController', () => {
     it('should handle user not found', async () => {
       facadeService.findUserById.mockRejectedValue(new NotFoundException('User not found'));
 
-      await request(app.getHttpServer() as Server)
-        .get(`/api/app/users/${validUUID}`)
-        .expect(HttpStatus.NOT_FOUND);
+      await expectNotFoundError(
+        httpTester.get(`/api/app/users/${validUUID}`),
+        'User not found',
+      );
     });
 
     it('should handle special characters in UUIDs', async () => {
       const upperCaseUUID = '123E4567-E89B-12D3-A456-426614174000';
       facadeService.findUserById.mockResolvedValue(mockActiveUser);
 
-      await request(app.getHttpServer() as Server)
-        .get(`/api/app/users/${upperCaseUUID}`)
-        .expect(HttpStatus.OK);
+      await expectJsonResponse(
+        httpTester.get(`/api/app/users/${upperCaseUUID}`),
+        mockActiveUserJson,
+      );
     });
   });
 
   describe('POST /api/app/users', () => {
     it('should create a new user', async () => {
-      const createDto: CreateUserInputDto = {
-        name: 'New User',
-        email: 'new@example.com',
-      };
-
       facadeService.createUser.mockResolvedValue(mockActiveUser);
 
-      const response = await request(app.getHttpServer() as Server)
-        .post('/api/app/users')
-        .send(createDto)
-        .expect(HttpStatus.CREATED);
+      await expectJsonResponse(
+        httpTester.post('/api/app/users').send(createUserInput),
+        mockActiveUserJson,
+        HttpStatus.CREATED,
+      );
 
-      expect(response.body).toEqual(mockActiveUserJson);
-      expect(facadeService.createUser).toHaveBeenCalledWith(createDto);
+      expect(facadeService.createUser).toHaveBeenCalledWith(createUserInput);
       expect(facadeService.createUser).toHaveBeenCalledTimes(1);
     });
 
@@ -138,10 +135,9 @@ describe('AppUsersController', () => {
         email: 'invalid-email',
       };
 
-      await request(app.getHttpServer() as Server)
-        .post('/api/app/users')
-        .send(invalidDto)
-        .expect(HttpStatus.BAD_REQUEST);
+      await expectBadRequestError(
+        httpTester.post('/api/app/users').send(invalidDto),
+      );
 
       expect(facadeService.createUser).not.toHaveBeenCalled();
     });
@@ -154,20 +150,15 @@ describe('AppUsersController', () => {
 
       facadeService.createUser.mockRejectedValue(new Error('Email already exists'));
 
-      const response = await request(app.getHttpServer() as Server)
-        .post('/api/app/users')
-        .send(createDto)
-        .expect(HttpStatus.INTERNAL_SERVER_ERROR);
-
-      expect(response.body).toHaveProperty('message');
-      expect(response.body.message).toBe('Internal server error');
+      await expectInternalServerError(
+        httpTester.post('/api/app/users').send(createDto),
+      );
     });
 
     it('should handle empty body', async () => {
-      await request(app.getHttpServer() as Server)
-        .post('/api/app/users')
-        .send({})
-        .expect(HttpStatus.BAD_REQUEST);
+      await expectBadRequestError(
+        httpTester.post('/api/app/users').send({}),
+      );
 
       expect(facadeService.createUser).not.toHaveBeenCalled();
     });
@@ -177,24 +168,19 @@ describe('AppUsersController', () => {
         name: 'User Without Email',
       };
 
-      await request(app.getHttpServer() as Server)
-        .post('/api/app/users')
-        .send(incompleteDto)
-        .expect(HttpStatus.BAD_REQUEST);
+      await expectBadRequestError(
+        httpTester.post('/api/app/users').send(incompleteDto),
+      );
 
       expect(facadeService.createUser).not.toHaveBeenCalled();
     });
   });
 
   describe('PUT /api/app/users/:id', () => {
-    const validUUID = '123e4567-e89b-12d3-a456-426614174000';
+    const validUUID = TEST_UUIDS.ACTIVE_USER;
 
     it('should update a user', async () => {
-      const updateDto: UpdateUserDataDto = {
-        name: 'Updated Name',
-      };
-
-      const updatedUser = { ...mockActiveUser, name: 'Updated Name' };
+      const updatedUser = { ...mockActiveUser, name: updateUserInput.name };
       const updatedUserJson = {
         ...updatedUser,
         createdAt: updatedUser.createdAt.toISOString(),
@@ -202,61 +188,55 @@ describe('AppUsersController', () => {
       };
       facadeService.updateUserById.mockResolvedValue(updatedUser);
 
-      const response = await request(app.getHttpServer() as Server)
-        .put(`/api/app/users/${validUUID}`)
-        .send(updateDto)
-        .expect(HttpStatus.OK);
+      await expectJsonResponse(
+        httpTester.put(`/api/app/users/${validUUID}`).send(updateUserInput),
+        updatedUserJson,
+      );
 
-      expect(response.body).toEqual(updatedUserJson);
       expect(facadeService.updateUserById).toHaveBeenCalledWith({
         id: validUUID,
-        data: updateDto,
+        data: updateUserInput,
       });
     });
 
     it('should validate UUID format', async () => {
-      await request(app.getHttpServer() as Server)
-        .put('/api/app/users/invalid-uuid')
-        .send({ name: 'Updated' })
-        .expect(HttpStatus.BAD_REQUEST);
+      await expectUuidValidationError(
+        httpTester.put(`/api/app/users/${TEST_UUIDS.INVALID}`).send({ name: 'Updated' }),
+      );
 
       expect(facadeService.updateUserById).not.toHaveBeenCalled();
     });
 
     it('should handle partial updates', async () => {
-      const partialUpdate: UpdateUserDataDto = {
-        email: 'newemail@example.com',
-      };
-
       facadeService.updateUserById.mockResolvedValue(mockActiveUser);
 
-      await request(app.getHttpServer() as Server)
-        .put(`/api/app/users/${validUUID}`)
-        .send(partialUpdate)
-        .expect(HttpStatus.OK);
+      await expectJsonResponse(
+        httpTester.put(`/api/app/users/${validUUID}`).send(updateUserEmailInput),
+        mockActiveUserJson,
+      );
 
       expect(facadeService.updateUserById).toHaveBeenCalledWith({
         id: validUUID,
-        data: partialUpdate,
+        data: updateUserEmailInput,
       });
     });
 
     it('should handle user not found', async () => {
       facadeService.updateUserById.mockRejectedValue(new NotFoundException('User not found'));
 
-      await request(app.getHttpServer() as Server)
-        .put(`/api/app/users/${validUUID}`)
-        .send({ name: 'Updated' })
-        .expect(HttpStatus.NOT_FOUND);
+      await expectNotFoundError(
+        httpTester.put(`/api/app/users/${validUUID}`).send({ name: 'Updated' }),
+        'User not found',
+      );
     });
 
     it('should handle empty update data', async () => {
       facadeService.updateUserById.mockResolvedValue(mockActiveUser);
 
-      await request(app.getHttpServer() as Server)
-        .put(`/api/app/users/${validUUID}`)
-        .send({})
-        .expect(HttpStatus.OK);
+      await expectJsonResponse(
+        httpTester.put(`/api/app/users/${validUUID}`).send({}),
+        mockActiveUserJson,
+      );
 
       expect(facadeService.updateUserById).toHaveBeenCalledWith({
         id: validUUID,
@@ -272,10 +252,10 @@ describe('AppUsersController', () => {
 
       facadeService.updateUserById.mockResolvedValue(mockActiveUser);
 
-      await request(app.getHttpServer() as Server)
-        .put(`/api/app/users/${validUUID}`)
-        .send(fullUpdate)
-        .expect(HttpStatus.OK);
+      await expectJsonResponse(
+        httpTester.put(`/api/app/users/${validUUID}`).send(fullUpdate),
+        mockActiveUserJson,
+      );
 
       expect(facadeService.updateUserById).toHaveBeenCalledWith({
         id: validUUID,
@@ -285,14 +265,14 @@ describe('AppUsersController', () => {
   });
 
   describe('DELETE /api/app/users/:id', () => {
-    const validUUID = '123e4567-e89b-12d3-a456-426614174000';
+    const validUUID = TEST_UUIDS.ACTIVE_USER;
 
     it('should soft delete a user', async () => {
       facadeService.deleteUserById.mockResolvedValue(undefined);
 
-      await request(app.getHttpServer() as Server)
-        .delete(`/api/app/users/${validUUID}`)
-        .expect(HttpStatus.NO_CONTENT);
+      await expectNoContentResponse(
+        httpTester.delete(`/api/app/users/${validUUID}`),
+      );
 
       expect(facadeService.deleteUserById).toHaveBeenCalledWith({ id: validUUID });
       expect(facadeService.deleteUserById).toHaveBeenCalledTimes(1);
@@ -301,15 +281,15 @@ describe('AppUsersController', () => {
     it('should return no content even if user not found', async () => {
       facadeService.deleteUserById.mockResolvedValue(undefined);
 
-      await request(app.getHttpServer() as Server)
-        .delete(`/api/app/users/${validUUID}`)
-        .expect(HttpStatus.NO_CONTENT);
+      await expectNoContentResponse(
+        httpTester.delete(`/api/app/users/${validUUID}`),
+      );
     });
 
     it('should validate UUID format', async () => {
-      await request(app.getHttpServer() as Server)
-        .delete('/api/app/users/invalid-uuid')
-        .expect(HttpStatus.BAD_REQUEST);
+      await expectUuidValidationError(
+        httpTester.delete(`/api/app/users/${TEST_UUIDS.INVALID}`),
+      );
 
       expect(facadeService.deleteUserById).not.toHaveBeenCalled();
     });
@@ -317,9 +297,9 @@ describe('AppUsersController', () => {
     it('should handle deletion errors gracefully', async () => {
       facadeService.deleteUserById.mockRejectedValue(new Error('Database error'));
 
-      await request(app.getHttpServer() as Server)
-        .delete(`/api/app/users/${validUUID}`)
-        .expect(HttpStatus.INTERNAL_SERVER_ERROR);
+      await expectInternalServerError(
+        httpTester.delete(`/api/app/users/${validUUID}`),
+      );
     });
   });
 
@@ -354,22 +334,15 @@ describe('AppUsersController', () => {
       customError.stack = 'Original stack';
       facadeService.createUser.mockRejectedValue(customError);
 
-      const response = await request(app.getHttpServer() as Server)
-        .post('/api/app/users')
-        .send({ name: 'Test', email: 'test@example.com' })
-        .expect(HttpStatus.INTERNAL_SERVER_ERROR);
-
-      expect(response.body).toHaveProperty('message');
-      expect(response.body.message).toBe('Internal server error');
+      await expectInternalServerError(
+        httpTester.post('/api/app/users').send({ name: 'Test', email: 'test@example.com' }),
+      );
     });
 
     it('should handle validation pipe errors', async () => {
-      await request(app.getHttpServer() as Server)
-        .get('/api/app/users/not-a-uuid')
-        .expect(HttpStatus.BAD_REQUEST)
-        .expect((res) => {
-          expect(res.body.message).toContain('Validation failed');
-        });
+      await expectUuidValidationError(
+        httpTester.get('/api/app/users/not-a-uuid'),
+      );
     });
   });
 
@@ -377,16 +350,13 @@ describe('AppUsersController', () => {
     it('should handle concurrent requests', async () => {
       facadeService.createUser.mockResolvedValue(mockActiveUser);
 
-      const promises = Array.from({ length: 3 }, (_, i) =>
-        request(app.getHttpServer() as Server)
+      await testConcurrentRequests(
+        (i) => httpTester
           .post('/api/app/users')
           .send({ name: `User ${i}`, email: `user${i}@example.com` }),
+        3,
+        HttpStatus.CREATED,
       );
-
-      const results = await Promise.all(promises);
-      results.forEach((result) => {
-        expect(result.status).toBe(HttpStatus.CREATED);
-      });
 
       expect(facadeService.createUser).toHaveBeenCalledTimes(3);
     });

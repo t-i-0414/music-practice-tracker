@@ -2,8 +2,12 @@ import { Controller } from '@nestjs/common';
 import 'reflect-metadata';
 
 import { ApiController } from '@/decorators/api-controller.decorator';
+import { cleanupMocks } from '@/tests/helpers';
 
 describe('ApiController Decorator', () => {
+  afterEach(() => {
+    cleanupMocks();
+  });
   describe('Basic functionality', () => {
     it('should set controller path with "api/" prefix', () => {
       @ApiController('users')

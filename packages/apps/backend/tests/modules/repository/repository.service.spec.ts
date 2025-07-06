@@ -1,22 +1,23 @@
-import { Test, type TestingModule } from '@nestjs/testing';
+import { type TestingModule } from '@nestjs/testing';
 
 import { RepositoryService } from '@/modules/repository/repository.service';
+import { cleanupMocks, createTestModule } from '@/tests/helpers';
 
 describe('RepositoryService', () => {
   let service: RepositoryService;
   let connectSpy: jest.SpyInstance;
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
+    const module: TestingModule = await createTestModule({
       providers: [RepositoryService],
-    }).compile();
+    });
 
     service = module.get<RepositoryService>(RepositoryService);
     connectSpy = jest.spyOn(service, '$connect').mockResolvedValue();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    cleanupMocks();
   });
 
   describe('Constructor and inheritance', () => {
@@ -75,12 +76,12 @@ describe('RepositoryService', () => {
   });
 
   describe('Integration scenarios', () => {
-    it('should be injectable into other services', () => {
+    it('should be injectable into other services', async () => {
       const InjectedService = class {
         constructor(public repository: RepositoryService) {}
       };
 
-      const testModule = Test.createTestingModule({
+      const testModule = await createTestModule({
         providers: [
           RepositoryService,
           {
