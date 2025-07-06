@@ -22,15 +22,15 @@ const config: Config = {
     '^@/tests/(.*)$': '<rootDir>/tests/$1',
     '^@/(.*)$': '<rootDir>/src/$1',
   },
-  rootDir: '.',
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+  rootDir: '..',
+  setupFilesAfterEnv: ['<rootDir>/tests/jest.setup.ts'],
   testEnvironment: 'node',
   testRegex: '.*\\.spec\\.ts$',
   transform: {
     '^.+\\.ts$': 'ts-jest',
   },
   testPathIgnorePatterns: ignorePatterns,
-  coverageDirectory: '../coverage',
+  coverageDirectory: './coverage',
   coveragePathIgnorePatterns: [...ignorePatterns, '/tests/'],
   coverageThreshold: {
     global: {
