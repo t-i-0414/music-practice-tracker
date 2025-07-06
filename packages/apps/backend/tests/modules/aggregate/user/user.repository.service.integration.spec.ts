@@ -37,7 +37,6 @@ describe('UserRepositoryService (Integration)', () => {
         deletedAt: null,
       });
 
-      // データベースに実際に保存されていることを確認
       const foundUser = await service.findUniqueActiveUser({ id: createdUser.id });
       expect(foundUser).toMatchObject(createdUser);
     });
@@ -69,7 +68,6 @@ describe('UserRepositoryService (Integration)', () => {
       };
       const createdUser = await service.createUser(userData);
 
-      // ユーザーをソフトデリート
       await service.deleteUser({ id: createdUser.id });
 
       const foundUser = await service.findUniqueActiveUser({ id: createdUser.id });
@@ -116,18 +114,15 @@ describe('UserRepositoryService (Integration)', () => {
 
       await service.deleteUser({ id: createdUser.id });
 
-      // 削除後のユーザーを取得
       const deletedUser = await service.findUniqueDeletedUser({ id: createdUser.id });
       expect(deletedUser).toMatchObject({
         id: createdUser.id,
         deletedAt: expect.any(Date),
       });
 
-      // アクティブユーザーとして検索できないことを確認
       const activeUser = await service.findUniqueActiveUser({ id: createdUser.id });
       expect(activeUser).toBeNull();
 
-      // 削除済みユーザーとして検索できることを確認
       const deletedFoundUser = await service.findUniqueDeletedUser({ id: createdUser.id });
       expect(deletedFoundUser).toBeTruthy();
       if (deletedUser && deletedFoundUser) {
@@ -152,7 +147,6 @@ describe('UserRepositoryService (Integration)', () => {
         deletedAt: null,
       });
 
-      // アクティブユーザーとして検索できることを確認
       const activeUser = await service.findUniqueActiveUser({ id: createdUser.id });
       expect(activeUser).toMatchObject(restoredUser);
     });
@@ -168,7 +162,6 @@ describe('UserRepositoryService (Integration)', () => {
 
       await service.hardDeleteUser({ id: createdUser.id });
 
-      // どの検索でも見つからないことを確認
       const activeUser = await service.findUniqueActiveUser({ id: createdUser.id });
       expect(activeUser).toBeNull();
 
@@ -182,23 +175,19 @@ describe('UserRepositoryService (Integration)', () => {
 
   describe('findManyUsers', () => {
     it('should find multiple users with filters', async () => {
-      // テストデータを作成
       await service.createUser({ name: 'User 1', email: 'user1@test.com' });
       await service.createUser({ name: 'User 2', email: 'user2@test.com' });
       const deletedUser = await service.createUser({ name: 'User 3', email: 'user3@test.com' });
       await service.deleteUser({ id: deletedUser.id });
 
-      // アクティブユーザーのみを検索
       const activeUsers = await service.findManyActiveUsers({});
       expect(activeUsers).toHaveLength(2);
       expect(activeUsers.every((user) => user.deletedAt === null)).toBe(true);
 
-      // 削除済みユーザーのみを検索
       const deletedUsers = await service.findManyDeletedUsers({});
       expect(deletedUsers).toHaveLength(1);
       expect(deletedUsers[0]).toMatchObject({ id: deletedUser.id });
 
-      // すべてのユーザーを検索
       const allUsers = await service.findManyAnyUsers({});
       expect(allUsers).toHaveLength(3);
     });
