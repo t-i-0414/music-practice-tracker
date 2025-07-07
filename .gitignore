@@ -168,7 +168,7 @@ dist
 .postgres-backups
 
 # CLAUDE
-.claude/*.local.*
+**/.claude/*.local.*
 
 # Local IDE Settings
 **/.vscode/settings.json
