@@ -85,6 +85,9 @@ describe('UserRepositoryService', () => {
         email: 'original@test.com',
       };
       const createdUser = await service.createUser(userData);
+      await new Promise((resolve) => {
+        const _timer = setTimeout(resolve, 10);
+      });
 
       const updateData = {
         name: 'Updated Name',
