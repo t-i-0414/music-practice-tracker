@@ -12,6 +12,9 @@
 
 # testing
 /coverage
+tests/integration/screenshots
+tests/integration/videos
+tests/integration/downloads
 
 # next.js
 /.next/
