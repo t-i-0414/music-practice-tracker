@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { Prisma, User } from '@/generated/prisma';
 import { RepositoryService } from '@/modules/repository/repository.service';
-import { StrictOmit } from '@/types/strict-omit';
+import { StrictOmit } from '@/utils/strict-omit';
 export type { User };
 
 @Injectable()
