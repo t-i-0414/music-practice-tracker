@@ -65,6 +65,37 @@ ruleTester.run('repository-model-access-restriction', rule, {
       `,
       filename: '/project/src/modules/aggregate/user/user.repository.ts',
     },
+    {
+      code: `
+        class UserRepository {
+          async findUser() {
+            return this.repository.user.findUnique();
+          }
+        }
+      `,
+      filename: '/project/src/modules/user.repository.ts',
+    },
+    {
+      code: `
+        class UserRepository {
+          async findUser() {
+            return this.repository.user.findUnique();
+          }
+        }
+      `,
+      filename: '/project/src/modules/aggregate',
+    },
+    {
+      code: `
+        class UserRepository {
+          async findUser() {
+            return this.repository.user.findUnique();
+          }
+        }
+      `,
+      filename: undefined,
+      // This will trigger context.getFilename() fallback
+    },
   ],
   invalid: [
     {

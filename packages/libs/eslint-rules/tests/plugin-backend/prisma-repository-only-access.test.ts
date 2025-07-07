@@ -78,6 +78,13 @@ ruleTester.run('prisma-repository-only-access', rule, {
       `,
       filename: '/project/src/modules/aggregate/user/user.dto.ts',
     },
+    {
+      code: `
+        import type * as Prisma from '@prisma/client';
+        export class UserDto {}
+      `,
+      filename: '/project/src/modules/aggregate/user/user.dto.ts',
+    },
   ],
   invalid: [
     {
@@ -141,7 +148,94 @@ ruleTester.run('prisma-repository-only-access', rule, {
     },
     {
       code: `
-        import { User } from '@/generated/prisma';
+        import User from '@/generated/prisma';
+        class UserService {
+          private user: User;
+        }
+      `,
+      filename: '/project/src/modules/aggregate/user/user.service.ts',
+      errors: [
+        {
+          messageId: 'invalidPrismaImport',
+        },
+      ],
+    },
+    {
+      code: `
+        import { PrismaClient } from '@/generated/prisma';
+        class UserService {
+          constructor(private prisma: PrismaClient) {}
+        }
+      `,
+      filename: '/project/src/modules/aggregate/user/user.service.ts',
+      errors: [
+        {
+          messageId: 'invalidPrismaImport',
+        },
+      ],
+    },
+    {
+      code: `
+        const service = {
+          async connect() {
+            return prisma.$connect();
+          }
+        }
+      `,
+      filename: '/project/src/modules/aggregate/user/user.service.ts',
+      errors: [
+        {
+          messageId: 'invalidPrismaAccess',
+        },
+      ],
+    },
+    {
+      code: `
+        const service = {
+          async disconnect() {
+            return prismaClient.$disconnect();
+          }
+        }
+      `,
+      filename: '/project/src/modules/aggregate/user/user.service.ts',
+      errors: [
+        {
+          messageId: 'invalidPrismaAccess',
+        },
+      ],
+    },
+    {
+      code: `
+        const service = {
+          async getUser() {
+            return repository.user.findUnique({ where: { id: 1 } });
+          }
+        }
+      `,
+      filename: '/project/src/modules/aggregate/user/user.service.ts',
+      errors: [
+        {
+          messageId: 'invalidPrismaAccess',
+        },
+      ],
+    },
+    {
+      code: `
+        import * as Prisma from '@prisma/client';
+        class UserService {
+          constructor(private prisma: Prisma.PrismaClient) {}
+        }
+      `,
+      filename: '/project/src/modules/aggregate/user/user.service.ts',
+      errors: [
+        {
+          messageId: 'invalidPrismaImport',
+        },
+      ],
+    },
+    {
+      code: `
+        import { User } from '@custom/prisma-models';
         class UserService {
           private user: User;
         }

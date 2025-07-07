@@ -125,6 +125,24 @@ ruleTester.run('prisma-delete-naming-convention', rule, {
         }
       `,
     },
+    {
+      code: `
+        export default function () {
+          return prisma.user.delete({
+            where: { id: 1 }
+          });
+        }
+      `,
+    },
+    {
+      code: `
+        (() => {
+          return prisma.user.deleteMany({
+            where: { active: false }
+          });
+        })();
+      `,
+    },
   ],
   invalid: [
     {

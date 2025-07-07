@@ -82,6 +82,25 @@ ruleTester.run('prisma-create-no-deleted-at', rule, {
         }
       `,
     },
+    {
+      code: `
+        async function createUser() {
+          return await prisma.user.create();
+        }
+      `,
+    },
+    {
+      code: `
+        async function createUser() {
+          return await prisma.user.create({
+            select: {
+              id: true,
+              name: true
+            }
+          });
+        }
+      `,
+    },
   ],
   invalid: [
     {
