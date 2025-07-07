@@ -18,10 +18,10 @@
     "build": "tsc -p tsconfig.build.json",
     "lint:check": "eslint",
     "lint:fix": "eslint --fix",
-    "test": "vitest run",
-    "test:cov": "vitest run --coverage",
-    "test:ui": "vitest --ui",
-    "test:watch": "vitest",
+    "test": "vitest run --config tests/vitest.config.mts",
+    "test:cov": "bun run test --coverage",
+    "test:ui": "bun run test:watch --ui",
+    "test:watch": "vitest --config tests/vitest.config.mts",
     "type:check": "tsc --noEmit"
   }
 }
