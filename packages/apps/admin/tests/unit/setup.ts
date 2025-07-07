@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom';
 import { afterAll, afterEach, beforeAll, vi } from 'vitest';
 
-import { server } from '../mocks/node';
+import { server } from '../mocks/http-request/node';
 
 beforeAll(() => {
   server.listen();
