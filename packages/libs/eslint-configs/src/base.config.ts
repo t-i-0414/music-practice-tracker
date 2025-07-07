@@ -328,9 +328,26 @@ export const createBaseConfig = ({ includesTsEslintPlugin = true, includeImportP
         '@typescript-eslint/no-unsafe-return': 'off',
         '@typescript-eslint/no-unsafe-argument': 'off',
         'require-atomic-updates': 'off',
+        '@typescript-eslint/consistent-type-definitions': 'off',
+        '@typescript-eslint/explicit-module-boundary-types': 'off',
+        '@typescript-eslint/strict-boolean-expressions': 'off',
+        '@typescript-eslint/restrict-template-expressions': 'off',
       },
     },
-    globalIgnores(['**/dist/**', '**/coverage/**', '**/generated/**', '**/.turbo/**', '**/node_modules/**']),
+    {
+      files: ['**/scripts/**'],
+      rules: {
+        'no-console': 'off',
+      },
+    },
+    globalIgnores([
+      '**/dist/**',
+      '**/coverage/**',
+      '**/generated/**',
+      '**/.turbo/**',
+      '**/node_modules/**',
+      '**/*/mockServiceWorker.js',
+    ]),
     prettierConfig,
   );
 
