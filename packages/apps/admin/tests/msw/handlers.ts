@@ -1,6 +1,6 @@
 import { http, HttpResponse } from 'msw';
 
-import type { components } from '../../../generated/types/api';
+import type { components } from '../../generated/types/api';
 
 export const handlers = [
   // Admin Users - Active Users

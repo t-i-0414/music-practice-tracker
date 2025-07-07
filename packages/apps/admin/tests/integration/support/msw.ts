@@ -1,8 +1,8 @@
 import { type RequestHandler } from 'msw';
 import { type SetupWorker } from 'msw/browser';
 
-import { handlers as defaultHandlers } from '../../mocks/msw/handlers';
-import { worker } from '../../mocks/msw/worker';
+import { handlers as defaultHandlers } from '../../msw/handlers';
+import { worker } from '../../msw/worker';
 
 type MswWindow = {
   msw?: {

@@ -65,7 +65,7 @@ cd packages/apps/admin || {
   echo "❌ Failed to change directory to packages/apps/admin. Ensure the path is correct."
   exit 1
 }
-bun run test
+bun run "$CMD"
 cd - || {
   echo "❌ Failed to change back to the original directory."
   exit 1
