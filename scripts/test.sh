@@ -1,6 +1,11 @@
 #!/bin/bash
 set -euo pipefail
 
+CMD="test"
+if [[ "${1:-}" == "--coverage" ]]; then
+  CMD="test:cov"
+fi
+
 echo "🔍 Searching for packages with entry test command and package.json..."
 
 find packages -type f -name package.json |
@@ -12,11 +17,11 @@ find packages -type f -name package.json |
   while read -r package; do
     dir=$(dirname "$package")
 
-    if grep -q '"test":' "$package"; then
-      echo "📦 Running 'bun run test' in $dir"
-      (cd "$dir" && bun run test)
+    if grep -q "\"$CMD\":" "$package"; then
+      echo "📦 Running 'bun run $CMD' in $dir"
+      (cd "$dir" && bun run "$CMD")
     else
-      echo "⚠️  Skipping $dir (no test command in package.json)"
+      echo "⚠️  Skipping $dir (no $CMD command in package.json)"
     fi
   done
 
