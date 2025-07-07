@@ -9,6 +9,10 @@
     "lint:fix": "next lint --fix",
     "start:dev": "next dev --turbopack",
     "start:prod": "next start",
+    "test:unit": "vitest run --config tests/unit/vitest.config.ts",
+    "test:unit:cov": "bun run test:unit --coverage",
+    "test:unit:ui": "bun run test:unit:watch --ui",
+    "test:unit:watch": "vitest --config tests/unit/vitest.config.ts",
     "type:check": "tsc --noEmit"
   },
   "dependencies": {
