@@ -13,8 +13,28 @@
 // https://on.cypress.io/configuration
 // ***********************************************************
 
-// Import Testing Library commands
 import '@testing-library/cypress/add-commands';
 
-// Import commands.js using ES2015 syntax:
 import './commands';
+import { setupMsw } from './msw';
+
+let mswInitialized = false;
+
+Cypress.Commands.overwrite('visit', (originalFn, ...args) =>
+  originalFn(...args).then(() => {
+    if (!mswInitialized) {
+      cy.window().then(async () => {
+        await setupMsw();
+        mswInitialized = true;
+      });
+    }
+  }),
+);
+
+beforeEach(() => {
+  cy.window().then((win) => {
+    if (win.msw) {
+      win.msw.resetHandlers();
+    }
+  });
+});

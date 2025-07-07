@@ -12,20 +12,20 @@ describe('Home Page', () => {
   });
 
   it('has deploy now link with correct href', () => {
-    cy.findByRole('link', { name: /deploy now/i })
+    cy.findByRole('link', { name: /deploy now/iu })
       .should('have.attr', 'href')
       .and('include', 'vercel.com/new');
   });
 
   it('has read docs link with correct href', () => {
-    cy.findByRole('link', { name: /read our docs/i })
+    cy.findByRole('link', { name: /read our docs/iu })
       .should('have.attr', 'href')
       .and('include', 'nextjs.org/docs');
   });
 
   it('displays footer links', () => {
-    cy.findByRole('link', { name: /learn/i }).should('be.visible');
-    cy.findByRole('link', { name: /examples/i }).should('be.visible');
-    cy.findByRole('link', { name: /go to nextjs.org/i }).should('be.visible');
+    cy.findByRole('link', { name: /learn/iu }).should('be.visible');
+    cy.findByRole('link', { name: /examples/iu }).should('be.visible');
+    cy.findByRole('link', { name: /go to nextjs.org/iu }).should('be.visible');
   });
 });

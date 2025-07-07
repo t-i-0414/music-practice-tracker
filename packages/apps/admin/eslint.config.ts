@@ -19,16 +19,21 @@ const config = tseslint.config(
   },
   cypressPlugin.configs.recommended,
   {
-    files: ['tests/integration/**/*.ts'],
+    files: ['tests/**/*.ts'],
     rules: {
-      'require-unicode-regexp': 'off',
+      '@typescript-eslint/consistent-type-definitions': 'off',
+      '@typescript-eslint/explicit-module-boundary-types': 'off',
+      '@typescript-eslint/strict-boolean-expressions': 'off',
     },
   },
   {
-    files: ['tests/integration/types/cypress.d.ts'],
+    files: ['tests/integration/support/commands.ts', 'tests/integration/support/setup.ts'],
     rules: {
-      '@typescript-eslint/consistent-type-definitions': 'off',
+      '@typescript-eslint/no-namespace': 'off',
     },
+  },
+  {
+    ignores: ['**/*/mockServiceWorker.js'],
   },
 );
 

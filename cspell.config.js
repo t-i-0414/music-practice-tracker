@@ -45,6 +45,7 @@ export default defineConfig({
     'Takuya',
     'Tanaka',
     'Tarō',
+    'transferrables',
     'tsc',
     'TSES',
     'turbopack',
