@@ -30,13 +30,13 @@
     "start:prod:admin-api": "node dist/admin-api.main",
     "start:prod:app-api": "node dist/app-api.main",
     "test": "jest --config ./tests/jest.config.ts",
-    "test:cov": "jest --config ./tests/jest.config.ts --coverage",
+    "test:cov": "bun run test --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --config ./tests/jest.config.ts --runInBand",
-    "test:e2e": "jest --config ./tests/jest.config.ts --testMatch=\"<rootDir>/tests/e2e/**/*.spec.ts\"",
-    "test:integration": "jest --config ./tests/jest.config.ts --testMatch=\"<rootDir>/tests/integration/**/*.spec.ts\"",
+    "test:e2e": "bun run test --testMatch=\"<rootDir>/tests/e2e/**/*.spec.ts\"",
+    "test:integration": "bun run test --testMatch=\"<rootDir>/tests/integration/**/*.spec.ts\"",
     "test:ui": "majestic",
-    "test:unit": "jest --config ./tests/jest.config.ts --testMatch=\"<rootDir>/tests/unit/**/*.spec.ts\"",
-    "test:watch": "jest --config ./tests/jest.config.ts --watch",
+    "test:unit": "bun run test --testMatch=\"<rootDir>/tests/unit/**/*.spec.ts\"",
+    "test:watch": "bun run test --watch",
     "type:check": "tsc --noEmit"
   },
   "dependencies": {
