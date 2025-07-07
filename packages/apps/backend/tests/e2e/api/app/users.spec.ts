@@ -1,30 +1,28 @@
 import { randomUUID } from 'crypto';
 
-import { ClassSerializerInterceptor, type INestApplication, ValidationPipe } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { Test, type TestingModule } from '@nestjs/testing';
+import { type INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
+
+import { createE2ETestHelper, type E2ETestHelper } from '../../helpers/e2e-test-utils';
 
 import { AppApiModule } from '@/modules/api/app/app.module';
 
 describe('App API - /api/users', () => {
+  let helper: E2ETestHelper;
   let app: INestApplication;
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppApiModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
-    app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
-
-    await app.init();
+    helper = createE2ETestHelper();
+    await helper.setup([AppApiModule]);
+    app = helper.getApp();
   });
 
   afterAll(async () => {
-    await app.close();
+    await helper.teardown();
+  });
+
+  beforeEach(async () => {
+    await helper.cleanupBeforeEach();
   });
 
   describe('POST /api/users', () => {

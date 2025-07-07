@@ -1,30 +1,28 @@
 import { randomUUID } from 'crypto';
 
-import { ClassSerializerInterceptor, type INestApplication, ValidationPipe } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { Test, type TestingModule } from '@nestjs/testing';
+import { type INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
+
+import { createE2ETestHelper, type E2ETestHelper } from '../../helpers';
 
 import { AdminApiModule } from '@/modules/api/admin/admin.module';
 
 describe('Admin API - /api/users', () => {
+  let helper: E2ETestHelper;
   let app: INestApplication;
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AdminApiModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
-    app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
-
-    await app.init();
+    helper = createE2ETestHelper();
+    await helper.setup([AdminApiModule]);
+    app = helper.getApp();
   });
 
   afterAll(async () => {
-    await app.close();
+    await helper.teardown();
+  });
+
+  beforeEach(async () => {
+    await helper.cleanupBeforeEach();
   });
 
   describe('GET /api/users/active_users', () => {
@@ -46,6 +44,8 @@ describe('Admin API - /api/users', () => {
           expect(res.body).toHaveProperty('users');
           expect(Array.isArray(res.body.users)).toBeTruthy();
           expect(res.body.users).toHaveLength(2);
+          expect(res.body.users.some((u: any) => u.id === user1.body.id)).toBeTruthy();
+          expect(res.body.users.some((u: any) => u.id === user2.body.id)).toBeTruthy();
         });
     });
   });

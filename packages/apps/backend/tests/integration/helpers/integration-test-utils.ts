@@ -1,7 +1,7 @@
 import { type INestApplication } from '@nestjs/common';
 import { Test, type TestingModule } from '@nestjs/testing';
 
-import { cleanupDatabase, disconnectDatabase, getPrismaClient } from './database-test-utils';
+import { cleanupDatabase, disconnectDatabase, getPrismaClient } from '../../helpers';
 
 import { RepositoryModule } from '@/modules/repository/repository.module';
 import { RepositoryService } from '@/modules/repository/repository.service';
