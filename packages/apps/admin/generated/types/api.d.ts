@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-    "/api/admin/users/active_users": {
+    "/api/users/active_users": {
         parameters: {
             query?: never;
             header?: never;
@@ -21,7 +21,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/admin/users/active_users/{id}": {
+    "/api/users/active_users/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -38,7 +38,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/admin/users/deleted_users": {
+    "/api/users/deleted_users": {
         parameters: {
             query?: never;
             header?: never;
@@ -55,7 +55,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/admin/users/deleted_users/{id}": {
+    "/api/users/deleted_users/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -72,7 +72,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/admin/users/any_users": {
+    "/api/users/any_users": {
         parameters: {
             query?: never;
             header?: never;
@@ -89,7 +89,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/admin/users/any_users/{id}": {
+    "/api/users/any_users/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -106,7 +106,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/admin/users": {
+    "/api/users": {
         parameters: {
             query?: never;
             header?: never;
@@ -123,7 +123,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/admin/users/bulk": {
+    "/api/users/bulk": {
         parameters: {
             query?: never;
             header?: never;
@@ -141,7 +141,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/admin/users/{id}": {
+    "/api/users/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -159,7 +159,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/admin/users/hard/bulk": {
+    "/api/users/hard/bulk": {
         parameters: {
             query?: never;
             header?: never;
@@ -176,7 +176,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/admin/users/hard/{id}": {
+    "/api/users/hard/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -193,7 +193,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/admin/users/restore/bulk": {
+    "/api/users/restore/bulk": {
         parameters: {
             query?: never;
             header?: never;
@@ -210,7 +210,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/admin/users/{id}/restore": {
+    "/api/users/{id}/restore": {
         parameters: {
             query?: never;
             header?: never;
@@ -300,7 +300,7 @@ export interface components {
              * @description The user deleted at timestamp
              * @example 2024-07-20T10:00:00.000Z
              */
-            deletedAt: Record<string, never> | null;
+            deletedAt: string | null;
         };
         DeletedUsersResponseDto: {
             users: components["schemas"]["DeletedUserResponseDto"][];
@@ -340,7 +340,7 @@ export interface components {
              * @description The user deleted at timestamp
              * @example 2024-07-20T10:00:00.000Z
              */
-            deletedAt: Record<string, never> | null;
+            deletedAt: string | null;
         };
         AnyUsersResponseDto: {
             users: components["schemas"]["AnyUserResponseDto"][];

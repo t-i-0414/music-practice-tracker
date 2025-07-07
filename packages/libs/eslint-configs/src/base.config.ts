@@ -332,6 +332,7 @@ export const createBaseConfig = ({ includesTsEslintPlugin = true, includeImportP
         '@typescript-eslint/explicit-module-boundary-types': 'off',
         '@typescript-eslint/strict-boolean-expressions': 'off',
         '@typescript-eslint/restrict-template-expressions': 'off',
+        '@typescript-eslint/no-unused-expressions': 'off',
       },
     },
     {

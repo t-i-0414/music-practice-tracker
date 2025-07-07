@@ -55,12 +55,11 @@ class FullUserResponseDto implements User {
     description: 'The user deleted at timestamp',
     example: '2024-07-20T10:00:00.000Z',
     format: 'date-time',
-    required: false,
     nullable: true,
   })
   @Type(() => Date)
   @Expose()
-  public deletedAt: Date | null;
+  public deletedAt: Date;
 }
 
 /**
@@ -86,17 +85,7 @@ export function toActiveUsersDto(users: unknown[]): ActiveUsersResponseDto {
  * Deleted User response DTO - Read-only fields returned from API
  */
 @Exclude()
-export class DeletedUserResponseDto extends PickType(FullUserResponseDto, [...activeUserKeys, 'deletedAt']) {
-  @ApiProperty({
-    description: 'The user deleted at timestamp',
-    example: '2024-07-20T10:00:00.000Z',
-    format: 'date-time',
-    required: true,
-  })
-  @Type(() => Date)
-  @Expose()
-  public deletedAt: Date;
-}
+export class DeletedUserResponseDto extends FullUserResponseDto {}
 export function toDeletedUserDto(user: unknown): DeletedUserResponseDto {
   return plainToInstance(DeletedUserResponseDto, user);
 }

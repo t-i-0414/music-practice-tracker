@@ -6,10 +6,31 @@ if [[ "${1:-}" == "--coverage" ]]; then
   CMD="test:cov"
 fi
 
+echo "🔍 Searching for packages with entry '$CMD' command and package.json..."
+
+find packages -type f -name package.json |
+  grep -v '/node_modules/' |
+  grep -v '/.next/' |
+  grep -v '/dist/' |
+  grep -v '/build/' |
+  grep -v '/generated/' |
+  grep -v '/coverage/' |
+  grep -v '/admin/' |
+  while read -r package; do
+    dir=$(dirname "$package")
+
+    if grep -q "\"$CMD\":" "$package"; then
+      echo "📦 Running 'bun run $CMD' in $dir"
+      (cd "$dir" && bun run "$CMD")
+    else
+      echo "⚠️  Skipping $dir (no $CMD command in package.json)"
+    fi
+  done
+
 echo "🔍 Checking if admin server is running on http://localhost:8000..."
 
 if ! curl --silent --fail http://localhost:8000 >/dev/null; then
-  echo "🚀 Admin server not detected. Starting with 'bun run start:admin' in background..."
+  echo "🚀 Admin server not detected. Starting with 'bun run start:dev' in background..."
   cd packages/apps/admin || {
     echo "❌ Failed to change directory to packages/apps/admin. Ensure the path is correct."
     exit 1
@@ -40,29 +61,19 @@ else
   echo "✅ Admin server is already running."
 fi
 
-echo "🔍 Searching for packages with entry '$CMD' command and package.json..."
-
-find packages -type f -name package.json |
-  grep -v '/node_modules/' |
-  grep -v '/.next/' |
-  grep -v '/dist/' |
-  grep -v '/build/' |
-  grep -v '/generated/' |
-  grep -v '/coverage/' |
-  while read -r package; do
-    dir=$(dirname "$package")
-
-    if grep -q "\"$CMD\":" "$package"; then
-      echo "📦 Running 'bun run $CMD' in $dir"
-      (cd "$dir" && bun run "$CMD")
-    else
-      echo "⚠️  Skipping $dir (no $CMD command in package.json)"
-    fi
-  done
-
-echo "✅ All tests complete."
+cd packages/apps/admin || {
+  echo "❌ Failed to change directory to packages/apps/admin. Ensure the path is correct."
+  exit 1
+}
+bun run test
+cd - || {
+  echo "❌ Failed to change back to the original directory."
+  exit 1
+}
 
 if [[ -n "${ADMIN_SERVER_PID:-}" ]]; then
   echo "🛑 Stopping admin server (PID: $ADMIN_SERVER_PID)"
   kill "$ADMIN_SERVER_PID"
 fi
+
+echo "✅ All tests complete."

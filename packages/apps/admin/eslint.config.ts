@@ -19,21 +19,10 @@ const config = tseslint.config(
   },
   cypressPlugin.configs.recommended,
   {
-    files: ['tests/**/*.ts'],
-    rules: {
-      '@typescript-eslint/consistent-type-definitions': 'off',
-      '@typescript-eslint/explicit-module-boundary-types': 'off',
-      '@typescript-eslint/strict-boolean-expressions': 'off',
-    },
-  },
-  {
     files: ['tests/integration/support/commands.ts', 'tests/integration/support/setup.ts'],
     rules: {
       '@typescript-eslint/no-namespace': 'off',
     },
-  },
-  {
-    ignores: ['**/*/mockServiceWorker.js'],
   },
 );
 
