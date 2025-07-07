@@ -5,6 +5,13 @@ import * as request from 'supertest';
 export async function setupTestApp(module: TestingModule): Promise<INestApplication> {
   const app = module.createNestApplication();
   app.useGlobalPipes(new ValidationPipe());
+  await app.init();
+  return app;
+}
+
+export async function setupNoLoggerTestApp(module: TestingModule): Promise<INestApplication> {
+  const app = module.createNestApplication();
+  app.useGlobalPipes(new ValidationPipe());
   app.useLogger(false);
   await app.init();
   return app;

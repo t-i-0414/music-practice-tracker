@@ -18,6 +18,7 @@ import {
   expectNotFoundError,
   expectUuidValidationError,
   setupIntegrationTest,
+  setupNoLoggerTestApp,
   setupTestApp,
   testConcurrentRequests,
   updateUserEmailInputFixture,
@@ -33,9 +34,11 @@ describe('AppUsersController', () => {
   const { setApp } = setupIntegrationTest();
 
   let app: INestApplication;
+  let noLoggerApp: INestApplication;
   let controller: AppUsersController;
   let facadeService: jest.Mocked<UserAppFacadeService>;
   let httpTester: ReturnType<typeof createHttpTester>;
+  let noLoggerHttpTester: ReturnType<typeof createHttpTester>;
 
   beforeEach(async () => {
     const mockFacadeService = createMockUserAppFacadeService();
@@ -51,8 +54,11 @@ describe('AppUsersController', () => {
     });
 
     app = await setupTestApp(module);
+    noLoggerApp = await setupNoLoggerTestApp(module);
     setApp(app);
+    setApp(noLoggerApp);
     httpTester = createHttpTester(app);
+    noLoggerHttpTester = createHttpTester(noLoggerApp);
     controller = module.get<AppUsersController>(AppUsersController);
     facadeService = module.get(UserAppFacadeService);
   });
@@ -136,7 +142,7 @@ describe('AppUsersController', () => {
 
       facadeService.createUser.mockRejectedValue(new Error('Email already exists'));
 
-      await expectInternalServerError(httpTester.post('/api/users').send(createDto));
+      await expectInternalServerError(noLoggerHttpTester.post('/api/users').send(createDto));
     });
 
     it('should handle empty body', async () => {

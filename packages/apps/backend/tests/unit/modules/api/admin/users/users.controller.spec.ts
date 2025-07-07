@@ -25,6 +25,7 @@ import {
   expectNotFoundError,
   expectUuidValidationError,
   setupIntegrationTest,
+  setupNoLoggerTestApp,
   setupTestApp,
   testConcurrentRequests,
   testUserIdsFixture,
@@ -47,9 +48,11 @@ describe('AdminUsersController', () => {
   const { setApp } = setupIntegrationTest();
 
   let app: INestApplication;
+  let noLoggerApp: INestApplication;
   let controller: AdminUsersController;
   let facadeService: jest.Mocked<UserAdminFacadeService>;
   let httpTester: ReturnType<typeof createHttpTester>;
+  let noLoggerHttpTester: ReturnType<typeof createHttpTester>;
 
   beforeEach(async () => {
     const mockFacadeService = createMockUserAdminFacadeService();
@@ -66,7 +69,9 @@ describe('AdminUsersController', () => {
 
     app = await setupTestApp(module);
     setApp(app);
+    noLoggerApp = await setupNoLoggerTestApp(module);
     httpTester = createHttpTester(app);
+    noLoggerHttpTester = createHttpTester(noLoggerApp);
     controller = module.get<AdminUsersController>(AdminUsersController);
     facadeService = module.get(UserAdminFacadeService);
   });
@@ -244,7 +249,7 @@ describe('AdminUsersController', () => {
 
       facadeService.createUser.mockRejectedValue(new Error('Email already exists'));
 
-      await expectInternalServerError(httpTester.post('/api/users').send(createDto));
+      await expectInternalServerError(noLoggerHttpTester.post('/api/users').send(createDto));
     });
   });
 

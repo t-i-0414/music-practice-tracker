@@ -1,6 +1,6 @@
 import type { Config } from 'jest';
 
-const ignorePatterns = ['/node_modules/', '/dist/', '/coverage/', '/generated/'];
+const ignorePatterns = ['/node_modules/', '/dist/', '/coverage/', '/generated/', 'scripts/'];
 
 const config: Config = {
   collectCoverageFrom: ['<rootDir>/src/**/*.ts'],
