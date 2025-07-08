@@ -19,6 +19,7 @@ import {
   DeletedUserResponseDto,
   DeletedUsersResponseDto,
 } from '@/modules/aggregate/user/user.response.dto';
+import { ensureIdsToArray } from '@/utils/ensure-ids-to-array';
 
 @ApiTags('users')
 @ApiController('users')
@@ -40,8 +41,8 @@ export class AdminUsersController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Users not found' })
-  public async findManyUsers(@Query('ids') ids: string[]): Promise<ActiveUsersResponseDto> {
-    return this.userAdminFacade.findManyUsers({ ids });
+  public async findManyUsers(@Query('ids') ids: string | string[]): Promise<ActiveUsersResponseDto> {
+    return this.userAdminFacade.findManyUsers({ ids: ensureIdsToArray(ids) });
   }
 
   @Get('active_users/:id')
@@ -70,8 +71,8 @@ export class AdminUsersController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Users not found' })
-  public async findManyDeletedUsers(@Query('ids') ids: string[]): Promise<DeletedUsersResponseDto> {
-    return this.userAdminFacade.findManyDeletedUsers({ ids });
+  public async findManyDeletedUsers(@Query('ids') ids: string | string[]): Promise<DeletedUsersResponseDto> {
+    return this.userAdminFacade.findManyDeletedUsers({ ids: ensureIdsToArray(ids) });
   }
 
   @Get('deleted_users/:id')
@@ -100,8 +101,8 @@ export class AdminUsersController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Users not found' })
-  public async findManyAnyUsers(@Query('ids') ids: string[]): Promise<AnyUsersResponseDto> {
-    return this.userAdminFacade.findManyAnyUsers({ ids });
+  public async findManyAnyUsers(@Query('ids') ids: string | string[]): Promise<AnyUsersResponseDto> {
+    return this.userAdminFacade.findManyAnyUsers({ ids: ensureIdsToArray(ids) });
   }
 
   @Get('any_users/:id')

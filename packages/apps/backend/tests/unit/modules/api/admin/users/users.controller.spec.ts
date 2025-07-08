@@ -119,7 +119,7 @@ describe('AdminUsersController', () => {
         activeUsersResponseJsonFixture,
       );
 
-      expect(facadeService.findManyUsers).toHaveBeenCalledWith({ ids: 'single-id' });
+      expect(facadeService.findManyUsers).toHaveBeenCalledWith({ ids: ['single-id'] });
     });
 
     it('should handle service errors', async () => {

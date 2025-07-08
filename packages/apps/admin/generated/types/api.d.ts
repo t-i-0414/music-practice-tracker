@@ -300,7 +300,7 @@ export interface components {
              * @description The user deleted at timestamp
              * @example 2024-07-20T10:00:00.000Z
              */
-            deletedAt: string | null;
+            deletedAt: string;
         };
         DeletedUsersResponseDto: {
             users: components["schemas"]["DeletedUserResponseDto"][];

@@ -67,7 +67,7 @@ export const anyUserJsonFixture = {
   email: anyUserFixture.email,
   createdAt: anyUserFixture.createdAt.toISOString(),
   updatedAt: anyUserFixture.updatedAt.toISOString(),
-  deletedAt: anyUserFixture.deletedAt.toISOString(),
+  deletedAt: anyUserFixture.deletedAt?.toISOString(),
 };
 
 export const activeUsersResponseFixture = {

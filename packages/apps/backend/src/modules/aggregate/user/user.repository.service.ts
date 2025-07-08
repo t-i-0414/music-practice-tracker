@@ -104,13 +104,19 @@ export class UserRepositoryService {
       data: {
         ...data,
       },
-      where,
+      where: {
+        ...where,
+        deletedAt: null,
+      },
     });
   }
 
   public async deleteUser(params: Prisma.UserWhereUniqueInput): Promise<void> {
     await this.repository.user.update({
-      where: params,
+      where: {
+        ...params,
+        deletedAt: null,
+      },
       data: {
         deletedAt: new Date(),
       },
@@ -140,7 +146,10 @@ export class UserRepositoryService {
 
   public async restoreUser(params: Prisma.UserWhereUniqueInput): Promise<User> {
     return this.repository.user.update({
-      where: params,
+      where: {
+        ...params,
+        deletedAt: { not: null },
+      },
       data: {
         deletedAt: null,
       },
@@ -149,7 +158,10 @@ export class UserRepositoryService {
 
   public async restoreManyAndReturnUsers(params: Prisma.UserWhereInput): Promise<User[]> {
     return this.repository.user.updateManyAndReturn({
-      where: params,
+      where: {
+        ...params,
+        deletedAt: { not: null },
+      },
       data: {
         deletedAt: null,
       },

@@ -9,6 +9,7 @@ import {
   AnyUsersResponseDto,
   DeletedUserResponseDto,
   DeletedUsersResponseDto,
+  FullUserResponseDto,
   toActiveUserDto,
   toActiveUsersDto,
   toAnyUserDto,
@@ -296,10 +297,10 @@ describe('User Response DTOs', () => {
       expect(dto.deletedAt).toBeUndefined();
     });
 
-    it('AnyUserResponseDto should extend DeletedUserResponseDto', () => {
+    it('AnyUserResponseDto should extend FullUserResponseDto', () => {
       const dto = new AnyUserResponseDto();
 
-      expect(dto).toBeInstanceOf(DeletedUserResponseDto);
+      expect(dto).toBeInstanceOf(FullUserResponseDto);
       expect(dto).toHaveProperty('deletedAt');
     });
 

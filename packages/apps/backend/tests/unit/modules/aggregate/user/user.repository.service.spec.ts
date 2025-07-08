@@ -337,7 +337,10 @@ describe('UserRepositoryService', () => {
         data: {
           ...params.data,
         },
-        where: params.where,
+        where: {
+          ...params.where,
+          deletedAt: null,
+        },
       });
       expect(result).toEqual(updatedUser);
     });
@@ -363,7 +366,10 @@ describe('UserRepositoryService', () => {
         data: {
           ...params.data,
         },
-        where: params.where,
+        where: {
+          ...params.where,
+          deletedAt: null,
+        },
       });
       expect(result).toEqual(updatedUser);
     });
@@ -389,7 +395,10 @@ describe('UserRepositoryService', () => {
       await service.deleteUser(params);
 
       expect(mockRepositoryService.user.update).toHaveBeenCalledWith({
-        where: params,
+        where: {
+          ...params,
+          deletedAt: null,
+        },
         data: {
           deletedAt: expect.any(Date),
         },
@@ -491,7 +500,10 @@ describe('UserRepositoryService', () => {
       const result = await service.restoreUser(params);
 
       expect(mockRepositoryService.user.update).toHaveBeenCalledWith({
-        where: params,
+        where: {
+          ...params,
+          deletedAt: { not: null },
+        },
         data: {
           deletedAt: null,
         },
@@ -538,7 +550,10 @@ describe('UserRepositoryService', () => {
       const result = await service.restoreManyAndReturnUsers(params);
 
       expect(mockRepositoryService.user.updateManyAndReturn).toHaveBeenCalledWith({
-        where: params,
+        where: {
+          ...params,
+          deletedAt: { not: null },
+        },
         data: {
           deletedAt: null,
         },

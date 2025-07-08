@@ -43,6 +43,7 @@ export class UserCommandService {
   }
 
   public async deleteUserById({ id }: DeleteUserByIdInputDto): Promise<void> {
+    await this.queryService.findUserByIdOrFail({ id });
     await this.repository.deleteUser({ id });
   }
 
@@ -53,6 +54,7 @@ export class UserCommandService {
   }
 
   public async hardDeleteUserById({ id }: HardDeleteUserByIdInputDto): Promise<void> {
+    await this.queryService.findAnyUserByIdOrFail({ id });
     await this.repository.hardDeleteUser({ id });
   }
 

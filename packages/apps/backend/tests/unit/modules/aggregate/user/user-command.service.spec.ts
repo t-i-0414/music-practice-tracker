@@ -312,12 +312,12 @@ describe('UserCommandService', () => {
       expect(repositoryService.deleteUser).toHaveBeenCalledTimes(1);
     });
 
-    it('should not check if user exists before deletion', async () => {
+    it('should check if user exists before deletion', async () => {
       repositoryService.deleteUser.mockResolvedValue(undefined);
 
       await service.deleteUserById(deleteInput);
 
-      expect(queryService.findUserByIdOrFail).not.toHaveBeenCalled();
+      expect(queryService.findUserByIdOrFail).toHaveBeenCalledTimes(1);
     });
 
     it('should handle repository errors', async () => {
