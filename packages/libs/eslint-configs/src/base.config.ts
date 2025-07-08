@@ -2,7 +2,9 @@ import eslint from '@eslint/js';
 import vitestPlugin from '@vitest/eslint-plugin';
 import { globalIgnores } from 'eslint/config';
 import prettierConfig from 'eslint-config-prettier/flat';
+import cypressPlugin from 'eslint-plugin-cypress';
 import importPlugin from 'eslint-plugin-import';
+import storybook from 'eslint-plugin-storybook';
 import globals from 'globals';
 import tseslint, { type ConfigArray, configs } from 'typescript-eslint';
 
@@ -333,6 +335,20 @@ export const createBaseConfig = ({ includesTsEslintPlugin = true, includeImportP
         '@typescript-eslint/strict-boolean-expressions': 'off',
         '@typescript-eslint/restrict-template-expressions': 'off',
         '@typescript-eslint/no-unused-expressions': 'off',
+      },
+    },
+    cypressPlugin.configs.recommended,
+    {
+      files: ['support/commands.ts', 'support/setup.ts'],
+      rules: {
+        '@typescript-eslint/no-namespace': 'off',
+      },
+    },
+    ...storybook.configs['flat/recommended'],
+    {
+      files: ['**/stories/**/*.ts', '**/stories/**/*.tsx', '**/*.stories.ts', '**/*.stories.tsx'],
+      rules: {
+        '@typescript-eslint/unbound-method': 'off',
       },
     },
     {

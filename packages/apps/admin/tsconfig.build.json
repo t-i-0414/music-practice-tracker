@@ -3,5 +3,5 @@
   "compilerOptions": {
     "plugins": [{ "name": "next" }]
   },
-  "exclude": ["node_modules", "tests", "vitest.config.ts", "**/*.spec.ts", "**/*.test.ts"]
+  "exclude": ["node_modules", "tests", "vitest.config.ts", "**/*.spec.ts", "**/*.test.ts", "**/*.stories.ts"]
 }

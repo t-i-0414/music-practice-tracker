@@ -4,6 +4,7 @@ export default defineConfig({
   version: '0.2',
   language: 'en',
   words: [
+    'Autodocs',
     'autoincrement',
     'awk',
     'bunx',
@@ -11,6 +12,7 @@ export default defineConfig({
     'cov',
     'createmany',
     'createmanyandreturn',
+    'customise',
     'env',
     'euo',
     'evenodd',

@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "next build",
+    "build:storybook": "storybook build",
     "gen:api-types": "openapi-typescript http://localhost:3001/api-json -o generated/types/api.d.ts",
     "lint:check": "next lint",
     "lint:fix": "next lint --fix",
@@ -17,6 +18,7 @@
     "test:integration": "cypress run --config-file tests/integration/cypress.config.ts",
     "test:integration:ui": "cypress open --config-file tests/integration/cypress.config.ts",
     "test:integration:verify": "cypress verify",
+    "test:storybook": "storybook dev -p 6006",
     "test:unit": "vitest run --config tests/unit/vitest.config.ts",
     "test:unit:cov": "bun run test:unit --coverage",
     "test:unit:ui": "bun run test:unit:watch --ui",
@@ -30,7 +32,6 @@
   },
   "devDependencies": {
     "@music-practice-tracker/eslint-configs": "workspace:*",
-    "eslint-config-next": "15.3.3",
-    "eslint-plugin-cypress": "^5.1.0"
+    "eslint-config-next": "15.3.3"
   }
 }
