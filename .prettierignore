@@ -9,5 +9,7 @@
 **/log/**
 **/cache/**
 **/generated/**
+**/test-results/**
+**/playwright-report/**
 packages/apps/mobile/.expo
 packages/apps/mobile/expo-env.d.ts
