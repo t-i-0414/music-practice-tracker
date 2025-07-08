@@ -61,6 +61,7 @@ export default defineConfig({
     '**/dist/**',
     'packages/apps/backend/prisma/**',
     '**/coverage/**',
+    '**/playwright-report/index.html',
   ],
   maxNumberOfProblems: 0,
   minWordLength: 3,
