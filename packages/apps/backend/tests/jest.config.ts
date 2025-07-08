@@ -29,6 +29,7 @@ const config: Config = {
       statements: 95,
     },
   },
+  maxWorkers: 1,
 };
 
 export default config;
