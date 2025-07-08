@@ -4,7 +4,7 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import testingLibraryPlugin from 'eslint-plugin-testing-library';
 import tseslint, { type ConfigArray } from 'typescript-eslint';
 
-import { createBaseConfig } from './base.config';
+import { createBaseConfig, testFilePatterns } from './base.config';
 
 export const createBaseReactConfig = ({
   includesTsEslintPlugin = true,
@@ -53,17 +53,14 @@ export const createBaseReactConfig = ({
       },
     },
     {
-      files: [
-        '**/*.spec.ts',
-        '**/*.spec.tsx',
-        '**/*.spec.mts',
-        '**/*.spec.cts',
-        '**/*.spec.js',
-        '**/*.spec.jsx',
-        '**/*.spec.mjs',
-        '**/*.spec.cjs',
-      ],
+      files: testFilePatterns,
       ...testingLibraryPlugin.configs['flat/react'],
+    },
+    {
+      files: ['**/e2e/**'],
+      rules: {
+        'testing-library/prefer-screen-queries': 'off',
+      },
     },
     prettierConfig,
   );
