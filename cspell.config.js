@@ -64,6 +64,7 @@ export default defineConfig({
     'packages/apps/backend/prisma/**',
     '**/coverage/**',
     '**/playwright-report/index.html',
+    '**/storybook-static/**',
   ],
   maxNumberOfProblems: 0,
   minWordLength: 3,
