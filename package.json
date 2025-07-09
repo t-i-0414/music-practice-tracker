@@ -6,7 +6,7 @@
     "packages/libs/*"
   ],
   "scripts": {
-    "ci:temp": "run-s cspell format:check lint:check markdown:check type:check test",
+    "ci:temp": "run-s cspell format:check lint:check markdown:check secretlint:check type:check test",
     "cspell": "cspell '**'",
     "format:check": "prettier --check .",
     "format:fix": "prettier --write . && bun run format:prisma",
@@ -16,6 +16,8 @@
     "lint:fix": "sh scripts/lint.sh --fix",
     "markdown:check": "markdownlint '**/*.md' --ignore '**/node_modules/**'",
     "markdown:fix": "markdownlint '**/*.md' --ignore '**/node_modules/**' --fix",
+    "secretlint:check": "secretlint '**/*'",
+    "secretlint:fix": "secretlint --fix '**/*'",
     "test": "sh scripts/test.sh",
     "test:cov": "sh scripts/test.sh --coverage",
     "type:check": "sh scripts/type_check.sh",
@@ -34,6 +36,7 @@
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.29.0",
     "@playwright/test": "^1.53.2",
+    "@secretlint/secretlint-rule-preset-recommend": "^10.2.0",
     "@storybook/addon-a11y": "^9.0.16",
     "@storybook/addon-docs": "^9.0.16",
     "@storybook/addon-onboarding": "^9.0.16",
@@ -88,6 +91,7 @@
     "openapi-typescript": "^7.8.0",
     "playwright": "^1.53.2",
     "prettier": "^3.5.3",
+    "secretlint": "^10.2.0",
     "source-map-support": "^0.5.21",
     "storybook": "^9.0.16",
     "supertest": "^7.1.1",

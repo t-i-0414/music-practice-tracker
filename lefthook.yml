@@ -19,3 +19,6 @@ pre-commit:
         for file in {staged_files}; do
           scripts/validate-prisma-schema.sh "$file"
         done
+    secretlint:
+      glob: '**/*'
+      run: bunx secretlint {staged_files}
