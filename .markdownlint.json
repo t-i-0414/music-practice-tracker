@@ -1,8 +1,13 @@
 {
   "default": true,
-  "MD003": { "style": "atx" },
-  "MD007": { "indent": 2 },
+  "MD003": {
+    "style": "atx"
+  },
+  "MD007": {
+    "indent": 2
+  },
   "MD013": false,
+  "MD024": false,
   "MD033": false,
   "MD041": false,
   "line-length": false
