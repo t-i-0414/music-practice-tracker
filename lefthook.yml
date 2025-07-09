@@ -11,6 +11,7 @@ pre-commit:
       run: |
         for file in {staged_files}; do
           bunx sort-package-json "$file"
+          git add "$file"
         done
     validate-prisma-schema:
       glob: '**/prisma/schema.prisma'
