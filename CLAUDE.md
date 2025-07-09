@@ -2,6 +2,62 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+Before starting any task,
+**you must review the following sections in `CLAUDE.md`:**
+
+- `important-instruction-reminders`
+- `Implementation Flow`
+
+## important-instruction-reminders
+
+Do what has been asked; nothing more, nothing less.
+NEVER create files unless they're absolutely necessary for achieving your goal.
+ALWAYS prefer editing an existing file to creating a new one.
+NEVER proactively create documentation files (\*.md) or README files. Only create documentation files if explicitly requested by the User.
+Minimize in-code comments. When adding them, include a comment type such as NOTE:.
+For npm packages that are used across multiple apps,
+**make sure to install them in the root project (workspace root)** rather than inside individual app directories.
+After making changes to the code, always run the following commands from the root project and make sure all of them pass:
+
+```shell
+bun run cspell
+bun run format:fix
+bun run lint:check
+bun run markdown:check
+bun run secretlint:check
+bun run type:check
+bun run test
+```
+
+This ensures code quality, style consistency, and avoids introducing regressions or sensitive data.
+Additionally, make sure to run `bun run test:cov` and verify that all projects meet the required coverage thresholds.
+
+## Implementation Flow
+
+Please follow the steps below when implementing a feature:
+
+### 1. Explore
+
+- Understand the relevant codebase, related files, and any existing implementations that may serve as references.
+
+### 2. Plan
+
+- Think deeply about the implementation plan and design.
+- Always **ultrathink** — go beyond surface-level thinking.
+- **You must obtain approval before proceeding to the next phase.**
+
+### 3. Code
+
+- Implement based on the approved plan.
+- Write code **as if you were Takuto Wada**, the renowned TDD expert in Japan.
+- Emphasize **clean, test-driven development**.
+
+### 4. Commit
+
+- Make commits in appropriately small chunks.
+- Follow the **[Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)** specification.
+- **Do not commit without prior approval.**
+
 ## Project Overview
 
 Music Practice Tracker is a monorepo application designed to help users track and manage their music practice sessions. The project consists of three main applications:
@@ -801,9 +857,6 @@ npm run ci:temp
 # Type check all packages
 npm run type:check
 
-# Type sync and install
-npm run type:sync
-
 # Format check and fix
 npm run format:check
 npm run format:fix
@@ -1220,51 +1273,3 @@ bunx jest --detectOpenHandles user.repository.service.spec.ts
 - Unit tests: Mock all dependencies
 - Integration tests: Use real database with transactions
 - E2E tests: Test full API flow with supertest
-
-## important-instruction-reminders
-
-Do what has been asked; nothing more, nothing less.
-NEVER create files unless they're absolutely necessary for achieving your goal.
-ALWAYS prefer editing an existing file to creating a new one.
-NEVER proactively create documentation files (\*.md) or README files. Only create documentation files if explicitly requested by the User.
-Minimize in-code comments. When adding them, include a comment type such as NOTE:.
-After making changes to the code, always run the following commands from the root project and make sure all of them pass:
-
-```shell
-bun run cspell
-bun run format:fix
-bun run lint:check
-bun run markdown:check
-bun run secretlint:check
-bun run type:check
-bun run test
-```
-
-This ensures code quality, style consistency, and avoids introducing regressions or sensitive data.
-Additionally, make sure to run `bun run test:cov` and verify that all projects meet the required coverage thresholds.
-
-## Implementation Flow
-
-Please follow the steps below when implementing a feature:
-
-### 1. Explore
-
-- Understand the relevant codebase, related files, and any existing implementations that may serve as references.
-
-### 2. Plan
-
-- Think deeply about the implementation plan and design.
-- Always **ultrathink** — go beyond surface-level thinking.
-- **You must obtain approval before proceeding to the next phase.**
-
-### 3. Code
-
-- Implement based on the approved plan.
-- Write code **as if you were Takuto Wada**, the renowned TDD expert in Japan.
-- Emphasize **clean, test-driven development**.
-
-### 4. Commit
-
-- Make commits in appropriately small chunks.
-- Follow the **[Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)** specification.
-- **Do not commit without prior approval.**
