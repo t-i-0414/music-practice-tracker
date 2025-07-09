@@ -151,11 +151,13 @@ The backend runs **two separate NestJS applications**:
 
 ```typescript
 // Global validation pipe
-app.useGlobalPipes(new ValidationPipe({
-  whitelist: true,
-  transform: true,
-  transformOptions: { enableImplicitConversion: true }
-}));
+app.useGlobalPipes(
+  new ValidationPipe({
+    whitelist: true,
+    transform: true,
+    transformOptions: { enableImplicitConversion: true },
+  }),
+);
 
 // Class serializer for response transformation
 app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
@@ -569,9 +571,9 @@ The project uses separate DTOs for input validation and response serialization:
 **Repository Methods Follow Naming Convention**:
 
 ```typescript
-findUniqueActiveUser()    // Active only
-findUniqueDeletedUser()   // Deleted only
-findUniqueAnyUser()       // All records
+findUniqueActiveUser(); // Active only
+findUniqueDeletedUser(); // Deleted only
+findUniqueAnyUser(); // All records
 ```
 
 ### Planned Domain Models
@@ -1055,9 +1057,9 @@ UserModule/
 **Soft Delete Pattern**:
 
 ```typescript
-findUniqueActiveUser()    // WHERE deletedAt IS NULL
-findUniqueDeletedUser()   // WHERE deletedAt IS NOT NULL
-findUniqueAnyUser()       // No deletedAt filter
+findUniqueActiveUser(); // WHERE deletedAt IS NULL
+findUniqueDeletedUser(); // WHERE deletedAt IS NOT NULL
+findUniqueAnyUser(); // No deletedAt filter
 ```
 
 ### API Design Patterns
@@ -1093,7 +1095,7 @@ const mockRepo = createMockUserRepositoryService();
 
 // Test module pattern
 const module = await createTestModule({
-  providers: [UserQueryService, mockRepo]
+  providers: [UserQueryService, mockRepo],
 });
 ```
 
@@ -1224,4 +1226,45 @@ bunx jest --detectOpenHandles user.repository.service.spec.ts
 Do what has been asked; nothing more, nothing less.
 NEVER create files unless they're absolutely necessary for achieving your goal.
 ALWAYS prefer editing an existing file to creating a new one.
-NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
+NEVER proactively create documentation files (\*.md) or README files. Only create documentation files if explicitly requested by the User.
+Minimize in-code comments. When adding them, include a comment type such as NOTE:.
+After making changes to the code, always run the following commands from the root project and make sure all of them pass:
+
+```shell
+bun run cspell
+bun run format:fix
+bun run lint:check
+bun run markdown:check
+bun run secretlint:check
+bun run type:check
+bun run test
+```
+
+This ensures code quality, style consistency, and avoids introducing regressions or sensitive data.
+Additionally, make sure to run `bun run test:cov` and verify that all projects meet the required coverage thresholds.
+
+## Implementation Flow
+
+Please follow the steps below when implementing a feature:
+
+### 1. Explore
+
+- Understand the relevant codebase, related files, and any existing implementations that may serve as references.
+
+### 2. Plan
+
+- Think deeply about the implementation plan and design.
+- Always **ultrathink** — go beyond surface-level thinking.
+- **You must obtain approval before proceeding to the next phase.**
+
+### 3. Code
+
+- Implement based on the approved plan.
+- Write code **as if you were Takuto Wada**, the renowned TDD expert in Japan.
+- Emphasize **clean, test-driven development**.
+
+### 4. Commit
+
+- Make commits in appropriately small chunks.
+- Follow the **[Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)** specification.
+- **Do not commit without prior approval.**
