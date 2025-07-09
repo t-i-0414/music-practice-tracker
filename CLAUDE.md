@@ -23,6 +23,7 @@ This executes:
 - `bun install` to install dependencies
 - Copies `.env.example` to `.env` (if not exists)
 - Symlinks root `.env` to backend directory
+- Builds shared libraries (eslint-configs, eslint-rules)
 - Runs Prisma migrations
 
 ### Database
@@ -71,6 +72,9 @@ bunx prisma generate
 ### Root Level Commands
 
 ```bash
+# CI/CD - Run all quality checks
+npm run ci:temp
+
 # Type check all packages
 npm run type:check
 
@@ -83,14 +87,18 @@ npm run format:fix
 
 # Spell check
 npm run cspell
+
+# Secret detection
+npm run secretlint:check
+npm run secretlint:fix
 ```
 
 ### Backend (packages/apps/backend)
 
 ```bash
 # Development
-npm run start:dev
-npm run start:debug
+npm run start:dev         # Start development server
+npm run start:debug       # Start with debugging
 
 # Build
 npm run build
@@ -108,6 +116,9 @@ bunx jest path/to/test.spec.ts
 
 # Run tests matching pattern
 bunx jest --testNamePattern="should create a user"
+
+# Run specific test suite
+bunx jest user.command.service.spec.ts
 
 # Linting
 npm run lint:check
@@ -173,8 +184,8 @@ Note: Test setup not yet configured for Mobile package.
 
 - **AppModule**: Root module importing ApiModule
 - **ApiModule**: Groups all API-related modules, organized by access type:
-  - `src/modules/api/admin/` - Admin API endpoints
-  - `src/modules/api/app/` - Application API endpoints
+  - `src/modules/api/admin/` - Admin API endpoints (extended permissions)
+  - `src/modules/api/app/` - Application API endpoints (regular users)
 - **Aggregate Modules**: Domain modules in `src/modules/aggregate/` containing:
   - **Command Service**: Write operations (create, update, delete)
   - **Query Service**: Read operations with OrFail pattern
@@ -208,6 +219,8 @@ class UserCommandService {
 class UserAppFacadeService {} // App API operations
 class UserAdminFacadeService {} // Admin API operations with extended permissions
 ```
+
+**Important**: Services must be injected in the correct order to avoid circular dependencies. Query services should not depend on command services.
 
 ### Repository Pattern
 
@@ -262,9 +275,13 @@ class UserAdminFacadeService {} // Admin API operations with extended permission
   - Pattern: `*.spec.ts`
   - Root: `src` directory
   - Coverage from all `.ts` and `.js` files
+- **Integration tests**: Test with real database
+  - Use `IntegrationTestUtils` for setup/teardown
+  - Test database on port 15433
 - **E2E tests**: Configuration in `test/jest-e2e.json`
   - Pattern: `*.e2e-spec.ts`
   - Root: `test` directory
+  - Full API testing with test database
 
 ### Frontend Applications
 
@@ -307,6 +324,7 @@ Lefthook automation:
 - Commit message validation (commitlint)
 - Automatic package.json sorting
 - Automatic Prisma schema validation (validate-prisma-schema)
+- Secret detection with secretlint
 - Parallel processing for performance
 
 ## Environment Configuration
@@ -328,3 +346,49 @@ Located in root `scripts/` directory:
 
 - **StrictOmit**: Custom type utility providing stricter TypeScript omit behavior
 - Used to prevent setting certain fields (e.g., deletedAt) in create/update operations
+
+## API Design Patterns
+
+### Controller Organization
+
+- Admin controllers: Full CRUD operations including soft-deleted records
+- App controllers: Limited operations, no access to deleted records
+- Use `@ApiController` decorator for consistent OpenAPI documentation
+
+### DTO Patterns
+
+- Input DTOs: Use class-validator for validation
+- Response DTOs: Transform Prisma entities to API responses
+- Separate DTOs for Admin and App APIs when needed
+
+## Testing Best Practices
+
+### Running Tests
+
+```bash
+# Backend - Run all tests
+cd packages/apps/backend
+npm run test
+
+# Run specific test file
+bunx jest user.command.service.spec.ts
+
+# Run with coverage
+npm run test:cov
+
+# Debug specific test
+bunx jest --detectOpenHandles user.repository.service.spec.ts
+```
+
+### Test Organization
+
+- Unit tests: Mock all dependencies
+- Integration tests: Use real database with transactions
+- E2E tests: Test full API flow with supertest
+
+## important-instruction-reminders
+
+Do what has been asked; nothing more, nothing less.
+NEVER create files unless they're absolutely necessary for achieving your goal.
+ALWAYS prefer editing an existing file to creating a new one.
+NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
