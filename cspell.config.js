@@ -33,6 +33,7 @@ export default defineConfig({
     'manyandreturn',
     'mau',
     'mts',
+    'nent',
     'num',
     'Myśliwiec',
     'nestframework',

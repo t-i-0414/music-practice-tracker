@@ -12,6 +12,10 @@
     "start:dev:android": "expo start --android",
     "start:dev:ios": "expo start --ios",
     "start:dev:web": "expo start --web",
+    "test": "jest --config tests/unit/jest.config.js",
+    "test:cov": "bun run test --coverage",
+    "test:debug": "node --inspect-brk ./node_modules/.bin/jest --runInBand",
+    "test:watch": "bun run test --watch",
     "type:check": "tsc --noEmit"
   },
   "dependencies": {
@@ -43,8 +47,10 @@
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@music-practice-tracker/eslint-configs": "workspace:*",
+    "@testing-library/react-native": "^13.2.0",
     "@types/babel__core": "~7.20.5",
     "@types/react-native-web": "~0.19.1",
-    "eslint-config-expo": "~9.2.0"
+    "eslint-config-expo": "~9.2.0",
+    "jest-expo": "^53.0.9"
   }
 }
