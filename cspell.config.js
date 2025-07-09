@@ -53,7 +53,6 @@ export default defineConfig({
     'tsc',
     'TSES',
     'turbopack',
-    'typesync',
     'ultrathink',
     'updatemany',
     'updatemanyandreturn',

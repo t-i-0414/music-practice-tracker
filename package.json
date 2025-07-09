@@ -11,7 +11,6 @@
     "format:check": "prettier --check .",
     "format:fix": "prettier --write . && bun run format:prisma",
     "format:prisma": "cd packages/apps/backend && bun run prisma:format && cd -",
-    "postinstall": "sh scripts/postinstall.sh",
     "lint:check": "sh scripts/lint.sh",
     "lint:fix": "sh scripts/lint.sh --fix",
     "markdown:check": "markdownlint '**/*.md' --ignore '**/node_modules/**'",
@@ -20,8 +19,7 @@
     "secretlint:fix": "secretlint --fix '**/*'",
     "test": "sh scripts/test.sh",
     "test:cov": "sh scripts/test.sh --coverage",
-    "type:check": "sh scripts/type_check.sh",
-    "type:sync": "sh scripts/type_sync_and_install.sh"
+    "type:check": "sh scripts/type_check.sh"
   },
   "dependencies": {
     "@prisma/client": "^6.9.0",
@@ -101,7 +99,6 @@
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.34.1",
-    "typesync": "^0.14.3",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4"
   }
