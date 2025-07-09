@@ -53,11 +53,8 @@ export const createBaseReactConfig = ({
       },
     },
     {
-      files: testFilePatterns,
       ...testingLibraryPlugin.configs['flat/react'],
-    },
-    {
-      files: ['**/e2e/**'],
+      files: testFilePatterns,
       rules: {
         'testing-library/prefer-screen-queries': 'off',
       },
