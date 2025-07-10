@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 import 'dotenv/config';
 
+const host = process.env.HOST ?? 'localhost';
 export default defineConfig({
   testDir: '.',
   outputDir: './test-results',
@@ -10,7 +11,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: [['html', { outputFolder: './playwright-report' }], process.env.CI ? ['dot'] : ['list']],
   use: {
-    baseURL: `http://localhost:${process.env.ADMIN_PORT ?? '8000'}`,
+    baseURL: `http://${host}:${process.env.ADMIN_PORT ?? '8000'}`,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
@@ -38,7 +39,7 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     env: {
       NODE_ENV: 'test',
-      NEXT_PUBLIC_API_BASE_URL: `http://localhost:${process.env.ADMIN_API_PORT ?? '3011'}/api`,
+      NEXT_PUBLIC_API_BASE_URL: `http://${host}:${process.env.ADMIN_API_PORT ?? '3011'}/api`,
     },
   },
 });

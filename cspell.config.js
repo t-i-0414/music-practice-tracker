@@ -49,6 +49,7 @@ export default defineConfig({
     'restoremanyandreturn',
     'rnstorybook',
     'setstate',
+    'simctl',
     'svh',
     'Takuto',
     'takudev',
@@ -64,6 +65,7 @@ export default defineConfig({
     'updatemanyandreturn',
     'vitest',
     'Wada',
+    'xcrun',
   ],
   flagWords: [],
   ignorePaths: [

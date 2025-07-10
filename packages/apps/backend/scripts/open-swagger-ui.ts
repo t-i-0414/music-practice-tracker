@@ -10,11 +10,12 @@ if (!target || !['admin', 'app'].includes(target)) {
   process.exit(CRASH_EXIT_CODE);
 }
 
+const host = process.env.HOST ?? 'localhost';
 const port = target === 'admin' ? (process.env.ADMIN_API_PORT ?? '3001') : (process.env.APP_API_PORT ?? '3000');
 
-console.log(`🔗 Opening Swagger UI for ${target} at http://localhost:${port}/api`);
+console.log(`🔗 Opening Swagger UI for ${target} at http://${host}:${port}/api`);
 
-open(`http://localhost:${port}/api`)
+open(`http://${host}:${port}/api`)
   .then(() => {
     console.log(`✅ Swagger UI for ${target} opened successfully.`);
   })

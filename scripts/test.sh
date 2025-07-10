@@ -117,6 +117,8 @@ cd packages/apps/mobile || {
   echo "❌ Failed to change directory to packages/apps/mobile. Ensure the path is correct."
   exit 1
 }
+xcrun simctl boot "iPhone 16"
+open -a Simulator
 bun run "$CMD" || {
   echo "❌ 'bun run $CMD' failed in packages/apps/mobile. Check the logs for details."
   kill "$MOBILE_SERVER_PID"

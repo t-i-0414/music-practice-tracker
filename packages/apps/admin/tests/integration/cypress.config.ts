@@ -2,7 +2,7 @@ import { defineConfig } from 'cypress';
 
 export default defineConfig({
   e2e: {
-    baseUrl: `http://localhost:${process.env.ADMIN_PORT ?? 8000}`,
+    baseUrl: `http://${process.env.HOST ?? 'localhost'}:${process.env.ADMIN_PORT ?? 8000}`,
     supportFile: 'tests/integration/support/setup.ts',
     specPattern: 'tests/integration/pages/**/*.cy.{js,jsx,ts,tsx}',
     fixturesFolder: 'tests/integration/fixtures',

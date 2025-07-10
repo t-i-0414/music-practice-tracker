@@ -2,9 +2,12 @@ import { http, HttpResponse } from 'msw';
 
 import type { components } from '../../generated/types/api';
 
+const host = process.env.HOST ?? 'localhost';
+const adminApiPort = process.env.ADMIN_API_PORT ?? '3001';
+
 export const handlers = [
   // Admin Users - Active Users
-  http.get('http://localhost:3001/api/users/active_users', ({ request }) => {
+  http.get(`http://${host}:${adminApiPort}/api/users/active_users`, ({ request }) => {
     const url = new URL(request.url);
     const ids = url.searchParams.getAll('ids');
 
@@ -21,7 +24,7 @@ export const handlers = [
     return HttpResponse.json(response);
   }),
 
-  http.get('http://localhost:3001/api/users/active_users/:id', ({ params }) => {
+  http.get(`http://${host}:${adminApiPort}/api/users/active_users/:id`, ({ params }) => {
     const response: components['schemas']['ActiveUserResponseDto'] = {
       id: params.id as string,
       email: `user${params.id}@example.com`,
@@ -34,7 +37,7 @@ export const handlers = [
   }),
 
   // Admin Users - Deleted Users
-  http.get('http://localhost:3001/api/users/deleted_users', ({ request }) => {
+  http.get(`http://${host}:${adminApiPort}/api/users/deleted_users`, ({ request }) => {
     const url = new URL(request.url);
     const ids = url.searchParams.getAll('ids');
 
@@ -52,7 +55,7 @@ export const handlers = [
     return HttpResponse.json(response);
   }),
 
-  http.get('http://localhost:3001/api/users/deleted_users/:id', ({ params }) => {
+  http.get(`http://${host}:${adminApiPort}/api/users/deleted_users/:id`, ({ params }) => {
     const response: components['schemas']['DeletedUserResponseDto'] = {
       id: params.id as string,
       email: `deleted${params.id}@example.com`,
@@ -66,7 +69,7 @@ export const handlers = [
   }),
 
   // Admin Users - Any Users (active or deleted)
-  http.get('http://localhost:3001/api/users/any_users', ({ request }) => {
+  http.get(`http://${host}:${adminApiPort}/api/users/any_users`, ({ request }) => {
     const url = new URL(request.url);
     const ids = url.searchParams.getAll('ids');
 
@@ -84,7 +87,7 @@ export const handlers = [
     return HttpResponse.json(response);
   }),
 
-  http.get('http://localhost:3001/api/users/any_users/:id', ({ params }) => {
+  http.get(`http://${host}:${adminApiPort}/api/users/any_users/:id`, ({ params }) => {
     const isDeleted = parseInt(params.id as string, 10) % 2 === 1;
     const response: components['schemas']['AnyUserResponseDto'] = {
       id: params.id as string,
@@ -99,7 +102,7 @@ export const handlers = [
   }),
 
   // Create operations
-  http.post('http://localhost:3001/api/users', async ({ request }) => {
+  http.post(`http://${host}:${adminApiPort}/api/users`, async ({ request }) => {
     const body = (await request.json()) as components['schemas']['CreateUserInputDto'];
     const response: components['schemas']['ActiveUserResponseDto'] = {
       id: crypto.randomUUID(),
@@ -111,7 +114,7 @@ export const handlers = [
     return HttpResponse.json(response, { status: 201 });
   }),
 
-  http.post('http://localhost:3001/api/users/bulk', async ({ request }) => {
+  http.post(`http://${host}:${adminApiPort}/api/users/bulk`, async ({ request }) => {
     const body = (await request.json()) as components['schemas']['CreateManyUsersInputDto'];
     const response: components['schemas']['ActiveUsersResponseDto'] = {
       users: body.users.map((user) => ({
@@ -126,7 +129,7 @@ export const handlers = [
   }),
 
   // Update operations
-  http.put('http://localhost:3001/api/users/:id', async ({ params, request }) => {
+  http.put(`http://${host}:${adminApiPort}/api/users/:id`, async ({ params, request }) => {
     const body = (await request.json()) as components['schemas']['UpdateUserDataDto'];
     const response: components['schemas']['ActiveUserResponseDto'] = {
       id: params.id as string,
@@ -140,9 +143,9 @@ export const handlers = [
   }),
 
   // Delete operations (soft delete)
-  http.delete('http://localhost:3001/api/users/:id', () => new HttpResponse(null, { status: 204 })),
+  http.delete(`http://${host}:${adminApiPort}/api/users/:id`, () => new HttpResponse(null, { status: 204 })),
 
-  http.delete('http://localhost:3001/api/users/bulk', () => {
+  http.delete(`http://${host}:${adminApiPort}/api/users/bulk`, () => {
     try {
       return new HttpResponse(null, { status: 204 });
     } catch (_error) {
@@ -151,12 +154,12 @@ export const handlers = [
   }),
 
   // Hard delete operations
-  http.delete('http://localhost:3001/api/users/hard/:id', () => new HttpResponse(null, { status: 204 })),
+  http.delete(`http://${host}:${adminApiPort}/api/users/hard/:id`, () => new HttpResponse(null, { status: 204 })),
 
-  http.delete('http://localhost:3001/api/users/hard/bulk', () => new HttpResponse(null, { status: 204 })),
+  http.delete(`http://${host}:${adminApiPort}/api/users/hard/bulk`, () => new HttpResponse(null, { status: 204 })),
 
   // Restore operations
-  http.put('http://localhost:3001/api/users/:id/restore', ({ params }) => {
+  http.put(`http://${host}:${adminApiPort}/api/users/:id/restore`, ({ params }) => {
     const response: components['schemas']['ActiveUserResponseDto'] = {
       id: params.id as string,
       email: `restored${params.id}@example.com`,
@@ -168,7 +171,7 @@ export const handlers = [
     return HttpResponse.json(response);
   }),
 
-  http.put('http://localhost:3001/api/users/restore/bulk', async ({ request }) => {
+  http.put(`http://${host}:${adminApiPort}/api/users/restore/bulk`, async ({ request }) => {
     const body = (await request.json()) as components['schemas']['RestoreManyUsersInputDto'];
     const response: components['schemas']['ActiveUsersResponseDto'] = {
       users: body.ids.map((id) => ({

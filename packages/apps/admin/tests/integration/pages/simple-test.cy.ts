@@ -1,10 +1,13 @@
 describe('Simple MSW Test', () => {
+  const host = process.env.HOST ?? 'localhost';
+  const adminApiPort = process.env.ADMIN_API_PORT ?? '3001';
+
   it('should work with active users endpoint', () => {
     cy.visit('/');
 
     cy.window().then((win) =>
       win
-        .fetch('http://localhost:3001/api/users/active_users?ids=10&ids=20')
+        .fetch(`http://${host}:${adminApiPort}/api/users/active_users?ids=10&ids=20`)
         .then((response) => response.json())
         .then((data) => {
           expect(data).to.have.property('users');
@@ -20,7 +23,7 @@ describe('Simple MSW Test', () => {
 
     cy.window().then((win) =>
       win
-        .fetch('http://localhost:3001/api/users/active_users/123')
+        .fetch(`http://${host}:${adminApiPort}/api/users/active_users/123`)
         .then((response) => response.json())
         .then((data) => {
           expect(data).to.have.property('id', '123');
