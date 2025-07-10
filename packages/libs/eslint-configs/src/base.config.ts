@@ -349,6 +349,7 @@ export const createBaseConfig = ({ includesTsEslintPlugin = true, includeImportP
       files: ['**/stories/**/*.ts', '**/stories/**/*.tsx', '**/*.stories.ts', '**/*.stories.tsx'],
       rules: {
         '@typescript-eslint/unbound-method': 'off',
+        '@typescript-eslint/explicit-function-return-type': 'off',
       },
     },
     {

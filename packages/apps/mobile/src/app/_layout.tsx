@@ -30,4 +30,11 @@ const RootLayout: React.FC = () => {
     </ThemeProvider>
   );
 };
-export default RootLayout;
+
+let AppEntryPoint = RootLayout;
+
+if (process.env.EXPO_PUBLIC_STORYBOOK_ENABLED === 'true') {
+  AppEntryPoint = require('../../tests/storybook/.rnstorybook').default;
+}
+
+export default AppEntryPoint;

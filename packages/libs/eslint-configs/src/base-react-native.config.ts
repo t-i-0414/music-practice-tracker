@@ -17,7 +17,13 @@ export const createBaseReactNativeConfig = ({
     {
       extends: [createBaseReactConfig({ includesTsEslintPlugin, includeImportPlugin, includeReactHooks })],
       rules: {
-        'react-native/no-raw-text': 'off', // Because this rule does not work with flat config yet
+        'react-native/no-raw-text': 'off', // Because this rule does not work with flat config yet,
+      },
+    },
+    {
+      files: ['**/stories/**/*.ts', '**/stories/**/*.tsx', '**/*.stories.ts', '**/*.stories.tsx'],
+      rules: {
+        'react-native/no-inline-styles': 'off',
       },
     },
     prettierConfig,

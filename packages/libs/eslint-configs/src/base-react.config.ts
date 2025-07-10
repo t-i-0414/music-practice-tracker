@@ -28,6 +28,9 @@ export const createBaseReactConfig = ({
         reactPlugin,
       },
       rules: {
+        // TypeScript-specific rules
+        '@typescript-eslint/unbound-method': 'off',
+
         // React-specific rules
         'react/jsx-no-useless-fragment': 'error',
         'react/jsx-no-leaked-render': ['error', { validStrategies: ['ternary'] }],

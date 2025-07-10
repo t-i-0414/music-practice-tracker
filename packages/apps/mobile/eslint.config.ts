@@ -25,7 +25,15 @@ const config = tseslint.config(
       }),
     ],
   },
-  globalIgnores(['scripts/reset-project.js', 'babel.config.js']),
+  {
+    files: ['src/app/_layout.tsx'],
+    rules: {
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-require-imports': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+    }
+  },
+  globalIgnores(['scripts/reset-project.js', 'babel.config.js', 'metro.config.js']),
 );
 
 export default config;
