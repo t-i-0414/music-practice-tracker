@@ -356,6 +356,11 @@ export const createBaseConfig = ({ includesTsEslintPlugin = true, includeImportP
       files: ['**/scripts/**'],
       rules: {
         'no-console': 'off',
+        'no-undef': 'off',
+        '@typescript-eslint/no-unsafe-assignment': 'off',
+        '@typescript-eslint/no-unsafe-member-access': 'off',
+        '@typescript-eslint/no-unsafe-call': 'off',
+        '@typescript-eslint/no-magic-numbers': 'off',
       },
     },
     globalIgnores([

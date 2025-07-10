@@ -6,8 +6,11 @@
     "packages/libs/*"
   ],
   "scripts": {
-    "ci:temp": "run-s cspell format:check lint:check markdown:check secretlint:check type:check test",
+    "ci:temp": "run-s cspell format:check dotenv-linter:check dotenv-linter:compare lint:check markdown:check secretlint:check type:check test",
     "cspell": "cspell '**'",
+    "dotenv-linter:check": "bin/dotenv-linter",
+    "dotenv-linter:compare": "bin/dotenv-linter compare .env .env.example .env.test",
+    "dotenv-linter:fix": "bin/dotenv-linter fix",
     "format:check": "prettier --check .",
     "format:fix": "prettier --write . && bun run format:prisma",
     "format:prisma": "cd packages/apps/backend && bun run prisma:format && cd -",
@@ -51,6 +54,7 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
+    "@types/bun": "^1.2.18",
     "@types/eslint": "^9.6.1",
     "@types/estree": "^1.0.8",
     "@types/jest": "^30.0.0",

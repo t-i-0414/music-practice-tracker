@@ -5,7 +5,7 @@
   "main": "expo-router/entry",
   "scripts": {
     "build-storybook": "test:storybook build",
-    "gen:api-types": "openapi-typescript http://localhost:3000/api-json -o generated/types/api.d.ts",
+    "gen:api-types": "bun scripts/gen.api-types.ts",
     "lint:check": "eslint",
     "lint:fix": "eslint --fix",
     "maestro:install": "curl -Ls 'https://get.maestro.mobile.dev' | bash",

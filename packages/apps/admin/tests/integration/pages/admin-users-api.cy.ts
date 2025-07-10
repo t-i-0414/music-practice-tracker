@@ -5,10 +5,12 @@ describe('Admin Users API Tests', () => {
     cy.visit('/');
   });
 
+  const adminApiPort = process.env.ADMIN_API_PORT ?? '3001';
+
   it('should fetch active users list', () => {
     cy.window().then((win) =>
       win
-        .fetch('http://localhost:3001/api/users/active_users?ids=1&ids=2')
+        .fetch(`http://localhost:${adminApiPort}/api/users/active_users?ids=1&ids=2`)
         .then((response) => {
           expect(response.status).to.equal(200);
           return response.json();
@@ -37,7 +39,7 @@ describe('Admin Users API Tests', () => {
 
     cy.window().then((win) =>
       win
-        .fetch(`http://localhost:3001/api/users/active_users/${userId}`)
+        .fetch(`http://localhost:${adminApiPort}/api/users/active_users/${userId}`)
         .then((response) => {
           expect(response.status).to.equal(200);
           return response.json();
@@ -57,7 +59,7 @@ describe('Admin Users API Tests', () => {
   it('should fetch deleted users', () => {
     cy.window().then((win) =>
       win
-        .fetch('http://localhost:3001/api/users/deleted_users?ids=100&ids=101')
+        .fetch(`http://localhost:${adminApiPort}/api/users/deleted_users?ids=100&ids=101`)
         .then((response) => {
           expect(response.status).to.equal(200);
           return response.json();
@@ -77,7 +79,7 @@ describe('Admin Users API Tests', () => {
   it('should fetch any users (active or deleted)', () => {
     cy.window().then((win) =>
       win
-        .fetch('http://localhost:3001/api/users/any_users?ids=1&ids=2&ids=3')
+        .fetch(`http://localhost:${adminApiPort}/api/users/any_users?ids=1&ids=2&ids=3`)
         .then((response) => {
           expect(response.status).to.equal(200);
           return response.json();
@@ -104,7 +106,7 @@ describe('Admin Users API Tests', () => {
 
     cy.window().then((win) =>
       win
-        .fetch('http://localhost:3001/api/users', {
+        .fetch(`http://localhost:${adminApiPort}/api/users`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -135,7 +137,7 @@ describe('Admin Users API Tests', () => {
 
     cy.window().then((win) =>
       win
-        .fetch('http://localhost:3001/api/users/bulk', {
+        .fetch(`http://localhost:${adminApiPort}/api/users/bulk`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -167,7 +169,7 @@ describe('Admin Users API Tests', () => {
 
     cy.window().then((win) =>
       win
-        .fetch(`http://localhost:3001/api/users/${userId}`, {
+        .fetch(`http://localhost:${adminApiPort}/api/users/${userId}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -193,7 +195,7 @@ describe('Admin Users API Tests', () => {
 
     cy.window().then((win) =>
       win
-        .fetch(`http://localhost:3001/api/users/${userId}`, {
+        .fetch(`http://localhost:${adminApiPort}/api/users/${userId}`, {
           method: 'DELETE',
         })
         .then((response) => {
@@ -207,7 +209,7 @@ describe('Admin Users API Tests', () => {
 
     cy.window().then((win) =>
       win
-        .fetch(`http://localhost:3001/api/users/hard/${userId}`, {
+        .fetch(`http://localhost:${adminApiPort}/api/users/hard/${userId}`, {
           method: 'DELETE',
         })
         .then((response) => {
@@ -221,7 +223,7 @@ describe('Admin Users API Tests', () => {
 
     cy.window().then((win) =>
       win
-        .fetch(`http://localhost:3001/api/users/${userId}/restore`, {
+        .fetch(`http://localhost:${adminApiPort}/api/users/${userId}/restore`, {
           method: 'PUT',
         })
         .then((response) => {
@@ -245,7 +247,7 @@ describe('Admin Users API Tests', () => {
 
     cy.window().then((win) =>
       win
-        .fetch('http://localhost:3001/api/users/bulk', {
+        .fetch(`http://localhost:${adminApiPort}/api/users/bulk`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',

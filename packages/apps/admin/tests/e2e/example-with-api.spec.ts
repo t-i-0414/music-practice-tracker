@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { test } from '@playwright/test';
 
 test.describe('Example: Testing with API interactions', () => {
   test('should interact with backend API', async ({ page }) => {

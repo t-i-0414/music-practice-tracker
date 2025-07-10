@@ -5,7 +5,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AdminApiModule } from './modules/api/admin/admin.module';
 import { isDevelopment } from './utils/environment';
 
-const PORT_NUMBER = 3001;
+const DEFAULT_PORT_NUMBER = 3001;
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AdminApiModule);
@@ -23,7 +23,7 @@ async function bootstrap(): Promise<void> {
     SwaggerModule.setup('api', app, document);
   }
 
-  const port = process.env.PORT ?? PORT_NUMBER;
+  const port = process.env.ADMIN_API_PORT ?? DEFAULT_PORT_NUMBER;
   await app.listen(port);
 }
 void bootstrap();

@@ -5,7 +5,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppApiModule } from './modules/api/app/app.module';
 import { isDevelopment } from './utils/environment';
 
-const PORT_NUMBER = 3000;
+const DEFAULT_PORT_NUMBER = 3000;
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppApiModule);
@@ -23,7 +23,7 @@ async function bootstrap(): Promise<void> {
     SwaggerModule.setup('api', app, document);
   }
 
-  const port = process.env.PORT ?? PORT_NUMBER;
+  const port = process.env.APP_API_PORT ?? DEFAULT_PORT_NUMBER;
   await app.listen(port);
 }
 void bootstrap();
