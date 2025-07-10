@@ -31,7 +31,7 @@ const config = tseslint.config(
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-require-imports': 'off',
       '@typescript-eslint/no-unsafe-member-access': 'off',
-    }
+    },
   },
   globalIgnores(['scripts/reset-project.js', 'babel.config.js', 'metro.config.js']),
 );

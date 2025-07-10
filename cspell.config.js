@@ -51,6 +51,7 @@ export default defineConfig({
     'setstate',
     'svh',
     'Takuto',
+    'takudev',
     'Takuya',
     'Tanaka',
     'Tarō',

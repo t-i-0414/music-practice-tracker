@@ -14,3 +14,4 @@
 packages/apps/mobile/.expo
 packages/apps/mobile/expo-env.d.ts
 **/storybook-static
+**/.rnstorybook/storybook.requires.ts
