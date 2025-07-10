@@ -50,6 +50,7 @@ const TabLayout: React.FC = () => {
           title: 'Explore',
           // cspell:ignore paperplane
           tabBarIcon: renderHouseIconWithColorScheme,
+          tabBarAccessibilityLabel: 'nav-explore',
         }}
       />
     </Tabs>

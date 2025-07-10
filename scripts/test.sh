@@ -16,6 +16,7 @@ find packages -type f -name package.json |
   grep -v '/generated/' |
   grep -v '/coverage/' |
   grep -v '/admin/' |
+  grep -v '/mobile/' |
   while read -r package; do
     dir=$(dirname "$package")
 
@@ -78,6 +79,57 @@ cd - || {
 if [[ -n "${ADMIN_SERVER_PID:-}" ]]; then
   echo "🛑 Stopping admin server (PID: $ADMIN_SERVER_PID)"
   kill "$ADMIN_SERVER_PID"
+fi
+
+if ! curl --silent --fail http://localhost:8081 >/dev/null; then
+  echo "🚀 Mobile server not detected. Starting with 'bun run start:dev' in background..."
+  cd packages/apps/mobile || {
+    echo "❌ Failed to change directory to packages/apps/mobile. Ensure the path is correct."
+    exit 1
+  }
+  bun run start:dev &
+  MOBILE_SERVER_PID=$!
+  cd - || {
+    echo "❌ Failed to change back to the original directory."
+    kill "$MOBILE_SERVER_PID"
+    exit 1
+  }
+
+  echo "⏳ Waiting for mobile server to become available..."
+  for _i in {1..30}; do
+    if curl --silent --fail http://localhost:8081 >/dev/null; then
+      echo "✅ Mobile server is up!"
+      break
+    fi
+    sleep 1
+  done
+
+  if ! curl --silent --fail http://localhost:8081 >/dev/null; then
+    echo "❌ Mobile server did not start within expected time."
+    kill "$MOBILE_SERVER_PID"
+    exit 1
+  fi
+else
+  echo "✅ Mobile server is already running."
+fi
+
+cd packages/apps/mobile || {
+  echo "❌ Failed to change directory to packages/apps/mobile. Ensure the path is correct."
+  exit 1
+}
+bun run "$CMD" || {
+  echo "❌ 'bun run $CMD' failed in packages/apps/mobile. Check the logs for details."
+  kill "$MOBILE_SERVER_PID"
+  exit 1
+}
+cd - || {
+  echo "❌ Failed to change back to the original directory."
+  exit 1
+}
+
+if [[ -n "${MOBILE_SERVER_PID:-}" ]]; then
+  echo "🛑 Stopping mobile server (PID: $MOBILE_SERVER_PID)"
+  kill "$MOBILE_SERVER_PID"
 fi
 
 echo "✅ All tests complete."
