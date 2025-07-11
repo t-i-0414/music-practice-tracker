@@ -1,5 +1,4 @@
 import { AST_NODE_TYPES, type TSESTree } from '@typescript-eslint/types';
-import { describe, expect, it } from 'vitest';
 
 import {
   PRISMA_CREATE_METHODS,
@@ -16,19 +15,23 @@ import {
 describe('prisma-helpers', () => {
   describe('constants', () => {
     it('should have correct PRISMA_CREATE_METHODS', () => {
-      expect(PRISMA_CREATE_METHODS).toEqual(['create', 'createMany', 'createManyAndReturn']);
+      expect.assertions(1);
+      expect(PRISMA_CREATE_METHODS).toStrictEqual(['create', 'createMany', 'createManyAndReturn']);
     });
 
     it('should have correct PRISMA_UPDATE_METHODS', () => {
-      expect(PRISMA_UPDATE_METHODS).toEqual(['update', 'updateMany', 'updateManyAndReturn']);
+      expect.assertions(1);
+      expect(PRISMA_UPDATE_METHODS).toStrictEqual(['update', 'updateMany', 'updateManyAndReturn']);
     });
 
     it('should have correct PRISMA_DELETE_METHODS', () => {
-      expect(PRISMA_DELETE_METHODS).toEqual(['delete', 'deleteMany']);
+      expect.assertions(1);
+      expect(PRISMA_DELETE_METHODS).toStrictEqual(['delete', 'deleteMany']);
     });
 
     it('should have correct PRISMA_FIND_METHODS', () => {
-      expect(PRISMA_FIND_METHODS).toEqual([
+      expect.assertions(1);
+      expect(PRISMA_FIND_METHODS).toStrictEqual([
         'findUnique',
         'findUniqueOrThrow',
         'findFirst',
@@ -40,6 +43,8 @@ describe('prisma-helpers', () => {
 
   describe('isPrismaUpdateMethod', () => {
     it('should return method name for valid Prisma update method', () => {
+      expect.assertions(1);
+
       const node: TSESTree.MemberExpression = {
         type: AST_NODE_TYPES.MemberExpression,
         property: {
@@ -63,6 +68,8 @@ describe('prisma-helpers', () => {
     });
 
     it('should return null for non-update method', () => {
+      expect.assertions(1);
+
       const node: TSESTree.MemberExpression = {
         type: AST_NODE_TYPES.MemberExpression,
         property: {
@@ -75,10 +82,12 @@ describe('prisma-helpers', () => {
         } as TSESTree.Identifier,
       } as TSESTree.MemberExpression;
 
-      expect(isPrismaUpdateMethod(node)).toBe(null);
+      expect(isPrismaUpdateMethod(node)).toBeNull();
     });
 
     it('should return null when property is not an identifier', () => {
+      expect.assertions(1);
+
       const node: TSESTree.MemberExpression = {
         type: AST_NODE_TYPES.MemberExpression,
         property: {
@@ -91,10 +100,12 @@ describe('prisma-helpers', () => {
         } as TSESTree.Identifier,
       } as TSESTree.MemberExpression;
 
-      expect(isPrismaUpdateMethod(node)).toBe(null);
+      expect(isPrismaUpdateMethod(node)).toBeNull();
     });
 
     it('should detect repository pattern', () => {
+      expect.assertions(1);
+
       const node: TSESTree.MemberExpression = {
         type: AST_NODE_TYPES.MemberExpression,
         property: {
@@ -118,6 +129,8 @@ describe('prisma-helpers', () => {
     });
 
     it('should detect this pattern', () => {
+      expect.assertions(1);
+
       const node: TSESTree.MemberExpression = {
         type: AST_NODE_TYPES.MemberExpression,
         property: {
@@ -133,6 +146,8 @@ describe('prisma-helpers', () => {
     });
 
     it('should detect service pattern', () => {
+      expect.assertions(1);
+
       const node: TSESTree.MemberExpression = {
         type: AST_NODE_TYPES.MemberExpression,
         property: {
@@ -149,6 +164,8 @@ describe('prisma-helpers', () => {
     });
 
     it('should handle other node types in object chain', () => {
+      expect.assertions(1);
+
       const node: TSESTree.MemberExpression = {
         type: AST_NODE_TYPES.MemberExpression,
         property: {
@@ -165,10 +182,12 @@ describe('prisma-helpers', () => {
         } as unknown as TSESTree.Expression,
       } as TSESTree.MemberExpression;
 
-      expect(isPrismaUpdateMethod(node)).toBe(null);
+      expect(isPrismaUpdateMethod(node)).toBeNull();
     });
 
     it('should detect model pattern', () => {
+      expect.assertions(1);
+
       const node: TSESTree.MemberExpression = {
         type: AST_NODE_TYPES.MemberExpression,
         property: {
@@ -185,6 +204,8 @@ describe('prisma-helpers', () => {
     });
 
     it('should continue traversing deeply nested member expressions', () => {
+      expect.assertions(1);
+
       const node: TSESTree.MemberExpression = {
         type: AST_NODE_TYPES.MemberExpression,
         property: {
@@ -222,6 +243,8 @@ describe('prisma-helpers', () => {
     });
 
     it('should detect when object has nested member property with repository name', () => {
+      expect.assertions(1);
+
       const node: TSESTree.MemberExpression = {
         type: AST_NODE_TYPES.MemberExpression,
         property: {
@@ -252,6 +275,8 @@ describe('prisma-helpers', () => {
     });
 
     it('should handle complex nested member with non-identifier properties', () => {
+      expect.assertions(1);
+
       const node: TSESTree.MemberExpression = {
         type: AST_NODE_TYPES.MemberExpression,
         property: {
@@ -282,10 +307,12 @@ describe('prisma-helpers', () => {
         } as TSESTree.MemberExpression,
       } as TSESTree.MemberExpression;
 
-      expect(isPrismaUpdateMethod(node)).toBe(null);
+      expect(isPrismaUpdateMethod(node)).toBeNull();
     });
 
     it('should return null when identifier has no prisma-related name', () => {
+      expect.assertions(1);
+
       const node: TSESTree.MemberExpression = {
         type: AST_NODE_TYPES.MemberExpression,
         property: {
@@ -298,12 +325,14 @@ describe('prisma-helpers', () => {
         } as TSESTree.Identifier,
       } as TSESTree.MemberExpression;
 
-      expect(isPrismaUpdateMethod(node)).toBe(null);
+      expect(isPrismaUpdateMethod(node)).toBeNull();
     });
   });
 
   describe('isPrismaMethodCall', () => {
     it('should return method name for valid Prisma method', () => {
+      expect.assertions(1);
+
       const node: TSESTree.MemberExpression = {
         type: AST_NODE_TYPES.MemberExpression,
         property: {
@@ -327,6 +356,8 @@ describe('prisma-helpers', () => {
     });
 
     it('should return null for method not in list', () => {
+      expect.assertions(1);
+
       const node: TSESTree.MemberExpression = {
         type: AST_NODE_TYPES.MemberExpression,
         property: {
@@ -339,10 +370,12 @@ describe('prisma-helpers', () => {
         } as TSESTree.Identifier,
       } as TSESTree.MemberExpression;
 
-      expect(isPrismaMethodCall(node, PRISMA_CREATE_METHODS)).toBe(null);
+      expect(isPrismaMethodCall(node, PRISMA_CREATE_METHODS)).toBeNull();
     });
 
     it('should return null when property is not an identifier', () => {
+      expect.assertions(1);
+
       const node: TSESTree.MemberExpression = {
         type: AST_NODE_TYPES.MemberExpression,
         property: {
@@ -355,10 +388,12 @@ describe('prisma-helpers', () => {
         } as TSESTree.Identifier,
       } as TSESTree.MemberExpression;
 
-      expect(isPrismaMethodCall(node, PRISMA_CREATE_METHODS)).toBe(null);
+      expect(isPrismaMethodCall(node, PRISMA_CREATE_METHODS)).toBeNull();
     });
 
     it('should handle userRepository pattern', () => {
+      expect.assertions(1);
+
       const node: TSESTree.MemberExpression = {
         type: AST_NODE_TYPES.MemberExpression,
         property: {
@@ -375,6 +410,8 @@ describe('prisma-helpers', () => {
     });
 
     it('should handle model pattern', () => {
+      expect.assertions(1);
+
       const node: TSESTree.MemberExpression = {
         type: AST_NODE_TYPES.MemberExpression,
         property: {
@@ -391,6 +428,8 @@ describe('prisma-helpers', () => {
     });
 
     it('should handle this expression pattern', () => {
+      expect.assertions(1);
+
       const node: TSESTree.MemberExpression = {
         type: AST_NODE_TYPES.MemberExpression,
         property: {
@@ -406,6 +445,8 @@ describe('prisma-helpers', () => {
     });
 
     it('should handle other node types in object chain', () => {
+      expect.assertions(1);
+
       const node: TSESTree.MemberExpression = {
         type: AST_NODE_TYPES.MemberExpression,
         property: {
@@ -422,10 +463,12 @@ describe('prisma-helpers', () => {
         } as unknown as TSESTree.Expression,
       } as TSESTree.MemberExpression;
 
-      expect(isPrismaMethodCall(node, PRISMA_DELETE_METHODS)).toBe(null);
+      expect(isPrismaMethodCall(node, PRISMA_DELETE_METHODS)).toBeNull();
     });
 
     it('should detect when property name is prisma', () => {
+      expect.assertions(1);
+
       const node: TSESTree.MemberExpression = {
         type: AST_NODE_TYPES.MemberExpression,
         property: {
@@ -449,6 +492,8 @@ describe('prisma-helpers', () => {
     });
 
     it('should detect when object name in nested member expression', () => {
+      expect.assertions(1);
+
       const node: TSESTree.MemberExpression = {
         type: AST_NODE_TYPES.MemberExpression,
         property: {
@@ -479,6 +524,8 @@ describe('prisma-helpers', () => {
     });
 
     it('should detect when object has nested member with undefined property name', () => {
+      expect.assertions(1);
+
       const node: TSESTree.MemberExpression = {
         type: AST_NODE_TYPES.MemberExpression,
         property: {
@@ -510,6 +557,8 @@ describe('prisma-helpers', () => {
 
   describe('getFunctionName', () => {
     it('should get name from function declaration', () => {
+      expect.assertions(1);
+
       const node: TSESTree.FunctionDeclaration = {
         type: AST_NODE_TYPES.FunctionDeclaration,
         id: {
@@ -522,6 +571,8 @@ describe('prisma-helpers', () => {
     });
 
     it('should get name from variable declarator', () => {
+      expect.assertions(1);
+
       const node: TSESTree.Node = {
         type: AST_NODE_TYPES.FunctionExpression,
         parent: {
@@ -537,6 +588,8 @@ describe('prisma-helpers', () => {
     });
 
     it('should get name from property', () => {
+      expect.assertions(1);
+
       const node: TSESTree.Node = {
         type: AST_NODE_TYPES.FunctionExpression,
         parent: {
@@ -552,6 +605,8 @@ describe('prisma-helpers', () => {
     });
 
     it('should get name from method definition', () => {
+      expect.assertions(1);
+
       const node: TSESTree.Node = {
         type: AST_NODE_TYPES.FunctionExpression,
         parent: {
@@ -567,16 +622,20 @@ describe('prisma-helpers', () => {
     });
 
     it('should return null for anonymous function', () => {
+      expect.assertions(1);
+
       const node: TSESTree.Node = {
         type: AST_NODE_TYPES.FunctionExpression,
       } as TSESTree.Node;
 
-      expect(getFunctionName(node)).toBe(null);
+      expect(getFunctionName(node)).toBeNull();
     });
   });
 
   describe('isPrismaFindMethod', () => {
     it('should return true for valid Prisma find method', () => {
+      expect.assertions(1);
+
       const node: TSESTree.MemberExpression = {
         type: AST_NODE_TYPES.MemberExpression,
         property: {
@@ -600,6 +659,8 @@ describe('prisma-helpers', () => {
     });
 
     it('should return false for non-find method', () => {
+      expect.assertions(1);
+
       const node: TSESTree.MemberExpression = {
         type: AST_NODE_TYPES.MemberExpression,
         property: {
@@ -616,6 +677,8 @@ describe('prisma-helpers', () => {
     });
 
     it('should return false for non-member expression', () => {
+      expect.assertions(1);
+
       const node: TSESTree.Node = {
         type: AST_NODE_TYPES.Identifier,
         name: 'findUnique',
@@ -625,6 +688,8 @@ describe('prisma-helpers', () => {
     });
 
     it('should detect repository in property name', () => {
+      expect.assertions(1);
+
       const node: TSESTree.MemberExpression = {
         type: AST_NODE_TYPES.MemberExpression,
         property: {
@@ -647,6 +712,8 @@ describe('prisma-helpers', () => {
     });
 
     it('should detect model pattern', () => {
+      expect.assertions(1);
+
       const node: TSESTree.MemberExpression = {
         type: AST_NODE_TYPES.MemberExpression,
         property: {
@@ -663,6 +730,8 @@ describe('prisma-helpers', () => {
     });
 
     it('should detect when object name includes prisma', () => {
+      expect.assertions(1);
+
       const node: TSESTree.MemberExpression = {
         type: AST_NODE_TYPES.MemberExpression,
         property: {
@@ -686,6 +755,8 @@ describe('prisma-helpers', () => {
     });
 
     it('should handle other node types gracefully', () => {
+      expect.assertions(1);
+
       const node: TSESTree.MemberExpression = {
         type: AST_NODE_TYPES.MemberExpression,
         property: {
@@ -706,6 +777,8 @@ describe('prisma-helpers', () => {
     });
 
     it('should detect this expression pattern', () => {
+      expect.assertions(1);
+
       const node: TSESTree.MemberExpression = {
         type: AST_NODE_TYPES.MemberExpression,
         property: {
@@ -721,6 +794,8 @@ describe('prisma-helpers', () => {
     });
 
     it('should return false when property is not an identifier', () => {
+      expect.assertions(1);
+
       const node: TSESTree.MemberExpression = {
         type: AST_NODE_TYPES.MemberExpression,
         property: {
@@ -737,6 +812,8 @@ describe('prisma-helpers', () => {
     });
 
     it('should continue traversing object chain without prisma indicator', () => {
+      expect.assertions(1);
+
       const node: TSESTree.MemberExpression = {
         type: AST_NODE_TYPES.MemberExpression,
         property: {
@@ -767,6 +844,8 @@ describe('prisma-helpers', () => {
     });
 
     it('should handle when objectName is undefined', () => {
+      expect.assertions(1);
+
       const node: TSESTree.MemberExpression = {
         type: AST_NODE_TYPES.MemberExpression,
         property: {
@@ -790,6 +869,8 @@ describe('prisma-helpers', () => {
     });
 
     it('should handle when property is not an identifier in nested member', () => {
+      expect.assertions(1);
+
       const node: TSESTree.MemberExpression = {
         type: AST_NODE_TYPES.MemberExpression,
         property: {
@@ -822,6 +903,8 @@ describe('prisma-helpers', () => {
 
   describe('getFunctionNameExtended', () => {
     it('should get name from node id', () => {
+      expect.assertions(1);
+
       const node = {
         type: AST_NODE_TYPES.FunctionDeclaration,
         id: {
@@ -834,6 +917,8 @@ describe('prisma-helpers', () => {
     });
 
     it('should get name from parent variable declarator', () => {
+      expect.assertions(1);
+
       const node = {
         type: AST_NODE_TYPES.FunctionExpression,
         parent: {
@@ -849,6 +934,8 @@ describe('prisma-helpers', () => {
     });
 
     it('should get name from parent property', () => {
+      expect.assertions(1);
+
       const node = {
         type: AST_NODE_TYPES.FunctionExpression,
         parent: {
@@ -864,6 +951,8 @@ describe('prisma-helpers', () => {
     });
 
     it('should get name from parent method definition', () => {
+      expect.assertions(1);
+
       const node = {
         type: AST_NODE_TYPES.FunctionExpression,
         parent: {
@@ -879,11 +968,13 @@ describe('prisma-helpers', () => {
     });
 
     it('should return null when no name is found', () => {
+      expect.assertions(1);
+
       const node = {
         type: AST_NODE_TYPES.FunctionExpression,
       } as TSESTree.FunctionExpression;
 
-      expect(getFunctionNameExtended(node)).toBe(null);
+      expect(getFunctionNameExtended(node)).toBeNull();
     });
   });
 });

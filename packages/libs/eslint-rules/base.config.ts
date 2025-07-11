@@ -1,1 +1,0 @@
-../eslint-configs/src/base.config.ts

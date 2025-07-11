@@ -1,29 +1,53 @@
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
-
-import { FlatCompat } from '@eslint/eslintrc';
-import { createBaseReactNativeConfig } from '@music-practice-tracker/eslint-configs';
+import {
+  baseConfig,
+  storybookConfig,
+  reactNativeConfig,
+  sharedIgnores,
+  tsConfigRules,
+  importConfigRules,
+  reactConfigRules,
+  testFilePatterns,
+  vitestConfig,
+} from '@music-practice-tracker/eslint-configs';
 import { globalIgnores } from 'eslint/config';
+import prettierConfig from 'eslint-config-prettier/flat';
 import tseslint from 'typescript-eslint';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
-
-const expoConfig = [...compat.extends('expo')];
 
 const config = tseslint.config(
   {
-    extends: [
-      expoConfig,
-      createBaseReactNativeConfig({
-        includesTsEslintPlugin: true,
-        includeImportPlugin: false,
-        includeReactHooks: false,
-      }),
-    ],
+    files: ['**/*.ts', '**/*.tsx'],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.json'],
+        tsconfigRootDir: __dirname,
+      },
+    },
+  },
+  {
+    files: ['tests/storybook/.rnstorybook/**/*', 'tests/storybook/.storybook/**/*'],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.storybook.json'],
+        tsconfigRootDir: __dirname,
+      },
+    },
+  },
+  {
+    extends: [baseConfig, reactNativeConfig],
+    rules: { ...tsConfigRules, ...importConfigRules, ...reactConfigRules },
+  },
+  {
+    files: ['scripts/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-magic-numbers': 'off',
+    },
+  },
+  {
+    files: testFilePatterns({ prefix: 'tests/unit' }),
+    extends: [vitestConfig],
+  },
+  {
+    extends: [storybookConfig],
   },
   {
     files: ['src/app/_layout.tsx'],
@@ -33,7 +57,15 @@ const config = tseslint.config(
       '@typescript-eslint/no-unsafe-member-access': 'off',
     },
   },
-  globalIgnores(['scripts/reset-project.js', 'babel.config.js', 'metro.config.js']),
+  globalIgnores([
+    ...sharedIgnores,
+    '.expo',
+    'scripts/reset-project.js',
+    'babel.config.js',
+    'metro.config.js',
+    'tests/storybook/.rnstorybook/storybook.requires.ts',
+  ]),
+  prettierConfig,
 );
 
 export default config;

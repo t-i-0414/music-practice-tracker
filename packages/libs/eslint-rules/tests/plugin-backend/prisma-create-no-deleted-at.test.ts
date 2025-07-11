@@ -2,12 +2,17 @@ import { RuleTester } from '@typescript-eslint/rule-tester';
 
 import rule from '@/plugin-backend/prisma-create-no-deleted-at';
 
-const ruleTester = new RuleTester();
+describe('prisma-create-no-deleted-at', () => {
+  const ruleTester = new RuleTester();
 
-ruleTester.run('prisma-create-no-deleted-at', rule, {
-  valid: [
-    {
-      code: `
+  RuleTester.afterAll = () => {
+    // No-op for Vitest
+  };
+
+  ruleTester.run('prisma-create-no-deleted-at', rule, {
+    valid: [
+      {
+        code: `
         async function createUser() {
           return await prisma.user.create({
             data: {
@@ -17,9 +22,9 @@ ruleTester.run('prisma-create-no-deleted-at', rule, {
           });
         }
       `,
-    },
-    {
-      code: `
+      },
+      {
+        code: `
         async function createManyUsers() {
           return await prisma.user.createMany({
             data: [
@@ -29,9 +34,9 @@ ruleTester.run('prisma-create-no-deleted-at', rule, {
           });
         }
       `,
-    },
-    {
-      code: `
+      },
+      {
+        code: `
         async function createManyAndReturnUsers() {
           return await prisma.user.createManyAndReturn({
             data: [
@@ -41,9 +46,9 @@ ruleTester.run('prisma-create-no-deleted-at', rule, {
           });
         }
       `,
-    },
-    {
-      code: `
+      },
+      {
+        code: `
         class UserRepository {
           async createUser() {
             return await this.repository.user.create({
@@ -55,9 +60,9 @@ ruleTester.run('prisma-create-no-deleted-at', rule, {
           }
         }
       `,
-    },
-    {
-      code: `
+      },
+      {
+        code: `
         async function createUser() {
           return await someOtherService.create({
             data: {
@@ -66,9 +71,9 @@ ruleTester.run('prisma-create-no-deleted-at', rule, {
           });
         }
       `,
-    },
-    {
-      code: `
+      },
+      {
+        code: `
         async function createPost() {
           return await prisma.post.create({
             data: {
@@ -81,16 +86,16 @@ ruleTester.run('prisma-create-no-deleted-at', rule, {
           });
         }
       `,
-    },
-    {
-      code: `
+      },
+      {
+        code: `
         async function createUser() {
           return await prisma.user.create();
         }
       `,
-    },
-    {
-      code: `
+      },
+      {
+        code: `
         async function createUser() {
           return await prisma.user.create({
             select: {
@@ -100,11 +105,11 @@ ruleTester.run('prisma-create-no-deleted-at', rule, {
           });
         }
       `,
-    },
-  ],
-  invalid: [
-    {
-      code: `
+      },
+    ],
+    invalid: [
+      {
+        code: `
         async function createUser() {
           return await prisma.user.create({
             data: {
@@ -114,14 +119,14 @@ ruleTester.run('prisma-create-no-deleted-at', rule, {
           });
         }
       `,
-      errors: [
-        {
-          messageId: 'createShouldNotHaveDeletedAt',
-        },
-      ],
-    },
-    {
-      code: `
+        errors: [
+          {
+            messageId: 'createShouldNotHaveDeletedAt',
+          },
+        ],
+      },
+      {
+        code: `
         async function createManyUsers() {
           return await prisma.user.createMany({
             data: [
@@ -131,14 +136,14 @@ ruleTester.run('prisma-create-no-deleted-at', rule, {
           });
         }
       `,
-      errors: [
-        {
-          messageId: 'createShouldNotHaveDeletedAt',
-        },
-      ],
-    },
-    {
-      code: `
+        errors: [
+          {
+            messageId: 'createShouldNotHaveDeletedAt',
+          },
+        ],
+      },
+      {
+        code: `
         async function createManyAndReturnUsers() {
           return await prisma.user.createManyAndReturn({
             data: [
@@ -148,14 +153,14 @@ ruleTester.run('prisma-create-no-deleted-at', rule, {
           });
         }
       `,
-      errors: [
-        {
-          messageId: 'createShouldNotHaveDeletedAt',
-        },
-      ],
-    },
-    {
-      code: `
+        errors: [
+          {
+            messageId: 'createShouldNotHaveDeletedAt',
+          },
+        ],
+      },
+      {
+        code: `
         class UserRepository {
           async createUser() {
             return await this.repository.user.create({
@@ -167,14 +172,14 @@ ruleTester.run('prisma-create-no-deleted-at', rule, {
           }
         }
       `,
-      errors: [
-        {
-          messageId: 'createShouldNotHaveDeletedAt',
-        },
-      ],
-    },
-    {
-      code: `
+        errors: [
+          {
+            messageId: 'createShouldNotHaveDeletedAt',
+          },
+        ],
+      },
+      {
+        code: `
         const createPost = async () => {
           return await prisma.post.create({
             data: {
@@ -184,14 +189,14 @@ ruleTester.run('prisma-create-no-deleted-at', rule, {
           });
         };
       `,
-      errors: [
-        {
-          messageId: 'createShouldNotHaveDeletedAt',
-        },
-      ],
-    },
-    {
-      code: `
+        errors: [
+          {
+            messageId: 'createShouldNotHaveDeletedAt',
+          },
+        ],
+      },
+      {
+        code: `
         const userService = {
           async createUser() {
             return await prisma.user.create({
@@ -203,14 +208,14 @@ ruleTester.run('prisma-create-no-deleted-at', rule, {
           }
         };
       `,
-      errors: [
-        {
-          messageId: 'createShouldNotHaveDeletedAt',
-        },
-      ],
-    },
-    {
-      code: `
+        errors: [
+          {
+            messageId: 'createShouldNotHaveDeletedAt',
+          },
+        ],
+      },
+      {
+        code: `
         class UserService {
           async createUser() {
             return await this.prisma.user.create({
@@ -222,11 +227,12 @@ ruleTester.run('prisma-create-no-deleted-at', rule, {
           }
         }
       `,
-      errors: [
-        {
-          messageId: 'createShouldNotHaveDeletedAt',
-        },
-      ],
-    },
-  ],
+        errors: [
+          {
+            messageId: 'createShouldNotHaveDeletedAt',
+          },
+        ],
+      },
+    ],
+  });
 });

@@ -19,8 +19,5 @@
     "lint:check": "eslint",
     "lint:fix": "eslint --fix",
     "type:check": "tsc --noEmit"
-  },
-  "devDependencies": {
-    "@music-practice-tracker/eslint-rules": "workspace:*"
   }
 }

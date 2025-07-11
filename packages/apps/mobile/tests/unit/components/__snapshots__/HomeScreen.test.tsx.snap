@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
-exports[`<HomeScreen /> CustomText renders correctly 1`] = `
+exports[`<HomeScreen /> customText renders correctly 1`] = `
 <Text>
   Some text
 </Text>

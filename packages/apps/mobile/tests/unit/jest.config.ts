@@ -8,7 +8,7 @@ const config: Config = {
     '^.+\\.(ts|tsx)$': 'babel-jest',
   },
   rootDir: '../..',
-  testMatch: ['<rootDir>/tests/unit/**/*.spec.{ts,tsx}'],
+  testMatch: ['<rootDir>/tests/unit/**/*.test.{ts,tsx}'],
   setupFiles: ['<rootDir>/tests/unit/jest-env.setup.ts'],
   setupFilesAfterEnv: ['<rootDir>/tests/unit/setup.ts'],
   moduleNameMapper: {

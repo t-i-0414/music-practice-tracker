@@ -77,6 +77,7 @@ export default defineConfig({
     '**/playwright-report/index.html',
     '**/storybook-static/**',
     '.secretlintignore',
+    'expo-env.d.ts',
   ],
   maxNumberOfProblems: 0,
   minWordLength: 3,

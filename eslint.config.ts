@@ -1,15 +1,14 @@
+import { baseConfig, importConfig, sharedIgnores, tsConfig } from '@music-practice-tracker/eslint-configs';
 import { globalIgnores } from 'eslint/config';
 import prettierConfig from 'eslint-config-prettier/flat';
 import tseslint from 'typescript-eslint';
-
-import { baseConfig, tsConfig, sharedIgnores, importConfig } from './src';
 
 export default tseslint.config(
   {
     languageOptions: {
       parserOptions: {
         projectService: true,
-        tsconfigRootDir: import.meta.dirname,
+        tsconfigRootDir: __dirname,
       },
     },
   },
@@ -17,6 +16,6 @@ export default tseslint.config(
     files: ['**/*.ts'],
     extends: [baseConfig, tsConfig, importConfig],
   },
-  globalIgnores([...sharedIgnores, './types']),
+  globalIgnores([...sharedIgnores, './packages']),
   prettierConfig,
 );

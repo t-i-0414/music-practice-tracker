@@ -1,7 +1,8 @@
 import type React from 'react';
 
-import { Image } from 'expo-image';
 import { Platform, StyleSheet } from 'react-native';
+
+import { Image } from 'expo-image';
 
 import PartialReactLogo from '@/assets/images/partial-react-logo.png';
 import { HelloWave } from '@/components/HelloWave';

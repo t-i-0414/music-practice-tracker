@@ -23,5 +23,8 @@
     "test:ui": "bun run test:watch --ui",
     "test:watch": "vitest --config tests/vitest.config.mts",
     "type:check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@music-practice-tracker/eslint-configs": "workspace:*"
   }
 }

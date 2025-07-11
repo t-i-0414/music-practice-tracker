@@ -1,9 +1,10 @@
 import type React from 'react';
 import { useCallback } from 'react';
 
+import { Platform } from 'react-native';
+
 import { type BottomTabBarButtonProps } from '@react-navigation/bottom-tabs';
 import { Tabs } from 'expo-router';
-import { Platform } from 'react-native';
 
 import { HapticTab } from '@/components/HapticTab';
 import { IconSymbol } from '@/components/ui/IconSymbol';

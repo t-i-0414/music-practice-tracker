@@ -1,7 +1,8 @@
 import type React from 'react';
 
-import { SymbolView, type SymbolViewProps, type SymbolWeight } from 'expo-symbols';
 import { type StyleProp, type ViewStyle } from 'react-native';
+
+import { SymbolView, type SymbolViewProps, type SymbolWeight } from 'expo-symbols';
 
 import { DEFAULT_ICON_SIZE } from '@/constants/Size';
 
