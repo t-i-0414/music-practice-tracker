@@ -70,13 +70,13 @@ export const expectJsonResponse = async (
 ): Promise<void> => {
   const response = await responsePromise.expect('Content-Type', /json/u).expect(statusCode);
 
-  expect(response.body).toEqual(expectedBody);
+  expect(response.body).toStrictEqual(expectedBody);
 };
 
 export const expectNoContentResponse = async (responsePromise: request.Test): Promise<void> => {
   const response = await responsePromise.expect(HttpStatus.NO_CONTENT);
 
-  expect(response.body).toEqual({});
+  expect(response.body).toStrictEqual({});
 };
 
 const DEFAULT_CONCURRENT_COUNT = 3;

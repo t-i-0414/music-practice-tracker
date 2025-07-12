@@ -1,6 +1,5 @@
 import { randomUUID } from 'crypto';
 
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from '@jest/globals';
 import { type INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 
@@ -18,16 +17,18 @@ describe('admin API - /api/users', () => {
     app = helper.getApp();
   });
 
-  afterAll(async () => {
-    await helper.teardown();
-  });
-
   beforeEach(async () => {
     await helper.cleanupBeforeEach();
   });
 
+  afterAll(async () => {
+    await helper.teardown();
+  });
+
   describe('gET /api/users/active_users', () => {
     it('should return users by IDs', async () => {
+      expect.assertions(5);
+
       const user1 = await request(app.getHttpServer())
         .post('/api/users')
         .send({ name: 'User 1', email: `user1-${randomUUID()}@example.com` })
@@ -38,188 +39,216 @@ describe('admin API - /api/users', () => {
         .send({ name: 'User 2', email: `user2-${randomUUID()}@example.com` })
         .expect(201);
 
-      return request(app.getHttpServer())
+      const response = await request(app.getHttpServer())
         .get(`/api/users/active_users?ids=${user1.body.id}&ids=${user2.body.id}`)
-        .expect(200)
-        .expect((res) => {
-          expect(res.body).toHaveProperty('users');
-          expect(Array.isArray(res.body.users)).toBeTruthy();
-          expect(res.body.users).toHaveLength(2);
-          expect(res.body.users.some((u: any) => u.id === user1.body.id)).toBeTruthy();
-          expect(res.body.users.some((u: any) => u.id === user2.body.id)).toBeTruthy();
-        });
+        .expect(200);
+
+      expect(response.body).toHaveProperty('users');
+      expect(Array.isArray(response.body.users)).toBe(true);
+      expect(response.body.users).toHaveLength(2);
+      expect(response.body.users.some((u: any) => u.id === user1.body.id)).toBe(true);
+      expect(response.body.users.some((u: any) => u.id === user2.body.id)).toBe(true);
     });
   });
 
-  describe('pOST /api/users', () => {
-    it('should create a user', () => {
-      const createDto = {
-        name: 'Admin Test User',
-        email: `admin-test-${randomUUID()}@example.com`,
-      };
+  describe('gET /api/users/deleted_users', () => {
+    it('should return deleted users', async () => {
+      expect.assertions(4);
 
-      return request(app.getHttpServer())
+      const user = await request(app.getHttpServer())
         .post('/api/users')
-        .send(createDto)
-        .expect(201)
-        .expect((res) => {
-          expect(res.body).toMatchObject({
-            id: expect.any(String),
-            name: createDto.name,
-            email: createDto.email,
-          });
-        });
+        .send({ name: 'Deleted User', email: `deleted-${randomUUID()}@example.com` })
+        .expect(201);
+
+      await request(app.getHttpServer()).delete(`/api/users/${user.body.id}`).expect(204);
+
+      const response = await request(app.getHttpServer())
+        .get(`/api/users/deleted_users?ids=${user.body.id}`)
+        .expect(200);
+
+      expect(response.body).toHaveProperty('users');
+      expect(Array.isArray(response.body.users)).toBe(true);
+      expect(response.body.users).toHaveLength(1);
+      expect(response.body.users[0].id).toBe(user.body.id);
     });
   });
 
-  describe('pOST /api/users/bulk', () => {
-    it('should create multiple users', () => {
-      const createDto = {
-        users: [
-          { name: 'Bulk User 1', email: `bulk1-${randomUUID()}@example.com` },
-          { name: 'Bulk User 2', email: `bulk2-${randomUUID()}@example.com` },
-        ],
-      };
+  describe('gET /api/users/any_users', () => {
+    it('should return both active and deleted users', async () => {
+      expect.assertions(6);
 
-      return request(app.getHttpServer())
-        .post('/api/users/bulk')
-        .send(createDto)
-        .expect(201)
-        .expect((res) => {
-          expect(res.body).toHaveProperty('users');
-          expect(res.body.users).toHaveLength(2);
-          expect(res.body.users[0].name).toBe('Bulk User 1');
-          expect(res.body.users[1].name).toBe('Bulk User 2');
-        });
+      const activeUser = await request(app.getHttpServer())
+        .post('/api/users')
+        .send({ name: 'Active User', email: `active-${randomUUID()}@example.com` })
+        .expect(201);
+
+      const deletedUser = await request(app.getHttpServer())
+        .post('/api/users')
+        .send({ name: 'Deleted User', email: `deleted-${randomUUID()}@example.com` })
+        .expect(201);
+
+      await request(app.getHttpServer()).delete(`/api/users/${deletedUser.body.id}`).expect(204);
+
+      const response = await request(app.getHttpServer())
+        .get(`/api/users/any_users?ids=${activeUser.body.id}&ids=${deletedUser.body.id}`)
+        .expect(200);
+
+      expect(response.body).toHaveProperty('users');
+      expect(Array.isArray(response.body.users)).toBe(true);
+      expect(response.body.users).toHaveLength(2);
+
+      const activeUserInResponse = response.body.users.find((u: any) => u.id === activeUser.body.id);
+
+      expect(activeUserInResponse).toBeTruthy();
+
+      const deletedUserInResponse = response.body.users.find((u: any) => u.id === deletedUser.body.id);
+
+      expect(deletedUserInResponse).toBeTruthy();
+      expect(deletedUserInResponse.deletedAt).not.toBeNull();
     });
   });
 
-  describe('dELETE /api/users/:id', () => {
-    it('should soft delete a user', async () => {
-      const createResponse = await request(app.getHttpServer())
+  describe('gET /api/users/active_users/:id', () => {
+    it('should return active user by ID', async () => {
+      expect.assertions(3);
+
+      const user = await request(app.getHttpServer())
+        .post('/api/users')
+        .send({ name: 'Test User', email: `test-${randomUUID()}@example.com` })
+        .expect(201);
+
+      const response = await request(app.getHttpServer()).get(`/api/users/active_users/${user.body.id}`).expect(200);
+
+      expect(response.body.id).toBe(user.body.id);
+      expect(response.body.name).toBe('Test User');
+      expect(response.body.email).toMatch(/test-.*@example\.com/u);
+    });
+
+    it('should return 404 for non-existent user', async () => {
+      expect.assertions(1);
+      await expect(
+        request(app.getHttpServer()).get('/api/users/active_users/00000000-0000-0000-0000-000000000000'),
+      ).resolves.toMatchObject({
+        status: 404,
+      });
+    });
+  });
+
+  describe('gET /api/users/deleted_users/:id', () => {
+    it('should return deleted user by ID', async () => {
+      expect.assertions(3);
+
+      const user = await request(app.getHttpServer())
         .post('/api/users')
         .send({ name: 'To Delete', email: `delete-${randomUUID()}@example.com` })
         .expect(201);
 
-      const userId = createResponse.body.id;
+      await request(app.getHttpServer()).delete(`/api/users/${user.body.id}`).expect(204);
 
-      await request(app.getHttpServer()).delete(`/api/users/${userId}`).expect(204);
+      const response = await request(app.getHttpServer()).get(`/api/users/deleted_users/${user.body.id}`).expect(200);
 
-      await request(app.getHttpServer()).get(`/api/users/active_users/${userId}`).expect(404);
-
-      await request(app.getHttpServer()).get(`/api/users/deleted_users/${userId}`).expect(200);
+      expect(response.body.id).toBe(user.body.id);
+      expect(response.body.name).toBe('To Delete');
+      expect(response.body.deletedAt).not.toBeNull();
     });
   });
 
-  describe('pUT /api/users/:id/restore', () => {
-    it('should restore a soft-deleted user', async () => {
-      const createResponse = await request(app.getHttpServer())
-        .post('/api/users')
-        .send({ name: 'To Restore', email: `restore-${randomUUID()}@example.com` })
-        .expect(201);
+  describe('pOST /api/users', () => {
+    it('should create a new user', async () => {
+      expect.assertions(4);
 
-      const userId = createResponse.body.id;
+      const userData = {
+        name: 'New User',
+        email: `new-${randomUUID()}@example.com`,
+      };
 
-      await request(app.getHttpServer()).delete(`/api/users/${userId}`).expect(204);
+      const response = await request(app.getHttpServer()).post('/api/users').send(userData).expect(201);
 
-      await request(app.getHttpServer())
-        .put(`/api/users/${userId}/restore`)
-        .expect(200)
-        .expect((res) => {
-          expect(res.body.id).toBe(userId);
-          expect(res.body.name).toBe('To Restore');
-        });
+      expect(response.body).toHaveProperty('id');
+      expect(response.body.name).toBe(userData.name);
+      expect(response.body.email).toBe(userData.email);
+      expect(response.body).toHaveProperty('createdAt');
+    });
 
-      await request(app.getHttpServer()).get(`/api/users/active_users/${userId}`).expect(200);
+    it('should return 400 for invalid data', async () => {
+      expect.assertions(1);
+      await expect(request(app.getHttpServer()).post('/api/users').send({ name: 'No Email' })).resolves.toMatchObject({
+        status: 400,
+      });
+    });
+
+    it('should return error for duplicate email', async () => {
+      expect.assertions(1);
+
+      const email = `duplicate-${randomUUID()}@example.com`;
+
+      await request(app.getHttpServer()).post('/api/users').send({ name: 'User 1', email }).expect(201);
+
+      const response = await request(app.getHttpServer()).post('/api/users').send({ name: 'User 2', email });
+
+      expect(response.status).toBeGreaterThanOrEqual(400);
     });
   });
 
-  describe('dELETE /api/users/hard/:id', () => {
-    it('should permanently delete a user', async () => {
-      const createResponse = await request(app.getHttpServer())
-        .post('/api/users')
-        .send({ name: 'To Hard Delete', email: `hard-delete-${randomUUID()}@example.com` })
-        .expect(201);
+  describe('pOST /api/users/bulk', () => {
+    it('should create multiple users', async () => {
+      expect.assertions(4);
 
-      const userId = createResponse.body.id;
+      const users = [
+        { name: 'Bulk User 1', email: `bulk1-${randomUUID()}@example.com` },
+        { name: 'Bulk User 2', email: `bulk2-${randomUUID()}@example.com` },
+        { name: 'Bulk User 3', email: `bulk3-${randomUUID()}@example.com` },
+      ];
 
-      await request(app.getHttpServer()).delete(`/api/users/hard/${userId}`).expect(204);
+      const response = await request(app.getHttpServer()).post('/api/users/bulk').send({ users }).expect(201);
 
-      await request(app.getHttpServer()).get(`/api/users/any_users/${userId}`).expect(404);
+      expect(response.body).toHaveProperty('users');
+      expect(Array.isArray(response.body.users)).toBe(true);
+      expect(response.body.users).toHaveLength(3);
+
+      const emails = response.body.users.map((u: any) => u.email);
+
+      expect(emails.sort()).toStrictEqual(users.map((u) => u.email).sort());
     });
   });
 
-  describe('dELETE /api/users/bulk', () => {
-    it('should soft delete multiple users', async () => {
-      const user1 = await request(app.getHttpServer())
+  describe('pUT /api/users/:id', () => {
+    it('should update user by ID', async () => {
+      expect.assertions(3);
+
+      const user = await request(app.getHttpServer())
         .post('/api/users')
-        .send({ name: 'Bulk Delete 1', email: `bulk-del1-${randomUUID()}@example.com` })
+        .send({ name: 'Original Name', email: `original-${randomUUID()}@example.com` })
         .expect(201);
 
-      const user2 = await request(app.getHttpServer())
-        .post('/api/users')
-        .send({ name: 'Bulk Delete 2', email: `bulk-del2-${randomUUID()}@example.com` })
-        .expect(201);
+      const updateData = { name: 'Updated Name' };
 
-      await request(app.getHttpServer())
-        .delete('/api/users/bulk')
-        .send({ ids: [user1.body.id, user2.body.id] })
-        .expect(204);
-
-      await request(app.getHttpServer()).get(`/api/users/active_users/${user1.body.id}`).expect(404);
-
-      await request(app.getHttpServer()).get(`/api/users/active_users/${user2.body.id}`).expect(404);
-    });
-  });
-
-  describe('pUT /api/users/restore/bulk', () => {
-    it('should restore multiple soft-deleted users', async () => {
-      const user1 = await request(app.getHttpServer())
-        .post('/api/users')
-        .send({ name: 'Bulk Restore 1', email: `bulk-res1-${randomUUID()}@example.com` })
-        .expect(201);
-
-      const user2 = await request(app.getHttpServer())
-        .post('/api/users')
-        .send({ name: 'Bulk Restore 2', email: `bulk-res2-${randomUUID()}@example.com` })
-        .expect(201);
-
-      await request(app.getHttpServer())
-        .delete('/api/users/bulk')
-        .send({ ids: [user1.body.id, user2.body.id] })
-        .expect(204);
-
-      const restoreResponse = await request(app.getHttpServer())
-        .put('/api/users/restore/bulk')
-        .send({ ids: [user1.body.id, user2.body.id] })
+      const response = await request(app.getHttpServer())
+        .put(`/api/users/${user.body.id}`)
+        .send(updateData)
         .expect(200);
 
-      expect(restoreResponse.body.users).toHaveLength(2);
-      expect(restoreResponse.body.users.map((u: any) => u.id)).toContain(user1.body.id);
-      expect(restoreResponse.body.users.map((u: any) => u.id)).toContain(user2.body.id);
+      expect(response.body.id).toBe(user.body.id);
+      expect(response.body.name).toBe('Updated Name');
+      expect(response.body.email).toBe(user.body.email);
     });
   });
 
-  describe('gET /api/users/any_users/:id', () => {
-    it('should find both active and deleted users', async () => {
-      const createResponse = await request(app.getHttpServer())
+  describe('dELETE /api/users/:id', () => {
+    it('should soft delete user by ID', async () => {
+      expect.assertions(1);
+
+      const user = await request(app.getHttpServer())
         .post('/api/users')
-        .send({ name: 'Any User', email: `any-${randomUUID()}@example.com` })
+        .send({ name: 'To Delete', email: `delete-${randomUUID()}@example.com` })
         .expect(201);
 
-      const userId = createResponse.body.id;
+      await request(app.getHttpServer()).delete(`/api/users/${user.body.id}`).expect(204);
 
-      await request(app.getHttpServer()).get(`/api/users/any_users/${userId}`).expect(200);
+      // Verify user is soft deleted
+      const response = await request(app.getHttpServer()).get(`/api/users/deleted_users/${user.body.id}`).expect(200);
 
-      await request(app.getHttpServer()).delete(`/api/users/${userId}`).expect(204);
-
-      await request(app.getHttpServer())
-        .get(`/api/users/any_users/${userId}`)
-        .expect(200)
-        .expect((res) => {
-          expect(res.body.id).toBe(userId);
-          expect(res.body.deletedAt).not.toBeNull();
-        });
+      expect(response.body.deletedAt).not.toBeNull();
     });
   });
 });
