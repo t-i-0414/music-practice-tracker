@@ -1,5 +1,6 @@
 import {
   baseConfig,
+  baseScriptConfigRules,
   importConfig,
   jestConfig,
   sharedIgnores,
@@ -60,6 +61,10 @@ const config = tseslint.config(
         },
       ],
     },
+  },
+  {
+    files: ['scripts/**/*.ts', 'scripts/**/*.js'],
+    rules: baseScriptConfigRules,
   },
   globalIgnores(sharedIgnores),
   prettierConfig,

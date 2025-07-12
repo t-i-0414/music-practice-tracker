@@ -8,6 +8,7 @@ import {
   reactConfigRules,
   testFilePatterns,
   vitestConfig,
+  baseScriptConfigRules,
 } from '@music-practice-tracker/eslint-configs';
 import { globalIgnores } from 'eslint/config';
 import prettierConfig from 'eslint-config-prettier/flat';
@@ -56,6 +57,10 @@ const config = tseslint.config(
       '@typescript-eslint/no-require-imports': 'off',
       '@typescript-eslint/no-unsafe-member-access': 'off',
     },
+  },
+  {
+    files: ['scripts/**/*.ts', 'scripts/**/*.js'],
+    rules: baseScriptConfigRules,
   },
   globalIgnores([
     ...sharedIgnores,
