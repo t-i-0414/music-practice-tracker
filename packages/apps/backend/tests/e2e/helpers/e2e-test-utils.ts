@@ -8,7 +8,12 @@ export class E2ETestHelper {
   private app: INestApplication | null = null;
   private module: TestingModule | null = null;
 
-  async setup(imports: any[] = []): Promise<{
+  async setup(
+    imports: any[] = [],
+    options?: {
+      enableLogging?: boolean;
+    },
+  ): Promise<{
     app: INestApplication;
     module: TestingModule;
   }> {
@@ -17,6 +22,12 @@ export class E2ETestHelper {
     }).compile();
 
     this.app = this.module.createNestApplication();
+
+    // Control logging based on options (default: true)
+    const enableLogging = options?.enableLogging ?? true;
+    if (!enableLogging) {
+      this.app.useLogger(false);
+    }
 
     this.app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
     this.app.useGlobalInterceptors(new ClassSerializerInterceptor(this.app.get(Reflector)));

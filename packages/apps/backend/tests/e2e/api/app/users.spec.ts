@@ -13,7 +13,7 @@ describe('app API - /api/users', () => {
 
   beforeAll(async () => {
     helper = createE2ETestHelper();
-    await helper.setup([AppApiModule]);
+    await helper.setup([AppApiModule], { enableLogging: false });
     app = helper.getApp();
   });
 
