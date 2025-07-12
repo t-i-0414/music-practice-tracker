@@ -8,9 +8,9 @@ describe('<HomeScreen />', () => {
 
     const { getByText } = render(<HomeScreen />);
 
-    getByText('Welcome!');
+    const welcomeText = getByText('Welcome!');
 
-    expect(1).toBe(1);
+    expect(welcomeText).toBeDefined();
   });
 
   it('customText renders correctly', () => {
