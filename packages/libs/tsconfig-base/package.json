@@ -1,0 +1,15 @@
+{
+  "name": "@music-practice-tracker/tsconfig-base",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Base TypeScript configuration for Music Practice Tracker projects",
+  "keywords": [
+    "typescript",
+    "tsconfig",
+    "configuration"
+  ],
+  "main": "tsconfig.json",
+  "files": [
+    "tsconfig.json"
+  ]
+}
