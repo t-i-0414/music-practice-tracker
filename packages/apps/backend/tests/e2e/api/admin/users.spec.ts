@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto';
 
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from '@jest/globals';
 import { type INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 
@@ -7,7 +8,7 @@ import { createE2ETestHelper, type E2ETestHelper } from '../../helpers';
 
 import { AdminApiModule } from '@/modules/api/admin/admin.module';
 
-describe('Admin API - /api/users', () => {
+describe('admin API - /api/users', () => {
   let helper: E2ETestHelper;
   let app: INestApplication;
 
@@ -25,7 +26,7 @@ describe('Admin API - /api/users', () => {
     await helper.cleanupBeforeEach();
   });
 
-  describe('GET /api/users/active_users', () => {
+  describe('gET /api/users/active_users', () => {
     it('should return users by IDs', async () => {
       const user1 = await request(app.getHttpServer())
         .post('/api/users')
@@ -50,7 +51,7 @@ describe('Admin API - /api/users', () => {
     });
   });
 
-  describe('POST /api/users', () => {
+  describe('pOST /api/users', () => {
     it('should create a user', () => {
       const createDto = {
         name: 'Admin Test User',
@@ -71,7 +72,7 @@ describe('Admin API - /api/users', () => {
     });
   });
 
-  describe('POST /api/users/bulk', () => {
+  describe('pOST /api/users/bulk', () => {
     it('should create multiple users', () => {
       const createDto = {
         users: [
@@ -93,7 +94,7 @@ describe('Admin API - /api/users', () => {
     });
   });
 
-  describe('DELETE /api/users/:id', () => {
+  describe('dELETE /api/users/:id', () => {
     it('should soft delete a user', async () => {
       const createResponse = await request(app.getHttpServer())
         .post('/api/users')
@@ -110,7 +111,7 @@ describe('Admin API - /api/users', () => {
     });
   });
 
-  describe('PUT /api/users/:id/restore', () => {
+  describe('pUT /api/users/:id/restore', () => {
     it('should restore a soft-deleted user', async () => {
       const createResponse = await request(app.getHttpServer())
         .post('/api/users')
@@ -133,7 +134,7 @@ describe('Admin API - /api/users', () => {
     });
   });
 
-  describe('DELETE /api/users/hard/:id', () => {
+  describe('dELETE /api/users/hard/:id', () => {
     it('should permanently delete a user', async () => {
       const createResponse = await request(app.getHttpServer())
         .post('/api/users')
@@ -148,7 +149,7 @@ describe('Admin API - /api/users', () => {
     });
   });
 
-  describe('DELETE /api/users/bulk', () => {
+  describe('dELETE /api/users/bulk', () => {
     it('should soft delete multiple users', async () => {
       const user1 = await request(app.getHttpServer())
         .post('/api/users')
@@ -171,7 +172,7 @@ describe('Admin API - /api/users', () => {
     });
   });
 
-  describe('PUT /api/users/restore/bulk', () => {
+  describe('pUT /api/users/restore/bulk', () => {
     it('should restore multiple soft-deleted users', async () => {
       const user1 = await request(app.getHttpServer())
         .post('/api/users')
@@ -199,7 +200,7 @@ describe('Admin API - /api/users', () => {
     });
   });
 
-  describe('GET /api/users/any_users/:id', () => {
+  describe('gET /api/users/any_users/:id', () => {
     it('should find both active and deleted users', async () => {
       const createResponse = await request(app.getHttpServer())
         .post('/api/users')

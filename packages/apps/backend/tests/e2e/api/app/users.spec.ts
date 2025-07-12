@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto';
 
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from '@jest/globals';
 import { type INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 
@@ -7,7 +8,7 @@ import { createE2ETestHelper, type E2ETestHelper } from '../../helpers/e2e-test-
 
 import { AppApiModule } from '@/modules/api/app/app.module';
 
-describe('App API - /api/users', () => {
+describe('app API - /api/users', () => {
   let helper: E2ETestHelper;
   let app: INestApplication;
 
@@ -25,7 +26,7 @@ describe('App API - /api/users', () => {
     await helper.cleanupBeforeEach();
   });
 
-  describe('POST /api/users', () => {
+  describe('pOST /api/users', () => {
     it('should create a user', () => {
       const createDto = {
         name: 'Test User',
@@ -55,7 +56,7 @@ describe('App API - /api/users', () => {
     });
   });
 
-  describe('GET /api/users/:id', () => {
+  describe('gET /api/users/:id', () => {
     it('should return 400 for invalid UUID', () =>
       request(app.getHttpServer()).get('/api/users/invalid-uuid').expect(400));
 
@@ -63,7 +64,7 @@ describe('App API - /api/users', () => {
       request(app.getHttpServer()).get('/api/users/00000000-0000-0000-0000-000000000000').expect(404));
   });
 
-  describe('PUT /api/users/:id', () => {
+  describe('pUT /api/users/:id', () => {
     it('should update user data', async () => {
       const createDto = {
         name: 'Original User',
@@ -89,7 +90,7 @@ describe('App API - /api/users', () => {
     });
   });
 
-  describe('DELETE /api/users/:id', () => {
+  describe('dELETE /api/users/:id', () => {
     it('should delete a user', async () => {
       const createDto = {
         name: 'To Delete User',

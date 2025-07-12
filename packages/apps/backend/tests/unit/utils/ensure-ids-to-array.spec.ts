@@ -1,79 +1,137 @@
 import { ensureIdsToArray } from '@/utils/ensure-ids-to-array';
 
 describe('ensureIdsToArray', () => {
-  describe('null or undefined inputs', () => {
+  describe('with null or undefined input', () => {
     it('should return empty array for null', () => {
-      expect(ensureIdsToArray(null)).toEqual([]);
+      expect.assertions(1);
+
+      const result = ensureIdsToArray(null);
+
+      expect(result).toStrictEqual([]);
     });
 
     it('should return empty array for undefined', () => {
-      expect(ensureIdsToArray(undefined)).toEqual([]);
+      expect.assertions(1);
+
+      const result = ensureIdsToArray(undefined);
+
+      expect(result).toStrictEqual([]);
     });
   });
 
-  describe('string inputs', () => {
-    it('should return array with single ID', () => {
-      expect(ensureIdsToArray('id1')).toEqual(['id1']);
+  describe('with string input', () => {
+    it('should return array with single string', () => {
+      expect.assertions(1);
+
+      const result = ensureIdsToArray('id1');
+
+      expect(result).toStrictEqual(['id1']);
     });
 
-    it('should split comma-separated IDs', () => {
-      expect(ensureIdsToArray('id1,id2,id3')).toEqual(['id1', 'id2', 'id3']);
+    it('should split comma-separated string', () => {
+      expect.assertions(1);
+
+      const result = ensureIdsToArray('id1,id2,id3');
+
+      expect(result).toStrictEqual(['id1', 'id2', 'id3']);
     });
 
-    it('should trim whitespace from IDs', () => {
-      expect(ensureIdsToArray('id1, id2 , id3')).toEqual(['id1', 'id2', 'id3']);
+    it('should trim whitespace from comma-separated values', () => {
+      expect.assertions(1);
+
+      const result = ensureIdsToArray('id1 , id2,  id3  ');
+
+      expect(result).toStrictEqual(['id1', 'id2', 'id3']);
     });
 
     it('should filter out empty strings', () => {
-      expect(ensureIdsToArray('id1,,id2,,')).toEqual(['id1', 'id2']);
-    });
+      expect.assertions(1);
 
-    it('should handle string with only commas', () => {
-      expect(ensureIdsToArray(',,,,')).toEqual([]);
+      const result = ensureIdsToArray('id1,,id2,,,id3,');
+
+      expect(result).toStrictEqual(['id1', 'id2', 'id3']);
     });
 
     it('should handle empty string', () => {
-      expect(ensureIdsToArray('')).toEqual([]);
+      expect.assertions(1);
+
+      const result = ensureIdsToArray('');
+
+      expect(result).toStrictEqual([]);
+    });
+
+    it('should handle string with only commas', () => {
+      expect.assertions(1);
+
+      const result = ensureIdsToArray(',,,');
+
+      expect(result).toStrictEqual([]);
     });
   });
 
-  describe('array inputs', () => {
-    it('should return array as-is for simple array', () => {
-      expect(ensureIdsToArray(['id1', 'id2', 'id3'])).toEqual(['id1', 'id2', 'id3']);
+  describe('with array input', () => {
+    it('should return same array for simple string array', () => {
+      expect.assertions(1);
+
+      const input = ['id1', 'id2', 'id3'];
+      const result = ensureIdsToArray(input);
+
+      expect(result).toStrictEqual(['id1', 'id2', 'id3']);
     });
 
-    it('should split comma-separated values in array', () => {
-      expect(ensureIdsToArray(['id1,id2', 'id3'])).toEqual(['id1', 'id2', 'id3']);
+    it('should flatten comma-separated strings in array', () => {
+      expect.assertions(1);
+
+      const input = ['id1,id2', 'id3', 'id4,id5'];
+      const result = ensureIdsToArray(input);
+
+      expect(result).toStrictEqual(['id1', 'id2', 'id3', 'id4', 'id5']);
     });
 
-    it('should handle mixed array with comma-separated values', () => {
-      expect(ensureIdsToArray(['id1', 'id2,id3', 'id4'])).toEqual(['id1', 'id2', 'id3', 'id4']);
+    it('should handle mixed array with empty values', () => {
+      expect.assertions(1);
+
+      const input = ['id1', '', 'id2,id3', ',,', 'id4'];
+      const result = ensureIdsToArray(input);
+
+      expect(result).toStrictEqual(['id1', 'id2', 'id3', 'id4']);
     });
 
-    it('should trim whitespace from array elements', () => {
-      expect(ensureIdsToArray([' id1 ', 'id2, id3 '])).toEqual(['id1', 'id2', 'id3']);
-    });
+    it('should trim whitespace in array values', () => {
+      expect.assertions(1);
 
-    it('should filter out empty strings from array', () => {
-      expect(ensureIdsToArray(['id1', '', 'id2', ','])).toEqual(['id1', 'id2']);
+      const input = [' id1 ', 'id2, id3 ', '  id4  '];
+      const result = ensureIdsToArray(input);
+
+      expect(result).toStrictEqual(['id1', 'id2', 'id3', 'id4']);
     });
 
     it('should handle empty array', () => {
-      expect(ensureIdsToArray([])).toEqual([]);
-    });
+      expect.assertions(1);
 
-    it('should handle array with empty strings only', () => {
-      expect(ensureIdsToArray(['', ',', ',,'])).toEqual([]);
+      const result = ensureIdsToArray([]);
+
+      expect(result).toStrictEqual([]);
     });
   });
 
   describe('edge cases', () => {
-    it('should handle complex nested comma-separated values', () => {
-      expect(ensureIdsToArray(['id1,id2,id3', 'id4,id5', 'id6'])).toEqual(['id1', 'id2', 'id3', 'id4', 'id5', 'id6']);
+    it('should handle array with empty strings', () => {
+      expect.assertions(1);
+
+      const input = ['', '', ''];
+      const result = ensureIdsToArray(input);
+
+      expect(result).toStrictEqual([]);
     });
 
-    it('should handle whitespace and empty values in complex array', () => {
-      expect(ensureIdsToArray([' id1, id2 ', '', 'id3,  ,id4'])).toEqual(['id1', 'id2', 'id3', 'id4']);
+    it('should handle complex nested comma-separated values', () => {
+      expect.assertions(1);
+
+      const input = ['a,b,c', 'd,e', 'f', 'g,h,i,j'];
+      const result = ensureIdsToArray(input);
+
+      expect(result).toStrictEqual(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']);
     });
   });
 });

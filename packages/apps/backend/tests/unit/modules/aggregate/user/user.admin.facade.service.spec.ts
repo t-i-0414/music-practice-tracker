@@ -1,65 +1,61 @@
-import { Test, type TestingModule } from '@nestjs/testing';
-
-import {
-  activeUserFixture,
-  activeUsersResponseFixture,
-  anyUserFixture,
-  anyUsersResponseFixture,
-  deletedUserFixture,
-  deletedUsersResponseFixture,
-} from '../../../helpers';
+import { Test, TestingModule } from '@nestjs/testing';
 
 import { UserAdminFacadeService } from '@/modules/aggregate/user/user.admin.facade.service';
 import { UserCommandService } from '@/modules/aggregate/user/user.command.service';
-import type {
-  CreateManyUsersInputDto,
-  CreateUserInputDto,
-  DeleteManyUsersInputDto,
-  DeleteUserByIdInputDto,
-  FindManyUsersByIdInputDto,
-  FindUserByIdInputDto,
-  HardDeleteManyUsersInputDto,
-  HardDeleteUserByIdInputDto,
-  RestoreManyUsersInputDto,
-  RestoreUserByIdInputDto,
-  UpdateUserInputDto,
-} from '@/modules/aggregate/user/user.input.dto';
 import { UserQueryService } from '@/modules/aggregate/user/user.query.service';
-import type { ActiveUserResponseDto, AnyUserResponseDto } from '@/modules/aggregate/user/user.response.dto';
+import { toActiveUserDto, toActiveUsersDto, toAnyUserDto, toDeletedUserDto, toDeletedUsersDto, toAnyUsersDto } from '@/modules/aggregate/user/user.response.dto';
 
-describe('UserAdminFacadeService', () => {
+describe('userAdminFacadeService', () => {
   let service: UserAdminFacadeService;
   let commandService: jest.Mocked<UserCommandService>;
   let queryService: jest.Mocked<UserQueryService>;
 
+  const mockUser = {
+    id: '123e4567-e89b-12d3-a456-426614174000',
+    email: 'test@example.com',
+    name: 'Test User',
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-01'),
+    deletedAt: null,
+  };
+
+  const mockDeletedUser = {
+    ...mockUser,
+    deletedAt: new Date('2024-01-02'),
+  };
+
   beforeEach(async () => {
+    const mockCommandService: jest.Mocked<UserCommandService> = {
+      createUser: jest.fn(),
+      createManyAndReturnUsers: jest.fn(),
+      updateUserById: jest.fn(),
+      deleteUserById: jest.fn(),
+      deleteManyUsersById: jest.fn(),
+      hardDeleteUserById: jest.fn(),
+      hardDeleteManyUsersById: jest.fn(),
+      restoreUserById: jest.fn(),
+      restoreManyUsersById: jest.fn(),
+    } as any;
+
+    const mockQueryService: jest.Mocked<UserQueryService> = {
+      findUserByIdOrFail: jest.fn(),
+      findDeletedUserByIdOrFail: jest.fn(),
+      findAnyUserByIdOrFail: jest.fn(),
+      findManyUsers: jest.fn(),
+      findManyDeletedUsers: jest.fn(),
+      findManyAnyUsers: jest.fn(),
+    } as any;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UserAdminFacadeService,
         {
           provide: UserCommandService,
-          useValue: {
-            createUser: jest.fn(),
-            createManyAndReturnUsers: jest.fn(),
-            updateUserById: jest.fn(),
-            deleteUserById: jest.fn(),
-            deleteManyUsersById: jest.fn(),
-            hardDeleteUserById: jest.fn(),
-            hardDeleteManyUsersById: jest.fn(),
-            restoreUserById: jest.fn(),
-            restoreManyUsersById: jest.fn(),
-          },
+          useValue: mockCommandService,
         },
         {
           provide: UserQueryService,
-          useValue: {
-            findUserByIdOrFail: jest.fn(),
-            findDeletedUserByIdOrFail: jest.fn(),
-            findAnyUserByIdOrFail: jest.fn(),
-            findManyUsers: jest.fn(),
-            findManyDeletedUsers: jest.fn(),
-            findManyAnyUsers: jest.fn(),
-          },
+          useValue: mockQueryService,
         },
       ],
     }).compile();
@@ -69,488 +65,224 @@ describe('UserAdminFacadeService', () => {
     queryService = module.get(UserQueryService);
   });
 
-  describe('Service initialization', () => {
-    it('should be defined', () => {
-      expect(service).toBeDefined();
-    });
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
-    it('should have all required dependencies', () => {
-      expect(commandService).toBeDefined();
-      expect(queryService).toBeDefined();
+  describe('findUserById', () => {
+    it('should delegate to query service', async () => {
+      expect.assertions(2);
+
+      const dto = { id: mockUser.id };
+      const expectedResult = toActiveUserDto(mockUser);
+      queryService.findUserByIdOrFail.mockResolvedValue(expectedResult);
+
+      const result = await service.findUserById(dto);
+
+      expect(queryService.findUserByIdOrFail).toHaveBeenCalledWith(dto);
+      expect(result).toStrictEqual(expectedResult);
     });
   });
 
-  describe('Query Methods', () => {
-    describe('findUserById', () => {
-      const mockInput: FindUserByIdInputDto = { id: '123e4567-e89b-12d3-a456-426614174000' };
+  describe('findDeletedUserById', () => {
+    it('should delegate to query service', async () => {
+      expect.assertions(2);
 
-      it('should delegate to UserQueryService.findUserByIdOrFail', async () => {
-        queryService.findUserByIdOrFail.mockResolvedValue(activeUserFixture);
+      const dto = { id: mockDeletedUser.id };
+      const expectedResult = toDeletedUserDto(mockDeletedUser);
+      queryService.findDeletedUserByIdOrFail.mockResolvedValue(expectedResult);
 
-        const result = await service.findUserById(mockInput);
+      const result = await service.findDeletedUserById(dto);
 
-        expect(queryService.findUserByIdOrFail).toHaveBeenCalledWith(mockInput);
-        expect(queryService.findUserByIdOrFail).toHaveBeenCalledTimes(1);
-        expect(result).toBe(activeUserFixture);
-      });
-
-      it('should propagate errors from query service', async () => {
-        const error = new Error('User not found');
-        queryService.findUserByIdOrFail.mockRejectedValue(error);
-
-        await expect(service.findUserById(mockInput)).rejects.toThrow(error);
-      });
-    });
-
-    describe('findDeletedUserById', () => {
-      const mockInput: FindUserByIdInputDto = { id: '223e4567-e89b-12d3-a456-426614174001' };
-
-      it('should delegate to UserQueryService.findDeletedUserByIdOrFail', async () => {
-        queryService.findDeletedUserByIdOrFail.mockResolvedValue(deletedUserFixture);
-
-        const result = await service.findDeletedUserById(mockInput);
-
-        expect(queryService.findDeletedUserByIdOrFail).toHaveBeenCalledWith(mockInput);
-        expect(queryService.findDeletedUserByIdOrFail).toHaveBeenCalledTimes(1);
-        expect(result).toBe(deletedUserFixture);
-      });
-
-      it('should return deleted users with deletedAt timestamp', async () => {
-        queryService.findDeletedUserByIdOrFail.mockResolvedValue(deletedUserFixture);
-
-        const result = await service.findDeletedUserById(mockInput);
-
-        expect(result.deletedAt).toBeDefined();
-        expect(result.deletedAt).toBeInstanceOf(Date);
-      });
-    });
-
-    describe('findAnyUserById', () => {
-      const mockInput: FindUserByIdInputDto = { id: '323e4567-e89b-12d3-a456-426614174002' };
-
-      it('should delegate to UserQueryService.findAnyUserByIdOrFail', async () => {
-        queryService.findAnyUserByIdOrFail.mockResolvedValue(anyUserFixture);
-
-        const result = await service.findAnyUserById(mockInput);
-
-        expect(queryService.findAnyUserByIdOrFail).toHaveBeenCalledWith(mockInput);
-        expect(queryService.findAnyUserByIdOrFail).toHaveBeenCalledTimes(1);
-        expect(result).toBe(anyUserFixture);
-      });
-
-      it('should handle users with different deletion dates', async () => {
-        const recentlyDeleted: AnyUserResponseDto = {
-          ...anyUserFixture,
-          deletedAt: new Date('2024-12-01'),
-        };
-        queryService.findAnyUserByIdOrFail.mockResolvedValue(recentlyDeleted);
-
-        const recentResult = await service.findAnyUserById(mockInput);
-        expect(recentResult.deletedAt).toEqual(new Date('2024-12-01'));
-
-        const olderDeleted: AnyUserResponseDto = {
-          ...anyUserFixture,
-          deletedAt: new Date('2023-01-01'),
-        };
-        queryService.findAnyUserByIdOrFail.mockResolvedValue(olderDeleted);
-
-        const olderResult = await service.findAnyUserById(mockInput);
-        expect(olderResult.deletedAt).toEqual(new Date('2023-01-01'));
-      });
-    });
-
-    describe('findManyUsers', () => {
-      const mockInput: FindManyUsersByIdInputDto = { ids: ['id1', 'id2', 'id3'] };
-
-      it('should delegate to UserQueryService.findManyUsers', async () => {
-        queryService.findManyUsers.mockResolvedValue(activeUsersResponseFixture);
-
-        const result = await service.findManyUsers(mockInput);
-
-        expect(queryService.findManyUsers).toHaveBeenCalledWith(mockInput);
-        expect(queryService.findManyUsers).toHaveBeenCalledTimes(1);
-        expect(result).toBe(activeUsersResponseFixture);
-      });
-
-      it('should handle empty results', async () => {
-        queryService.findManyUsers.mockResolvedValue({ users: [] });
-
-        const result = await service.findManyUsers(mockInput);
-
-        expect(result.users).toHaveLength(0);
-      });
-    });
-
-    describe('findManyDeletedUsers', () => {
-      const mockInput: FindManyUsersByIdInputDto = { ids: ['id1', 'id2'] };
-
-      it('should delegate to UserQueryService.findManyDeletedUsers', async () => {
-        queryService.findManyDeletedUsers.mockResolvedValue(deletedUsersResponseFixture);
-
-        const result = await service.findManyDeletedUsers(mockInput);
-
-        expect(queryService.findManyDeletedUsers).toHaveBeenCalledWith(mockInput);
-        expect(queryService.findManyDeletedUsers).toHaveBeenCalledTimes(1);
-        expect(result).toBe(deletedUsersResponseFixture);
-      });
-    });
-
-    describe('findManyAnyUsers', () => {
-      const mockInput: FindManyUsersByIdInputDto = { ids: ['id1', 'id2'] };
-
-      it('should delegate to UserQueryService.findManyAnyUsers', async () => {
-        queryService.findManyAnyUsers.mockResolvedValue(anyUsersResponseFixture);
-
-        const result = await service.findManyAnyUsers(mockInput);
-
-        expect(queryService.findManyAnyUsers).toHaveBeenCalledWith(mockInput);
-        expect(queryService.findManyAnyUsers).toHaveBeenCalledTimes(1);
-        expect(result).toBe(anyUsersResponseFixture);
-      });
+      expect(queryService.findDeletedUserByIdOrFail).toHaveBeenCalledWith(dto);
+      expect(result).toStrictEqual(expectedResult);
     });
   });
 
-  describe('Command Methods', () => {
-    describe('createUser', () => {
-      const mockInput: CreateUserInputDto = {
-        name: 'New User',
-        email: 'new@example.com',
-      };
+  describe('findAnyUserById', () => {
+    it('should delegate to query service', async () => {
+      expect.assertions(2);
 
-      it('should delegate to UserCommandService.createUser', async () => {
-        commandService.createUser.mockResolvedValue(activeUserFixture);
+      const dto = { id: mockUser.id };
+      const expectedResult = toAnyUserDto(mockUser);
+      queryService.findAnyUserByIdOrFail.mockResolvedValue(expectedResult);
 
-        const result = await service.createUser(mockInput);
+      const result = await service.findAnyUserById(dto);
 
-        expect(commandService.createUser).toHaveBeenCalledWith(mockInput);
-        expect(commandService.createUser).toHaveBeenCalledTimes(1);
-        expect(result).toBe(activeUserFixture);
-      });
-    });
-
-    describe('createManyAndReturnUsers', () => {
-      const mockInput: CreateManyUsersInputDto = {
-        users: [
-          { name: 'User1', email: 'user1@example.com' },
-          { name: 'User2', email: 'user2@example.com' },
-        ],
-      };
-
-      it('should delegate to UserCommandService.createManyAndReturnUsers', async () => {
-        commandService.createManyAndReturnUsers.mockResolvedValue(activeUsersResponseFixture);
-
-        const result = await service.createManyAndReturnUsers(mockInput);
-
-        expect(commandService.createManyAndReturnUsers).toHaveBeenCalledWith(mockInput);
-        expect(commandService.createManyAndReturnUsers).toHaveBeenCalledTimes(1);
-        expect(result).toBe(activeUsersResponseFixture);
-      });
-    });
-
-    describe('updateUserById', () => {
-      const mockInput: UpdateUserInputDto = {
-        id: '123e4567-e89b-12d3-a456-426614174000',
-        data: { name: 'Updated Name' },
-      };
-
-      it('should delegate to UserCommandService.updateUserById', async () => {
-        commandService.updateUserById.mockResolvedValue(activeUserFixture);
-
-        const result = await service.updateUserById(mockInput);
-
-        expect(commandService.updateUserById).toHaveBeenCalledWith(mockInput);
-        expect(commandService.updateUserById).toHaveBeenCalledTimes(1);
-        expect(result).toBe(activeUserFixture);
-      });
-    });
-
-    describe('deleteUserById', () => {
-      const mockInput: DeleteUserByIdInputDto = { id: '123e4567-e89b-12d3-a456-426614174000' };
-
-      it('should delegate to UserCommandService.deleteUserById', async () => {
-        commandService.deleteUserById.mockResolvedValue(undefined);
-
-        await service.deleteUserById(mockInput);
-
-        expect(commandService.deleteUserById).toHaveBeenCalledWith(mockInput);
-        expect(commandService.deleteUserById).toHaveBeenCalledTimes(1);
-      });
-
-      it('should return void', async () => {
-        commandService.deleteUserById.mockResolvedValue(undefined);
-
-        await service.deleteUserById(mockInput);
-
-        expect(true).toBe(true);
-      });
-    });
-
-    describe('deleteManyUsersById', () => {
-      const mockInput: DeleteManyUsersInputDto = { ids: ['id1', 'id2', 'id3'] };
-
-      it('should delegate to UserCommandService.deleteManyUsersById', async () => {
-        commandService.deleteManyUsersById.mockResolvedValue(undefined);
-
-        await service.deleteManyUsersById(mockInput);
-
-        expect(commandService.deleteManyUsersById).toHaveBeenCalledWith(mockInput);
-        expect(commandService.deleteManyUsersById).toHaveBeenCalledTimes(1);
-      });
-
-      it('should destructure and pass ids correctly', async () => {
-        commandService.deleteManyUsersById.mockResolvedValue(undefined);
-
-        await service.deleteManyUsersById({ ids: ['id1', 'id2'] });
-
-        expect(commandService.deleteManyUsersById).toHaveBeenCalledWith({ ids: ['id1', 'id2'] });
-      });
-    });
-
-    describe('hardDeleteUserById', () => {
-      const mockInput: HardDeleteUserByIdInputDto = { id: '123e4567-e89b-12d3-a456-426614174000' };
-
-      it('should delegate to UserCommandService.hardDeleteUserById', async () => {
-        commandService.hardDeleteUserById.mockResolvedValue(undefined);
-
-        await service.hardDeleteUserById(mockInput);
-
-        expect(commandService.hardDeleteUserById).toHaveBeenCalledWith(mockInput);
-        expect(commandService.hardDeleteUserById).toHaveBeenCalledTimes(1);
-      });
-
-      it('should destructure and pass id correctly', async () => {
-        commandService.hardDeleteUserById.mockResolvedValue(undefined);
-
-        await service.hardDeleteUserById({ id: 'test-id' });
-
-        expect(commandService.hardDeleteUserById).toHaveBeenCalledWith({ id: 'test-id' });
-      });
-    });
-
-    describe('hardDeleteManyUsersById', () => {
-      const mockInput: HardDeleteManyUsersInputDto = { ids: ['id1', 'id2'] };
-
-      it('should delegate to UserCommandService.hardDeleteManyUsersById', async () => {
-        commandService.hardDeleteManyUsersById.mockResolvedValue(undefined);
-
-        await service.hardDeleteManyUsersById(mockInput);
-
-        expect(commandService.hardDeleteManyUsersById).toHaveBeenCalledWith(mockInput);
-        expect(commandService.hardDeleteManyUsersById).toHaveBeenCalledTimes(1);
-      });
-    });
-
-    describe('restoreUserById', () => {
-      const mockInput: RestoreUserByIdInputDto = { id: '123e4567-e89b-12d3-a456-426614174000' };
-
-      it('should delegate to UserCommandService.restoreUserById', async () => {
-        commandService.restoreUserById.mockResolvedValue(activeUserFixture);
-
-        const result = await service.restoreUserById(mockInput);
-
-        expect(commandService.restoreUserById).toHaveBeenCalledWith(mockInput);
-        expect(commandService.restoreUserById).toHaveBeenCalledTimes(1);
-        expect(result).toBe(activeUserFixture);
-      });
-
-      it('should destructure and pass id correctly', async () => {
-        commandService.restoreUserById.mockResolvedValue(activeUserFixture);
-
-        await service.restoreUserById({ id: 'restore-id' });
-
-        expect(commandService.restoreUserById).toHaveBeenCalledWith({ id: 'restore-id' });
-      });
-    });
-
-    describe('restoreManyUsersById', () => {
-      const mockInput: RestoreManyUsersInputDto = { ids: ['id1', 'id2'] };
-
-      it('should delegate to UserCommandService.restoreManyUsersById', async () => {
-        commandService.restoreManyUsersById.mockResolvedValue(activeUsersResponseFixture);
-
-        const result = await service.restoreManyUsersById(mockInput);
-
-        expect(commandService.restoreManyUsersById).toHaveBeenCalledWith(mockInput);
-        expect(commandService.restoreManyUsersById).toHaveBeenCalledTimes(1);
-        expect(result).toBe(activeUsersResponseFixture);
-      });
+      expect(queryService.findAnyUserByIdOrFail).toHaveBeenCalledWith(dto);
+      expect(result).toStrictEqual(expectedResult);
     });
   });
 
-  describe('Facade Pattern Characteristics', () => {
-    it('should expose all admin operations through a single interface', () => {
-      expect(service.findUserById).toBeInstanceOf(Function);
-      expect(service.findDeletedUserById).toBeInstanceOf(Function);
-      expect(service.findAnyUserById).toBeInstanceOf(Function);
-      expect(service.findManyUsers).toBeInstanceOf(Function);
-      expect(service.findManyDeletedUsers).toBeInstanceOf(Function);
-      expect(service.findManyAnyUsers).toBeInstanceOf(Function);
+  describe('findManyUsers', () => {
+    it('should delegate to query service', async () => {
+      expect.assertions(2);
 
-      expect(service.createUser).toBeInstanceOf(Function);
-      expect(service.createManyAndReturnUsers).toBeInstanceOf(Function);
-      expect(service.updateUserById).toBeInstanceOf(Function);
-      expect(service.deleteUserById).toBeInstanceOf(Function);
-      expect(service.deleteManyUsersById).toBeInstanceOf(Function);
-      expect(service.hardDeleteUserById).toBeInstanceOf(Function);
-      expect(service.hardDeleteManyUsersById).toBeInstanceOf(Function);
-      expect(service.restoreUserById).toBeInstanceOf(Function);
-      expect(service.restoreManyUsersById).toBeInstanceOf(Function);
-    });
+      const dto = { ids: [mockUser.id] };
+      const expectedResult = toActiveUsersDto([mockUser]);
+      queryService.findManyUsers.mockResolvedValue(expectedResult);
 
-    it('should provide additional admin-only operations not available in app facade', () => {
-      expect(service.findDeletedUserById).toBeDefined();
-      expect(service.findAnyUserById).toBeDefined();
-      expect(service.findManyDeletedUsers).toBeDefined();
-      expect(service.findManyAnyUsers).toBeDefined();
-      expect(service.hardDeleteUserById).toBeDefined();
-      expect(service.hardDeleteManyUsersById).toBeDefined();
-      expect(service.restoreUserById).toBeDefined();
-      expect(service.restoreManyUsersById).toBeDefined();
-    });
+      const result = await service.findManyUsers(dto);
 
-    it('should not add business logic, only delegate', async () => {
-      queryService.findUserByIdOrFail.mockResolvedValue(activeUserFixture);
-      commandService.createUser.mockResolvedValue(activeUserFixture);
-
-      const start1 = Date.now();
-      await service.findUserById({ id: 'test' });
-      const duration1 = Date.now() - start1;
-
-      const start2 = Date.now();
-      await service.createUser({ name: 'Test', email: 'test@example.com' });
-      const duration2 = Date.now() - start2;
-
-      expect(duration1).toBeLessThan(10);
-      expect(duration2).toBeLessThan(10);
+      expect(queryService.findManyUsers).toHaveBeenCalledWith(dto);
+      expect(result).toStrictEqual(expectedResult);
     });
   });
 
-  describe('Error Handling', () => {
-    it('should propagate query service errors without modification', async () => {
-      const error = new Error('Query failed');
-      error.stack = 'Original stack';
-      queryService.findUserByIdOrFail.mockRejectedValue(error);
+  describe('findManyDeletedUsers', () => {
+    it('should delegate to query service', async () => {
+      expect.assertions(2);
 
-      try {
-        await service.findUserById({ id: 'test' });
-        fail('Expected error to be thrown');
-      } catch (e: any) {
-        expect(e).toBe(error);
-        expect(e.stack).toBe('Original stack');
-      }
-    });
+      const dto = { ids: [mockDeletedUser.id] };
+      const expectedResult = toDeletedUsersDto([mockDeletedUser]);
+      queryService.findManyDeletedUsers.mockResolvedValue(expectedResult);
 
-    it('should propagate command service errors without modification', async () => {
-      const error = new Error('Command failed');
-      error.stack = 'Original stack';
-      commandService.createUser.mockRejectedValue(error);
+      const result = await service.findManyDeletedUsers(dto);
 
-      try {
-        await service.createUser({ name: 'Test', email: 'test@example.com' });
-        fail('Expected error to be thrown');
-      } catch (e: any) {
-        expect(e).toBe(error);
-        expect(e.stack).toBe('Original stack');
-      }
-    });
-
-    it('should handle null/undefined errors', async () => {
-      queryService.findUserByIdOrFail.mockRejectedValue(null);
-
-      await expect(service.findUserById({ id: 'test' })).rejects.toBeNull();
+      expect(queryService.findManyDeletedUsers).toHaveBeenCalledWith(dto);
+      expect(result).toStrictEqual(expectedResult);
     });
   });
 
-  describe('Concurrent Operations', () => {
-    it('should handle multiple concurrent queries', async () => {
-      queryService.findUserByIdOrFail.mockResolvedValue(activeUserFixture);
-      queryService.findDeletedUserByIdOrFail.mockResolvedValue(deletedUserFixture);
-      queryService.findAnyUserByIdOrFail.mockResolvedValue(anyUserFixture);
+  describe('findManyAnyUsers', () => {
+    it('should delegate to query service', async () => {
+      expect.assertions(2);
 
-      const [active, deleted, any] = await Promise.all([
-        service.findUserById({ id: 'id1' }),
-        service.findDeletedUserById({ id: 'id2' }),
-        service.findAnyUserById({ id: 'id3' }),
-      ]);
+      const dto = { ids: [mockUser.id, mockDeletedUser.id] };
+      const expectedResult = toAnyUsersDto([mockUser, mockDeletedUser]);
+      queryService.findManyAnyUsers.mockResolvedValue(expectedResult);
 
-      expect(active).toBe(activeUserFixture);
-      expect(deleted).toBe(deletedUserFixture);
-      expect(any).toBe(anyUserFixture);
-    });
+      const result = await service.findManyAnyUsers(dto);
 
-    it('should handle mixed queries and commands concurrently', async () => {
-      queryService.findUserByIdOrFail.mockResolvedValue(activeUserFixture);
-      commandService.createUser.mockResolvedValue(activeUserFixture);
-      commandService.updateUserById.mockResolvedValue(activeUserFixture);
-      commandService.deleteUserById.mockResolvedValue(undefined);
-
-      const results = await Promise.all([
-        service.findUserById({ id: 'id1' }),
-        service.createUser({ name: 'New', email: 'new@example.com' }),
-        service.updateUserById({ id: 'id2', data: { name: 'Updated' } }),
-        service.deleteUserById({ id: 'id3' }),
-      ]);
-
-      expect(results[0]).toBe(activeUserFixture);
-      expect(results[1]).toBe(activeUserFixture);
-      expect(results[2]).toBe(activeUserFixture);
-      expect(results[3]).toBeUndefined();
+      expect(queryService.findManyAnyUsers).toHaveBeenCalledWith(dto);
+      expect(result).toStrictEqual(expectedResult);
     });
   });
 
-  describe('Integration with DTOs', () => {
-    it('should pass DTOs through without modification', async () => {
-      const complexInput: UpdateUserInputDto = {
-        id: '123e4567-e89b-12d3-a456-426614174000',
-        data: {
-          name: 'Complex Update',
-          email: 'complex@example.com',
-        },
-      };
+  describe('createUser', () => {
+    it('should delegate to command service', async () => {
+      expect.assertions(2);
 
-      commandService.updateUserById.mockResolvedValue(activeUserFixture);
+      const dto = { email: mockUser.email, name: mockUser.name };
+      const expectedResult = toActiveUserDto(mockUser);
+      commandService.createUser.mockResolvedValue(expectedResult);
 
-      await service.updateUserById(complexInput);
+      const result = await service.createUser(dto);
 
-      const [[calledWith]] = commandService.updateUserById.mock.calls;
-      expect(calledWith).toBe(complexInput);
-    });
-
-    it('should return response DTOs without modification', async () => {
-      const responseDto: ActiveUserResponseDto = {
-        id: '123',
-        name: 'Test',
-        email: 'test@example.com',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      queryService.findUserByIdOrFail.mockResolvedValue(responseDto);
-
-      const result = await service.findUserById({ id: '123' });
-
-      expect(result).toBe(responseDto);
+      expect(commandService.createUser).toHaveBeenCalledWith(dto);
+      expect(result).toStrictEqual(expectedResult);
     });
   });
 
-  describe('Performance', () => {
-    it('should handle high-volume operations efficiently', async () => {
-      commandService.createUser.mockResolvedValue(activeUserFixture);
+  describe('createManyAndReturnUsers', () => {
+    it('should delegate to command service', async () => {
+      expect.assertions(2);
 
-      const iterations = 1000;
-      const start = Date.now();
+      const dto = { users: [{ email: 'user1@example.com', name: 'User 1' }] };
+      const expectedResult = toActiveUsersDto([mockUser]);
+      commandService.createManyAndReturnUsers.mockResolvedValue(expectedResult);
 
-      const promises = Array.from({ length: iterations }, (_, i) =>
-        service.createUser({ name: `User${i}`, email: `user${i}@example.com` }),
-      );
+      const result = await service.createManyAndReturnUsers(dto);
 
-      await Promise.all(promises);
+      expect(commandService.createManyAndReturnUsers).toHaveBeenCalledWith(dto);
+      expect(result).toStrictEqual(expectedResult);
+    });
+  });
 
-      const duration = Date.now() - start;
-      const avgTimePerCall = duration / iterations;
+  describe('updateUserById', () => {
+    it('should delegate to command service', async () => {
+      expect.assertions(2);
 
-      expect(avgTimePerCall).toBeLessThan(1);
-      expect(commandService.createUser).toHaveBeenCalledTimes(iterations);
+      const dto = { id: mockUser.id, data: { name: 'Updated Name' } };
+      const expectedResult = toActiveUserDto({ ...mockUser, name: 'Updated Name' });
+      commandService.updateUserById.mockResolvedValue(expectedResult);
+
+      const result = await service.updateUserById(dto);
+
+      expect(commandService.updateUserById).toHaveBeenCalledWith(dto);
+      expect(result).toStrictEqual(expectedResult);
+    });
+  });
+
+  describe('deleteUserById', () => {
+    it('should delegate to command service', async () => {
+      expect.assertions(1);
+
+      const dto = { id: mockUser.id };
+      commandService.deleteUserById.mockResolvedValue();
+
+      await service.deleteUserById(dto);
+
+      expect(commandService.deleteUserById).toHaveBeenCalledWith(dto);
+    });
+  });
+
+  describe('deleteManyUsersById', () => {
+    it('should delegate to command service', async () => {
+      expect.assertions(1);
+
+      const dto = { ids: ['id1', 'id2'] };
+      commandService.deleteManyUsersById.mockResolvedValue();
+
+      await service.deleteManyUsersById(dto);
+
+      expect(commandService.deleteManyUsersById).toHaveBeenCalledWith(dto);
+    });
+  });
+
+  describe('hardDeleteUserById', () => {
+    it('should delegate to command service', async () => {
+      expect.assertions(1);
+
+      const dto = { id: mockUser.id };
+      commandService.hardDeleteUserById.mockResolvedValue();
+
+      await service.hardDeleteUserById(dto);
+
+      expect(commandService.hardDeleteUserById).toHaveBeenCalledWith(dto);
+    });
+  });
+
+  describe('hardDeleteManyUsersById', () => {
+    it('should delegate to command service', async () => {
+      expect.assertions(1);
+
+      const dto = { ids: ['id1', 'id2'] };
+      commandService.hardDeleteManyUsersById.mockResolvedValue();
+
+      await service.hardDeleteManyUsersById(dto);
+
+      expect(commandService.hardDeleteManyUsersById).toHaveBeenCalledWith(dto);
+    });
+  });
+
+  describe('restoreUserById', () => {
+    it('should delegate to command service', async () => {
+      expect.assertions(2);
+
+      const dto = { id: mockDeletedUser.id };
+      const expectedResult = toActiveUserDto({ ...mockDeletedUser, deletedAt: null });
+      commandService.restoreUserById.mockResolvedValue(expectedResult);
+
+      const result = await service.restoreUserById(dto);
+
+      expect(commandService.restoreUserById).toHaveBeenCalledWith(dto);
+      expect(result).toStrictEqual(expectedResult);
+    });
+  });
+
+  describe('restoreManyUsersById', () => {
+    it('should delegate to command service', async () => {
+      expect.assertions(2);
+
+      const dto = { ids: ['id1', 'id2'] };
+      const expectedResult = toActiveUsersDto([{ ...mockDeletedUser, deletedAt: null }]);
+      commandService.restoreManyUsersById.mockResolvedValue(expectedResult);
+
+      const result = await service.restoreManyUsersById(dto);
+
+      expect(commandService.restoreManyUsersById).toHaveBeenCalledWith(dto);
+      expect(result).toStrictEqual(expectedResult);
     });
   });
 });

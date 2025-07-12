@@ -1,10 +1,12 @@
 import { randomUUID } from 'crypto';
 
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from '@jest/globals';
+
 import { createIntegrationTestHelper, type IntegrationTestHelper } from '../../../helpers';
 
 import { UserRepositoryService } from '@/modules/aggregate/user/user.repository.service';
 
-describe('UserRepositoryService', () => {
+describe('userRepositoryService', () => {
   let helper: IntegrationTestHelper;
   let service: UserRepositoryService;
 
@@ -41,6 +43,7 @@ describe('UserRepositoryService', () => {
       });
 
       const foundUser = await service.findUniqueActiveUser({ id: createdUser.id });
+
       expect(foundUser).toMatchObject(createdUser);
     });
   });
@@ -74,6 +77,7 @@ describe('UserRepositoryService', () => {
       await service.deleteUser({ id: createdUser.id });
 
       const foundUser = await service.findUniqueActiveUser({ id: createdUser.id });
+
       expect(foundUser).toBeNull();
     });
   });
@@ -121,16 +125,20 @@ describe('UserRepositoryService', () => {
       await service.deleteUser({ id: createdUser.id });
 
       const deletedUser = await service.findUniqueDeletedUser({ id: createdUser.id });
+
       expect(deletedUser).toMatchObject({
         id: createdUser.id,
         deletedAt: expect.any(Date),
       });
 
       const activeUser = await service.findUniqueActiveUser({ id: createdUser.id });
+
       expect(activeUser).toBeNull();
 
       const deletedFoundUser = await service.findUniqueDeletedUser({ id: createdUser.id });
+
       expect(deletedFoundUser).toBeTruthy();
+
       if (deletedUser && deletedFoundUser) {
         expect(deletedFoundUser).toMatchObject(deletedUser);
       }
@@ -154,6 +162,7 @@ describe('UserRepositoryService', () => {
       });
 
       const activeUser = await service.findUniqueActiveUser({ id: createdUser.id });
+
       expect(activeUser).toMatchObject(restoredUser);
     });
   });
@@ -169,12 +178,15 @@ describe('UserRepositoryService', () => {
       await service.hardDeleteUser({ id: createdUser.id });
 
       const activeUser = await service.findUniqueActiveUser({ id: createdUser.id });
+
       expect(activeUser).toBeNull();
 
       const deletedUser = await service.findUniqueDeletedUser({ id: createdUser.id });
+
       expect(deletedUser).toBeNull();
 
       const anyUser = await service.findUniqueAnyUser({ id: createdUser.id });
+
       expect(anyUser).toBeNull();
     });
   });
@@ -187,14 +199,17 @@ describe('UserRepositoryService', () => {
       await service.deleteUser({ id: deletedUser.id });
 
       const activeUsers = await service.findManyActiveUsers({});
+
       expect(activeUsers).toHaveLength(2);
       expect(activeUsers.every((user) => user.deletedAt === null)).toBe(true);
 
       const deletedUsers = await service.findManyDeletedUsers({});
+
       expect(deletedUsers).toHaveLength(1);
       expect(deletedUsers[0]).toMatchObject({ id: deletedUser.id });
 
       const allUsers = await service.findManyAnyUsers({});
+
       expect(allUsers).toHaveLength(3);
     });
   });

@@ -1,3 +1,4 @@
+import { expect } from '@jest/globals';
 import { HttpStatus, type INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 
@@ -34,6 +35,7 @@ export function createHttpTester(app: INestApplication): HttpTester {
 export const expectNotFoundError = async (responsePromise: request.Test, message = 'Not Found'): Promise<void> => {
   const response = await responsePromise.expect(HttpStatus.NOT_FOUND);
   const body = response.body as { message: string };
+
   expect(body).toHaveProperty('message');
   expect(body.message).toContain(message);
 };
@@ -41,7 +43,9 @@ export const expectNotFoundError = async (responsePromise: request.Test, message
 export const expectBadRequestError = async (responsePromise: request.Test, message?: string): Promise<void> => {
   const response = await responsePromise.expect(HttpStatus.BAD_REQUEST);
   const body = response.body as { message: string };
+
   expect(body).toHaveProperty('message');
+
   if (message !== undefined) {
     expect(body.message).toContain(message);
   }
@@ -50,6 +54,7 @@ export const expectBadRequestError = async (responsePromise: request.Test, messa
 export const expectInternalServerError = async (responsePromise: request.Test): Promise<void> => {
   const response = await responsePromise.expect(HttpStatus.INTERNAL_SERVER_ERROR);
   const body = response.body as { message: string };
+
   expect(body).toHaveProperty('message');
   expect(body.message).toBe('Internal server error');
 };
@@ -64,11 +69,13 @@ export const expectJsonResponse = async (
   statusCode = HttpStatus.OK,
 ): Promise<void> => {
   const response = await responsePromise.expect('Content-Type', /json/u).expect(statusCode);
+
   expect(response.body).toEqual(expectedBody);
 };
 
 export const expectNoContentResponse = async (responsePromise: request.Test): Promise<void> => {
   const response = await responsePromise.expect(HttpStatus.NO_CONTENT);
+
   expect(response.body).toEqual({});
 };
 

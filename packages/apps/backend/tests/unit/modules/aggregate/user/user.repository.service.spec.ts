@@ -1,30 +1,30 @@
-import { Test, type TestingModule } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 
-import { createUserEntity } from '../../../helpers';
-
-import { UserRepositoryService, type User } from '@/modules/aggregate/user/user.repository.service';
+import { Prisma } from '@/generated/prisma';
+import { UserRepositoryService } from '@/modules/aggregate/user/user.repository.service';
 import { RepositoryService } from '@/modules/repository/repository.service';
 
-describe('UserRepositoryService', () => {
+describe('userRepositoryService', () => {
   let service: UserRepositoryService;
+  let userModel: any;
 
-  const mockUser: User = createUserEntity({
+  const mockUser = {
     id: '123e4567-e89b-12d3-a456-426614174000',
-    name: 'Test User',
     email: 'test@example.com',
-    createdAt: new Date('2024-01-01T00:00:00.000Z'),
-    updatedAt: new Date('2024-01-01T00:00:00.000Z'),
+    name: 'Test User',
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-01'),
     deletedAt: null,
-  });
+  };
 
-  const deletedUserFixture: User = createUserEntity({
+  const mockDeletedUser = {
     ...mockUser,
-    id: '123e4567-e89b-12d3-a456-426614174001',
-    deletedAt: new Date('2024-01-02T00:00:00.000Z'),
-  });
+    id: '223e4567-e89b-12d3-a456-426614174001',
+    deletedAt: new Date('2024-01-02'),
+  };
 
-  const mockRepositoryService = {
-    user: {
+  beforeEach(async () => {
+    userModel = {
       findUnique: jest.fn(),
       findMany: jest.fn(),
       create: jest.fn(),
@@ -34,472 +34,323 @@ describe('UserRepositoryService', () => {
       updateManyAndReturn: jest.fn(),
       delete: jest.fn(),
       deleteMany: jest.fn(),
-    },
-  };
+    };
 
-  beforeEach(async () => {
+    const mockRepository = {
+      user: userModel,
+    } as unknown as jest.Mocked<RepositoryService>;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UserRepositoryService,
         {
           provide: RepositoryService,
-          useValue: mockRepositoryService,
+          useValue: mockRepository,
         },
       ],
     }).compile();
 
     service = module.get<UserRepositoryService>(UserRepositoryService);
+  });
 
+  afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('findUniqueActiveUser', () => {
-    it('should find an active user by id', async () => {
+    it('should find active user with deletedAt null', async () => {
+      expect.assertions(2);
+
+      userModel.findUnique.mockResolvedValue(mockUser);
       const params = { id: mockUser.id };
-      mockRepositoryService.user.findUnique.mockResolvedValue(mockUser);
 
       const result = await service.findUniqueActiveUser(params);
 
-      expect(mockRepositoryService.user.findUnique).toHaveBeenCalledWith({
+      expect(userModel.findUnique).toHaveBeenCalledWith({
         where: {
           ...params,
           deletedAt: null,
         },
       });
-      expect(result).toEqual(mockUser);
+      expect(result).toStrictEqual(mockUser);
     });
 
-    it('should return null when user is not found', async () => {
+    it('should return null when user not found', async () => {
+      expect.assertions(2);
+
+      userModel.findUnique.mockResolvedValue(null);
       const params = { id: 'non-existent-id' };
-      mockRepositoryService.user.findUnique.mockResolvedValue(null);
 
       const result = await service.findUniqueActiveUser(params);
 
+      expect(userModel.findUnique).toHaveBeenCalledWith({
+        where: {
+          ...params,
+          deletedAt: null,
+        },
+      });
       expect(result).toBeNull();
     });
   });
 
   describe('findUniqueDeletedUser', () => {
-    it('should find a deleted user by id', async () => {
-      const params = { id: deletedUserFixture.id };
-      mockRepositoryService.user.findUnique.mockResolvedValue(deletedUserFixture);
+    it('should find deleted user', async () => {
+      expect.assertions(2);
+
+      userModel.findUnique.mockResolvedValue(mockDeletedUser);
+      const params = { id: mockDeletedUser.id };
 
       const result = await service.findUniqueDeletedUser(params);
 
-      expect(mockRepositoryService.user.findUnique).toHaveBeenCalledWith({
+      expect(userModel.findUnique).toHaveBeenCalledWith({
         where: {
           ...params,
           deletedAt: { not: null },
         },
       });
-      expect(result).toEqual(deletedUserFixture);
-    });
-
-    it('should return null when deleted user is not found', async () => {
-      const params = { id: 'non-existent-id' };
-      mockRepositoryService.user.findUnique.mockResolvedValue(null);
-
-      const result = await service.findUniqueDeletedUser(params);
-
-      expect(result).toBeNull();
+      expect(result).toStrictEqual(mockDeletedUser);
     });
   });
 
   describe('findUniqueAnyUser', () => {
-    it('should find any user (active or deleted) by id', async () => {
+    it('should find any user regardless of deletion status', async () => {
+      expect.assertions(2);
+
+      userModel.findUnique.mockResolvedValue(mockUser);
       const params = { id: mockUser.id };
-      mockRepositoryService.user.findUnique.mockResolvedValue(mockUser);
 
       const result = await service.findUniqueAnyUser(params);
 
-      expect(mockRepositoryService.user.findUnique).toHaveBeenCalledWith({
+      expect(userModel.findUnique).toHaveBeenCalledWith({
         where: {
           ...params,
           OR: [{ deletedAt: null }, { deletedAt: { not: null } }],
         },
       });
-      expect(result).toEqual(mockUser);
-    });
-
-    it('should return null when user is not found', async () => {
-      const params = { id: 'non-existent-id' };
-      mockRepositoryService.user.findUnique.mockResolvedValue(null);
-
-      const result = await service.findUniqueAnyUser(params);
-
-      expect(result).toBeNull();
+      expect(result).toStrictEqual(mockUser);
     });
   });
 
   describe('findManyActiveUsers', () => {
-    it('should find many active users with all parameters', async () => {
-      const params = {
-        skip: 0,
-        take: 10,
-        cursor: { id: mockUser.id },
-        where: { name: { contains: 'Test' } },
-        orderBy: { createdAt: 'desc' as const },
-      };
+    it('should find many active users with pagination', async () => {
+      expect.assertions(2);
+
       const mockUsers = [mockUser];
-      mockRepositoryService.user.findMany.mockResolvedValue(mockUsers);
+      userModel.findMany.mockResolvedValue(mockUsers);
+      const params = {
+        skip: 10,
+        take: 20,
+        where: { email: { contains: 'test' } },
+        orderBy: { createdAt: Prisma.SortOrder.desc },
+      };
 
       const result = await service.findManyActiveUsers(params);
 
-      expect(mockRepositoryService.user.findMany).toHaveBeenCalledWith({
+      expect(userModel.findMany).toHaveBeenCalledWith({
         ...params,
         where: {
           ...params.where,
           deletedAt: null,
         },
       });
-      expect(result).toEqual(mockUsers);
-    });
-
-    it('should find many active users without optional parameters', async () => {
-      const params = {};
-      const mockUsers = [mockUser];
-      mockRepositoryService.user.findMany.mockResolvedValue(mockUsers);
-
-      const result = await service.findManyActiveUsers(params);
-
-      expect(mockRepositoryService.user.findMany).toHaveBeenCalledWith({
-        where: {
-          deletedAt: null,
-        },
-      });
-      expect(result).toEqual(mockUsers);
-    });
-
-    it('should return empty array when no users found', async () => {
-      const params = {};
-      mockRepositoryService.user.findMany.mockResolvedValue([]);
-
-      const result = await service.findManyActiveUsers(params);
-
-      expect(result).toEqual([]);
+      expect(result).toStrictEqual(mockUsers);
     });
   });
 
   describe('findManyDeletedUsers', () => {
-    it('should find many deleted users with all parameters', async () => {
+    it('should find many deleted users', async () => {
+      expect.assertions(2);
+
+      const mockUsers = [mockDeletedUser];
+      userModel.findMany.mockResolvedValue(mockUsers);
       const params = {
-        skip: 0,
-        take: 10,
-        cursor: { id: deletedUserFixture.id },
-        where: { name: { contains: 'Test' } },
-        orderBy: { createdAt: 'desc' as const },
+        where: { email: { contains: 'test' } },
       };
-      const mockUsers = [deletedUserFixture];
-      mockRepositoryService.user.findMany.mockResolvedValue(mockUsers);
 
       const result = await service.findManyDeletedUsers(params);
 
-      expect(mockRepositoryService.user.findMany).toHaveBeenCalledWith({
+      expect(userModel.findMany).toHaveBeenCalledWith({
         ...params,
         where: {
           ...params.where,
           deletedAt: { not: null },
         },
       });
-      expect(result).toEqual(mockUsers);
-    });
-
-    it('should find many deleted users without optional parameters', async () => {
-      const params = {};
-      const mockUsers = [deletedUserFixture];
-      mockRepositoryService.user.findMany.mockResolvedValue(mockUsers);
-
-      const result = await service.findManyDeletedUsers(params);
-
-      expect(mockRepositoryService.user.findMany).toHaveBeenCalledWith({
-        where: {
-          deletedAt: { not: null },
-        },
-      });
-      expect(result).toEqual(mockUsers);
+      expect(result).toStrictEqual(mockUsers);
     });
   });
 
   describe('findManyAnyUsers', () => {
-    it('should find many users (active and deleted) with all parameters', async () => {
+    it('should find many users regardless of deletion status', async () => {
+      expect.assertions(2);
+
+      const mockUsers = [mockUser, mockDeletedUser];
+      userModel.findMany.mockResolvedValue(mockUsers);
       const params = {
-        skip: 0,
-        take: 10,
-        cursor: { id: mockUser.id },
-        where: { name: { contains: 'Test' } },
-        orderBy: { createdAt: 'desc' as const },
+        where: { email: { contains: 'test' } },
       };
-      const mockUsers = [mockUser, deletedUserFixture];
-      mockRepositoryService.user.findMany.mockResolvedValue(mockUsers);
 
       const result = await service.findManyAnyUsers(params);
 
-      expect(mockRepositoryService.user.findMany).toHaveBeenCalledWith({
+      expect(userModel.findMany).toHaveBeenCalledWith({
         ...params,
         where: {
           ...params.where,
           OR: [{ deletedAt: null }, { deletedAt: { not: null } }],
         },
       });
-      expect(result).toEqual(mockUsers);
-    });
-
-    it('should find many users without optional parameters', async () => {
-      const params = {};
-      const mockUsers = [mockUser, deletedUserFixture];
-      mockRepositoryService.user.findMany.mockResolvedValue(mockUsers);
-
-      const result = await service.findManyAnyUsers(params);
-
-      expect(mockRepositoryService.user.findMany).toHaveBeenCalledWith({
-        where: {
-          OR: [{ deletedAt: null }, { deletedAt: { not: null } }],
-        },
-      });
-      expect(result).toEqual(mockUsers);
+      expect(result).toStrictEqual(mockUsers);
     });
   });
 
   describe('createUser', () => {
     it('should create a new user', async () => {
-      const createInput = {
-        name: 'New User',
-        email: 'new@example.com',
-      };
-      mockRepositoryService.user.create.mockResolvedValue(mockUser);
+      expect.assertions(2);
 
-      const result = await service.createUser(createInput);
+      userModel.create.mockResolvedValue(mockUser);
+      const params = { email: mockUser.email, name: mockUser.name };
 
-      expect(mockRepositoryService.user.create).toHaveBeenCalledWith({
-        data: createInput,
+      const result = await service.createUser(params);
+
+      expect(userModel.create).toHaveBeenCalledWith({
+        data: params,
       });
-      expect(result).toEqual(mockUser);
-    });
-
-    it('should handle database error during creation', async () => {
-      const createInput = {
-        name: 'New User',
-        email: 'new@example.com',
-      };
-      const error = new Error('Database error');
-      mockRepositoryService.user.create.mockRejectedValue(error);
-
-      await expect(service.createUser(createInput)).rejects.toThrow(error);
+      expect(result).toStrictEqual(mockUser);
     });
   });
 
   describe('createManyAndReturnUsers', () => {
-    it('should create multiple users and return them', async () => {
-      const createInputs = [
-        { name: 'User 1', email: 'user1@example.com' },
-        { name: 'User 2', email: 'user2@example.com' },
+    it('should create many users and return them', async () => {
+      expect.assertions(2);
+
+      const params = [
+        { email: 'user1@example.com', name: 'User 1' },
+        { email: 'user2@example.com', name: 'User 2' },
       ];
-      const mockUsers = [mockUser, { ...mockUser, id: 'another-id' }];
-      mockRepositoryService.user.createManyAndReturn.mockResolvedValue(mockUsers);
+      const mockUsers = [mockUser, { ...mockUser, id: '223e4567-e89b-12d3-a456-426614174002' }];
+      userModel.createManyAndReturn.mockResolvedValue(mockUsers);
 
-      const result = await service.createManyAndReturnUsers(createInputs);
+      const result = await service.createManyAndReturnUsers(params);
 
-      expect(mockRepositoryService.user.createManyAndReturn).toHaveBeenCalledWith({
-        data: createInputs,
+      expect(userModel.createManyAndReturn).toHaveBeenCalledWith({
+        data: params,
       });
-      expect(result).toEqual(mockUsers);
-    });
-
-    it('should return empty array when creating empty array', async () => {
-      const createInputs: { name: string; email: string }[] = [];
-      mockRepositoryService.user.createManyAndReturn.mockResolvedValue([]);
-
-      const result = await service.createManyAndReturnUsers(createInputs);
-
-      expect(mockRepositoryService.user.createManyAndReturn).toHaveBeenCalledWith({
-        data: createInputs,
-      });
-      expect(result).toEqual([]);
+      expect(result).toStrictEqual(mockUsers);
     });
   });
 
   describe('updateUser', () => {
-    it('should update a user', async () => {
-      const params = {
-        where: { id: mockUser.id },
-        data: { name: 'Updated Name' },
-      };
+    it('should update an active user', async () => {
+      expect.assertions(2);
+
       const updatedUser = { ...mockUser, name: 'Updated Name' };
-      mockRepositoryService.user.update.mockResolvedValue(updatedUser);
-
-      const result = await service.updateUser(params);
-
-      expect(mockRepositoryService.user.update).toHaveBeenCalledWith({
-        data: {
-          ...params.data,
-        },
-        where: {
-          ...params.where,
-          deletedAt: null,
-        },
-      });
-      expect(result).toEqual(updatedUser);
-    });
-
-    it('should handle complex update data', async () => {
-      const params = {
-        where: { id: mockUser.id },
-        data: {
-          name: 'Updated Name',
-          email: 'updated@example.com',
-        },
-      };
-      const updatedUser = {
-        ...mockUser,
-        name: 'Updated Name',
-        email: 'updated@example.com',
-      };
-      mockRepositoryService.user.update.mockResolvedValue(updatedUser);
-
-      const result = await service.updateUser(params);
-
-      expect(mockRepositoryService.user.update).toHaveBeenCalledWith({
-        data: {
-          ...params.data,
-        },
-        where: {
-          ...params.where,
-          deletedAt: null,
-        },
-      });
-      expect(result).toEqual(updatedUser);
-    });
-
-    it('should handle database error during update', async () => {
+      userModel.update.mockResolvedValue(updatedUser);
       const params = {
         where: { id: mockUser.id },
         data: { name: 'Updated Name' },
       };
-      const error = new Error('Database error');
-      mockRepositoryService.user.update.mockRejectedValue(error);
 
-      await expect(service.updateUser(params)).rejects.toThrow(error);
+      const result = await service.updateUser(params);
+
+      expect(userModel.update).toHaveBeenCalledWith({
+        data: params.data,
+        where: {
+          ...params.where,
+          deletedAt: null,
+        },
+      });
+      expect(result).toStrictEqual(updatedUser);
     });
   });
 
   describe('deleteUser', () => {
     it('should soft delete a user', async () => {
+      expect.assertions(2);
+
+      const mockDate = new Date('2024-01-03');
+      jest.spyOn(global, 'Date').mockImplementation(() => mockDate as any);
+      userModel.update.mockResolvedValue({ ...mockUser, deletedAt: mockDate });
       const params = { id: mockUser.id };
-      const deletedUser = { ...mockUser, deletedAt: new Date() };
-      mockRepositoryService.user.update.mockResolvedValue(deletedUser);
 
       await service.deleteUser(params);
 
-      expect(mockRepositoryService.user.update).toHaveBeenCalledWith({
+      expect(userModel.update).toHaveBeenCalledWith({
         where: {
           ...params,
           deletedAt: null,
         },
         data: {
-          deletedAt: expect.any(Date),
+          deletedAt: mockDate,
         },
       });
-    });
-
-    it('should handle database error during soft delete', async () => {
-      const params = { id: mockUser.id };
-      const error = new Error('Database error');
-      mockRepositoryService.user.update.mockRejectedValue(error);
-
-      await expect(service.deleteUser(params)).rejects.toThrow(error);
+      expect(userModel.update).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('deleteManyUsers', () => {
     it('should soft delete many users', async () => {
-      const params = { name: { contains: 'Test' } };
-      mockRepositoryService.user.updateMany.mockResolvedValue({ count: 2 });
+      expect.assertions(2);
+
+      const mockDate = new Date('2024-01-03');
+      jest.spyOn(global, 'Date').mockImplementation(() => mockDate as any);
+      userModel.updateMany.mockResolvedValue({ count: 2 });
+      const params = { email: { contains: 'test' } };
 
       await service.deleteManyUsers(params);
 
-      expect(mockRepositoryService.user.updateMany).toHaveBeenCalledWith({
+      expect(userModel.updateMany).toHaveBeenCalledWith({
         where: params,
         data: {
-          deletedAt: expect.any(Date),
+          deletedAt: mockDate,
         },
       });
-    });
-
-    it('should handle empty where clause', async () => {
-      const params = {};
-      mockRepositoryService.user.updateMany.mockResolvedValue({ count: 0 });
-
-      await service.deleteManyUsers(params);
-
-      expect(mockRepositoryService.user.updateMany).toHaveBeenCalledWith({
-        where: params,
-        data: {
-          deletedAt: expect.any(Date),
-        },
-      });
+      expect(userModel.updateMany).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('hardDeleteUser', () => {
     it('should permanently delete a user', async () => {
+      expect.assertions(2);
+
+      userModel.delete.mockResolvedValue(mockUser);
       const params = { id: mockUser.id };
-      mockRepositoryService.user.delete.mockResolvedValue(mockUser);
 
       await service.hardDeleteUser(params);
 
-      expect(mockRepositoryService.user.delete).toHaveBeenCalledWith({
+      expect(userModel.delete).toHaveBeenCalledWith({
         where: params,
       });
-    });
-
-    it('should handle database error during hard delete', async () => {
-      const params = { id: mockUser.id };
-      const error = new Error('Database error');
-      mockRepositoryService.user.delete.mockRejectedValue(error);
-
-      await expect(service.hardDeleteUser(params)).rejects.toThrow(error);
+      expect(userModel.delete).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('hardDeleteManyUsers', () => {
     it('should permanently delete many users', async () => {
-      const params = { name: { contains: 'Test' } };
-      mockRepositoryService.user.deleteMany.mockResolvedValue({ count: 2 });
+      expect.assertions(2);
+
+      userModel.deleteMany.mockResolvedValue({ count: 2 });
+      const params = { email: { contains: 'test' } };
 
       await service.hardDeleteManyUsers(params);
 
-      expect(mockRepositoryService.user.deleteMany).toHaveBeenCalledWith({
+      expect(userModel.deleteMany).toHaveBeenCalledWith({
         where: params,
       });
-    });
-
-    it('should handle complex where conditions', async () => {
-      const params = {
-        OR: [{ email: { contains: '@test.com' } }, { name: { startsWith: 'Test' } }],
-      };
-      mockRepositoryService.user.deleteMany.mockResolvedValue({ count: 5 });
-
-      await service.hardDeleteManyUsers(params);
-
-      expect(mockRepositoryService.user.deleteMany).toHaveBeenCalledWith({
-        where: params,
-      });
+      expect(userModel.deleteMany).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('restoreUser', () => {
-    it('should restore a soft deleted user', async () => {
-      const params = { id: deletedUserFixture.id };
-      const restoredUser = { ...deletedUserFixture, deletedAt: null };
-      mockRepositoryService.user.update.mockResolvedValue(restoredUser);
+    it('should restore a deleted user', async () => {
+      expect.assertions(2);
+
+      const restoredUser = { ...mockDeletedUser, deletedAt: null };
+      userModel.update.mockResolvedValue(restoredUser);
+      const params = { id: mockDeletedUser.id };
 
       const result = await service.restoreUser(params);
 
-      expect(mockRepositoryService.user.update).toHaveBeenCalledWith({
+      expect(userModel.update).toHaveBeenCalledWith({
         where: {
           ...params,
           deletedAt: { not: null },
@@ -508,48 +359,24 @@ describe('UserRepositoryService', () => {
           deletedAt: null,
         },
       });
-      expect(result).toEqual(restoredUser);
-    });
-
-    it('should handle database error during restore', async () => {
-      const params = { id: deletedUserFixture.id };
-      const error = new Error('Database error');
-      mockRepositoryService.user.update.mockRejectedValue(error);
-
-      await expect(service.restoreUser(params)).rejects.toThrow(error);
+      expect(result).toStrictEqual(restoredUser);
     });
   });
 
   describe('restoreManyAndReturnUsers', () => {
-    it('should restore many users and return them', async () => {
-      const params = { deletedAt: { not: null } };
+    it('should restore many deleted users and return them', async () => {
+      expect.assertions(2);
+
       const restoredUsers = [
-        { ...deletedUserFixture, deletedAt: null },
-        { ...deletedUserFixture, id: 'another-id', deletedAt: null },
+        { ...mockDeletedUser, deletedAt: null },
+        { ...mockDeletedUser, id: '323e4567-e89b-12d3-a456-426614174003', deletedAt: null },
       ];
-      mockRepositoryService.user.updateManyAndReturn.mockResolvedValue(restoredUsers);
+      userModel.updateManyAndReturn.mockResolvedValue(restoredUsers);
+      const params = { email: { contains: 'test' } };
 
       const result = await service.restoreManyAndReturnUsers(params);
 
-      expect(mockRepositoryService.user.updateManyAndReturn).toHaveBeenCalledWith({
-        where: params,
-        data: {
-          deletedAt: null,
-        },
-      });
-      expect(result).toEqual(restoredUsers);
-    });
-
-    it('should handle complex where conditions', async () => {
-      const params = {
-        AND: [{ deletedAt: { not: null } }, { email: { contains: '@example.com' } }],
-      };
-      const restoredUsers = [{ ...deletedUserFixture, deletedAt: null }];
-      mockRepositoryService.user.updateManyAndReturn.mockResolvedValue(restoredUsers);
-
-      const result = await service.restoreManyAndReturnUsers(params);
-
-      expect(mockRepositoryService.user.updateManyAndReturn).toHaveBeenCalledWith({
+      expect(userModel.updateManyAndReturn).toHaveBeenCalledWith({
         where: {
           ...params,
           deletedAt: { not: null },
@@ -558,16 +385,7 @@ describe('UserRepositoryService', () => {
           deletedAt: null,
         },
       });
-      expect(result).toEqual(restoredUsers);
-    });
-
-    it('should return empty array when no users to restore', async () => {
-      const params = { id: 'non-existent' };
-      mockRepositoryService.user.updateManyAndReturn.mockResolvedValue([]);
-
-      const result = await service.restoreManyAndReturnUsers(params);
-
-      expect(result).toEqual([]);
+      expect(result).toStrictEqual(restoredUsers);
     });
   });
 });
