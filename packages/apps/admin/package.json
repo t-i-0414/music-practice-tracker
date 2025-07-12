@@ -6,8 +6,8 @@
     "build": "next build",
     "build:storybook": "storybook build -c tests/storybook/.storybook -o tests/storybook/storybook-static",
     "gen:api-types": "bun scripts/gen.api-types.ts",
-    "lint:check": "next lint",
-    "lint:fix": "next lint --fix",
+    "lint:check": "eslint ",
+    "lint:fix": "eslint --fix",
     "start:dev": "bun scripts/start.dev.ts",
     "start:prod": "bun scripts/start.prod.ts",
     "test": "run-s test:unit test:integration test:e2e",
@@ -33,6 +33,7 @@
   },
   "devDependencies": {
     "@music-practice-tracker/eslint-configs": "workspace:*",
+    "@music-practice-tracker/tsconfig-base": "workspace:*",
     "eslint-config-next": "15.3.3"
   }
 }
