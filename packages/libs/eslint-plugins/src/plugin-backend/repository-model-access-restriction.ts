@@ -4,7 +4,7 @@ import { AST_NODE_TYPES } from '@typescript-eslint/types';
 import { ESLintUtils } from '@typescript-eslint/utils';
 
 const createRule = ESLintUtils.RuleCreator(
-  (name) => `https://github.com/music-practice-tracker/eslint_plugins/blob/main/docs/${name}.md`,
+  (name) => `https://github.com/music-practice-tracker/eslint-plugins/blob/main/docs/${name}.md`,
 );
 
 const rule = createRule({

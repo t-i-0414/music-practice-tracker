@@ -106,7 +106,7 @@ music-practice-tracker/
 │   │   └── mobile/         # React Native mobile app
 │   └── libs/
 │       ├── eslint-configs/ # Shared ESLint configurations
-│       └── eslint_plugins/   # Custom architectural enforcement rules
+│       └── eslint-plugins/   # Custom architectural enforcement rules
 ├── scripts/                # Build and utility scripts
 ├── docker-compose.yml      # PostgreSQL database setup
 └── Makefile               # Common development commands
@@ -284,7 +284,7 @@ music-practice-tracker/
 │   │   └── mobile/         # React Native app
 │   └── libs/               # Shared libraries
 │       ├── eslint-configs/ # Shared ESLint rules
-│       └── eslint_plugins/   # Custom architecture rules
+│       └── eslint-plugins/   # Custom architecture rules
 ├── scripts/                # Build and utility scripts
 ├── docker-compose.yml      # Database setup
 ├── Makefile               # Build automation
@@ -397,7 +397,7 @@ src/
 - Base, backend, React, and React Native configurations
 - Shared across all packages
 
-**ESLint Rules**: `packages/libs/eslint_plugins/`
+**ESLint Rules**: `packages/libs/eslint-plugins/`
 
 - Custom rules enforcing architecture patterns
 - Repository access restrictions
@@ -802,7 +802,7 @@ This executes:
 - `bun install` to install dependencies
 - Copies `.env.example` to `.env` (if not exists)
 - Symlinks root `.env` to backend directory
-- Builds shared libraries (eslint-configs, eslint_plugins)
+- Builds shared libraries (eslint-configs, eslint-plugins)
 - Runs Prisma migrations
 
 ### Database
@@ -1062,7 +1062,7 @@ class UserAdminFacadeService {} // Admin API operations with extended permission
 ### Shared Library Packages
 
 - `packages/libs/eslint-configs/` - Shared ESLint configurations
-- `packages/libs/eslint_plugins/` - Custom ESLint rules for enforcing architecture
+- `packages/libs/eslint-plugins/` - Custom ESLint rules for enforcing architecture
 
 ## Architecture Patterns
 

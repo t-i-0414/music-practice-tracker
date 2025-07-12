@@ -21,8 +21,8 @@
       "path": "./packages/libs/eslint-configs",
     },
     {
-      "name": "libs/eslint_plugins",
-      "path": "./packages/libs/eslint_plugins",
+      "name": "libs/eslint-plugins",
+      "path": "./packages/libs/eslint-plugins",
     },
   ],
 }
