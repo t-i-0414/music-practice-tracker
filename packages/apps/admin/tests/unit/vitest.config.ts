@@ -14,11 +14,17 @@ export default defineConfig({
       reporter: ['text', 'json', 'html'],
       include: ['src/**/*.{js,ts,jsx,tsx}'],
       exclude: ['src/**/*.d.ts', 'src/**/*.stories.{js,ts,jsx,tsx}'],
+      thresholds: {
+        statements: 95,
+        branches: 95,
+        functions: 95,
+        lines: 95,
+      },
     },
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      '@': path.resolve(__dirname, '../../src'),
     },
   },
 });
