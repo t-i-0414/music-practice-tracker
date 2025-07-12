@@ -37,6 +37,15 @@ const config = tseslint.config(
     },
   },
   {
+    files: ['tests/integration/**/*'],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tests/integration/tsconfig.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+  },
+  {
     files: ['**/*.ts', '**/*.tsx'],
     extends: [baseConfig],
     rules: { ...tsConfigRules, ...importConfigRules, ...reactConfigRules },
