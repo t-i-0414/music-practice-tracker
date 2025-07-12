@@ -38,6 +38,7 @@
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.29.0",
     "@music-practice-tracker/eslint-configs": "workspace:*",
+    "@music-practice-tracker/tsconfig-base": "workspace:*",
     "@playwright/test": "^1.53.2",
     "@secretlint/secretlint-rule-preset-recommend": "^10.2.0",
     "@storybook/addon-a11y": "^9.0.16",
