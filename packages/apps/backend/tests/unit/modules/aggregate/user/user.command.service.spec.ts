@@ -83,8 +83,14 @@ describe('userCommandService', () => {
     it('should create many users and return them', async () => {
       expect.assertions(2);
 
-      const users = [{ email: 'user1@example.com', name: 'User 1' }, { email: 'user2@example.com', name: 'User 2' }];
-      const mockUsers = [mockUser, { ...mockUser, id: '223e4567-e89b-12d3-a456-426614174001', email: 'user2@example.com', name: 'User 2' }];
+      const users = [
+        { email: 'user1@example.com', name: 'User 1' },
+        { email: 'user2@example.com', name: 'User 2' },
+      ];
+      const mockUsers = [
+        mockUser,
+        { ...mockUser, id: '223e4567-e89b-12d3-a456-426614174001', email: 'user2@example.com', name: 'User 2' },
+      ];
       repository.createManyAndReturnUsers.mockResolvedValue(mockUsers);
 
       const result = await service.createManyAndReturnUsers({ users });

@@ -164,7 +164,7 @@ describe('user response DTOs', () => {
       expect.assertions(2);
 
       const result = toActiveUserDto(mockUser);
-      
+
       expect(result).toBeInstanceOf(ActiveUserResponseDto);
       expect(result.constructor.name).toBe('ActiveUserResponseDto');
     });
@@ -173,7 +173,7 @@ describe('user response DTOs', () => {
       expect.assertions(2);
 
       const result = toDeletedUserDto(mockDeletedUser);
-      
+
       expect(result).toBeInstanceOf(DeletedUserResponseDto);
       expect(result.constructor.name).toBe('DeletedUserResponseDto');
     });
@@ -182,7 +182,7 @@ describe('user response DTOs', () => {
       expect.assertions(2);
 
       const result = toAnyUserDto(mockUser);
-      
+
       expect(result).toBeInstanceOf(AnyUserResponseDto);
       expect(result.constructor.name).toBe('AnyUserResponseDto');
     });

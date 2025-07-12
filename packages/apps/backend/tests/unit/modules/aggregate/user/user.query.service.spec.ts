@@ -77,9 +77,7 @@ describe('userQueryService', () => {
       repository.findUniqueActiveUser.mockResolvedValue(null);
       const dto = { id: mockUser.id };
 
-      await expect(service.findUserByIdOrFail(dto)).rejects.toThrow(
-        new NotFoundException(`User ${dto.id} not found`)
-      );
+      await expect(service.findUserByIdOrFail(dto)).rejects.toThrow(new NotFoundException(`User ${dto.id} not found`));
       expect(repository.findUniqueActiveUser).toHaveBeenCalledWith(dto);
     });
   });
@@ -104,7 +102,7 @@ describe('userQueryService', () => {
       const dto = { id: mockUser.id };
 
       await expect(service.findDeletedUserByIdOrFail(dto)).rejects.toThrow(
-        new NotFoundException(`Deleted user ${dto.id} not found`)
+        new NotFoundException(`Deleted user ${dto.id} not found`),
       );
       expect(repository.findUniqueDeletedUser).toHaveBeenCalledWith(dto);
     });
@@ -130,7 +128,7 @@ describe('userQueryService', () => {
       const dto = { id: mockUser.id };
 
       await expect(service.findAnyUserByIdOrFail(dto)).rejects.toThrow(
-        new NotFoundException(`User ${dto.id} not found`)
+        new NotFoundException(`User ${dto.id} not found`),
       );
       expect(repository.findUniqueAnyUser).toHaveBeenCalledWith(dto);
     });
