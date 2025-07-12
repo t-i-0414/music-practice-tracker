@@ -24,7 +24,7 @@ export const reactConfigRules: FlatConfig.Rules = {
 };
 
 export const reactConfig: ConfigArray = tseslint.config(
-  reactPlugin.configs.flat.recommended,
+  reactPlugin.configs.flat['recommended'],
   reactPlugin.configs.flat['jsx-runtime'],
   reactHooksPlugin.configs['recommended-latest'],
   {

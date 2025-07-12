@@ -190,13 +190,21 @@
     "packages/libs/eslint-configs": {
       "name": "@music-practice-tracker/eslint-configs",
       "version": "1.0.0",
+      "devDependencies": {
+        "@music-practice-tracker/tsconfig-base": "workspace:*",
+      },
     },
     "packages/libs/eslint-plugins": {
       "name": "@music-practice-tracker/eslint-plugins",
       "version": "1.0.0",
       "devDependencies": {
         "@music-practice-tracker/eslint-configs": "workspace:*",
+        "@music-practice-tracker/tsconfig-base": "workspace:*",
       },
+    },
+    "packages/libs/tsconfig-base": {
+      "name": "@music-practice-tracker/tsconfig-base",
+      "version": "0.0.0",
     },
   },
   "packages": {
@@ -957,6 +965,8 @@
     "@music-practice-tracker/eslint-plugins": ["@music-practice-tracker/eslint-plugins@workspace:packages/libs/eslint-plugins"],
 
     "@music-practice-tracker/mobile": ["@music-practice-tracker/mobile@workspace:packages/apps/mobile"],
+
+    "@music-practice-tracker/tsconfig-base": ["@music-practice-tracker/tsconfig-base@workspace:packages/libs/tsconfig-base"],
 
     "@napi-rs/nice": ["@napi-rs/nice@1.0.1", "", { "optionalDependencies": { "@napi-rs/nice-android-arm-eabi": "1.0.1", "@napi-rs/nice-android-arm64": "1.0.1", "@napi-rs/nice-darwin-arm64": "1.0.1", "@napi-rs/nice-darwin-x64": "1.0.1", "@napi-rs/nice-freebsd-x64": "1.0.1", "@napi-rs/nice-linux-arm-gnueabihf": "1.0.1", "@napi-rs/nice-linux-arm64-gnu": "1.0.1", "@napi-rs/nice-linux-arm64-musl": "1.0.1", "@napi-rs/nice-linux-ppc64-gnu": "1.0.1", "@napi-rs/nice-linux-riscv64-gnu": "1.0.1", "@napi-rs/nice-linux-s390x-gnu": "1.0.1", "@napi-rs/nice-linux-x64-gnu": "1.0.1", "@napi-rs/nice-linux-x64-musl": "1.0.1", "@napi-rs/nice-win32-arm64-msvc": "1.0.1", "@napi-rs/nice-win32-ia32-msvc": "1.0.1", "@napi-rs/nice-win32-x64-msvc": "1.0.1" } }, "sha512-zM0mVWSXE0a0h9aKACLwKmD6nHcRiKrPpCfvaKqG1CqDEyjEawId0ocXxVzPMCAm6kkWr2P025msfxXEnt8UGQ=="],
 
