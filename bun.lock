@@ -126,7 +126,7 @@
       "devDependencies": {
         "@golevelup/ts-jest": "^0.7.0",
         "@music-practice-tracker/eslint-configs": "workspace:*",
-        "@music-practice-tracker/eslint-rules": "workspace:*",
+        "@music-practice-tracker/eslint_plugins": "workspace:*",
         "@nestjs/cli": "^11.0.0",
         "@nestjs/schematics": "^11.0.0",
         "@nestjs/testing": "^11.0.1",
@@ -191,8 +191,8 @@
       "name": "@music-practice-tracker/eslint-configs",
       "version": "1.0.0",
     },
-    "packages/libs/eslint-rules": {
-      "name": "@music-practice-tracker/eslint-rules",
+    "packages/libs/eslint-plugins": {
+      "name": "@music-practice-tracker/eslint_plugins",
       "version": "1.0.0",
       "devDependencies": {
         "@music-practice-tracker/eslint-configs": "workspace:*",
@@ -954,7 +954,7 @@
 
     "@music-practice-tracker/eslint-configs": ["@music-practice-tracker/eslint-configs@workspace:packages/libs/eslint-configs"],
 
-    "@music-practice-tracker/eslint-rules": ["@music-practice-tracker/eslint-rules@workspace:packages/libs/eslint-rules"],
+    "@music-practice-tracker/eslint_plugins": ["@music-practice-tracker/eslint_plugins@workspace:packages/libs/eslint-plugins"],
 
     "@music-practice-tracker/mobile": ["@music-practice-tracker/mobile@workspace:packages/apps/mobile"],
 

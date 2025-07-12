@@ -6,7 +6,7 @@ import {
   testFilePatterns,
   tsConfig,
 } from '@music-practice-tracker/eslint-configs';
-import { pluginBackend } from '@music-practice-tracker/eslint-rules';
+import { pluginBackend } from '@music-practice-tracker/eslint_plugins';
 import { globalIgnores } from 'eslint/config';
 import prettierConfig from 'eslint-config-prettier/flat';
 import tseslint from 'typescript-eslint';
