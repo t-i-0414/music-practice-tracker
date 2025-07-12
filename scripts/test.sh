@@ -40,7 +40,7 @@ if ! curl --silent --fail http://localhost:8000 >/dev/null; then
   ADMIN_SERVER_PID=$!
   cd - || {
     echo "❌ Failed to change back to the original directory."
-    kill "$ADMIN_SERVER_PID"
+    kill -9 "$ADMIN_SERVER_PID"
     exit 1
   }
 
@@ -55,7 +55,7 @@ if ! curl --silent --fail http://localhost:8000 >/dev/null; then
 
   if ! curl --silent --fail http://localhost:8000 >/dev/null; then
     echo "❌ Admin server did not start within expected time."
-    kill "$ADMIN_SERVER_PID"
+    kill -9 "$ADMIN_SERVER_PID"
     exit 1
   fi
 else
@@ -68,7 +68,7 @@ cd packages/apps/admin || {
 }
 bun run "$CMD" || {
   echo "❌ 'bun run $CMD' failed in packages/apps/admin. Check the logs for details."
-  kill "$ADMIN_SERVER_PID"
+  kill -9 "$ADMIN_SERVER_PID"
   exit 1
 }
 cd - || {
@@ -78,7 +78,7 @@ cd - || {
 
 if [[ -n "${ADMIN_SERVER_PID:-}" ]]; then
   echo "🛑 Stopping admin server (PID: $ADMIN_SERVER_PID)"
-  kill "$ADMIN_SERVER_PID"
+  kill -9 "$ADMIN_SERVER_PID"
 fi
 
 if ! curl --silent --fail http://localhost:8081 >/dev/null; then
@@ -91,7 +91,7 @@ if ! curl --silent --fail http://localhost:8081 >/dev/null; then
   MOBILE_SERVER_PID=$!
   cd - || {
     echo "❌ Failed to change back to the original directory."
-    kill "$MOBILE_SERVER_PID"
+    kill -9 "$MOBILE_SERVER_PID"
     exit 1
   }
 
@@ -106,7 +106,7 @@ if ! curl --silent --fail http://localhost:8081 >/dev/null; then
 
   if ! curl --silent --fail http://localhost:8081 >/dev/null; then
     echo "❌ Mobile server did not start within expected time."
-    kill "$MOBILE_SERVER_PID"
+    kill -9 "$MOBILE_SERVER_PID"
     exit 1
   fi
 else
@@ -121,7 +121,7 @@ xcrun simctl boot "iPhone 16"
 open -a Simulator
 bun run "$CMD" || {
   echo "❌ 'bun run $CMD' failed in packages/apps/mobile. Check the logs for details."
-  kill "$MOBILE_SERVER_PID"
+  kill -9 "$MOBILE_SERVER_PID"
   exit 1
 }
 cd - || {
@@ -131,7 +131,7 @@ cd - || {
 
 if [[ -n "${MOBILE_SERVER_PID:-}" ]]; then
   echo "🛑 Stopping mobile server (PID: $MOBILE_SERVER_PID)"
-  kill "$MOBILE_SERVER_PID"
+  kill -9 "$MOBILE_SERVER_PID"
 fi
 
 echo "✅ All tests complete."
