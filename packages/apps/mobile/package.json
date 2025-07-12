@@ -62,7 +62,6 @@
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@expo/metro-runtime": "~5.0.4",
-    "@music-practice-tracker/eslint-configs": "workspace:*",
     "@storybook/react": "^9.0.16",
     "@storybook/react-native": "^9.0.14",
     "@storybook/react-native-web-vite": "^9.0.16",

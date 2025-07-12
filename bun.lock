@@ -109,8 +109,6 @@
         "next": "15.3.3",
       },
       "devDependencies": {
-        "@music-practice-tracker/eslint-configs": "workspace:*",
-        "@music-practice-tracker/tsconfig-base": "workspace:*",
         "eslint-config-next": "15.3.3",
       },
     },
@@ -128,7 +126,6 @@
       },
       "devDependencies": {
         "@golevelup/ts-jest": "^0.7.0",
-        "@music-practice-tracker/eslint-configs": "workspace:*",
         "@music-practice-tracker/eslint-plugins": "workspace:*",
         "@nestjs/cli": "^11.0.0",
         "@nestjs/schematics": "^11.0.0",
@@ -178,7 +175,6 @@
       "devDependencies": {
         "@babel/core": "^7.25.2",
         "@expo/metro-runtime": "~5.0.4",
-        "@music-practice-tracker/eslint-configs": "workspace:*",
         "@storybook/react": "^9.0.16",
         "@storybook/react-native": "^9.0.14",
         "@storybook/react-native-web-vite": "^9.0.16",
@@ -201,7 +197,6 @@
       "name": "@music-practice-tracker/eslint-plugins",
       "version": "1.0.0",
       "devDependencies": {
-        "@music-practice-tracker/eslint-configs": "workspace:*",
         "@music-practice-tracker/tsconfig-base": "workspace:*",
       },
     },

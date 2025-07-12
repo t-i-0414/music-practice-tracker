@@ -55,7 +55,6 @@
   },
   "devDependencies": {
     "@golevelup/ts-jest": "^0.7.0",
-    "@music-practice-tracker/eslint-configs": "workspace:*",
     "@music-practice-tracker/eslint-plugins": "workspace:*",
     "@nestjs/cli": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",
