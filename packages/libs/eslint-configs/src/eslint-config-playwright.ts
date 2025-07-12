@@ -5,5 +5,5 @@ import { disabledRulesOnTests } from './eslint-config-vitest';
 
 export const playwrightConfig: ConfigArray = tseslint.config({
   extends: [playwright.configs['flat/recommended']],
-  rules: disabledRulesOnTests,
+  rules: { ...disabledRulesOnTests, 'no-undef': 'off' },
 });

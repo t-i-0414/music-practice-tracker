@@ -3,6 +3,7 @@ import type React from 'react';
 import { Button } from './Button';
 import './header.css';
 
+export default {};
 type User = {
   name: string;
 };

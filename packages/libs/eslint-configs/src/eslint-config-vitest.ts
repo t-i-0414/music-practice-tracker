@@ -27,5 +27,16 @@ export const disabledRulesOnTests: FlatConfig.Rules = {
 
 export const vitestConfig: ConfigArray = tseslint.config({
   extends: [vitestPlugin.configs.all],
-  rules: { ...disabledRulesOnTests, 'vitest/prefer-importing-vitest-globals': 'off' },
+  rules: {
+    ...disabledRulesOnTests,
+    'vitest/prefer-importing-vitest-globals': 'off',
+    'vitest/prefer-expect-assertions': [
+      'error',
+      {
+        onlyFunctionsWithAsyncKeyword: true,
+        onlyFunctionsWithExpectInLoop: true,
+        onlyFunctionsWithExpectInCallback: true,
+      },
+    ],
+  },
 });

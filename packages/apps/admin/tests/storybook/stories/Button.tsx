@@ -2,6 +2,7 @@ import type React from 'react';
 
 import './button.css';
 
+export default {};
 export type ButtonProps = {
   /** Is this the principal call to action on the page? */
   primary?: boolean;
@@ -27,7 +28,6 @@ export const Button = ({
   return (
     <button type='button' className={['storybook-button', `storybook-button--${size}`, mode].join(' ')} {...props}>
       {label}
-      {/* eslint-disable-next-line react/no-unknown-property */}
       <style jsx>{`
         button {
           background-color: ${backgroundColor};

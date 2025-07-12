@@ -64,10 +64,37 @@ const config = tseslint.config(
     },
   },
   {
+    files: [
+      'tests/e2e/playwright.config.ts',
+      'tests/integration/support/commands.ts',
+      'tests/integration/support/msw.ts',
+      'tests/integration/support/setup.ts',
+      'tests/integration/cypress.config.ts',
+      'tests/msw/handlers.ts',
+    ],
+    rules: {
+      'no-undef': 'off',
+
+      '@typescript-eslint/no-magic-numbers': 'off',
+      '@typescript-eslint/no-unsafe-type-assertion': 'off',
+      '@typescript-eslint/restrict-template-expressions': 'off',
+      '@typescript-eslint/consistent-type-assertions': 'off',
+      '@typescript-eslint/consistent-type-definitions': 'off',
+      '@typescript-eslint/explicit-module-boundary-types': 'off',
+      '@typescript-eslint/strict-boolean-expressions': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/max-params': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-namespace': 'off',
+    },
+  },
+  {
     files: ['scripts/**/*.ts', 'scripts/**/*.js'],
     rules: baseScriptConfigRules,
   },
-  globalIgnores(sharedIgnores),
+  globalIgnores([...sharedIgnores, '.next/**']),
   prettierConfig,
 );
 
