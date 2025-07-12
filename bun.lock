@@ -108,6 +108,7 @@
       },
       "devDependencies": {
         "@music-practice-tracker/eslint-configs": "workspace:*",
+        "@music-practice-tracker/tsconfig-base": "workspace:*",
         "eslint-config-next": "15.3.3",
       },
     },

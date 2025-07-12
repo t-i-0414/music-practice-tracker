@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import { FlatCompat } from '@eslint/eslintrc';
 import {
   baseConfig,
+  baseScriptConfigRules,
   cypressConfig,
   importConfigRules,
   playwrightConfig,
@@ -54,6 +55,17 @@ const config = tseslint.config(
   },
   {
     extends: [storybookConfig],
+  },
+  {
+    files: ['tests/storybook/.storybook/main.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+    },
+  },
+  {
+    files: ['scripts/**/*.ts', 'scripts/**/*.js'],
+    rules: baseScriptConfigRules,
   },
   globalIgnores(sharedIgnores),
   prettierConfig,
