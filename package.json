@@ -1,6 +1,13 @@
 {
   "name": "music-practice-tracker",
   "version": "1.0.0",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/t-i-0414/music-practice-tracker.git"
+  },
+  "license": "UNLICENSED",
+  "author": "Takuya Iwashiro <takuya.iwashiro@takudev.net>",
   "workspaces": [
     "packages/apps/*",
     "packages/libs/*"
