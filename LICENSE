@@ -1,0 +1,24 @@
+Copyright (c) 2025 Takuya Iwashiro. All Rights Reserved.
+
+This software and associated documentation files (the "Software") are published
+for portfolio demonstration purposes only.
+
+PROHIBITED ACTIONS:
+
+1. Using, copying, modifying, merging, publishing, distributing, sublicensing,
+   and/or selling copies of the Software
+2. Deploying the Software in any production or development environment
+3. Creating derivative works based on the Software
+4. Any commercial or non-commercial use
+
+PERMITTED ACTIONS:
+
+- Viewing the code on GitHub for learning purposes only
+- Referencing the architecture (implementation must be your own)
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+
+Violation of this license may result in legal action.
+Contact: <takuya.iwashiro@takudev.net>
