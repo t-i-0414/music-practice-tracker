@@ -23,6 +23,7 @@
     "format:prisma": "cd packages/apps/backend && bun run prisma:format && cd -",
     "lint:check": "eslint && sh scripts/lint.sh",
     "lint:fix": "eslint --fix && sh scripts/lint.sh --fix",
+    "lint:shell:check": "sh scripts/shellcheck.sh",
     "markdown:check": "markdownlint '**/*.md' --ignore '**/node_modules/**'",
     "markdown:fix": "markdownlint '**/*.md' --ignore '**/node_modules/**' --fix",
     "secretlint:check": "secretlint '**/*'",
