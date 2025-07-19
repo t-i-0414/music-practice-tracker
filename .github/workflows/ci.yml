@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  setup:
+    name: Setup and Cache Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun with cache
+        uses: ./.github/actions/setup-bun
+
+  # Placeholder for future jobs
+  # format-check:
+  #   name: Format Check
+  #   needs: setup
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Setup Bun with cache
+  #       uses: ./.github/actions/setup-bun
+  #
+  #     - name: Run format check
+  #       run: bun run format:check
+
+  # Additional jobs will be added in Phase 2:
+  # - cspell
+  # - markdown-check
+  # - secretlint-check
+  # - lint-check
+  # - type-check
+  # - dotenv-linter
+  # - test

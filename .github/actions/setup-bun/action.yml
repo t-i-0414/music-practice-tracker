@@ -1,0 +1,35 @@
+name: 'Setup Bun with Cache'
+description: 'Set up Bun runtime with dependency caching for monorepo'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v2
+      with:
+        bun-version-file: .tool-versions
+
+    - name: Cache Bun dependencies
+      uses: actions/cache@v4
+      id: cache
+      with:
+        path: |
+          ~/.bun/install/cache
+          **/node_modules
+        key: bun-${{ runner.os }}-${{ hashFiles('**/bun.lock') }}
+        restore-keys: |
+          bun-${{ runner.os }}-
+
+    - name: Notify cache hit
+      if: steps.cache.outputs.cache-hit == 'true'
+      shell: bash
+      run: |
+        echo "✅ Bun dependencies restored from cache."
+
+    - name: Install dependencies
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        echo " Installing dependencies with Bun..."
+        bun install --frozen-lockfile
+        echo "✅ Dependencies installed successfully"
