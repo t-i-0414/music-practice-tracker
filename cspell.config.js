@@ -49,6 +49,7 @@ export default defineConfig({
     'restoremanyandreturn',
     'rnstorybook',
     'setstate',
+    'shellcheck',
     'simctl',
     'svh',
     'Takuto',
