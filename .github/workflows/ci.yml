@@ -76,8 +76,22 @@ jobs:
       - name: Run secret detection
         run: bun run secretlint:check
 
+  markdown-check:
+    name: Markdown Lint
+    needs: setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun with cache
+        uses: ./.github/actions/setup-bun
+
+      - name: Run markdown lint
+        run: bun run markdown:check
+
   # Additional jobs will be added in Phase 2:
-  # - markdown-check
   # - lint-check
   # - type-check
   # - dotenv-linter
