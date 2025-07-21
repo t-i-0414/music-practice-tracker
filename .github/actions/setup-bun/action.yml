@@ -1,9 +1,14 @@
 name: 'Setup Bun with Cache'
-description: 'Set up Bun runtime with dependency caching for monorepo'
+description: 'Set up Node.js and Bun runtime with dependency caching for monorepo'
 
 runs:
   using: 'composite'
   steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version-file: '.tool-versions'
+
     - name: Setup Bun
       uses: oven-sh/setup-bun@v2
       with:
