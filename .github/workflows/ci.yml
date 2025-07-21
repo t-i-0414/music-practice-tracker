@@ -61,9 +61,23 @@ jobs:
       - name: Run spell check
         run: bun run cspell
 
+  secretlint-check:
+    name: Secret Detection
+    needs: setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun with cache
+        uses: ./.github/actions/setup-bun
+
+      - name: Run secret detection
+        run: bun run secretlint:check
+
   # Additional jobs will be added in Phase 2:
   # - markdown-check
-  # - secretlint-check
   # - lint-check
   # - type-check
   # - dotenv-linter
