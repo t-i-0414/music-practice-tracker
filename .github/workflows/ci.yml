@@ -46,8 +46,22 @@ jobs:
       - name: Run format check
         run: bun run format:check
 
+  cspell:
+    name: Spell Check
+    needs: setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun with cache
+        uses: ./.github/actions/setup-bun
+
+      - name: Run spell check
+        run: bun run cspell
+
   # Additional jobs will be added in Phase 2:
-  # - cspell
   # - markdown-check
   # - secretlint-check
   # - lint-check
