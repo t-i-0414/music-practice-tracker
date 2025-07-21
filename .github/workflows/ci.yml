@@ -5,6 +5,10 @@ permissions:
 
 on:
   push:
+    branches:
+      - main
+      - staging
+      - develop
   pull_request:
   workflow_dispatch:
 
@@ -24,20 +28,23 @@ jobs:
       - name: Setup Bun with cache
         uses: ./.github/actions/setup-bun
 
-  # Placeholder for future jobs
-  # format-check:
-  #   name: Format Check
-  #   needs: setup
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
-  #
-  #     - name: Setup Bun with cache
-  #       uses: ./.github/actions/setup-bun
-  #
-  #     - name: Run format check
-  #       run: bun run format:check
+  format-check:
+    name: Format Check
+    needs: setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun with cache
+        uses: ./.github/actions/setup-bun
+
+      - name: Build ESLint packages
+        uses: ./.github/actions/build-eslint-packages
+
+      - name: Run format check
+        run: bun run format:check
 
   # Additional jobs will be added in Phase 2:
   # - cspell
