@@ -91,8 +91,20 @@ jobs:
       - name: Run markdown lint
         run: bun run markdown:check
 
+  dotenv-check:
+    name: Dotenv Lint
+    needs: setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run dotenv-linter
+        uses: dotenv-linter/action-dotenv-linter@v2
+        with:
+          reporter: github-pr-review # Default is github-pr-check
+          dotenv_linter_flags: --skip UnorderedKey
+
   # Additional jobs will be added in Phase 2:
   # - lint-check
   # - type-check
-  # - dotenv-linter
   # - test
