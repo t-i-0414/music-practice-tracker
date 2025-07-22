@@ -91,8 +91,22 @@ jobs:
       - name: Run markdown lint
         run: bun run markdown:check
 
+  dotenv-check:
+    name: Dotenv Lint
+    needs: setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup dotenv-linter
+        run: curl -sSfL https://raw.githubusercontent.com/dotenv-linter/dotenv-linter/master/install.sh | sh -s
+
+      - name: Run dotenv lint
+        run: ./bin/dotenv-linter
+
   # Additional jobs will be added in Phase 2:
   # - lint-check
   # - type-check
-  # - dotenv-linter
   # - test
