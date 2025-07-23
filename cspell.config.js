@@ -21,6 +21,7 @@ export default defineConfig({
     'dbgenerated',
     'deletemany',
     'deletemanyandreturn',
+    'dotenv',
     'Dto',
     'Dtos',
     'golevelup',

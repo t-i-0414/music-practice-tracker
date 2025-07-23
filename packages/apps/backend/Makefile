@@ -1,15 +1,26 @@
 # -------------------------------------------------------------
 # Setting up
 # -------------------------------------------------------------
+# Default value for IS_CI
+IS_CI ?= false
+# Skip migrations for type checking
+SKIP_MIGRATIONS ?= false
+
 .PHONY: setup
 setup:
 	@echo "🔧 Setting up the backend environment..."
 	@${MAKE} setup-env
+ifneq ($(IS_CI),true)
 	@${MAKE} docker-compose-up
+endif
 	bun install
 	bun run prisma:generate
+ifneq ($(SKIP_MIGRATIONS),true)
+ifneq ($(IS_CI),true)
 	bun run prisma:migrate:dev
+endif
 	bun run prisma:migrate:test
+endif
 	bun run prisma:validate
 	@echo "✅ Backend environment setup complete!"
 

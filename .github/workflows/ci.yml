@@ -125,7 +125,30 @@ jobs:
       - name: Run lint check
         run: bun run lint:check
 
+  type-check:
+    name: Type Check
+    needs: setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun with cache
+        uses: ./.github/actions/setup-bun
+
+      - name: Build ESLint packages
+        uses: ./.github/actions/build-eslint-packages
+
+      - name: Setup backend
+        run: |
+          echo "Setting up backend..."
+          make setup-env
+          cd packages/apps/backend
+          make setup IS_CI=true SKIP_MIGRATIONS=true
+
+      - name: Run type check
+        run: bun run type:check
+
   # Additional jobs will be added in Phase 2:
-  # - lint-check
-  # - type-check
   # - test
