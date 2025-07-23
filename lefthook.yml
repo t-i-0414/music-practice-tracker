@@ -21,4 +21,12 @@ pre-commit:
         done
     secretlint:
       glob: '**/*'
-      run: bunx secretlint {staged_files}
+      run: |
+        bunx secretlint {staged_files}
+    dotenv-linter:
+      glob: '.env*'
+      run: |
+        bun run dotenv-linter:check
+        bun run dotenv-linter:compare
+        bun run dotenv-linter:fix
+        git add {staged_files}

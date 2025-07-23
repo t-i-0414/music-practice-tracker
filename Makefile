@@ -5,6 +5,7 @@
 setup:
 	@echo "🔧 Setting up the environment..."
 	@${MAKE} setup-env
+	@${MAKE} setup-dotenv-linter
 	bun install
 	@make -C packages/libs/eslint-configs setup
 	@make -C packages/libs/eslint-configs build
@@ -25,3 +26,7 @@ setup-env:
 	else \
 		echo "⚠️  .env file already exists, skipping creation"; \
 	fi
+
+.PHONY: setup-dotenv-linter
+setup-dotenv-linter:
+	curl -sSfL https://raw.githubusercontent.com/dotenv-linter/dotenv-linter/master/install.sh | sh -s

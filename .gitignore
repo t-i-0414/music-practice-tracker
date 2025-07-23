@@ -176,3 +176,6 @@ dist
 
 # direnv
 .envrc
+
+# dotenv-linter
+bin/dotenv-linter
