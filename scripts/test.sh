@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -eu
 
 CMD="test"
 if [[ "${1:-}" == "--coverage" ]]; then

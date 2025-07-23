@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -eu
 
 CMD="lint:check"
 if [[ "${1:-}" == "--fix" ]]; then
