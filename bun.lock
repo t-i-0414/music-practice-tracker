@@ -61,7 +61,6 @@
         "cspell": "^9.0.2",
         "cypress": "^14.5.1",
         "dotenv-cli": "^7.4.4",
-        "dotenv-linter": "^0.2.0",
         "eslint": "^9.29.0",
         "eslint-config-prettier": "^10.1.5",
         "eslint-import-resolver-typescript": "^4.4.4",
@@ -2073,8 +2072,6 @@
     "dotenv-cli": ["dotenv-cli@7.4.4", "", { "dependencies": { "cross-spawn": "^7.0.6", "dotenv": "^16.3.0", "dotenv-expand": "^10.0.0", "minimist": "^1.2.6" }, "bin": { "dotenv": "cli.js" } }, "sha512-XkBYCG0tPIes+YZr4SpfFv76SQrV/LeCE8CI7JSEMi3VR9MvTihCGTOtbIexD6i2mXF+6px7trb1imVCXSNMDw=="],
 
     "dotenv-expand": ["dotenv-expand@10.0.0", "", {}, "sha512-GopVGCpVS1UKH75VKHGuQFqS1Gusej0z4FyQkPdwjil2gNIv+LNsqBlboOzpJFZKVT95GkCyWJbBSdFEFUWI2A=="],
-
-    "dotenv-linter": ["dotenv-linter@0.2.0", "", { "bin": { "dotenv-linter": "./src/bin.js" } }, "sha512-DWiYPfVnFlgBPEQo464LmcGVZvGnovaV27lo1bwMuPcG+jopAjOfAJ68Xgn10iSnmTZh+3Mu119Mfh5BZCPAcA=="],
 
     "dunder-proto": ["dunder-proto@1.0.1", "", { "dependencies": { "call-bind-apply-helpers": "^1.0.1", "es-errors": "^1.3.0", "gopd": "^1.2.0" } }, "sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A=="],
 
