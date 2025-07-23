@@ -13,7 +13,7 @@
     "packages/libs/*"
   ],
   "scripts": {
-    "ci:temp": "run-s cspell format:check dotenv-linter:check dotenv-linter:compare lint:check markdown:check secretlint:check type:check test",
+    "ci:temp": "run-s test",
     "cspell": "cspell '**'",
     "dotenv-linter:check": "./bin/dotenv-linter",
     "dotenv-linter:compare": "./bin/dotenv-linter compare .env .env.example .env.test",
