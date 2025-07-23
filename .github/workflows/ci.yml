@@ -28,6 +28,9 @@ jobs:
       - name: Setup Bun with cache
         uses: ./.github/actions/setup-bun
 
+      - name: Build ESLint packages
+        uses: ./.github/actions/build-eslint-packages
+
   format-check:
     name: Format Check
     needs: setup
@@ -103,6 +106,24 @@ jobs:
         with:
           reporter: github-pr-review # Default is github-pr-check
           dotenv_linter_flags: --skip UnorderedKey
+
+  lint-check:
+    name: Lint Check
+    needs: setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun with cache
+        uses: ./.github/actions/setup-bun
+
+      - name: Build ESLint packages
+        uses: ./.github/actions/build-eslint-packages
+
+      - name: Run lint check
+        run: bun run lint:check
 
   # Additional jobs will be added in Phase 2:
   # - lint-check

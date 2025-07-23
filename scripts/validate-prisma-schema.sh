@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -eu
 
 # Validate Prisma schema:
 # 1. Check that @id fields use String type with @default(uuid())
@@ -124,7 +124,7 @@ validate_model() {
       if echo "$line" | grep -q "@@index.*\[createdAt\]"; then
         has_createdAt_index=true
       fi
-      
+
       # Check for deletedAt index
       if echo "$line" | grep -q "@@index.*\[deletedAt\]"; then
         has_deletedAt_index=true

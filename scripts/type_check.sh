@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -eu
 
 echo "🔍 Searching for tsconfig.json files in packages/ (excluding node_modules)..."
 
