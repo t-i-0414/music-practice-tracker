@@ -5,6 +5,11 @@ CMD="lint:es:deadcode:check"
 FAILED=0
 
 echo "🔍 Checking for dead code......"
+echo "📦 Running 'bun run ts-prune -e' in root"
+if ! (bun run ts-prune -e); then
+    echo "❌ Failed in root"
+    FAILED=1
+fi
 
 TEMP_FILE=$(mktemp)
 trap 'rm -f "$TEMP_FILE"' EXIT

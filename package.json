@@ -21,7 +21,7 @@
     "lint:dotenv:compare": "./bin/dotenv-linter compare .env .env.example .env.test",
     "lint:dotenv:fix": "./bin/dotenv-linter fix",
     "lint:es:check": "eslint && sh scripts/lint-es.sh",
-    "lint:es:deadcode:check": "bun run ts-prune -e && sh scripts/check-deadcode.sh",
+    "lint:es:deadcode:check": "sh scripts/check-deadcode.sh",
     "lint:es:fix": "eslint --fix && sh scripts/lint-es.sh --fix",
     "lint:markdown:check": "markdownlint '**/*.md' --ignore '**/node_modules/**'",
     "lint:markdown:fix": "markdownlint '**/*.md' --ignore '**/node_modules/**' --fix",
