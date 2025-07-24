@@ -7,8 +7,8 @@
   "author": "",
   "scripts": {
     "build": "nest build",
-    "lint:check": "eslint",
-    "lint:fix": "eslint --fix",
+    "lint:es:check": "eslint",
+    "lint:es:fix": "eslint --fix",
     "open:swagger-ui": "run-p -c open:swagger-ui:admin open:swagger-ui:app",
     "open:swagger-ui:admin": "ts-node scripts/open-swagger-ui.ts admin",
     "open:swagger-ui:app": "ts-node scripts/open-swagger-ui.ts app",

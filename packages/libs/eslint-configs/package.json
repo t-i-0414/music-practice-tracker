@@ -16,8 +16,8 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "lint:check": "eslint",
-    "lint:fix": "eslint --fix",
+    "lint:es:check": "eslint",
+    "lint:es:fix": "eslint --fix",
     "type:check": "tsc --noEmit"
   },
   "devDependencies": {

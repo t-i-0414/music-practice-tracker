@@ -1,9 +1,9 @@
 #!/bin/bash
 set -eu
 
-CMD="lint:check"
+CMD="lint:es:check"
 if [[ "${1:-}" == "--fix" ]]; then
-  CMD="lint:fix"
+  CMD="lint:es:fix"
 fi
 
 echo "🔍 Searching for packages with eslint.config.ts and package.json..."

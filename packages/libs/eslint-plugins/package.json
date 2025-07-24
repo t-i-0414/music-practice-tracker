@@ -16,8 +16,8 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "lint:check": "eslint",
-    "lint:fix": "eslint --fix",
+    "lint:es:check": "eslint",
+    "lint:es:fix": "eslint --fix",
     "test": "vitest run --config tests/vitest.config.mts",
     "test:cov": "bun run test --coverage",
     "test:ui": "bun run test:watch --ui",

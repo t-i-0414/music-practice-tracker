@@ -22,9 +22,9 @@ After making changes to the code, always run the following commands from the roo
 ```shell
 bun run cspell
 bun run format:fix
-bun run lint:check
-bun run markdown:check
-bun run secretlint:check
+bun run lint:es:check
+bun run lint:markdown:check
+bun run lint:secret:check
 bun run type:check
 bun run test
 ```
@@ -865,8 +865,8 @@ npm run format:fix
 npm run cspell
 
 # Secret detection
-npm run secretlint:check
-npm run secretlint:fix
+npm run lint:secret:check
+npm run lint:secret::fix
 ```
 
 ### Backend (packages/apps/backend)
@@ -897,8 +897,8 @@ bunx jest --testNamePattern="should create a user"
 bunx jest user.command.service.spec.ts
 
 # Linting
-npm run lint:check
-npm run lint:fix
+npm run lint:es:check
+npm run lint:es:fix
 
 # Type checking
 npm run type:check
@@ -915,8 +915,8 @@ npm run build
 npm run start
 
 # Linting
-npm run lint:check
-npm run lint:fix
+npm run lint:es:check
+npm run lint:es:fix
 
 # Type checking
 npm run type:check
@@ -935,8 +935,8 @@ npm run dev:web
 
 # Linting (runs in parallel)
 npm run lint
-npm run lint:check
-npm run lint:fix
+npm run lint:es:check
+npm run lint:es:fix
 
 # Type checking
 npm run type:check
