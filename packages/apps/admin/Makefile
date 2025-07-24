@@ -6,6 +6,8 @@ setup:
 	@echo "🔧 Setting up the admin environment..."
 	@${MAKE} setup-env
 	bun install
+	bun run cypress install
+	bunx playwright install
 	@echo "✅ admin environment setup complete!"
 
 .PHONY: setup-env

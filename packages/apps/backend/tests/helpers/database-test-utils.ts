@@ -25,25 +25,3 @@ export const disconnectDatabase = async (): Promise<void> => {
     prisma = null;
   }
 };
-
-export const seedTestData = async (): Promise<void> => {
-  const client = getPrismaClient();
-
-  await client.user.createMany({
-    data: [
-      {
-        name: 'Test User 1',
-        email: 'test1@example.com',
-      },
-      {
-        name: 'Test User 2',
-        email: 'test2@example.com',
-      },
-    ],
-  });
-};
-
-export const withTransaction = async <T>(callback: (tx: PrismaClient) => Promise<T>): Promise<T> => {
-  const client = getPrismaClient();
-  return client.$transaction(async (tx) => callback(tx as PrismaClient));
-};

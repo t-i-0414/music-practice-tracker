@@ -7,6 +7,7 @@
     "build-storybook": "test:storybook build",
     "gen:api-types": "bun scripts/gen.api-types.ts",
     "lint:es:check": "eslint",
+    "lint:es:deadcode:check": "ts-prune -e",
     "lint:es:fix": "eslint --fix",
     "maestro:install": "curl -Ls 'https://get.maestro.mobile.dev' | bash",
     "reset-project": "node ./scripts/reset-project.js",

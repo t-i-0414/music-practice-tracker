@@ -7,7 +7,7 @@ import { User } from './user.repository.service';
 const activeUserKeys = ['id', 'email', 'name', 'createdAt', 'updatedAt'] satisfies (keyof User)[];
 
 @Exclude()
-export class FullUserResponseDto implements User {
+class FullUserResponseDto implements User {
   @ApiProperty({
     description: 'The user ID',
     example: '123e4567-e89b-12d3-a456-426614174000',

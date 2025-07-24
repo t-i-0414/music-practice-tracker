@@ -17,6 +17,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "lint:es:check": "eslint",
+    "lint:es:deadcode:check": "ts-prune -e",
     "lint:es:fix": "eslint --fix",
     "test": "vitest run --config tests/vitest.config.mts",
     "test:cov": "bun run test --coverage",

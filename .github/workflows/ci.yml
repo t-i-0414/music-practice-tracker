@@ -125,6 +125,26 @@ jobs:
       - name: Run ESLint check
         run: bun run lint:es:check
 
+  check-es-deadcode:
+    name: Check ESLint Dead Code
+    needs: setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun with cache
+        uses: ./.github/actions/setup-bun
+
+      - name: Build ESLint packages
+        uses: ./.github/actions/build-eslint-packages
+
+      - name: Run ESLint dead code check
+        run: |
+          echo "Running ESLint dead code check..."
+          bun run lint:es:deadcode:check
+
   type-check:
     name: Type Check
     needs: setup
