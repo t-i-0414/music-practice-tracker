@@ -866,7 +866,7 @@ npm run cspell
 
 # Secret detection
 npm run lint:secret:check
-npm run lint:secret::fix
+npm run lint:secret:fix
 ```
 
 ### Backend (packages/apps/backend)
