@@ -17,6 +17,7 @@ import {
 } from '@music-practice-tracker/eslint-configs';
 import { globalIgnores } from 'eslint/config';
 import prettierConfig from 'eslint-config-prettier/flat';
+import unusedImportsPlugin from 'eslint-plugin-unused-imports';
 import tseslint from 'typescript-eslint';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -47,6 +48,9 @@ const config = tseslint.config(
   },
   {
     files: ['**/*.ts', '**/*.tsx'],
+    plugins: {
+      'unused-imports': unusedImportsPlugin,
+    },
     extends: [baseConfig],
     rules: { ...tsConfigRules, ...importConfigRules, ...reactConfigRules },
   },
