@@ -1,0 +1,3 @@
+{
+  ignore: '(dist|.next|build|coverage|generated|.storybook|msw|storybook-static|stories|config.ts)',
+}
