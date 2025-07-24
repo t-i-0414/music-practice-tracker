@@ -11,5 +11,8 @@
   "main": "tsconfig.json",
   "files": [
     "tsconfig.json"
-  ]
+  ],
+  "scripts": {
+    "lint:es:deadcode:check": "ts-prune -e"
+  }
 }

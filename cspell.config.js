@@ -19,6 +19,7 @@ export default defineConfig({
     'evenodd',
     'datetimepicker',
     'dbgenerated',
+    'deadcode',
     'deletemany',
     'deletemanyandreturn',
     'dotenv',
