@@ -5,8 +5,8 @@ CMD="lint:es:deadcode:check"
 FAILED=0
 
 echo "🔍 Checking for dead code......"
-echo "📦 Running 'bunx ts-prune -e' in root"
-if ! bunx ts-prune -e; then
+echo "📦 Running 'npx ts-prune -e' in root"
+if ! npx ts-prune -e; then
     echo "❌ Failed in root"
     FAILED=1
 fi
