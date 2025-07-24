@@ -31,8 +31,8 @@ jobs:
       - name: Build ESLint packages
         uses: ./.github/actions/build-eslint-packages
 
-  format-check:
-    name: Format Check
+  check-format:
+    name: Check Format
     needs: setup
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -49,8 +49,8 @@ jobs:
       - name: Run format check
         run: bun run format:check
 
-  cspell:
-    name: Spell Check
+  check-shell-lint:
+    name: Check Shell Lint
     needs: setup
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -61,11 +61,11 @@ jobs:
       - name: Setup Bun with cache
         uses: ./.github/actions/setup-bun
 
-      - name: Run spell check
+      - name: Run shell lint check
         run: bun run cspell
 
-  secretlint-check:
-    name: Secret Detection
+  check-secret-lint:
+    name: Check Secret Lint
     needs: setup
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -76,11 +76,11 @@ jobs:
       - name: Setup Bun with cache
         uses: ./.github/actions/setup-bun
 
-      - name: Run secret detection
-        run: bun run secretlint:check
+      - name: Run secret lint check
+        run: bun run lint:secret:check
 
-  markdown-check:
-    name: Markdown Lint
+  check-markdown-lint:
+    name: Check Markdown Lint
     needs: setup
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -91,11 +91,11 @@ jobs:
       - name: Setup Bun with cache
         uses: ./.github/actions/setup-bun
 
-      - name: Run markdown lint
-        run: bun run markdown:check
+      - name: Run markdown lint check
+        run: bun run lint:markdown:check
 
-  dotenv-check:
-    name: Dotenv Lint
+  check-dotenv-lint:
+    name: Check Dotenv Lint
     needs: setup
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -104,11 +104,11 @@ jobs:
       - name: Run dotenv-linter
         uses: dotenv-linter/action-dotenv-linter@v2
         with:
-          reporter: github-pr-review # Default is github-pr-check
+          reporter: github-pr-review
           dotenv_linter_flags: --skip UnorderedKey
 
-  lint-check:
-    name: Lint Check
+  check-es-lint:
+    name: Check ESLint
     needs: setup
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -122,8 +122,8 @@ jobs:
       - name: Build ESLint packages
         uses: ./.github/actions/build-eslint-packages
 
-      - name: Run lint check
-        run: bun run lint:check
+      - name: Run ESLint check
+        run: bun run lint:es:check
 
   type-check:
     name: Type Check

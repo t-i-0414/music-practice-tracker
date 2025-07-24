@@ -19,14 +19,14 @@ pre-commit:
         for file in {staged_files}; do
           scripts/validate-prisma-schema.sh "$file"
         done
-    secretlint:
+    check-secret-lint:
       glob: '**/*'
       run: |
         bunx secretlint {staged_files}
-    dotenv-linter:
+    check-dotenv-lint:
       glob: '.env*'
       run: |
-        bun run dotenv-linter:check
-        bun run dotenv-linter:compare
-        bun run dotenv-linter:fix
+        bun run lint:dotenv:check
+        bun run lint:dotenv:compare
+        bun run lint:dotenv:fix
         git add {staged_files}
