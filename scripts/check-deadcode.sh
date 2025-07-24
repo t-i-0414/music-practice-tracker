@@ -5,8 +5,8 @@ CMD="lint:es:deadcode:check"
 FAILED=0
 
 echo "🔍 Checking for dead code......"
-echo "📦 Running 'bun run ts-prune -e' in root"
-if ! (bun run ts-prune -e); then
+echo "📦 Running 'bunx ts-prune -e' in root"
+if ! bunx ts-prune -e; then
     echo "❌ Failed in root"
     FAILED=1
 fi
@@ -21,7 +21,7 @@ while IFS= read -r config; do
 
     if grep -q "\"$CMD\":" "$config" 2>/dev/null; then
         echo "📦 Running 'bun run $CMD' in $dir"
-        if ! (cd "$dir" && bun run "$CMD" -e); then
+        if ! (cd "$dir" && bun run "$CMD"); then
             echo "❌ Failed in $dir"
             FAILED=1
         fi
