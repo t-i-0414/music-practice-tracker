@@ -9,12 +9,12 @@ echo "🔍 Checking for dead code......"
 TEMP_FILE=$(mktemp)
 trap 'rm -f "$TEMP_FILE"' EXIT
 
-find packages -maxdepth 3 -type f -name package.json | grep -v '/node_modules/' > "$TEMP_FILE"
+find packages -maxdepth 3 -type f -name package.json > "$TEMP_FILE"
 
 while IFS= read -r config; do
     dir=$(dirname "$config")
 
-    if grep -q "\"$CMD\"" "$config" 2>/dev/null; then
+    if grep -q "\"$CMD\":" "$config" 2>/dev/null; then
         echo "📦 Running 'bun run $CMD' in $dir"
         if ! (cd "$dir" && bun run "$CMD" -e); then
             echo "❌ Failed in $dir"
