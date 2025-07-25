@@ -3,10 +3,7 @@ description: Setup the backend project
 runs:
   using: composite
   steps:
-    - name: Setup Project Base
-      uses: ./.github/actions/setup-project-base
-
-    - name: Setup Backend
+    - name: Setup Backend Project
       shell: bash
       run: |
         cd packages/apps/backend

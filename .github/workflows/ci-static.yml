@@ -18,12 +18,15 @@ concurrency:
 
 jobs:
   setup:
-    name: Setup Project Base
+    name: Setup Bun with cache
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Setup Project Base
-        uses: ./.github/actions/setup-project-base
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun with cache
+        uses: ./.github/actions/setup-bun
 
   check-format:
     name: Check Format
@@ -31,8 +34,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Setup Project Base
-        uses: ./.github/actions/setup-project-base
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun with cache
+        uses: ./.github/actions/setup-bun
 
       - name: Run Format Check
         run: bun run format:check
@@ -43,8 +49,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Setup Project Base
-        uses: ./.github/actions/setup-project-base
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun with cache
+        uses: ./.github/actions/setup-bun
 
       - name: Run Shell Lint Check
         run: bun run cspell
@@ -55,8 +64,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Setup Project Base
-        uses: ./.github/actions/setup-project-base
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun with cache
+        uses: ./.github/actions/setup-bun
 
       - name: Run Secret Lint Check
         run: bun run lint:secret:check
@@ -67,15 +79,17 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Setup Project Base
-        uses: ./.github/actions/setup-project-base
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun with cache
+        uses: ./.github/actions/setup-bun
 
       - name: Run Markdown Lint Check
         run: bun run lint:markdown:check
 
   check-dotenv-lint:
     name: Check Dotenv Lint
-    needs: setup
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -94,8 +108,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Setup Project Base
-        uses: ./.github/actions/setup-project-base
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun with cache
+        uses: ./.github/actions/setup-bun
 
       - name: Run ESLint Check
         run: bun run lint:es:check
@@ -106,6 +123,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun with cache
+        uses: ./.github/actions/setup-bun
+
       - name: Setup Backend Project
         uses: ./.github/actions/setup-backend
 
