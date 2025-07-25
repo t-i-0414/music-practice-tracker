@@ -137,6 +137,8 @@ jobs:
 
       - name: Setup Backend Project
         uses: ./.github/actions/setup-backend
+        with:
+          skip_migrations: 'true'
 
       - name: Run Type Check
         run: bun run type:check
