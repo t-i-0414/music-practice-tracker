@@ -1,0 +1,32 @@
+name: 'Build ESLint Packages'
+description: 'Build eslint-configs and eslint-plugins packages'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Cache ESLint Packages Build
+      id: cache-eslint-build
+      uses: actions/cache@v4
+      with:
+        path: |
+          packages/libs/eslint-configs/dist
+          packages/libs/eslint-plugins/dist
+        key: eslint-build-${{ runner.os }}-${{ hashFiles('bun.lockb') }}-${{ hashFiles('packages/libs/eslint-configs/**/*.ts', 'packages/libs/eslint-plugins/**/*.ts') }}
+        restore-keys: |
+          eslint-build-${{ runner.os }}-${{ hashFiles('bun.lockb') }}-
+
+    - name: Build eslint-configs
+      if: steps.cache-eslint-build.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        echo " Building eslint-configs..."
+        cd packages/libs/eslint-configs && bun run build
+        echo "✅ eslint-configs built successfully"
+
+    - name: Build eslint-plugins
+      if: steps.cache-eslint-build.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        echo " Building eslint-plugins..."
+        cd packages/libs/eslint-plugins && bun run build
+        echo "✅ eslint-plugins built successfully"

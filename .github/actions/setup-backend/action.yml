@@ -6,5 +6,6 @@ runs:
     - name: Setup Backend Project
       shell: bash
       run: |
+        make setup-env
         cd packages/apps/backend
         make setup IS_CI=true SKIP_MIGRATIONS=true

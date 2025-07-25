@@ -114,6 +114,9 @@ jobs:
       - name: Setup Bun with cache
         uses: ./.github/actions/setup-bun
 
+      - name: Build ESLint Packages
+        uses: ./.github/actions/build-eslint-packages
+
       - name: Run ESLint Check
         run: bun run lint:es:check
 
@@ -128,6 +131,9 @@ jobs:
 
       - name: Setup Bun with cache
         uses: ./.github/actions/setup-bun
+
+      - name: Build ESLint Packages
+        uses: ./.github/actions/build-eslint-packages
 
       - name: Setup Backend Project
         uses: ./.github/actions/setup-backend
