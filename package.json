@@ -19,7 +19,7 @@
     "format:fix": "prettier --write . && bun run format:prisma",
     "format:prisma": "cd packages/apps/backend && bun run prisma:format && cd -",
     "lint:dotenv:check": "./bin/dotenv-linter",
-    "lint:dotenv:compare": "./bin/dotenv-linter compare .env .env.example .env.test",
+    "lint:dotenv:compare": "./bin/dotenv-linter compare .env .env.*",
     "lint:dotenv:fix": "./bin/dotenv-linter fix",
     "lint:es:check": "eslint && sh scripts/lint-es.sh",
     "lint:es:deadcode:check": "sh scripts/check-deadcode.sh",

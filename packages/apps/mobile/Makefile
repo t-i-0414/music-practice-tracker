@@ -5,7 +5,6 @@
 setup:
 	@echo "🔧 Setting up the mobile environment..."
 	@${MAKE} setup-env
-	bun install
 	@echo "✅ mobile environment setup complete!"
 
 .PHONY: setup-env

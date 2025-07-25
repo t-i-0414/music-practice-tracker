@@ -5,17 +5,14 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "default": "./src/index.ts"
     }
   },
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "src/index.ts",
   "files": [
-    "dist"
+    "src"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
     "lint:es:check": "eslint",
     "lint:es:deadcode:check": "ts-prune -e",
     "lint:es:fix": "eslint --fix",

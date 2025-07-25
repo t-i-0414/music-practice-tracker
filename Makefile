@@ -7,10 +7,6 @@ setup:
 	@${MAKE} setup-env
 	@${MAKE} setup-dotenv-linter
 	bun install
-	@make -C packages/libs/eslint-configs setup
-	@make -C packages/libs/eslint-configs build
-	@make -C packages/libs/eslint-plugins setup
-	@make -C packages/libs/eslint-plugins build
 	@make -C packages/apps/backend setup
 	@make -C packages/apps/mobile setup
 	@make -C packages/apps/admin setup

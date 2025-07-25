@@ -1,0 +1,13 @@
+name: Setup Backend Project
+description: Setup the backend project
+runs:
+  using: composite
+  steps:
+    - name: Setup Project Base
+      uses: ./.github/actions/setup-project-base
+
+    - name: Setup Backend
+      shell: bash
+      run: |
+        cd packages/apps/backend
+        make setup IS_CI=true
