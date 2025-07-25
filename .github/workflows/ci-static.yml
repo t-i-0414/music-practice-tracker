@@ -1,4 +1,4 @@
-name: CI/Static
+name: CI / Static
 
 permissions:
   contents: read
