@@ -1,0 +1,18 @@
+name: 'Setup Base Project'
+description: ''
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Env Variables
+      shell: bash
+      run: |
+        echo "Setting up environment variables..."
+        make run setup-env
+        echo "Environment variables set up successfully."
+
+    - name: Setup Bun with cache
+      uses: ./.github/actions/setup-bun
+
+    - name: Build ESLint Packages
+      uses: ./.github/actions/build-eslint-packages
