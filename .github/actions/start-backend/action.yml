@@ -1,0 +1,39 @@
+name: Start Backend Server
+description: Start the backend server and wait for it to be ready
+
+runs:
+  using: composite
+  steps:
+    - name: Start Backend Server
+      shell: bash
+      run: |
+        cd packages/apps/backend
+        bun run start:dev &
+
+        echo "Waiting for Admin and Mobile servers to start..."
+
+        timeout 60 bash -c '
+          while true; do
+            port_3000_up=false
+            port_3001_up=false
+
+            curl --silent --fail http://localhost:3000/api >/dev/null 2>&1 && port_3000_up=true
+            curl --silent --fail http://localhost:3001/api >/dev/null 2>&1 && port_3001_up=true
+
+            if [ "$port_3000_up" = true ] && [ "$port_3001_up" = true ]; then
+              echo "✅ All servers are up!"
+              exit 0
+            fi
+
+            echo -n "."
+            sleep 1
+          done
+        '
+
+        if [ $? -ne 0 ]; then
+          echo ""
+          echo "❌ One or more servers failed to start within 60 seconds"
+          curl --silent --fail http://localhost:3000/api >/dev/null 2>&1 || echo "Mobile Server DOWN"
+          curl --silent --fail http://localhost:3001/api >/dev/null 2>&1 || echo "Admin Server DOWN"
+          exit 1
+        fi

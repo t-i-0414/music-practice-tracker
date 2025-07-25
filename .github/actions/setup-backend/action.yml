@@ -1,20 +1,22 @@
 name: Setup Backend Project
 description: Setup the backend project
+
 inputs:
-  is_ci:
-    description: 'Whether running in CI environment'
+  need_db:
+    description: 'Whether to set up the database'
     required: false
     default: 'true'
   skip_migrations:
     description: 'Whether to skip database migrations'
     required: false
     default: 'false'
+
 runs:
   using: composite
   steps:
     - name: Setup Backend Project
       shell: bash
       run: |
-        make setup-env
         cd packages/apps/backend
-        make setup IS_CI=${{ inputs.is_ci }} SKIP_MIGRATIONS=${{ inputs.skip_migrations }}
+        make setup NEED_DB=${{ inputs.need_db }} SKIP_MIGRATIONS=${{ inputs.skip_migrations }}
+        sleep 10

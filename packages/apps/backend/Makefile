@@ -1,8 +1,8 @@
 # -------------------------------------------------------------
 # Variables
 # -------------------------------------------------------------
-# Default value for IS_CI
-IS_CI ?= false
+# Default value for NEED_DB
+NEED_DB ?= true
 
 # Skip migrations for type checking
 SKIP_MIGRATIONS ?= false
@@ -32,7 +32,7 @@ setup-env:
 # -------------------------------------------------------------
 .PHONY: setup-docker
 setup-docker:
-ifneq ($(IS_CI),true)
+ifeq ($(NEED_DB),true)
 	@echo "🐳 Setting up Docker containers..."
 	@${MAKE} docker-compose-up
 endif

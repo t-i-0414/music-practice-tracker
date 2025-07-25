@@ -18,15 +18,15 @@ concurrency:
 
 jobs:
   setup:
-    name: Setup Bun with cache
+    name: Setup Base Project
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Bun with cache
-        uses: ./.github/actions/setup-bun
+      - name: Setup Base Project
+        uses: ./.github/actions/setup-base-project
 
   check-format:
     name: Check Format
@@ -37,8 +37,8 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Bun with cache
-        uses: ./.github/actions/setup-bun
+      - name: Setup Base Project
+        uses: ./.github/actions/setup-base-project
 
       - name: Run Format Check
         run: bun run format:check
@@ -52,8 +52,8 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Bun with cache
-        uses: ./.github/actions/setup-bun
+      - name: Setup Base Project
+        uses: ./.github/actions/setup-base-project
 
       - name: Run Shell Lint Check
         run: bun run cspell
@@ -67,8 +67,8 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Bun with cache
-        uses: ./.github/actions/setup-bun
+      - name: Setup Base Project
+        uses: ./.github/actions/setup-base-project
 
       - name: Run Secret Lint Check
         run: bun run lint:secret:check
@@ -82,8 +82,8 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Bun with cache
-        uses: ./.github/actions/setup-bun
+      - name: Setup Base Project
+        uses: ./.github/actions/setup-base-project
 
       - name: Run Markdown Lint Check
         run: bun run lint:markdown:check
@@ -111,11 +111,8 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Bun with cache
-        uses: ./.github/actions/setup-bun
-
-      - name: Build ESLint Packages
-        uses: ./.github/actions/build-eslint-packages
+      - name: Setup Base Project
+        uses: ./.github/actions/setup-base-project
 
       - name: Run ESLint Check
         run: bun run lint:es:check
@@ -129,19 +126,54 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Bun with cache
-        uses: ./.github/actions/setup-bun
-
-      - name: Build ESLint Packages
-        uses: ./.github/actions/build-eslint-packages
+      - name: Setup Base Project
+        uses: ./.github/actions/setup-base-project
 
       - name: Setup Backend Project
         uses: ./.github/actions/setup-backend
         with:
           skip_migrations: 'true'
+          need_db: 'false'
 
       - name: Run Type Check
         run: bun run type:check
 
-  # Additional jobs will be added in Phase 2:
-  # - test
+  check-schema:
+    name: Check Schema
+    needs: setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Base Project
+        uses: ./.github/actions/setup-base-project
+
+      - name: Setup Backend Project
+        uses: ./.github/actions/setup-backend
+
+      - name: Run Schema Check
+        run: |
+          cd packages/apps/backend
+          bun run prisma:validate
+
+      - name: Start Backend Server
+        uses: ./.github/actions/start-backend
+
+      - name: Generate Admin API Types
+        run: |
+          cd packages/apps/admin
+          bun run gen:api-types
+
+      - name: Generate Mobile API Types
+        run: |
+          cd packages/apps/mobile
+          bun run gen:api-types
+
+      - name: Check Diff
+        run: |
+          if ! git diff --quiet -- packages/apps/mobile/generated/types/api.d.ts packages/apps/admin/generated/types/api.d.ts; then
+            echo "::error::Changes detected in API types. Please run 'bun run gen:api-types' to update them."
+            exit 1
+          fi
