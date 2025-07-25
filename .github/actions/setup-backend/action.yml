@@ -7,4 +7,4 @@ runs:
       shell: bash
       run: |
         cd packages/apps/backend
-        make setup IS_CI=true
+        make setup IS_CI=true SKIP_MIGRATIONS=true
