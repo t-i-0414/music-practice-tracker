@@ -17,6 +17,6 @@ runs:
     - name: Setup Backend Project
       shell: bash
       run: |
-        make setup-env
         cd packages/apps/backend
         make setup NEED_DB=${{ inputs.need_db }} SKIP_MIGRATIONS=${{ inputs.skip_migrations }}
+        sleep 10
