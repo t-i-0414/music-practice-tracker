@@ -4,7 +4,7 @@ description: 'Build eslint-configs and eslint-plugins packages'
 runs:
   using: 'composite'
   steps:
-    - name: Cache ESLint packages build
+    - name: Cache ESLint Packages Build
       id: cache-eslint-build
       uses: actions/cache@v4
       with:

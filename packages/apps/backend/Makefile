@@ -1,37 +1,64 @@
 # -------------------------------------------------------------
-# Setting up
+# Variables
 # -------------------------------------------------------------
 # Default value for IS_CI
 IS_CI ?= false
+
 # Skip migrations for type checking
 SKIP_MIGRATIONS ?= false
 
+# -------------------------------------------------------------
+# Main setup target
+# -------------------------------------------------------------
 .PHONY: setup
 setup:
 	@echo "🔧 Setting up the backend environment..."
 	@${MAKE} setup-env
-ifneq ($(IS_CI),true)
-	@${MAKE} docker-compose-up
-endif
-	bun install
-	bun run prisma:generate
-ifneq ($(SKIP_MIGRATIONS),true)
-ifneq ($(IS_CI),true)
-	bun run prisma:migrate:dev
-endif
-	bun run prisma:migrate:test
-endif
-	bun run prisma:validate
+	@${MAKE} setup-docker
+	@${MAKE} setup-database
 	@echo "✅ Backend environment setup complete!"
 
+# -------------------------------------------------------------
+# Environment setup
+# -------------------------------------------------------------
 .PHONY: setup-env
 setup-env:
 	@echo "🔗 Setting up environment symlink..."
 	ln -sf ../../../.env .env
-	@echo "✅ environment symlink created"
+	@echo "✅ Environment symlink created"
 
 # -------------------------------------------------------------
-# docker
+# Docker setup
+# -------------------------------------------------------------
+.PHONY: setup-docker
+setup-docker:
+ifneq ($(IS_CI),true)
+	@echo "🐳 Setting up Docker containers..."
+	@${MAKE} docker-compose-up
+endif
+
+# -------------------------------------------------------------
+# Database setup
+# -------------------------------------------------------------
+.PHONY: setup-database
+setup-database:
+	@echo "🗄️ Setting up database..."
+	bun run prisma:generate
+ifneq ($(SKIP_MIGRATIONS),true)
+	@${MAKE} run-migrations
+endif
+	bun run prisma:validate
+	@echo "✅ Database setup complete"
+
+.PHONY: run-migrations
+run-migrations:
+	@echo "📊 Running database migrations..."
+	bun run prisma:migrate:dev
+	bun run prisma:migrate:test
+	@echo "✅ Migrations complete"
+
+# -------------------------------------------------------------
+# Docker management
 # -------------------------------------------------------------
 .PHONY: docker-compose-up
 docker-compose-up:

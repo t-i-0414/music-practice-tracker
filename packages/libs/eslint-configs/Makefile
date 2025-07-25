@@ -1,13 +1,4 @@
 # -------------------------------------------------------------
-# Setting up
-# -------------------------------------------------------------
-.PHONY: setup
-setup:
-	@echo "🔧 Setting up the ESLint configs environment..."
-	bun install
-	@echo "✅ ESLint configs environment setup complete!"
-
-# -------------------------------------------------------------
 # Building
 # -------------------------------------------------------------
 .PHONY: build
