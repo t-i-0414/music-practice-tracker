@@ -38,3 +38,10 @@ runs:
         echo " Installing dependencies with Bun..."
         bun install --frozen-lockfile
         echo "✅ Dependencies installed successfully"
+
+    - name: Setup Env Variables
+      shell: bash
+      run: |
+        echo "Setting up environment variables..."
+        make setup-env
+        echo "Environment variables set successfully."
