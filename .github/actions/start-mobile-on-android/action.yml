@@ -8,6 +8,7 @@ runs:
       shell: bash
       run: |
         cd packages/apps/mobile
+        emulator -avd test -no-window -no-audio -no-boot-anim &
         bun run start:dev:android &
 
         echo "Waiting for Mobile server to start..."
