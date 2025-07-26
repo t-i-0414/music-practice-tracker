@@ -30,8 +30,6 @@
     "lint:secret:check": "secretlint '**/*'",
     "lint:secret:fix": "secretlint --fix '**/*'",
     "lint:shell:check": "sh scripts/lint-shell.sh",
-    "test": "sh scripts/test.sh",
-    "test:cov": "sh scripts/test.sh --coverage",
     "type:check": "tsc --noEmit && sh scripts/type_check.sh"
   },
   "dependencies": {
