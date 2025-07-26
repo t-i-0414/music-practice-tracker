@@ -32,6 +32,8 @@ jobs:
     name: Test Admin
     needs: setup
     runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.40.0-focal
     timeout-minutes: 10
     steps:
       - name: Checkout Repository
