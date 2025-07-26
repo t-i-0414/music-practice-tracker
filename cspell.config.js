@@ -4,6 +4,7 @@ export default defineConfig({
   version: '0.2',
   language: 'en',
   words: [
+    'aquasecurity',
     'Autodocs',
     'autoincrement',
     'awk',
@@ -51,6 +52,7 @@ export default defineConfig({
     'restoremany',
     'restoremanyandreturn',
     'rnstorybook',
+    'sarif',
     'setstate',
     'shellcheck',
     'simctl',
