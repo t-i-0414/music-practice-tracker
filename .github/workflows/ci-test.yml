@@ -93,7 +93,7 @@ jobs:
   # test-mobile: TODO: Implement Mobile tests
 
   eslint-plugin:
-    name: Libs / Test ESLint Plugin
+    name: Libs / Test ESLint Plugins
     needs: setup
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -104,12 +104,12 @@ jobs:
       - name: Setup Base Project
         uses: ./.github/actions/setup-base-project
 
-      - name: Run ESLint Plugin Tests
+      - name: Run ESLint Plugins Tests
         run: |
-          cd packages/eslint-plugin
+          cd packages/libs/eslint-plugins
           bun run test
 
-      - name: Run ESLint Plugin Tests (Coverage)
+      - name: Run ESLint Plugins Tests (Coverage)
         run: |
-          cd packages/eslint-plugin
+          cd packages/libs/eslint-plugins
           bun run test:cov
