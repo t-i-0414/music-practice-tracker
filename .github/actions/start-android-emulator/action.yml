@@ -45,5 +45,5 @@ runs:
         disable-animations: true
         script: |
           adb wait-for-device
-          cd packages/apps/mobile && bun run start:dev:android &
-          bun run test
+          cd packages/apps/mobile && bun run start:dev:android & sleep 10
+          cd packages/apps/mobile && bun run test
