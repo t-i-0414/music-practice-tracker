@@ -4,21 +4,6 @@ description: Setup the admin project
 runs:
   using: composite
   steps:
-    - name: Setup Java
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: '17'
-
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v3
-
-    - name: Install Maestro
-      shell: bash
-      run: |
-        curl -Ls "https://get.maestro.mobile.dev" | bash
-        echo "$HOME/.maestro/bin" >> $GITHUB_PATH
-
     - name: Setup Admin Project
       shell: bash
       run: |

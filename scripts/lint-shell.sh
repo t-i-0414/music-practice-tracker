@@ -3,10 +3,8 @@ set -eu
 
 echo "🔍 Linting shell scripts..."
 
-# Check root scripts
 echo "📂 Checking root 'scripts/*.sh'"
 if [ -d "scripts" ]; then
-    # Find files and count them
     file_count=$(find scripts -maxdepth 1 -name "*.sh" -type f 2>/dev/null | wc -l)
 
     if [ "$file_count" -gt 0 ]; then
@@ -19,10 +17,8 @@ else
     echo "   ⚠️  Directory 'scripts' not found - skipping"
 fi
 
-# Check packages scripts
 echo "📂 Checking packages 'scripts/*.sh'"
 if [ -d "packages" ]; then
-    # Find files and count them
     file_count=$(find packages -path "*/scripts/*.sh" -type f 2>/dev/null | wc -l)
 
     if [ "$file_count" -gt 0 ]; then
