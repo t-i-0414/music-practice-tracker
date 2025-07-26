@@ -22,17 +22,6 @@
       "groupSlug": "root-dependencies"
     },
     {
-      "description": "Root dependencies (major updates)",
-      "matchFileNames": ["package.json"],
-      "matchManagers": ["npm"],
-      "matchDepTypes": ["dependencies"],
-      "matchUpdateTypes": ["major"],
-      "addLabels": ["root"],
-      "commitMessagePrefix": "chore(root): ",
-      "groupName": "root dependencies (major updates)",
-      "groupSlug": "root-dependencies-major"
-    },
-    {
       "description": "Root devdependencies",
       "matchFileNames": ["package.json"],
       "matchManagers": ["npm"],
@@ -42,17 +31,6 @@
       "commitMessagePrefix": "chore(root): ",
       "groupName": "root devdependencies",
       "groupSlug": "root-dev-dependencies"
-    },
-    {
-      "description": "Root devdependencies (major updates)",
-      "matchFileNames": ["package.json"],
-      "matchManagers": ["npm"],
-      "matchDepTypes": ["devDependencies"],
-      "matchUpdateTypes": ["major"],
-      "addLabels": ["root"],
-      "commitMessagePrefix": "chore(root): ",
-      "groupName": "root devdependencies (major updates)",
-      "groupSlug": "root-dev-dependencies-major"
     },
     {
       "description": "Backend dependencies",
@@ -66,17 +44,6 @@
       "groupSlug": "backend-dependencies"
     },
     {
-      "description": "Backend dependencies (major updates)",
-      "matchFileNames": ["packages/apps/backend/package.json"],
-      "matchManagers": ["npm"],
-      "matchDepTypes": ["dependencies"],
-      "matchUpdateTypes": ["major"],
-      "addLabels": ["backend"],
-      "commitMessagePrefix": "chore(backend): ",
-      "groupName": "backend dependencies (major updates)",
-      "groupSlug": "backend-dependencies-major"
-    },
-    {
       "description": "Backend devdependencies",
       "matchFileNames": ["packages/apps/backend/package.json"],
       "matchManagers": ["npm"],
@@ -86,17 +53,6 @@
       "commitMessagePrefix": "chore(backend): ",
       "groupName": "backend devdependencies",
       "groupSlug": "backend-dev-dependencies"
-    },
-    {
-      "description": "Backend devdependencies (major updates)",
-      "matchFileNames": ["packages/apps/backend/package.json"],
-      "matchManagers": ["npm"],
-      "matchDepTypes": ["devDependencies"],
-      "matchUpdateTypes": ["major"],
-      "addLabels": ["backend"],
-      "commitMessagePrefix": "chore(backend): ",
-      "groupName": "backend devdependencies (major updates)",
-      "groupSlug": "backend-dev-dependencies-major"
     },
     {
       "description": "Group NestJS packages",
@@ -122,17 +78,6 @@
       "groupSlug": "admin-dependencies"
     },
     {
-      "description": "Admin dependencies (major updates)",
-      "matchFileNames": ["packages/apps/admin/package.json"],
-      "matchManagers": ["npm"],
-      "matchDepTypes": ["dependencies"],
-      "matchUpdateTypes": ["major"],
-      "addLabels": ["admin"],
-      "commitMessagePrefix": "chore(admin): ",
-      "groupName": "admin dependencies (major updates)",
-      "groupSlug": "admin-dependencies-major"
-    },
-    {
       "description": "Admin devdependencies",
       "matchFileNames": ["packages/apps/admin/package.json"],
       "matchManagers": ["npm"],
@@ -142,17 +87,6 @@
       "commitMessagePrefix": "chore(admin): ",
       "groupName": "admin devdependencies",
       "groupSlug": "admin-dev-dependencies"
-    },
-    {
-      "description": "Admin devdependencies (major updates)",
-      "matchFileNames": ["packages/apps/admin/package.json"],
-      "matchManagers": ["npm"],
-      "matchDepTypes": ["devDependencies"],
-      "matchUpdateTypes": ["major"],
-      "addLabels": ["admin"],
-      "commitMessagePrefix": "chore(admin): ",
-      "groupName": "admin devdependencies (major updates)",
-      "groupSlug": "admin-dev-dependencies-major"
     },
     {
       "description": "Group Next.js packages",
