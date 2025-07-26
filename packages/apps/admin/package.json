@@ -33,6 +33,6 @@
     "next": "15.3.3"
   },
   "devDependencies": {
-    "eslint-config-next": "15.3.3"
+    "eslint-config-next": "15.4.4"
   }
 }
