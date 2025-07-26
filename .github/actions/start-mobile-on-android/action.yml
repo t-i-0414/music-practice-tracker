@@ -1,0 +1,35 @@
+name: Start Mobile Server on Android
+description: Start the mobile server on Android
+
+runs:
+  using: composite
+  steps:
+    - name: Start Android Emulator
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: 33
+        arch: x86_64
+        profile: Nexus 6
+        avd-name: test
+        emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+        disable-animations: true
+        script: |
+          adb wait-for-device
+          adb shell input keyevent 82
+          bun run start:dev:android
+
+          echo "Waiting for Mobile server to start..."
+
+          timeout 60 bash -c '
+            while true; do
+              curl --silent --fail http://localhost:8080 >/dev/null 2>&1 && echo "✅ Mobile server is up!" && exit 0
+              echo -n "."
+              sleep 1
+            done
+          '
+
+          if [ $? -ne 0 ]; then
+            echo ""
+            echo "❌ Mobile server failed to start within 60 seconds"
+            exit 1
+          fi

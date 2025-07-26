@@ -106,12 +106,7 @@ jobs:
         uses: ./.github/actions/setup-mobile
 
       - name: Start Mobile on Android Emulator
-        uses: ./.github/actions/build-and-start-on-android
-
-      - name: Install Maestro
-        run: |
-          curl -Ls "https://get.maestro.mobile.dev" | bash
-          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+        uses: ./.github/actions/start-mobile-on-android
 
       - name: Run Mobile Tests
         run: |
