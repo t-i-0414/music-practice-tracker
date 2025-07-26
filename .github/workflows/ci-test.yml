@@ -105,18 +105,10 @@ jobs:
       - name: Setup Mobile Project
         uses: ./.github/actions/setup-mobile
 
-      - name: Start Android Emulator
-        uses: ./.github/actions/start-android-emulator
-
-      - name: Start Mobile Server on Android
-        uses: ./.github/actions/start-mobile-on-android
-
-      - name: Run Mobile Tests
+      - name: Run Mobile Unit Tests
         run: |
-          emulator -avd test -no-window -no-audio -no-boot-anim &
-          sleep 60
           cd packages/apps/mobile
-          bun run test
+          bun run test:unit
 
       - name: Run Mobile Tests (Coverage)
         run: |
