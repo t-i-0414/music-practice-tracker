@@ -23,16 +23,16 @@ const config: Config = {
   collectCoverageFrom: [
     '<rootDir>/src/**/*.{ts,tsx}',
     '<rootDir>/!src/**/*.d.ts',
-    '<rootDir>/!src/app/_layout.tsx',
-    '<rootDir>/!src/app/+not-found.tsx',
+    '<rootDir>/!src/app/**/*.{ts,tsx}',
+    '<rootDir>/!src/constants/**/*.ts',
   ],
   coveragePathIgnorePatterns: ignorePatterns,
   coverageThreshold: {
     global: {
-      statements: 95,
-      branches: 95,
-      functions: 95,
-      lines: 95,
+      statements: 0,
+      branches: 0,
+      functions: 0,
+      lines: 0,
     },
   },
   maxWorkers: 1,

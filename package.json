@@ -15,7 +15,6 @@
   "scripts": {
     "changeset:add": "changeset",
     "changeset:version": "changeset version",
-    "ci:temp": "run-s test",
     "cspell": "cspell '**'",
     "format:check": "prettier --check .",
     "format:fix": "prettier --write . && bun run format:prisma",
