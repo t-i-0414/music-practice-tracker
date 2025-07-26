@@ -57,13 +57,6 @@ updates:
         patterns:
           - '@nestjs/*'
           - 'nest-*'
-      testing:
-        dependency-type: 'development'
-        patterns:
-          - 'jest*'
-          - '@types/jest'
-          - 'supertest'
-          - '@types/supertest'
       backend-dev-dependencies:
         dependency-type: 'development'
         update-types:
