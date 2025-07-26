@@ -84,6 +84,7 @@ export default defineConfig({
     '**/storybook-static/**',
     '.secretlintignore',
     'expo-env.d.ts',
+    '.github/**',
   ],
   maxNumberOfProblems: 0,
   minWordLength: 3,
