@@ -4,13 +4,6 @@ description: Build and start the mobile project on Android
 runs:
   using: composite
   steps:
-    - name: Build Android app
-      shell: bash
-      run: |
-        cd packages/apps/mobile
-        # Expo/React Native build
-        bun run build:android
-
     - name: Start Android Emulator
       uses: reactivecircus/android-emulator-runner@v2
       with:
@@ -23,5 +16,4 @@ runs:
         script: |
           adb wait-for-device
           adb shell input keyevent 82
-
-          adb install -r packages/apps/mobile/android/app/build/outputs/apk/release/app-release.apk
+          bun run start:dev:android

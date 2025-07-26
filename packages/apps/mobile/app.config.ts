@@ -18,6 +18,7 @@ export default ({ config: _config }: ConfigContext): ExpoConfig => {
       supportsTablet: true,
     },
     android: {
+      package: 'com.takudev.musicpracticetracker',
       adaptiveIcon: {
         foregroundImage: './src/assets/images/splash-icon.png',
         backgroundColor: '#ffffff',
@@ -42,6 +43,9 @@ export default ({ config: _config }: ConfigContext): ExpoConfig => {
     },
     owner: 'takudev',
     extra: {
+      eas: {
+        projectId: '382a6dba-a16c-4b4d-91be-abade4f6c750',
+      },
       storybookEnabled: process.env.EXPO_PUBLIC_STORYBOOK_ENABLED === 'true',
     },
   };

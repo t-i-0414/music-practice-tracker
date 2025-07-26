@@ -5,6 +5,7 @@
 setup:
 	@echo "🔧 Setting up the mobile environment..."
 	@${MAKE} setup-env
+	npm install -g eas-cli
 	@echo "✅ mobile environment setup complete!"
 
 .PHONY: setup-env
