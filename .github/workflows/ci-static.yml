@@ -57,7 +57,7 @@ jobs:
       - name: Setup Base Project
         uses: ./.github/actions/setup-base-project
 
-      - name: Run Shell Lint Check
+      - name: Run Spelling Check
         run: bun run cspell
 
   check-shell-lint:
