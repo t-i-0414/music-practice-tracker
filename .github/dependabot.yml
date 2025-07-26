@@ -15,7 +15,6 @@ updates:
     commit-message:
       prefix: 'chore'
       prefix-development: 'chore'
-      include: 'scope'
     groups:
       development-dependencies:
         dependency-type: 'development'
@@ -42,7 +41,6 @@ updates:
     commit-message:
       prefix: 'chore(backend)'
       prefix-development: 'chore(backend)'
-      include: 'scope'
     groups:
       nestjs:
         patterns:
@@ -93,7 +91,6 @@ updates:
     commit-message:
       prefix: 'chore(admin)'
       prefix-development: 'chore(admin)'
-      include: 'scope'
     groups:
       nextjs:
         patterns:
@@ -152,7 +149,6 @@ updates:
     commit-message:
       prefix: 'chore(mobile)'
       prefix-development: 'chore(mobile)'
-      include: 'scope'
     groups:
       expo:
         patterns:
