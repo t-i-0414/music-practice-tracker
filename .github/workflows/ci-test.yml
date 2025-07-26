@@ -106,7 +106,7 @@ jobs:
         uses: ./.github/actions/setup-mobile
 
       - name: Start Mobile on Android Emulator
-        uses: ./.github/actions/build-and-start-android
+        uses: ./.github/actions/build-and-start-on-android
 
       - name: Install Maestro
         run: |
