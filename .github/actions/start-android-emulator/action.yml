@@ -43,4 +43,6 @@ runs:
         force-avd-creation: false
         emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
         disable-animations: true
-        script: echo "Started Android Emulator."
+        script: |
+          adb wait-for-device
+          echo "Started Android Emulator."
