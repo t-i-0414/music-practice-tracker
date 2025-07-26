@@ -1,0 +1,20 @@
+name: Setup Admin Project
+description: Setup the admin project
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+
+    - name: Setup Admin Project
+      shell: bash
+      run: |
+        cd packages/apps/mobile
+        make setup
