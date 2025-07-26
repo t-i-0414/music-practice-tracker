@@ -29,7 +29,7 @@ jobs:
         uses: ./.github/actions/setup-base-project
 
   test-admin:
-    name: Test Admin
+    name: Apps / Test Admin
     needs: setup
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -63,7 +63,7 @@ jobs:
           bun run test:cov
 
   test-backend:
-    name: Test Backend
+    name: Apps / Test Backend
     needs: setup
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -88,4 +88,28 @@ jobs:
       - name: Run Backend Tests (Coverage)
         run: |
           cd packages/apps/backend
+          bun run test:cov
+
+  # test-mobile: TODO: Implement Mobile tests
+
+  eslint-plugin:
+    name: Libs / Test ESLint Plugin
+    needs: setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Base Project
+        uses: ./.github/actions/setup-base-project
+
+      - name: Run ESLint Plugin Tests
+        run: |
+          cd packages/eslint-plugin
+          bun run test
+
+      - name: Run ESLint Plugin Tests (Coverage)
+        run: |
+          cd packages/eslint-plugin
           bun run test:cov
