@@ -1,0 +1,11 @@
+name: Setup Admin Project
+description: Setup the admin project
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Admin Project
+      shell: bash
+      run: |
+        cd packages/apps/admin
+        make setup

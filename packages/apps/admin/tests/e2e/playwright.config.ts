@@ -36,7 +36,7 @@ export default defineConfig({
     command: 'bun run start:dev',
     port: (process.env.ADMIN_PORT ?? 8000) as unknown as number,
     timeout: 120 * 1000,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: true,
     env: {
       NODE_ENV: 'test',
       NEXT_PUBLIC_API_BASE_URL: `http://${host}:${process.env.ADMIN_API_PORT ?? '3011'}/api`,

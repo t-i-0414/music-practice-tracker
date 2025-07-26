@@ -1,0 +1,27 @@
+name: Start Admin Server
+description: Start the admin server and wait for it to be ready
+
+runs:
+  using: composite
+  steps:
+    - name: Start Admin Server
+      shell: bash
+      run: |
+        cd packages/apps/admin
+        bun run start:dev &
+
+        echo "Waiting for Admin server to start..."
+
+        timeout 60 bash -c '
+          while true; do
+            curl --silent --fail http://localhost:8000 >/dev/null 2>&1 && echo "✅ Admin server is up!" && exit 0
+            echo -n "."
+            sleep 1
+          done
+        '
+
+        if [ $? -ne 0 ]; then
+          echo ""
+          echo "❌ Admin server failed to start within 60 seconds"
+          exit 1
+        fi

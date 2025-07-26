@@ -10,18 +10,18 @@ runs:
         cd packages/apps/backend
         bun run start:dev &
 
-        echo "Waiting for Admin and Mobile servers to start..."
+        echo "Waiting for Admin and Mobile API servers to start..."
 
         timeout 60 bash -c '
           while true; do
-            port_3000_up=false
-            port_3001_up=false
+            port_mobile_up=false
+            port_admin_up=false
 
-            curl --silent --fail http://localhost:3000/api >/dev/null 2>&1 && port_3000_up=true
-            curl --silent --fail http://localhost:3001/api >/dev/null 2>&1 && port_3001_up=true
+            curl --silent --fail http://localhost:3000/api >/dev/null 2>&1 && port_mobile_up=true
+            curl --silent --fail http://localhost:3001/api >/dev/null 2>&1 && port_admin_up=true
 
-            if [ "$port_3000_up" = true ] && [ "$port_3001_up" = true ]; then
-              echo "✅ All servers are up!"
+            if [ "$port_mobile_up" = true ] && [ "$port_admin_up" = true ]; then
+              echo "✅ All API servers are up!"
               exit 0
             fi
 
@@ -32,8 +32,8 @@ runs:
 
         if [ $? -ne 0 ]; then
           echo ""
-          echo "❌ One or more servers failed to start within 60 seconds"
-          curl --silent --fail http://localhost:3000/api >/dev/null 2>&1 || echo "Mobile Server DOWN"
-          curl --silent --fail http://localhost:3001/api >/dev/null 2>&1 || echo "Admin Server DOWN"
+          echo "❌ One or more API servers failed to start within 60 seconds"
+          curl --silent --fail http://localhost:3000/api >/dev/null 2>&1 || echo "Mobile API Server DOWN"
+          curl --silent --fail http://localhost:3001/api >/dev/null 2>&1 || echo "Admin API Server DOWN"
           exit 1
         fi

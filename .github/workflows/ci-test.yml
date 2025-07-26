@@ -1,0 +1,115 @@
+name: CI / Test
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+      - develop
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  setup:
+    name: Setup Base Project
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Base Project
+        uses: ./.github/actions/setup-base-project
+
+  test-admin:
+    name: Apps / Test Admin
+    needs: setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Base Project
+        uses: ./.github/actions/setup-base-project
+
+      - name: Setup Backend Project
+        uses: ./.github/actions/setup-backend
+
+      - name: Start Backend Server
+        uses: ./.github/actions/start-backend
+
+      - name: Setup Admin Project
+        uses: ./.github/actions/setup-admin
+
+      - name: Start Admin Server
+        uses: ./.github/actions/start-admin
+
+      - name: Run Admin Tests
+        run: |
+          cd packages/apps/admin
+          bun run test
+
+      - name: Run Admin Tests (Coverage)
+        run: |
+          cd packages/apps/admin
+          bun run test:cov
+
+  test-backend:
+    name: Apps / Test Backend
+    needs: setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Base Project
+        uses: ./.github/actions/setup-base-project
+
+      - name: Setup Backend Project
+        uses: ./.github/actions/setup-backend
+
+      - name: Start Backend Server
+        uses: ./.github/actions/start-backend
+
+      - name: Run Backend Tests
+        run: |
+          cd packages/apps/backend
+          bun run test
+
+      - name: Run Backend Tests (Coverage)
+        run: |
+          cd packages/apps/backend
+          bun run test:cov
+
+  # test-mobile: TODO: Implement Mobile tests
+
+  eslint-plugin:
+    name: Libs / Test ESLint Plugins
+    needs: setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Base Project
+        uses: ./.github/actions/setup-base-project
+
+      - name: Run ESLint Plugins Tests
+        run: |
+          cd packages/libs/eslint-plugins
+          bun run test
+
+      - name: Run ESLint Plugins Tests (Coverage)
+        run: |
+          cd packages/libs/eslint-plugins
+          bun run test:cov

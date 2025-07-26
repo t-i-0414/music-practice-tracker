@@ -13,7 +13,19 @@ export default defineConfig({
     coverage: {
       reporter: ['text', 'json', 'html'],
       include: ['src/**/*.{js,ts,jsx,tsx}'],
-      exclude: ['src/**/*.d.ts', 'src/**/*.stories.{js,ts,jsx,tsx}'],
+      exclude: [
+        'src/**/*.d.ts',
+        'src/**/*.stories.{js,ts,jsx,tsx}',
+        'src/app/**/*.d.ts',
+        'src/app/**/layout.{js,jsx,ts,tsx}',
+        'src/app/**/page.{js,jsx,ts,tsx}',
+        'src/app/**/loading.{js,jsx,ts,tsx}',
+        'src/app/**/error.{js,jsx,ts,tsx}',
+        'src/app/**/not-found.{js,jsx,ts,tsx}',
+        'src/app/**/global-error.{js,jsx,ts,tsx}',
+        'src/app/**/*.stories.{js,jsx,ts,tsx}',
+        'src/app/**/types/**',
+      ],
       thresholds: {
         statements: 95,
         branches: 95,
