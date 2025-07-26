@@ -105,7 +105,10 @@ jobs:
       - name: Setup Mobile Project
         uses: ./.github/actions/setup-mobile
 
-      - name: Start Mobile on Android Emulator
+      - name: Start Android Emulator
+        uses: ./.github/actions/start-android-emulator
+
+      - name: Start Mobile Server on Android
         uses: ./.github/actions/start-mobile-on-android
 
       - name: Run Mobile Tests
