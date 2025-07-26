@@ -22,7 +22,7 @@ updates:
           - 'minor'
         patterns:
           - '*'
-      patch-and-minor:
+      dependencies:
         update-types:
           - 'patch'
           - 'minor'
@@ -71,7 +71,7 @@ updates:
           - 'minor'
         patterns:
           - '*'
-      backend-patch-and-minor:
+      backend-dependencies:
         update-types:
           - 'patch'
           - 'minor'
@@ -105,7 +105,7 @@ updates:
           - 'minor'
         patterns:
           - '*'
-      admin-patch-and-minor:
+      admin-dependencies:
         update-types:
           - 'patch'
           - 'minor'
@@ -131,7 +131,7 @@ updates:
         dependency-type: 'development'
         patterns:
           - '*'
-      mobile-patch-and-minor:
+      mobile-dependencies:
         patterns:
           - '*'
     ignore:
