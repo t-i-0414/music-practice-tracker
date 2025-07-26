@@ -43,6 +43,7 @@ runs:
         emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
         disable-animations: true
         script: |
+          cd packages/apps/mobile
           bun run start:dev:android
 
           echo "Waiting for Mobile server to start..."
