@@ -17,9 +17,12 @@ updates:
     groups:
       development-dependencies:
         dependency-type: 'development'
+        update-types:
+          - 'patch'
+          - 'minor'
         patterns:
           - '*'
-      patch-and-minor:
+      dependencies:
         update-types:
           - 'patch'
           - 'minor'
@@ -50,11 +53,18 @@ updates:
       prefix: 'chore(backend)'
       prefix-development: 'chore(backend)'
     groups:
+      nestjs:
+        patterns:
+          - '@nestjs/*'
+          - 'nest-*'
       backend-dev-dependencies:
         dependency-type: 'development'
+        update-types:
+          - 'patch'
+          - 'minor'
         patterns:
           - '*'
-      backend-patch-and-minor:
+      backend-dependencies:
         update-types:
           - 'patch'
           - 'minor'
@@ -76,11 +86,19 @@ updates:
       prefix: 'chore(admin)'
       prefix-development: 'chore(admin)'
     groups:
+      nextjs:
+        patterns:
+          - 'next'
+          - '@next/*'
+          - 'eslint-config-next'
       admin-dev-dependencies:
         dependency-type: 'development'
+        update-types:
+          - 'patch'
+          - 'minor'
         patterns:
           - '*'
-      admin-patch-and-minor:
+      admin-dependencies:
         update-types:
           - 'patch'
           - 'minor'
@@ -102,11 +120,16 @@ updates:
       prefix: 'chore(mobile)'
       prefix-development: 'chore(mobile)'
     groups:
-      mobile-patch-and-minor:
-        update-types:
-          - 'patch'
+      mobile-dev-dependencies:
+        dependency-type: 'development'
         patterns:
           - '*'
+      mobile-dependencies:
+        patterns:
+          - '*'
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major', 'version-update:semver-minor']
 
   - package-ecosystem: 'github-actions'
     directory: '/'
