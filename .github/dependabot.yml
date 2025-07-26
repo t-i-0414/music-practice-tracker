@@ -26,6 +26,13 @@ updates:
           - 'minor'
         patterns:
           - '*'
+    ignore:
+      - dependency-name: '@prisma/client'
+        update-types: ['version-update:semver-major', 'version-update:semver-minor', 'version-update:semver-patch']
+      - dependency-name: 'react'
+        update-types: ['version-update:semver-major', 'version-update:semver-minor', 'version-update:semver-patch']
+      - dependency-name: 'react-dom'
+        update-types: ['version-update:semver-major', 'version-update:semver-minor', 'version-update:semver-patch']
 
   - package-ecosystem: 'npm'
     directory: '/packages/apps/backend'
@@ -107,6 +114,12 @@ updates:
     ignore:
       - dependency-name: 'react-native'
         update-types: ['version-update:semver-major', 'version-update:semver-minor']
+      - dependency-name: 'react-native-gesture-handler'
+        versions: ['>2.24.0']
+      - dependency-name: 'react-native-screens'
+        versions: ['>4.11.1']
+      - dependency-name: 'babel-preset-expo'
+        versions: ['>13.0.0']
 
   - package-ecosystem: 'github-actions'
     directory: '/'
