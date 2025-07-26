@@ -9,20 +9,5 @@ runs:
       run: |
         cd packages/apps/mobile
         emulator -avd test -no-window -no-audio -no-boot-anim &
-        bun run start:dev:android &
-
-        echo "Waiting for Mobile server to start..."
-
-        timeout 60 bash -c '
-          while true; do
-            curl --silent --fail http://localhost:8081 >/dev/null 2>&1 && echo "✅ Mobile server is up!" && exit 0
-            echo -n "."
-            sleep 1
-          done
-        '
-
-        if [ $? -ne 0 ]; then
-          echo ""
-          echo "❌ Mobile server failed to start within 60 seconds"
-          exit 1
-        fi
+        bun run start:dev:android & sleep 15
+        bun run test
