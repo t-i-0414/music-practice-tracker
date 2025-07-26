@@ -1,6 +1,217 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended"
-  ]
+  "extends": ["config:recommended"],
+  "timezone": "Asia/Tokyo",
+  "schedule": ["before 10am on Monday"],
+  "prConcurrentLimit": 10,
+  "labels": ["dependencies"],
+  "commitMessagePrefix": "chore: ",
+  "commitMessageTopic": "{{depName}}",
+  "commitMessageExtra": "to {{#if isPinDigest}}{{{newDigestShort}}}{{else}}{{#if isMajor}}{{prettyNewMajor}}{{else}}{{#if isSingleVersion}}{{prettyNewVersion}}{{else}}{{#if newValue}}{{{newValue}}}{{else}}{{{newDigestShort}}}{{/if}}{{/if}}{{/if}}{{/if}}",
+  "rangeStrategy": "bump",
+  "packageRules": [
+    {
+      "description": "Root dependencies",
+      "matchFileNames": ["package.json"],
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["dependencies"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "addLabels": ["root"],
+      "commitMessagePrefix": "chore(root): ",
+      "groupName": "root dependencies",
+      "groupSlug": "root-dependencies"
+    },
+    {
+      "description": "Root dependencies (major updates)",
+      "matchFileNames": ["package.json"],
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["dependencies"],
+      "matchUpdateTypes": ["major"],
+      "addLabels": ["root"],
+      "commitMessagePrefix": "chore(root): ",
+      "groupName": "root dependencies (major updates)",
+      "groupSlug": "root-dependencies-major"
+    },
+    {
+      "description": "Root devdependencies",
+      "matchFileNames": ["package.json"],
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "addLabels": ["root"],
+      "commitMessagePrefix": "chore(root): ",
+      "groupName": "root devdependencies",
+      "groupSlug": "root-dev-dependencies"
+    },
+    {
+      "description": "Root devdependencies (major updates)",
+      "matchFileNames": ["package.json"],
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["major"],
+      "addLabels": ["root"],
+      "commitMessagePrefix": "chore(root): ",
+      "groupName": "root devdependencies (major updates)",
+      "groupSlug": "root-dev-dependencies-major"
+    },
+    {
+      "description": "Backend dependencies",
+      "matchFileNames": ["packages/apps/backend/package.json"],
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["dependencies"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "addLabels": ["backend"],
+      "commitMessagePrefix": "chore(backend): ",
+      "groupName": "backend dependencies",
+      "groupSlug": "backend-dependencies"
+    },
+    {
+      "description": "Backend dependencies (major updates)",
+      "matchFileNames": ["packages/apps/backend/package.json"],
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["dependencies"],
+      "matchUpdateTypes": ["major"],
+      "addLabels": ["backend"],
+      "commitMessagePrefix": "chore(backend): ",
+      "groupName": "backend dependencies (major updates)",
+      "groupSlug": "backend-dependencies-major"
+    },
+    {
+      "description": "Backend devdependencies",
+      "matchFileNames": ["packages/apps/backend/package.json"],
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "addLabels": ["backend"],
+      "commitMessagePrefix": "chore(backend): ",
+      "groupName": "backend devdependencies",
+      "groupSlug": "backend-dev-dependencies"
+    },
+    {
+      "description": "Backend devdependencies (major updates)",
+      "matchFileNames": ["packages/apps/backend/package.json"],
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["major"],
+      "addLabels": ["backend"],
+      "commitMessagePrefix": "chore(backend): ",
+      "groupName": "backend devdependencies (major updates)",
+      "groupSlug": "backend-dev-dependencies-major"
+    },
+    {
+      "description": "Group NestJS packages",
+      "matchFileNames": ["packages/apps/backend/package.json"],
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["dependencies", "devDependencies"],
+      "matchUpdateTypes": ["patch", "minor", "major"],
+      "addLabels": ["backend"],
+      "commitMessagePrefix": "chore(backend): ",
+      "matchPackagePatterns": ["^@nestjs/", "^nest-"],
+      "groupName": "NestJS packages",
+      "groupSlug": "nestjs"
+    },
+    {
+      "description": "Admin dependencies",
+      "matchFileNames": ["packages/apps/admin/package.json"],
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["dependencies"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "addLabels": ["admin"],
+      "commitMessagePrefix": "chore(admin): ",
+      "groupName": "admin dependencies",
+      "groupSlug": "admin-dependencies"
+    },
+    {
+      "description": "Admin dependencies (major updates)",
+      "matchFileNames": ["packages/apps/admin/package.json"],
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["dependencies"],
+      "matchUpdateTypes": ["major"],
+      "addLabels": ["admin"],
+      "commitMessagePrefix": "chore(admin): ",
+      "groupName": "admin dependencies (major updates)",
+      "groupSlug": "admin-dependencies-major"
+    },
+    {
+      "description": "Admin devdependencies",
+      "matchFileNames": ["packages/apps/admin/package.json"],
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "addLabels": ["admin"],
+      "commitMessagePrefix": "chore(admin): ",
+      "groupName": "admin devdependencies",
+      "groupSlug": "admin-dev-dependencies"
+    },
+    {
+      "description": "Admin devdependencies (major updates)",
+      "matchFileNames": ["packages/apps/admin/package.json"],
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["major"],
+      "addLabels": ["admin"],
+      "commitMessagePrefix": "chore(admin): ",
+      "groupName": "admin devdependencies (major updates)",
+      "groupSlug": "admin-dev-dependencies-major"
+    },
+    {
+      "description": "Group Next.js packages",
+      "matchFileNames": ["packages/apps/admin/package.json"],
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["dependencies", "devDependencies"],
+      "matchUpdateTypes": ["patch", "minor", "major"],
+      "addLabels": ["admin"],
+      "commitMessagePrefix": "chore(admin): ",
+      "matchPackagePatterns": ["^next$", "^@next/", "^eslint-config-next"],
+      "groupName": "Next.js packages",
+      "groupSlug": "nextjs"
+    },
+    {
+      "description": "Group Prisma packages",
+      "matchPackagePatterns": ["^@prisma/", "^prisma"],
+      "matchFileNames": ["package.json", "packages/apps/backend/package.json"],
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["dependencies", "devDependencies"],
+      "matchUpdateTypes": ["patch", "minor", "major"],
+      "commitMessagePrefix": "chore: ",
+      "groupName": "Prisma packages",
+      "groupSlug": "prisma"
+    },
+    {
+      "description": "Disable all updates for @prisma/client",
+      "matchPackageNames": ["@prisma/client"],
+      "enabled": false
+    },
+    {
+      "description": "Disable all updates for React packages",
+      "matchPackageNames": ["react", "react-dom", "react-test-renderer"],
+      "enabled": false
+    },
+    {
+      "description": "Security updates",
+      "matchDatasources": ["npm"],
+      "matchUpdateTypes": ["patch", "minor", "major"],
+      "matchCategories": ["security"],
+      "prPriority": 10,
+      "addLabels": ["security"]
+    },
+    {
+      "description": "Group GitHub Actions",
+      "matchManagers": ["github-actions"],
+      "groupName": "GitHub Actions",
+      "groupSlug": "github-actions",
+      "addLabels": ["github-actions"],
+      "commitMessagePrefix": "ci: "
+    },
+    {
+      "description": "Pin GitHub Actions digests",
+      "matchManagers": ["github-actions"],
+      "pinDigests": true
+    }
+  ],
+  "ignorePaths": ["**/node_modules/**", "packages/apps/mobile/**"],
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "labels": ["security"]
+  }
 }
