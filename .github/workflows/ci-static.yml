@@ -2,6 +2,8 @@ name: CI / Static
 
 permissions:
   contents: read
+  pull-requests: write
+  security-events: write
 
 on:
   push:
@@ -177,3 +179,25 @@ jobs:
             echo "::error::Changes detected in API types. Please run 'bun run gen:api-types' to update them."
             exit 1
           fi
+
+  scan-vulnerability:
+    name: Scan Vulnerability
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Run Trivy Vulnerability Scanner in repo mode
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: 'fs'
+          ignore-unfixed: true
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL'
+
+      - name: Upload Trivy Scan Results to GitHub Security Tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
