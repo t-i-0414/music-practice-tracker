@@ -61,3 +61,31 @@ jobs:
         run: |
           cd packages/apps/admin
           bun run test:cov
+
+  test-backend:
+    name: Test Backend
+    needs: setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Base Project
+        uses: ./.github/actions/setup-base-project
+
+      - name: Setup Backend Project
+        uses: ./.github/actions/setup-backend
+
+      - name: Start Backend Server
+        uses: ./.github/actions/start-backend
+
+      - name: Run Backend Tests
+        run: |
+          cd packages/apps/backend
+          bun run test
+
+      - name: Run Backend Tests (Coverage)
+        run: |
+          cd packages/apps/backend
+          bun run test:cov
