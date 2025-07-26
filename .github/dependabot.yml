@@ -33,6 +33,8 @@ updates:
         update-types: ['version-update:semver-major', 'version-update:semver-minor', 'version-update:semver-patch']
       - dependency-name: 'react-dom'
         update-types: ['version-update:semver-major', 'version-update:semver-minor', 'version-update:semver-patch']
+      - dependency-name: 'react-test-renderer'
+        update-types: ['version-update:semver-major', 'version-update:semver-minor', 'version-update:semver-patch']
 
   - package-ecosystem: 'npm'
     directory: '/packages/apps/backend'
