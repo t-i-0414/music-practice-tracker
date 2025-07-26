@@ -2,13 +2,6 @@
 
 <!-- Describe CI/CD pipeline modifications -->
 
-## 📋 Modified Systems
-
-- [ ] GitHub Actions
-- [ ] CircleCI
-- [ ] Jenkins
-- [ ] Other:
-
 ## 🔧 Configuration Changes
 
 ```yaml
