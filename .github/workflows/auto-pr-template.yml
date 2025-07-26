@@ -80,7 +80,7 @@ jobs:
             }
 
             // Read template content
-            const templatePath = path.join('.github', 'PULL_REQUEST_TEMPLATE', templateFile);
+            const templatePath = path.join('.github', 'pull_request_template', templateFile);
             let templateContent;
 
             try {
