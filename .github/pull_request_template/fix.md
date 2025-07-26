@@ -1,10 +1,13 @@
 ## 🐛 Bug Description
+
 <!-- Describe the bug being fixed -->
 
 ## 🔍 Root Cause
+
 <!-- Explain why this bug occurred -->
 
 ## 💡 Solution
+
 <!-- Describe how the bug was fixed -->
 
 ## 📋 Testing
@@ -19,5 +22,7 @@
 - Related: #
 
 ## 💥 Breaking Changes
+
 <!-- List any breaking changes -->
+
 - [ ] None

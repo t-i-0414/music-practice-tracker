@@ -1,4 +1,5 @@
 ## 🏗️ Build Changes
+
 <!-- Describe build system modifications -->
 
 ## 📋 Change Type
@@ -9,6 +10,7 @@
 - [ ] Other:
 
 ## ⚠️ Important Notes
+
 <!-- Any build-related warnings or notes -->
 
 ## ✅ Verification

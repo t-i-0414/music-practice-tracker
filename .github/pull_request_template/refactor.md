@@ -1,7 +1,9 @@
 ## ♻️ Refactoring Summary
+
 <!-- Describe the code improvements -->
 
 ## 🎯 Motivation
+
 <!-- Why was this refactoring needed? -->
 
 ## 📊 Improvements
@@ -23,5 +25,7 @@
 - Related: #
 
 ## 💥 Breaking Changes
+
 <!-- List any breaking changes -->
+
 - [ ] None

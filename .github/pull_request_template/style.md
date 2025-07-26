@@ -1,4 +1,5 @@
 ## 💎 Style Changes
+
 <!-- Describe formatting or style changes -->
 
 ## 📋 Change Type
