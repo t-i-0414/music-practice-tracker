@@ -36,5 +36,5 @@ runs:
       shell: bash
       run: |
         echo " Installing dependencies with Bun..."
-        bun install
+        bun install --frozen-lockfile
         echo "✅ Dependencies installed successfully"
