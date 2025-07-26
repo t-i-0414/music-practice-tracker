@@ -17,7 +17,7 @@
 
 ## ✅ Verification
 
-- [ ] All tests pass
+- [ ] Mobile E2E tests pass
 - [ ] New tests work correctly
 - [ ] CI/CD pipeline passes
 

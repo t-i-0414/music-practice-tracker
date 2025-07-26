@@ -17,7 +17,7 @@
 ## 📋 Checklist
 
 - [ ] Feature works as expected
-- [ ] Unit tests added
+- [ ] Tests added
 - [ ] Documentation updated
 - [ ] Performance impact considered
 

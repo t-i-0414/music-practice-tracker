@@ -11,7 +11,6 @@
 ## ✅ Verification
 
 - [ ] Pipeline runs successfully
-- [ ] All jobs pass
 - [ ] Security scans pass
 
 ## 🔗 References
