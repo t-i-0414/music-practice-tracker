@@ -1024,20 +1024,17 @@ class UserAdminFacadeService {} // Admin API operations with extended permission
 `scripts/validate-prisma-schema.sh` enforces:
 
 1. **ID Fields**
-
    - Field name must be `id`
    - `String` type with `@id` attribute
    - `@db.Uuid` for UUID storage
    - `@default(dbgenerated("gen_random_uuid()"))`
 
 2. **Timestamps**
-
    - `createdAt`: `DateTime` type with `@default(now())`
    - `updatedAt`: `DateTime` type with `@updatedAt`
    - `deletedAt`: `DateTime?` for soft delete support
 
 3. **Required Indexes**
-
    - `@@index([createdAt])`
    - `@@index([deletedAt])`
 
