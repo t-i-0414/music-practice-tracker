@@ -2,7 +2,7 @@ name: 'PR Title Validation'
 permissions:
   pull-requests: read
 on:
-  pull_request_target:
+  pull_request:
     types:
       - opened
       - edited
