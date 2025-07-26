@@ -13,6 +13,8 @@
     "packages/libs/*"
   ],
   "scripts": {
+    "changeset:add": "changeset",
+    "changeset:version": "changeset version",
     "ci:temp": "run-s test",
     "cspell": "cspell '**'",
     "format:check": "prettier --check .",
@@ -41,6 +43,7 @@
   },
   "devDependencies": {
     "@babel/preset-env": "^7.25.4",
+    "@changesets/cli": "^2.29.5",
     "@chromatic-com/storybook": "^4.0.1",
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
