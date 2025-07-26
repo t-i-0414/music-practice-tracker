@@ -26,6 +26,15 @@ updates:
           - 'minor'
         patterns:
           - '*'
+    ignore:
+      - dependency-name: '@prisma/client'
+        update-types: ['version-update:semver-major', 'version-update:semver-minor', 'version-update:semver-patch']
+      - dependency-name: 'react'
+        update-types: ['version-update:semver-major', 'version-update:semver-minor', 'version-update:semver-patch']
+      - dependency-name: 'react-dom'
+        update-types: ['version-update:semver-major', 'version-update:semver-minor', 'version-update:semver-patch']
+      - dependency-name: 'react-test-renderer'
+        update-types: ['version-update:semver-major', 'version-update:semver-minor', 'version-update:semver-patch']
 
   - package-ecosystem: 'npm'
     directory: '/packages/apps/backend'
@@ -42,40 +51,16 @@ updates:
       prefix: 'chore(backend)'
       prefix-development: 'chore(backend)'
     groups:
-      nestjs:
-        patterns:
-          - '@nestjs/*'
-          - 'nest-*'
-      testing:
-        dependency-type: 'development'
-        patterns:
-          - 'jest*'
-          - '@types/jest'
-          - 'supertest'
-          - '@types/supertest'
       backend-dev-dependencies:
         dependency-type: 'development'
         patterns:
           - '*'
-        exclude-patterns:
-          - 'jest*'
-          - '@types/jest'
-          - 'supertest'
-          - '@types/supertest'
       backend-patch-and-minor:
         update-types:
           - 'patch'
           - 'minor'
         patterns:
           - '*'
-        exclude-patterns:
-          - '@prisma/*'
-          - 'prisma'
-    ignore:
-      - dependency-name: '@prisma/client'
-        update-types: ['version-update:semver-major']
-      - dependency-name: 'prisma'
-        update-types: ['version-update:semver-major']
 
   - package-ecosystem: 'npm'
     directory: '/packages/apps/admin'
@@ -92,48 +77,16 @@ updates:
       prefix: 'chore(admin)'
       prefix-development: 'chore(admin)'
     groups:
-      nextjs:
-        patterns:
-          - 'next'
-          - '@next/*'
-          - 'eslint-config-next'
-      admin-testing:
-        dependency-type: 'development'
-        patterns:
-          - '@playwright/*'
-          - 'playwright'
-          - 'cypress'
-          - 'vitest'
-          - '@vitest/*'
-          - '@storybook/*'
-          - 'storybook'
       admin-dev-dependencies:
         dependency-type: 'development'
         patterns:
           - '*'
-        exclude-patterns:
-          - '@playwright/*'
-          - 'playwright'
-          - 'cypress'
-          - 'vitest'
-          - '@vitest/*'
-          - '@storybook/*'
-          - 'storybook'
       admin-patch-and-minor:
         update-types:
           - 'patch'
           - 'minor'
         patterns:
           - '*'
-        exclude-patterns:
-          - 'react'
-          - 'react-dom'
-          - 'next'
-    ignore:
-      - dependency-name: 'react'
-        update-types: ['version-update:semver-major']
-      - dependency-name: 'react-dom'
-        update-types: ['version-update:semver-major']
 
   - package-ecosystem: 'npm'
     directory: '/packages/apps/mobile'
@@ -150,17 +103,6 @@ updates:
       prefix: 'chore(mobile)'
       prefix-development: 'chore(mobile)'
     groups:
-      expo:
-        patterns:
-          - 'expo'
-          - 'expo-*'
-          - '@expo/*'
-      react-native:
-        patterns:
-          - 'react-native'
-          - 'react-native-*'
-          - '@react-native*'
-          - '@react-navigation/*'
       mobile-dev-dependencies:
         dependency-type: 'development'
         patterns:
@@ -171,14 +113,15 @@ updates:
           - 'minor'
         patterns:
           - '*'
-        exclude-patterns:
-          - 'expo'
-          - 'react-native'
     ignore:
-      - dependency-name: 'expo'
-        update-types: ['version-update:semver-major']
       - dependency-name: 'react-native'
-        update-types: ['version-update:semver-major']
+        update-types: ['version-update:semver-major', 'version-update:semver-minor']
+      - dependency-name: 'react-native-gesture-handler'
+        versions: ['>2.24.0']
+      - dependency-name: 'react-native-screens'
+        versions: ['>4.11.1']
+      - dependency-name: 'babel-preset-expo'
+        versions: ['>13.0.0']
 
   - package-ecosystem: 'github-actions'
     directory: '/'
