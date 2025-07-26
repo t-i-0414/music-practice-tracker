@@ -9,5 +9,7 @@ on:
 jobs:
   add-reviews:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: kentaro-m/auto-assign-action@v2.0.0
+      - name: Auto Assign Reviewers & Reviewee
+        uses: kentaro-m/auto-assign-action@v2.0.0
