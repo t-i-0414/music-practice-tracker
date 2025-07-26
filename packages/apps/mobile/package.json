@@ -52,7 +52,7 @@
     "expo-system-ui": "~5.0.10",
     "expo-web-browser": "~14.2.0",
     "react-native": "0.80.2",
-    "react-native-gesture-handler": "~2.24.0",
+    "react-native-gesture-handler": "~2.27.2",
     "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "5.5.2",
     "react-native-screens": "~4.11.1",
@@ -70,7 +70,7 @@
     "@testing-library/react-native": "^13.2.0",
     "@types/babel__core": "~7.20.5",
     "@types/react-native-web": "~0.19.1",
-    "babel-preset-expo": "~13.0.0",
+    "babel-preset-expo": "~13.2.3",
     "eslint-config-expo": "~9.2.0"
   }
 }
