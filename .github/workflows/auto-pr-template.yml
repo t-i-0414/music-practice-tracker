@@ -1,0 +1,109 @@
+name: Auto PR Template
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  apply-template:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get branch name and apply template
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs').promises;
+            const path = require('path');
+
+            // Get branch name
+            const branch = context.payload.pull_request.head.ref;
+            console.log(`Branch name: ${branch}`);
+
+            // Extract branch prefix
+            const branchPrefix = branch.split('/')[0];
+
+            // Determine template using switch
+            let templateFile;
+            switch (branchPrefix) {
+              case 'feat':
+              case 'feature':
+                templateFile = 'feat.md';
+                break;
+              case 'fix':
+              case 'bugfix':
+              case 'hotfix':
+                templateFile = 'fix.md';
+                break;
+              case 'docs':
+              case 'documentation':
+                templateFile = 'docs.md';
+                break;
+              case 'style':
+              case 'format':
+                templateFile = 'style.md';
+                break;
+              case 'refactor':
+              case 'refact':
+                templateFile = 'refactor.md';
+                break;
+              case 'perf':
+              case 'performance':
+                templateFile = 'perf.md';
+                break;
+              case 'test':
+              case 'tests':
+                templateFile = 'test.md';
+                break;
+              case 'build':
+              case 'deps':
+                templateFile = 'build.md';
+                break;
+              case 'ci':
+              case 'pipeline':
+                templateFile = 'ci.md';
+                break;
+              case 'chore':
+              case 'misc':
+                templateFile = 'chore.md';
+                break;
+              default:
+                console.log(`No template for branch prefix: ${branchPrefix}`);
+                return;
+            }
+
+            // Read template content
+            const templatePath = path.join('.github', 'pull_request_template', templateFile);
+            let templateContent;
+
+            try {
+              templateContent = await fs.readFile(templatePath, 'utf8');
+            } catch (error) {
+              console.error(`Template file not found: ${templatePath}`);
+              return;
+            }
+
+            // Get current PR body
+            const currentBody = context.payload.pull_request.body || '';
+
+            // Only apply template if PR body is empty
+            if (!currentBody || currentBody.trim() === '') {
+              // Update PR with template
+              await github.rest.pulls.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.issue.number,
+                body: templateContent
+              });
+
+              console.log(`Applied template: ${templateFile}`);
+            } else {
+              console.log('PR already has content, skipping template');
+            }
