@@ -53,7 +53,7 @@
     "expo-web-browser": "~14.2.0",
     "react-native": "0.79.5",
     "react-native-gesture-handler": "~2.27.2",
-    "react-native-reanimated": "~3.17.4",
+    "react-native-reanimated": "~4.0.0",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.13.1",
     "react-native-svg": "15.11.2",
