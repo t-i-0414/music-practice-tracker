@@ -16,7 +16,6 @@
 ## ✅ Verification
 
 - [ ] Local build succeeds
-- [ ] CI/CD build passes
 - [ ] Build artifacts are correct
 
 ## 🔗 References

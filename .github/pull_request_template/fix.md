@@ -15,6 +15,7 @@
 - [ ] Bug no longer reproduces
 - [ ] Existing tests pass
 - [ ] New test cases added (if applicable)
+- [ ] Mobile E2E tests pass
 
 ## 🔗 References
 

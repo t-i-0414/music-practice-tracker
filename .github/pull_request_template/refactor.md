@@ -17,7 +17,7 @@
 ## ✅ Verification
 
 - [ ] All features work as before
-- [ ] All tests pass
+- [ ] Mobile E2E tests pass
 - [ ] No performance regression
 
 ## 🔗 References
