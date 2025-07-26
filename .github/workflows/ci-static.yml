@@ -45,6 +45,21 @@ jobs:
       - name: Run Format Check
         run: bun run format:check
 
+  check-spelling:
+    name: Check Spelling
+    needs: setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Base Project
+        uses: ./.github/actions/setup-base-project
+
+      - name: Run Spelling Check
+        run: bun run cspell
+
   check-shell-lint:
     name: Check Shell Lint
     needs: setup
@@ -58,7 +73,7 @@ jobs:
         uses: ./.github/actions/setup-base-project
 
       - name: Run Shell Lint Check
-        run: bun run cspell
+        run: bun run lint:shell:check
 
   check-secret-lint:
     name: Check Secret Lint
