@@ -1,11 +1,14 @@
 model User {
-  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id        Int       @id @default(autoincrement())
+  publicId  String    @unique @default(uuid()) @map("public_id") @db.Uuid
   email     String    @unique
   name      String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 
+  @@index([publicId])
   @@index([createdAt])
   @@index([deletedAt])
+  @@map("users")
 }
