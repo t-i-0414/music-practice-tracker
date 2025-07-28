@@ -31,47 +31,47 @@ export class UserCommandService {
     return toActiveUsersDto(createdUsers);
   }
 
-  public async updateUserById({ id, data }: UpdateUserInputDto): Promise<ActiveUserResponseDto> {
-    await this.queryService.findUserByIdOrFail({ id });
+  public async updateUserById({ publicId, data }: UpdateUserInputDto): Promise<ActiveUserResponseDto> {
+    await this.queryService.findUserByIdOrFail({ publicId });
 
     return toActiveUserDto(
       await this.repository.updateUser({
-        where: { id },
+        where: { publicId },
         data,
       }),
     );
   }
 
-  public async deleteUserById({ id }: DeleteUserByIdInputDto): Promise<void> {
-    await this.queryService.findUserByIdOrFail({ id });
-    await this.repository.deleteUser({ id });
+  public async deleteUserById({ publicId }: DeleteUserByIdInputDto): Promise<void> {
+    await this.queryService.findUserByIdOrFail({ publicId });
+    await this.repository.deleteUser({ publicId });
   }
 
-  public async deleteManyUsersById({ ids }: DeleteManyUsersInputDto): Promise<void> {
+  public async deleteManyUsersById({ publicIds }: DeleteManyUsersInputDto): Promise<void> {
     await this.repository.deleteManyUsers({
-      id: { in: ids },
+      publicId: { in: publicIds },
     });
   }
 
-  public async hardDeleteUserById({ id }: HardDeleteUserByIdInputDto): Promise<void> {
-    await this.queryService.findAnyUserByIdOrFail({ id });
-    await this.repository.hardDeleteUser({ id });
+  public async hardDeleteUserById({ publicId }: HardDeleteUserByIdInputDto): Promise<void> {
+    await this.queryService.findAnyUserByIdOrFail({ publicId });
+    await this.repository.hardDeleteUser({ publicId });
   }
 
-  public async hardDeleteManyUsersById({ ids }: HardDeleteManyUsersInputDto): Promise<void> {
+  public async hardDeleteManyUsersById({ publicIds }: HardDeleteManyUsersInputDto): Promise<void> {
     await this.repository.hardDeleteManyUsers({
-      id: { in: ids },
+      publicId: { in: publicIds },
     });
   }
 
-  public async restoreUserById({ id }: RestoreUserByIdInputDto): Promise<ActiveUserResponseDto> {
-    const restoredUser = await this.repository.restoreUser({ id });
+  public async restoreUserById({ publicId }: RestoreUserByIdInputDto): Promise<ActiveUserResponseDto> {
+    const restoredUser = await this.repository.restoreUser({ publicId });
     return toActiveUserDto(restoredUser);
   }
 
-  public async restoreManyUsersById({ ids }: RestoreManyUsersInputDto): Promise<ActiveUsersResponseDto> {
+  public async restoreManyUsersById({ publicIds }: RestoreManyUsersInputDto): Promise<ActiveUsersResponseDto> {
     const restoredUsers = await this.repository.restoreManyAndReturnUsers({
-      id: { in: ids },
+      publicId: { in: publicIds },
     });
     return toActiveUsersDto(restoredUsers);
   }

@@ -9,7 +9,7 @@ describe('appUsersController', () => {
   let facadeService: jest.Mocked<UserAppFacadeService>;
 
   const mockUser = {
-    id: '123e4567-e89b-12d3-a456-426614174000',
+    publicId: '123e4567-e89b-12d3-a456-426614174000',
     email: 'test@example.com',
     name: 'Test User',
     createdAt: new Date('2024-01-01'),
@@ -44,16 +44,16 @@ describe('appUsersController', () => {
   });
 
   describe('findUserById', () => {
-    it('should find user by id', async () => {
+    it('should find user by publicId', async () => {
       expect.assertions(2);
 
-      const { id } = mockUser;
+      const { publicId } = mockUser;
       const expectedResult = toActiveUserDto(mockUser);
       facadeService.findUserById.mockResolvedValue(expectedResult);
 
-      const result = await controller.findUserById(id);
+      const result = await controller.findUserById(publicId);
 
-      expect(facadeService.findUserById).toHaveBeenCalledWith({ id });
+      expect(facadeService.findUserById).toHaveBeenCalledWith({ publicId });
       expect(result).toStrictEqual(expectedResult);
     });
   });
@@ -77,14 +77,14 @@ describe('appUsersController', () => {
     it('should update user', async () => {
       expect.assertions(2);
 
-      const { id } = mockUser;
+      const { publicId } = mockUser;
       const data = { name: 'Updated Name' };
       const expectedResult = toActiveUserDto({ ...mockUser, name: 'Updated Name' });
       facadeService.updateUserById.mockResolvedValue(expectedResult);
 
-      const result = await controller.updateUser(id, data);
+      const result = await controller.updateUser(publicId, data);
 
-      expect(facadeService.updateUserById).toHaveBeenCalledWith({ id, data });
+      expect(facadeService.updateUserById).toHaveBeenCalledWith({ publicId, data });
       expect(result).toStrictEqual(expectedResult);
     });
   });
@@ -93,12 +93,12 @@ describe('appUsersController', () => {
     it('should delete user', async () => {
       expect.assertions(1);
 
-      const { id } = mockUser;
+      const { publicId } = mockUser;
       facadeService.deleteUserById.mockResolvedValue();
 
-      await controller.deleteUser(id);
+      await controller.deleteUser(publicId);
 
-      expect(facadeService.deleteUserById).toHaveBeenCalledWith({ id });
+      expect(facadeService.deleteUserById).toHaveBeenCalledWith({ publicId });
     });
   });
 });

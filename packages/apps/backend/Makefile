@@ -53,8 +53,8 @@ endif
 .PHONY: run-migrations
 run-migrations:
 	@echo "📊 Running database migrations..."
-	bun run prisma:migrate:dev
-	bun run prisma:migrate:test
+	bun run prisma:migrate:deploy
+	bun run prisma:migrate:deploy:test
 	@echo "✅ Migrations complete"
 
 # -------------------------------------------------------------

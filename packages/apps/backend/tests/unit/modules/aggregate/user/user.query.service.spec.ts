@@ -17,7 +17,8 @@ describe('userQueryService', () => {
   let repository: jest.Mocked<UserRepositoryService>;
 
   const mockUser = {
-    id: '123e4567-e89b-12d3-a456-426614174000',
+    id: 1,
+    publicId: '123e4567-e89b-12d3-a456-426614174000',
     email: 'test@example.com',
     name: 'Test User',
     createdAt: new Date('2024-01-01'),
@@ -63,7 +64,7 @@ describe('userQueryService', () => {
       expect.assertions(2);
 
       repository.findUniqueActiveUser.mockResolvedValue(mockUser);
-      const dto = { id: mockUser.id };
+      const dto = { publicId: mockUser.publicId };
 
       const result = await service.findUserByIdOrFail(dto);
 
@@ -75,9 +76,11 @@ describe('userQueryService', () => {
       expect.assertions(2);
 
       repository.findUniqueActiveUser.mockResolvedValue(null);
-      const dto = { id: mockUser.id };
+      const dto = { publicId: mockUser.publicId };
 
-      await expect(service.findUserByIdOrFail(dto)).rejects.toThrow(new NotFoundException(`User ${dto.id} not found`));
+      await expect(service.findUserByIdOrFail(dto)).rejects.toThrow(
+        new NotFoundException(`User ${dto.publicId} not found`),
+      );
       expect(repository.findUniqueActiveUser).toHaveBeenCalledWith(dto);
     });
   });
@@ -87,7 +90,7 @@ describe('userQueryService', () => {
       expect.assertions(2);
 
       repository.findUniqueDeletedUser.mockResolvedValue(mockDeletedUser);
-      const dto = { id: mockDeletedUser.id };
+      const dto = { publicId: mockDeletedUser.publicId };
 
       const result = await service.findDeletedUserByIdOrFail(dto);
 
@@ -99,10 +102,10 @@ describe('userQueryService', () => {
       expect.assertions(2);
 
       repository.findUniqueDeletedUser.mockResolvedValue(null);
-      const dto = { id: mockUser.id };
+      const dto = { publicId: mockUser.publicId };
 
       await expect(service.findDeletedUserByIdOrFail(dto)).rejects.toThrow(
-        new NotFoundException(`Deleted user ${dto.id} not found`),
+        new NotFoundException(`Deleted user ${dto.publicId} not found`),
       );
       expect(repository.findUniqueDeletedUser).toHaveBeenCalledWith(dto);
     });
@@ -113,7 +116,7 @@ describe('userQueryService', () => {
       expect.assertions(2);
 
       repository.findUniqueAnyUser.mockResolvedValue(mockUser);
-      const dto = { id: mockUser.id };
+      const dto = { publicId: mockUser.publicId };
 
       const result = await service.findAnyUserByIdOrFail(dto);
 
@@ -125,10 +128,10 @@ describe('userQueryService', () => {
       expect.assertions(2);
 
       repository.findUniqueAnyUser.mockResolvedValue(null);
-      const dto = { id: mockUser.id };
+      const dto = { publicId: mockUser.publicId };
 
       await expect(service.findAnyUserByIdOrFail(dto)).rejects.toThrow(
-        new NotFoundException(`User ${dto.id} not found`),
+        new NotFoundException(`User ${dto.publicId} not found`),
       );
       expect(repository.findUniqueAnyUser).toHaveBeenCalledWith(dto);
     });
@@ -140,12 +143,12 @@ describe('userQueryService', () => {
 
       const mockUsers = [mockUser];
       repository.findManyActiveUsers.mockResolvedValue(mockUsers);
-      const dto = { ids: [mockUser.id] };
+      const dto = { publicIds: [mockUser.publicId] };
 
       const result = await service.findManyUsers(dto);
 
       expect(repository.findManyActiveUsers).toHaveBeenCalledWith({
-        where: { id: { in: dto.ids } },
+        where: { publicId: { in: dto.publicIds } },
       });
       expect(result).toStrictEqual(toActiveUsersDto(mockUsers));
     });
@@ -154,12 +157,12 @@ describe('userQueryService', () => {
       expect.assertions(2);
 
       repository.findManyActiveUsers.mockResolvedValue([]);
-      const dto = { ids: [mockUser.id] };
+      const dto = { publicIds: [mockUser.publicId] };
 
       const result = await service.findManyUsers(dto);
 
       expect(repository.findManyActiveUsers).toHaveBeenCalledWith({
-        where: { id: { in: dto.ids } },
+        where: { publicId: { in: dto.publicIds } },
       });
       expect(result).toStrictEqual(toActiveUsersDto([]));
     });
@@ -171,12 +174,12 @@ describe('userQueryService', () => {
 
       const mockUsers = [mockDeletedUser];
       repository.findManyDeletedUsers.mockResolvedValue(mockUsers);
-      const dto = { ids: [mockDeletedUser.id] };
+      const dto = { publicIds: [mockDeletedUser.publicId] };
 
       const result = await service.findManyDeletedUsers(dto);
 
       expect(repository.findManyDeletedUsers).toHaveBeenCalledWith({
-        where: { id: { in: dto.ids } },
+        where: { publicId: { in: dto.publicIds } },
       });
       expect(result).toStrictEqual(toDeletedUsersDto(mockUsers));
     });
@@ -185,12 +188,12 @@ describe('userQueryService', () => {
       expect.assertions(2);
 
       repository.findManyDeletedUsers.mockResolvedValue([]);
-      const dto = { ids: [mockDeletedUser.id] };
+      const dto = { publicIds: [mockDeletedUser.publicId] };
 
       const result = await service.findManyDeletedUsers(dto);
 
       expect(repository.findManyDeletedUsers).toHaveBeenCalledWith({
-        where: { id: { in: dto.ids } },
+        where: { publicId: { in: dto.publicIds } },
       });
       expect(result).toStrictEqual(toDeletedUsersDto([]));
     });
@@ -202,12 +205,12 @@ describe('userQueryService', () => {
 
       const mockUsers = [mockUser, mockDeletedUser];
       repository.findManyAnyUsers.mockResolvedValue(mockUsers);
-      const dto = { ids: [mockUser.id, mockDeletedUser.id] };
+      const dto = { publicIds: [mockUser.publicId, mockDeletedUser.publicId] };
 
       const result = await service.findManyAnyUsers(dto);
 
       expect(repository.findManyAnyUsers).toHaveBeenCalledWith({
-        where: { id: { in: dto.ids } },
+        where: { publicId: { in: dto.publicIds } },
       });
       expect(result).toStrictEqual(toAnyUsersDto(mockUsers));
     });
@@ -216,12 +219,12 @@ describe('userQueryService', () => {
       expect.assertions(2);
 
       repository.findManyAnyUsers.mockResolvedValue([]);
-      const dto = { ids: [mockUser.id] };
+      const dto = { publicIds: [mockUser.publicId] };
 
       const result = await service.findManyAnyUsers(dto);
 
       expect(repository.findManyAnyUsers).toHaveBeenCalledWith({
-        where: { id: { in: dto.ids } },
+        where: { publicId: { in: dto.publicIds } },
       });
       expect(result).toStrictEqual(toAnyUsersDto([]));
     });

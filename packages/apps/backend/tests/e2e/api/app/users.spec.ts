@@ -25,8 +25,8 @@ describe('app API - /api/users', () => {
     await helper.teardown();
   });
 
-  describe('gET /api/users/:id', () => {
-    it('should return active user by ID', async () => {
+  describe('gET /api/users/:publicId', () => {
+    it('should return active user by publicId', async () => {
       expect.assertions(3);
 
       const user = await request(app.getHttpServer())
@@ -34,9 +34,9 @@ describe('app API - /api/users', () => {
         .send({ name: 'Test User', email: `test-${randomUUID()}@example.com` })
         .expect(201);
 
-      const response = await request(app.getHttpServer()).get(`/api/users/${user.body.id}`).expect(200);
+      const response = await request(app.getHttpServer()).get(`/api/users/${user.body.publicId}`).expect(200);
 
-      expect(response.body.id).toBe(user.body.id);
+      expect(response.body.publicId).toBe(user.body.publicId);
       expect(response.body.name).toBe('Test User');
       expect(response.body.email).toMatch(/test-.*@example\.com/u);
     });
@@ -58,9 +58,9 @@ describe('app API - /api/users', () => {
         .send({ name: 'To Delete', email: `delete-${randomUUID()}@example.com` })
         .expect(201);
 
-      await request(app.getHttpServer()).delete(`/api/users/${user.body.id}`).expect(204);
+      await request(app.getHttpServer()).delete(`/api/users/${user.body.publicId}`).expect(204);
 
-      await expect(request(app.getHttpServer()).get(`/api/users/${user.body.id}`)).resolves.toMatchObject({
+      await expect(request(app.getHttpServer()).get(`/api/users/${user.body.publicId}`)).resolves.toMatchObject({
         status: 404,
       });
     });
@@ -84,7 +84,7 @@ describe('app API - /api/users', () => {
 
       const response = await request(app.getHttpServer()).post('/api/users').send(userData).expect(201);
 
-      expect(response.body).toHaveProperty('id');
+      expect(response.body).toHaveProperty('publicId');
       expect(response.body.name).toBe(userData.name);
       expect(response.body.email).toBe(userData.email);
       expect(response.body).toHaveProperty('createdAt');
@@ -110,8 +110,8 @@ describe('app API - /api/users', () => {
     });
   });
 
-  describe('pUT /api/users/:id', () => {
-    it('should update user by ID', async () => {
+  describe('pUT /api/users/:publicId', () => {
+    it('should update user by publicId', async () => {
       expect.assertions(3);
 
       const user = await request(app.getHttpServer())
@@ -122,18 +122,18 @@ describe('app API - /api/users', () => {
       const updateData = { name: 'Updated Name' };
 
       const response = await request(app.getHttpServer())
-        .put(`/api/users/${user.body.id}`)
+        .put(`/api/users/${user.body.publicId}`)
         .send(updateData)
         .expect(200);
 
-      expect(response.body.id).toBe(user.body.id);
+      expect(response.body.publicId).toBe(user.body.publicId);
       expect(response.body.name).toBe('Updated Name');
       expect(response.body.email).toBe(user.body.email);
     });
   });
 
-  describe('dELETE /api/users/:id', () => {
-    it('should soft delete user by ID', async () => {
+  describe('dELETE /api/users/:publicId', () => {
+    it('should soft delete user by publicId', async () => {
       expect.assertions(1);
 
       const user = await request(app.getHttpServer())
@@ -141,7 +141,7 @@ describe('app API - /api/users', () => {
         .send({ name: 'To Delete', email: `delete-${randomUUID()}@example.com` })
         .expect(201);
 
-      await expect(request(app.getHttpServer()).delete(`/api/users/${user.body.id}`)).resolves.toMatchObject({
+      await expect(request(app.getHttpServer()).delete(`/api/users/${user.body.publicId}`)).resolves.toMatchObject({
         status: 204,
       });
     });

@@ -11,7 +11,7 @@ describe('userAppFacadeService', () => {
   let queryService: jest.Mocked<UserQueryService>;
 
   const mockUser = {
-    id: '123e4567-e89b-12d3-a456-426614174000',
+    publicId: '123e4567-e89b-12d3-a456-426614174000',
     email: 'test@example.com',
     name: 'Test User',
     createdAt: new Date('2024-01-01'),
@@ -57,7 +57,7 @@ describe('userAppFacadeService', () => {
     it('should delegate to query service', async () => {
       expect.assertions(2);
 
-      const dto = { id: mockUser.id };
+      const dto = { publicId: mockUser.publicId };
       const expectedResult = toActiveUserDto(mockUser);
       queryService.findUserByIdOrFail.mockResolvedValue(expectedResult);
 
@@ -87,7 +87,7 @@ describe('userAppFacadeService', () => {
     it('should delegate to command service', async () => {
       expect.assertions(2);
 
-      const dto = { id: mockUser.id, data: { name: 'Updated Name' } };
+      const dto = { publicId: mockUser.publicId, data: { name: 'Updated Name' } };
       const expectedResult = toActiveUserDto({ ...mockUser, name: 'Updated Name' });
       commandService.updateUserById.mockResolvedValue(expectedResult);
 
@@ -102,7 +102,7 @@ describe('userAppFacadeService', () => {
     it('should delegate to command service', async () => {
       expect.assertions(1);
 
-      const dto = { id: mockUser.id };
+      const dto = { publicId: mockUser.publicId };
       commandService.deleteUserById.mockResolvedValue();
 
       await service.deleteUserById(dto);

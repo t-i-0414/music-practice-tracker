@@ -9,7 +9,7 @@ describe('userRepositoryService', () => {
   let userModel: any;
 
   const mockUser = {
-    id: '123e4567-e89b-12d3-a456-426614174000',
+    publicId: '123e4567-e89b-12d3-a456-426614174000',
     email: 'test@example.com',
     name: 'Test User',
     createdAt: new Date('2024-01-01'),
@@ -19,7 +19,7 @@ describe('userRepositoryService', () => {
 
   const mockDeletedUser = {
     ...mockUser,
-    id: '223e4567-e89b-12d3-a456-426614174001',
+    publicId: '223e4567-e89b-12d3-a456-426614174001',
     deletedAt: new Date('2024-01-02'),
   };
 
@@ -62,7 +62,7 @@ describe('userRepositoryService', () => {
       expect.assertions(2);
 
       userModel.findUnique.mockResolvedValue(mockUser);
-      const params = { id: mockUser.id };
+      const params = { publicId: mockUser.publicId };
 
       const result = await service.findUniqueActiveUser(params);
 
@@ -79,7 +79,7 @@ describe('userRepositoryService', () => {
       expect.assertions(2);
 
       userModel.findUnique.mockResolvedValue(null);
-      const params = { id: 'non-existent-id' };
+      const params = { publicId: 'non-existent-publicId' };
 
       const result = await service.findUniqueActiveUser(params);
 
@@ -98,7 +98,7 @@ describe('userRepositoryService', () => {
       expect.assertions(2);
 
       userModel.findUnique.mockResolvedValue(mockDeletedUser);
-      const params = { id: mockDeletedUser.id };
+      const params = { publicId: mockDeletedUser.publicId };
 
       const result = await service.findUniqueDeletedUser(params);
 
@@ -117,7 +117,7 @@ describe('userRepositoryService', () => {
       expect.assertions(2);
 
       userModel.findUnique.mockResolvedValue(mockUser);
-      const params = { id: mockUser.id };
+      const params = { publicId: mockUser.publicId };
 
       const result = await service.findUniqueAnyUser(params);
 
@@ -227,7 +227,7 @@ describe('userRepositoryService', () => {
         { email: 'user1@example.com', name: 'User 1' },
         { email: 'user2@example.com', name: 'User 2' },
       ];
-      const mockUsers = [mockUser, { ...mockUser, id: '223e4567-e89b-12d3-a456-426614174002' }];
+      const mockUsers = [mockUser, { ...mockUser, publicId: '223e4567-e89b-12d3-a456-426614174002' }];
       userModel.createManyAndReturn.mockResolvedValue(mockUsers);
 
       const result = await service.createManyAndReturnUsers(params);
@@ -246,7 +246,7 @@ describe('userRepositoryService', () => {
       const updatedUser = { ...mockUser, name: 'Updated Name' };
       userModel.update.mockResolvedValue(updatedUser);
       const params = {
-        where: { id: mockUser.id },
+        where: { publicId: mockUser.publicId },
         data: { name: 'Updated Name' },
       };
 
@@ -270,7 +270,7 @@ describe('userRepositoryService', () => {
       const mockDate = new Date('2024-01-03');
       jest.spyOn(global, 'Date').mockImplementation(() => mockDate as any);
       userModel.update.mockResolvedValue({ ...mockUser, deletedAt: mockDate });
-      const params = { id: mockUser.id };
+      const params = { publicId: mockUser.publicId };
 
       await service.deleteUser(params);
 
@@ -313,7 +313,7 @@ describe('userRepositoryService', () => {
       expect.assertions(2);
 
       userModel.delete.mockResolvedValue(mockUser);
-      const params = { id: mockUser.id };
+      const params = { publicId: mockUser.publicId };
 
       await service.hardDeleteUser(params);
 
@@ -346,7 +346,7 @@ describe('userRepositoryService', () => {
 
       const restoredUser = { ...mockDeletedUser, deletedAt: null };
       userModel.update.mockResolvedValue(restoredUser);
-      const params = { id: mockDeletedUser.id };
+      const params = { publicId: mockDeletedUser.publicId };
 
       const result = await service.restoreUser(params);
 
@@ -369,7 +369,7 @@ describe('userRepositoryService', () => {
 
       const restoredUsers = [
         { ...mockDeletedUser, deletedAt: null },
-        { ...mockDeletedUser, id: '323e4567-e89b-12d3-a456-426614174003', deletedAt: null },
+        { ...mockDeletedUser, publicId: '323e4567-e89b-12d3-a456-426614174003', deletedAt: null },
       ];
       userModel.updateManyAndReturn.mockResolvedValue(restoredUsers);
       const params = { email: { contains: 'test' } };

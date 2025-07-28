@@ -6,6 +6,7 @@ import {
   IsEmail,
   IsNotEmpty,
   IsNotEmptyObject,
+  IsOptional,
   IsString,
   IsUUID,
   MaxLength,
@@ -16,18 +17,18 @@ import { MAX_EMAIL_LENGTH, MAX_NAME_LENGTH } from './user.constants';
 
 export class FindUserByIdInputDto {
   @ApiProperty({
-    description: 'The user ID',
+    description: 'The user public ID',
     example: '123e4567-e89b-12d3-a456-426614174000',
     format: 'uuid',
   })
   @IsUUID()
   @IsNotEmpty()
-  public id: string;
+  public publicId: string;
 }
 
 export class FindManyUsersByIdInputDto {
   @ApiProperty({
-    description: 'List of user IDs',
+    description: 'List of user public IDs',
     example: ['123e4567-e89b-12d3-a456-426614174000', '789e1234-e89b-12d3-a456-426614174000'],
     isArray: true,
     type: String,
@@ -36,7 +37,7 @@ export class FindManyUsersByIdInputDto {
   @IsArray()
   @IsUUID('all', { each: true })
   @ArrayNotEmpty()
-  public ids: string[];
+  public publicIds: string[];
 }
 
 export class CreateUserInputDto {
@@ -60,6 +61,16 @@ export class CreateUserInputDto {
   @MaxLength(MAX_NAME_LENGTH)
   @IsNotEmpty()
   public name: string;
+
+  @ApiProperty({
+    description: 'The user public ID',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    format: 'uuid',
+    required: false,
+  })
+  @IsUUID()
+  @IsOptional()
+  public publicId?: string;
 }
 
 export class CreateManyUsersInputDto {
@@ -79,13 +90,13 @@ export class UpdateUserDataDto extends PartialType(CreateUserInputDto) {}
 
 export class UpdateUserInputDto {
   @ApiProperty({
-    description: 'The ID of the user to update',
+    description: 'The public ID of the user to update',
     example: '123e4567-e89b-12d3-a456-426614174000',
     format: 'uuid',
   })
   @IsUUID()
   @IsNotEmpty()
-  public id: string;
+  public publicId: string;
 
   @ApiProperty({
     description: 'Fields to update',

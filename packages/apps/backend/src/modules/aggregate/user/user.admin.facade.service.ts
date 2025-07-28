@@ -71,23 +71,23 @@ export class UserAdminFacadeService {
     await this.userCommandService.deleteUserById(dto);
   }
 
-  public async deleteManyUsersById({ ids }: DeleteManyUsersInputDto): Promise<void> {
-    await this.userCommandService.deleteManyUsersById({ ids });
+  public async deleteManyUsersById({ publicIds }: DeleteManyUsersInputDto): Promise<void> {
+    await this.userCommandService.deleteManyUsersById({ publicIds });
   }
 
-  public async hardDeleteUserById({ id }: HardDeleteUserByIdInputDto): Promise<void> {
-    await this.userCommandService.hardDeleteUserById({ id });
+  public async hardDeleteUserById({ publicId }: HardDeleteUserByIdInputDto): Promise<void> {
+    await this.userCommandService.hardDeleteUserById({ publicId });
   }
 
-  public async hardDeleteManyUsersById({ ids }: HardDeleteManyUsersInputDto): Promise<void> {
-    await this.userCommandService.hardDeleteManyUsersById({ ids });
+  public async hardDeleteManyUsersById({ publicIds }: HardDeleteManyUsersInputDto): Promise<void> {
+    await this.userCommandService.hardDeleteManyUsersById({ publicIds });
   }
 
-  public async restoreUserById({ id }: RestoreUserByIdInputDto): Promise<ActiveUserResponseDto> {
-    return this.userCommandService.restoreUserById({ id });
+  public async restoreUserById({ publicId }: RestoreUserByIdInputDto): Promise<ActiveUserResponseDto> {
+    return this.userCommandService.restoreUserById({ publicId });
   }
 
-  public async restoreManyUsersById({ ids }: RestoreManyUsersInputDto): Promise<ActiveUsersResponseDto> {
-    return this.userCommandService.restoreManyUsersById({ ids });
+  public async restoreManyUsersById({ publicIds }: RestoreManyUsersInputDto): Promise<ActiveUsersResponseDto> {
+    return this.userCommandService.restoreManyUsersById({ publicIds });
   }
 }

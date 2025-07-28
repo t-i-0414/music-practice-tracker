@@ -12,7 +12,7 @@ import {
 
 describe('user response DTOs', () => {
   const mockUser = {
-    id: '123e4567-e89b-12d3-a456-426614174000',
+    publicId: '123e4567-e89b-12d3-a456-426614174000',
     email: 'test@example.com',
     name: 'Test User',
     createdAt: new Date('2024-01-01'),
@@ -32,7 +32,7 @@ describe('user response DTOs', () => {
       const result = toActiveUserDto(mockUser);
 
       expect(result).toBeInstanceOf(ActiveUserResponseDto);
-      expect(result.id).toBe(mockUser.id);
+      expect(result.publicId).toBe(mockUser.publicId);
       expect(result.email).toBe(mockUser.email);
       expect(result.name).toBe(mockUser.name);
       expect(result.createdAt).toStrictEqual(mockUser.createdAt);
@@ -61,7 +61,7 @@ describe('user response DTOs', () => {
     it('should transform users array to ActiveUsersResponseDto', () => {
       expect.assertions(4);
 
-      const users = [mockUser, { ...mockUser, id: '223e4567-e89b-12d3-a456-426614174001' }];
+      const users = [mockUser, { ...mockUser, publicId: '223e4567-e89b-12d3-a456-426614174001' }];
       const result = toActiveUsersDto(users);
 
       expect(result).toHaveProperty('users');
@@ -87,7 +87,7 @@ describe('user response DTOs', () => {
       const result = toDeletedUserDto(mockDeletedUser);
 
       expect(result).toBeInstanceOf(DeletedUserResponseDto);
-      expect(result.id).toBe(mockDeletedUser.id);
+      expect(result.publicId).toBe(mockDeletedUser.publicId);
       expect(result.email).toBe(mockDeletedUser.email);
       expect(result.name).toBe(mockDeletedUser.name);
       expect(result.createdAt).toStrictEqual(mockDeletedUser.createdAt);
@@ -109,7 +109,7 @@ describe('user response DTOs', () => {
     it('should transform deleted users array to DeletedUsersResponseDto', () => {
       expect.assertions(4);
 
-      const users = [mockDeletedUser, { ...mockDeletedUser, id: '323e4567-e89b-12d3-a456-426614174002' }];
+      const users = [mockDeletedUser, { ...mockDeletedUser, publicId: '323e4567-e89b-12d3-a456-426614174002' }];
       const result = toDeletedUsersDto(users);
 
       expect(result).toHaveProperty('users');
@@ -126,7 +126,7 @@ describe('user response DTOs', () => {
       const result = toAnyUserDto(mockUser);
 
       expect(result).toBeInstanceOf(AnyUserResponseDto);
-      expect(result.id).toBe(mockUser.id);
+      expect(result.publicId).toBe(mockUser.publicId);
       expect(result.email).toBe(mockUser.email);
       expect(result.name).toBe(mockUser.name);
       expect(result.createdAt).toStrictEqual(mockUser.createdAt);

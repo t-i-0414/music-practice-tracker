@@ -16,7 +16,7 @@ describe('adminUsersController', () => {
   let facadeService: jest.Mocked<UserAdminFacadeService>;
 
   const mockUser = {
-    id: '123e4567-e89b-12d3-a456-426614174000',
+    publicId: '123e4567-e89b-12d3-a456-426614174000',
     email: 'test@example.com',
     name: 'Test User',
     createdAt: new Date('2024-01-01'),
@@ -67,104 +67,104 @@ describe('adminUsersController', () => {
   });
 
   describe('findManyUsers', () => {
-    it('should find many active users with array of ids', async () => {
+    it('should find many active users with array of publicIds', async () => {
       expect.assertions(2);
 
-      const ids = ['id1', 'id2'];
+      const publicIds = ['id1', 'id2'];
       const expectedResult = toActiveUsersDto([mockUser]);
       facadeService.findManyUsers.mockResolvedValue(expectedResult);
 
-      const result = await controller.findManyUsers(ids);
+      const result = await controller.findManyUsers(publicIds);
 
-      expect(facadeService.findManyUsers).toHaveBeenCalledWith({ ids });
+      expect(facadeService.findManyUsers).toHaveBeenCalledWith({ publicIds });
       expect(result).toStrictEqual(expectedResult);
     });
 
-    it('should find many active users with single id string', async () => {
+    it('should find many active users with single publicId string', async () => {
       expect.assertions(2);
 
-      const id = 'id1';
+      const publicId = 'id1';
       const expectedResult = toActiveUsersDto([mockUser]);
       facadeService.findManyUsers.mockResolvedValue(expectedResult);
 
-      const result = await controller.findManyUsers(id);
+      const result = await controller.findManyUsers(publicId);
 
-      expect(facadeService.findManyUsers).toHaveBeenCalledWith({ ids: [id] });
+      expect(facadeService.findManyUsers).toHaveBeenCalledWith({ publicIds: [publicId] });
       expect(result).toStrictEqual(expectedResult);
     });
   });
 
   describe('findUserById', () => {
-    it('should find active user by id', async () => {
+    it('should find active user by publicId', async () => {
       expect.assertions(2);
 
-      const { id } = mockUser;
+      const { publicId } = mockUser;
       const expectedResult = toActiveUserDto(mockUser);
       facadeService.findUserById.mockResolvedValue(expectedResult);
 
-      const result = await controller.findUserById(id);
+      const result = await controller.findUserById(publicId);
 
-      expect(facadeService.findUserById).toHaveBeenCalledWith({ id });
+      expect(facadeService.findUserById).toHaveBeenCalledWith({ publicId });
       expect(result).toStrictEqual(expectedResult);
     });
   });
 
   describe('findManyDeletedUsers', () => {
-    it('should find many deleted users with array of ids', async () => {
+    it('should find many deleted users with array of publicIds', async () => {
       expect.assertions(2);
 
-      const ids = ['id1', 'id2'];
+      const publicIds = ['id1', 'id2'];
       const expectedResult = toDeletedUsersDto([mockDeletedUser]);
       facadeService.findManyDeletedUsers.mockResolvedValue(expectedResult);
 
-      const result = await controller.findManyDeletedUsers(ids);
+      const result = await controller.findManyDeletedUsers(publicIds);
 
-      expect(facadeService.findManyDeletedUsers).toHaveBeenCalledWith({ ids });
+      expect(facadeService.findManyDeletedUsers).toHaveBeenCalledWith({ publicIds });
       expect(result).toStrictEqual(expectedResult);
     });
   });
 
   describe('findDeletedUserById', () => {
-    it('should find deleted user by id', async () => {
+    it('should find deleted user by publicId', async () => {
       expect.assertions(2);
 
-      const { id } = mockDeletedUser;
+      const { publicId } = mockDeletedUser;
       const expectedResult = toDeletedUserDto(mockDeletedUser);
       facadeService.findDeletedUserById.mockResolvedValue(expectedResult);
 
-      const result = await controller.findDeletedUserById(id);
+      const result = await controller.findDeletedUserById(publicId);
 
-      expect(facadeService.findDeletedUserById).toHaveBeenCalledWith({ id });
+      expect(facadeService.findDeletedUserById).toHaveBeenCalledWith({ publicId });
       expect(result).toStrictEqual(expectedResult);
     });
   });
 
   describe('findManyAnyUsers', () => {
-    it('should find many any users with array of ids', async () => {
+    it('should find many any users with array of publicIds', async () => {
       expect.assertions(2);
 
-      const ids = ['id1', 'id2'];
+      const publicIds = ['id1', 'id2'];
       const expectedResult = toAnyUsersDto([mockUser, mockDeletedUser]);
       facadeService.findManyAnyUsers.mockResolvedValue(expectedResult);
 
-      const result = await controller.findManyAnyUsers(ids);
+      const result = await controller.findManyAnyUsers(publicIds);
 
-      expect(facadeService.findManyAnyUsers).toHaveBeenCalledWith({ ids });
+      expect(facadeService.findManyAnyUsers).toHaveBeenCalledWith({ publicIds });
       expect(result).toStrictEqual(expectedResult);
     });
   });
 
   describe('findAnyUserById', () => {
-    it('should find any user by id', async () => {
+    it('should find any user by publicId', async () => {
       expect.assertions(2);
 
-      const { id } = mockUser;
+      const { publicId } = mockUser;
       const expectedResult = toAnyUserDto(mockUser);
       facadeService.findAnyUserById.mockResolvedValue(expectedResult);
 
-      const result = await controller.findAnyUserById(id);
+      const result = await controller.findAnyUserById(publicId);
 
-      expect(facadeService.findAnyUserById).toHaveBeenCalledWith({ id });
+      expect(facadeService.findAnyUserById).toHaveBeenCalledWith({ publicId });
       expect(result).toStrictEqual(expectedResult);
     });
   });
@@ -203,14 +203,14 @@ describe('adminUsersController', () => {
     it('should update user', async () => {
       expect.assertions(2);
 
-      const { id } = mockUser;
+      const { publicId } = mockUser;
       const data = { name: 'Updated Name' };
       const expectedResult = toActiveUserDto({ ...mockUser, name: 'Updated Name' });
       facadeService.updateUserById.mockResolvedValue(expectedResult);
 
-      const result = await controller.updateUser(id, data);
+      const result = await controller.updateUser(publicId, data);
 
-      expect(facadeService.updateUserById).toHaveBeenCalledWith({ id, data });
+      expect(facadeService.updateUserById).toHaveBeenCalledWith({ publicId, data });
       expect(result).toStrictEqual(expectedResult);
     });
   });
@@ -219,7 +219,7 @@ describe('adminUsersController', () => {
     it('should delete many users', async () => {
       expect.assertions(1);
 
-      const dto = { ids: ['id1', 'id2'] };
+      const dto = { publicIds: ['id1', 'id2'] };
       facadeService.deleteManyUsersById.mockResolvedValue();
 
       await controller.deleteManyUsers(dto);
@@ -232,7 +232,7 @@ describe('adminUsersController', () => {
     it('should hard delete many users', async () => {
       expect.assertions(1);
 
-      const dto = { ids: ['id1', 'id2'] };
+      const dto = { publicIds: ['id1', 'id2'] };
       facadeService.hardDeleteManyUsersById.mockResolvedValue();
 
       await controller.hardDeleteManyUsers(dto);
@@ -245,12 +245,12 @@ describe('adminUsersController', () => {
     it('should hard delete user', async () => {
       expect.assertions(1);
 
-      const { id } = mockUser;
+      const { publicId } = mockUser;
       facadeService.hardDeleteUserById.mockResolvedValue();
 
-      await controller.hardDeleteUser(id);
+      await controller.hardDeleteUser(publicId);
 
-      expect(facadeService.hardDeleteUserById).toHaveBeenCalledWith({ id });
+      expect(facadeService.hardDeleteUserById).toHaveBeenCalledWith({ publicId });
     });
   });
 
@@ -258,12 +258,12 @@ describe('adminUsersController', () => {
     it('should soft delete user', async () => {
       expect.assertions(1);
 
-      const { id } = mockUser;
+      const { publicId } = mockUser;
       facadeService.deleteUserById.mockResolvedValue();
 
-      await controller.deleteUser(id);
+      await controller.deleteUser(publicId);
 
-      expect(facadeService.deleteUserById).toHaveBeenCalledWith({ id });
+      expect(facadeService.deleteUserById).toHaveBeenCalledWith({ publicId });
     });
   });
 
@@ -271,7 +271,7 @@ describe('adminUsersController', () => {
     it('should restore many users', async () => {
       expect.assertions(2);
 
-      const dto = { ids: ['id1', 'id2'] };
+      const dto = { publicIds: ['id1', 'id2'] };
       const expectedResult = toActiveUsersDto([mockUser]);
       facadeService.restoreManyUsersById.mockResolvedValue(expectedResult);
 
@@ -286,13 +286,13 @@ describe('adminUsersController', () => {
     it('should restore user', async () => {
       expect.assertions(2);
 
-      const { id } = mockDeletedUser;
+      const { publicId } = mockDeletedUser;
       const expectedResult = toActiveUserDto({ ...mockDeletedUser, deletedAt: null });
       facadeService.restoreUserById.mockResolvedValue(expectedResult);
 
-      const result = await controller.restoreUser(id);
+      const result = await controller.restoreUser(publicId);
 
-      expect(facadeService.restoreUserById).toHaveBeenCalledWith({ id });
+      expect(facadeService.restoreUserById).toHaveBeenCalledWith({ publicId });
       expect(result).toStrictEqual(expectedResult);
     });
   });

@@ -11,7 +11,8 @@ describe('userCommandService', () => {
   let queryService: jest.Mocked<UserQueryService>;
 
   const mockUser = {
-    id: '123e4567-e89b-12d3-a456-426614174000',
+    id: 1,
+    publicId: '123e4567-e89b-12d3-a456-426614174000',
     email: 'test@example.com',
     name: 'Test User',
     createdAt: new Date('2024-01-01'),
@@ -89,7 +90,7 @@ describe('userCommandService', () => {
       ];
       const mockUsers = [
         mockUser,
-        { ...mockUser, id: '223e4567-e89b-12d3-a456-426614174001', email: 'user2@example.com', name: 'User 2' },
+        { ...mockUser, publicId: '223e4567-e89b-12d3-a456-426614174001', email: 'user2@example.com', name: 'User 2' },
       ];
       repository.createManyAndReturnUsers.mockResolvedValue(mockUsers);
 
@@ -104,16 +105,16 @@ describe('userCommandService', () => {
     it('should update user when user exists', async () => {
       expect.assertions(3);
 
-      const updateDto = { id: mockUser.id, data: { name: 'Updated Name' } };
+      const updateDto = { publicId: mockUser.publicId, data: { name: 'Updated Name' } };
       const updatedUser = { ...mockUser, name: 'Updated Name' };
       queryService.findUserByIdOrFail.mockResolvedValue(toActiveUserDto(mockUser));
       repository.updateUser.mockResolvedValue(updatedUser);
 
       const result = await service.updateUserById(updateDto);
 
-      expect(queryService.findUserByIdOrFail).toHaveBeenCalledWith({ id: mockUser.id });
+      expect(queryService.findUserByIdOrFail).toHaveBeenCalledWith({ publicId: mockUser.publicId });
       expect(repository.updateUser).toHaveBeenCalledWith({
-        where: { id: mockUser.id },
+        where: { publicId: mockUser.publicId },
         data: { name: 'Updated Name' },
       });
       expect(result).toStrictEqual(toActiveUserDto(updatedUser));
@@ -122,7 +123,7 @@ describe('userCommandService', () => {
     it('should throw when user not found', async () => {
       expect.assertions(2);
 
-      const updateDto = { id: mockUser.id, data: { name: 'Updated Name' } };
+      const updateDto = { publicId: mockUser.publicId, data: { name: 'Updated Name' } };
       queryService.findUserByIdOrFail.mockRejectedValue(new Error('User not found'));
 
       await expect(service.updateUserById(updateDto)).rejects.toThrow('User not found');
@@ -134,20 +135,20 @@ describe('userCommandService', () => {
     it('should delete user when user exists', async () => {
       expect.assertions(2);
 
-      const deleteDto = { id: mockUser.id };
+      const deleteDto = { publicId: mockUser.publicId };
       queryService.findUserByIdOrFail.mockResolvedValue(toActiveUserDto(mockUser));
       repository.deleteUser.mockResolvedValue();
 
       await service.deleteUserById(deleteDto);
 
-      expect(queryService.findUserByIdOrFail).toHaveBeenCalledWith({ id: mockUser.id });
-      expect(repository.deleteUser).toHaveBeenCalledWith({ id: mockUser.id });
+      expect(queryService.findUserByIdOrFail).toHaveBeenCalledWith({ publicId: mockUser.publicId });
+      expect(repository.deleteUser).toHaveBeenCalledWith({ publicId: mockUser.publicId });
     });
 
     it('should throw when user not found', async () => {
       expect.assertions(2);
 
-      const deleteDto = { id: mockUser.id };
+      const deleteDto = { publicId: mockUser.publicId };
       queryService.findUserByIdOrFail.mockRejectedValue(new Error('User not found'));
 
       await expect(service.deleteUserById(deleteDto)).rejects.toThrow('User not found');
@@ -159,13 +160,13 @@ describe('userCommandService', () => {
     it('should delete many users', async () => {
       expect.assertions(1);
 
-      const ids = ['id1', 'id2'];
+      const publicIds = ['id1', 'id2'];
       repository.deleteManyUsers.mockResolvedValue();
 
-      await service.deleteManyUsersById({ ids });
+      await service.deleteManyUsersById({ publicIds });
 
       expect(repository.deleteManyUsers).toHaveBeenCalledWith({
-        id: { in: ids },
+        publicId: { in: publicIds },
       });
     });
   });
@@ -174,20 +175,20 @@ describe('userCommandService', () => {
     it('should hard delete user when user exists', async () => {
       expect.assertions(2);
 
-      const deleteDto = { id: mockUser.id };
+      const deleteDto = { publicId: mockUser.publicId };
       queryService.findAnyUserByIdOrFail.mockResolvedValue(toAnyUserDto(mockUser));
       repository.hardDeleteUser.mockResolvedValue();
 
       await service.hardDeleteUserById(deleteDto);
 
-      expect(queryService.findAnyUserByIdOrFail).toHaveBeenCalledWith({ id: mockUser.id });
-      expect(repository.hardDeleteUser).toHaveBeenCalledWith({ id: mockUser.id });
+      expect(queryService.findAnyUserByIdOrFail).toHaveBeenCalledWith({ publicId: mockUser.publicId });
+      expect(repository.hardDeleteUser).toHaveBeenCalledWith({ publicId: mockUser.publicId });
     });
 
     it('should throw when user not found', async () => {
       expect.assertions(2);
 
-      const deleteDto = { id: mockUser.id };
+      const deleteDto = { publicId: mockUser.publicId };
       queryService.findAnyUserByIdOrFail.mockRejectedValue(new Error('User not found'));
 
       await expect(service.hardDeleteUserById(deleteDto)).rejects.toThrow('User not found');
@@ -199,13 +200,13 @@ describe('userCommandService', () => {
     it('should hard delete many users', async () => {
       expect.assertions(1);
 
-      const ids = ['id1', 'id2'];
+      const publicIds = ['id1', 'id2'];
       repository.hardDeleteManyUsers.mockResolvedValue();
 
-      await service.hardDeleteManyUsersById({ ids });
+      await service.hardDeleteManyUsersById({ publicIds });
 
       expect(repository.hardDeleteManyUsers).toHaveBeenCalledWith({
-        id: { in: ids },
+        publicId: { in: publicIds },
       });
     });
   });
@@ -214,13 +215,13 @@ describe('userCommandService', () => {
     it('should restore user and return it', async () => {
       expect.assertions(2);
 
-      const restoreDto = { id: mockDeletedUser.id };
+      const restoreDto = { publicId: mockDeletedUser.publicId };
       const restoredUser = { ...mockDeletedUser, deletedAt: null };
       repository.restoreUser.mockResolvedValue(restoredUser);
 
       const result = await service.restoreUserById(restoreDto);
 
-      expect(repository.restoreUser).toHaveBeenCalledWith({ id: mockDeletedUser.id });
+      expect(repository.restoreUser).toHaveBeenCalledWith({ publicId: mockDeletedUser.publicId });
       expect(result).toStrictEqual(toActiveUserDto(restoredUser));
     });
   });
@@ -229,14 +230,14 @@ describe('userCommandService', () => {
     it('should restore many users and return them', async () => {
       expect.assertions(2);
 
-      const ids = ['id1', 'id2'];
-      const restoredUsers = [mockUser, { ...mockUser, id: 'id2' }];
+      const publicIds = ['id1', 'id2'];
+      const restoredUsers = [mockUser, { ...mockUser, publicId: 'id2' }];
       repository.restoreManyAndReturnUsers.mockResolvedValue(restoredUsers);
 
-      const result = await service.restoreManyUsersById({ ids });
+      const result = await service.restoreManyUsersById({ publicIds });
 
       expect(repository.restoreManyAndReturnUsers).toHaveBeenCalledWith({
-        id: { in: ids },
+        publicId: { in: publicIds },
       });
       expect(result).toStrictEqual(toActiveUsersDto(restoredUsers));
     });
