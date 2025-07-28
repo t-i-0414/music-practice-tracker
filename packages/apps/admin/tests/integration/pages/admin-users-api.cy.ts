@@ -11,7 +11,7 @@ describe('Admin Users API Tests', () => {
   it('should fetch active users list', () => {
     cy.window().then((win) =>
       win
-        .fetch(`http://${host}:${adminApiPort}/api/users/active_users?ids=1&ids=2`)
+        .fetch(`http://${host}:${adminApiPort}/api/users/active_users?publicIds=1&publicIds=2`)
         .then((response) => {
           expect(response.status).to.equal(200);
           return response.json();
@@ -22,12 +22,12 @@ describe('Admin Users API Tests', () => {
 
           const [user1, user2] = data.users;
           expect(user1).to.include({
-            id: '1',
+            publicId: '1',
             name: 'Test User 1',
             email: 'user1@example.com',
           });
           expect(user2).to.include({
-            id: '2',
+            publicId: '2',
             name: 'Test User 2',
             email: 'user2@example.com',
           });
@@ -47,7 +47,7 @@ describe('Admin Users API Tests', () => {
         })
         .then((data: components['schemas']['ActiveUserResponseDto']) => {
           expect(data).to.include({
-            id: userId,
+            publicId: userId,
             name: `Test User ${userId}`,
             email: `user${userId}@example.com`,
           });
@@ -60,7 +60,7 @@ describe('Admin Users API Tests', () => {
   it('should fetch deleted users', () => {
     cy.window().then((win) =>
       win
-        .fetch(`http://${host}:${adminApiPort}/api/users/deleted_users?ids=100&ids=101`)
+        .fetch(`http://${host}:${adminApiPort}/api/users/deleted_users?publicIds=100&publicIds=101`)
         .then((response) => {
           expect(response.status).to.equal(200);
           return response.json();
@@ -80,7 +80,7 @@ describe('Admin Users API Tests', () => {
   it('should fetch any users (active or deleted)', () => {
     cy.window().then((win) =>
       win
-        .fetch(`http://${host}:${adminApiPort}/api/users/any_users?ids=1&ids=2&ids=3`)
+        .fetch(`http://${host}:${adminApiPort}/api/users/any_users?publicIds=1&publicIds=2&publicIds=3`)
         .then((response) => {
           expect(response.status).to.equal(200);
           return response.json();
@@ -119,8 +119,8 @@ describe('Admin Users API Tests', () => {
           return response.json();
         })
         .then((data: components['schemas']['ActiveUserResponseDto']) => {
-          expect(data).to.have.property('id');
-          expect(data.id).to.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu); // UUID format
+          expect(data).to.have.property('publicId');
+          expect(data.publicId).to.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu); // UUID format
           expect(data).to.include(newUser);
           expect(data).to.have.property('createdAt');
           expect(data).to.have.property('updatedAt');
@@ -154,7 +154,7 @@ describe('Admin Users API Tests', () => {
           expect(data.users).to.have.length(2);
 
           data.users.forEach((user, index) => {
-            expect(user).to.have.property('id');
+            expect(user).to.have.property('publicId');
             expect(user).to.include(newUsers.users[index]);
           });
         }),
@@ -183,7 +183,7 @@ describe('Admin Users API Tests', () => {
         })
         .then((data: components['schemas']['ActiveUserResponseDto']) => {
           expect(data).to.include({
-            id: userId,
+            publicId: userId,
             ...updates,
           });
           expect(data).to.have.property('updatedAt');
@@ -233,7 +233,7 @@ describe('Admin Users API Tests', () => {
         })
         .then((data: components['schemas']['ActiveUserResponseDto']) => {
           expect(data).to.include({
-            id: userId,
+            publicId: userId,
           });
           // ActiveUserResponseDto doesn't include deletedAt
           expect(data).to.have.property('createdAt');
@@ -244,7 +244,7 @@ describe('Admin Users API Tests', () => {
   });
 
   it('should bulk delete users', () => {
-    const ids = ['201', '202', '203'];
+    const publicIds = ['201', '202', '203'];
 
     cy.window().then((win) =>
       win
@@ -253,7 +253,7 @@ describe('Admin Users API Tests', () => {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ ids }),
+          body: JSON.stringify({ publicIds }),
         })
         .then((response) => {
           expect(response.status).to.equal(204);

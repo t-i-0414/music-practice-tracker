@@ -11,7 +11,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get users by IDs */
+        /** Get users by public IDs */
         get: operations["AdminUsersController_findManyUsers"];
         put?: never;
         post?: never;
@@ -21,14 +21,14 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/users/active_users/{id}": {
+    "/api/users/active_users/{publicId}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get user by ID */
+        /** Get user by public ID */
         get: operations["AdminUsersController_findUserById"];
         put?: never;
         post?: never;
@@ -45,7 +45,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get users by IDs */
+        /** Get users by public IDs */
         get: operations["AdminUsersController_findManyDeletedUsers"];
         put?: never;
         post?: never;
@@ -55,14 +55,14 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/users/deleted_users/{id}": {
+    "/api/users/deleted_users/{publicId}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get user by ID */
+        /** Get user by public ID */
         get: operations["AdminUsersController_findDeletedUserById"];
         put?: never;
         post?: never;
@@ -79,7 +79,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get users by IDs */
+        /** Get users by public IDs */
         get: operations["AdminUsersController_findManyAnyUsers"];
         put?: never;
         post?: never;
@@ -89,14 +89,14 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/users/any_users/{id}": {
+    "/api/users/any_users/{publicId}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get user by ID */
+        /** Get user by public ID */
         get: operations["AdminUsersController_findAnyUserById"];
         put?: never;
         post?: never;
@@ -134,14 +134,14 @@ export interface paths {
         put?: never;
         /** Create multiple users */
         post: operations["AdminUsersController_createManyUsers"];
-        /** Delete multiple users by IDs (soft) */
+        /** Delete multiple users by public IDs (soft) */
         delete: operations["AdminUsersController_deleteManyUsers"];
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/users/{id}": {
+    "/api/users/{publicId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -149,10 +149,10 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        /** Update a user by ID */
+        /** Update a user by public ID */
         put: operations["AdminUsersController_updateUser"];
         post?: never;
-        /** Delete a user by ID (soft) */
+        /** Delete a user by public ID (soft) */
         delete: operations["AdminUsersController_deleteUser"];
         options?: never;
         head?: never;
@@ -169,14 +169,14 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        /** Hard delete multiple users by IDs */
+        /** Hard delete multiple users by public IDs */
         delete: operations["AdminUsersController_hardDeleteManyUsers"];
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/users/hard/{id}": {
+    "/api/users/hard/{publicId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -186,7 +186,7 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        /** Hard delete a user by ID */
+        /** Hard delete a user by public ID */
         delete: operations["AdminUsersController_hardDeleteUser"];
         options?: never;
         head?: never;
@@ -201,7 +201,7 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        /** Restore multiple soft-deleted users by IDs */
+        /** Restore multiple soft-deleted users by public IDs */
         put: operations["AdminUsersController_restoreManyUsers"];
         post?: never;
         delete?: never;
@@ -210,7 +210,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/users/{id}/restore": {
+    "/api/users/{publicId}/restore": {
         parameters: {
             query?: never;
             header?: never;
@@ -218,7 +218,7 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        /** Restore a soft-deleted user by ID */
+        /** Restore a soft-deleted user by public ID */
         put: operations["AdminUsersController_restoreUser"];
         post?: never;
         delete?: never;
@@ -234,10 +234,10 @@ export interface components {
         ActiveUserResponseDto: {
             /**
              * Format: uuid
-             * @description The user ID
+             * @description The user public ID
              * @example 123e4567-e89b-12d3-a456-426614174000
              */
-            id: string;
+            publicId: string;
             /**
              * Format: email
              * @description The user email address
@@ -268,10 +268,10 @@ export interface components {
         DeletedUserResponseDto: {
             /**
              * Format: uuid
-             * @description The user ID
+             * @description The user public ID
              * @example 123e4567-e89b-12d3-a456-426614174000
              */
-            id: string;
+            publicId: string;
             /**
              * Format: email
              * @description The user email address
@@ -308,10 +308,10 @@ export interface components {
         AnyUserResponseDto: {
             /**
              * Format: uuid
-             * @description The user ID
+             * @description The user public ID
              * @example 123e4567-e89b-12d3-a456-426614174000
              */
-            id: string;
+            publicId: string;
             /**
              * Format: email
              * @description The user email address
@@ -377,33 +377,33 @@ export interface components {
         };
         DeleteManyUsersInputDto: {
             /**
-             * @description List of user IDs
+             * @description List of user public IDs
              * @example [
              *       "123e4567-e89b-12d3-a456-426614174000",
              *       "789e1234-e89b-12d3-a456-426614174000"
              *     ]
              */
-            ids: string[];
+            publicIds: string[];
         };
         HardDeleteManyUsersInputDto: {
             /**
-             * @description List of user IDs
+             * @description List of user public IDs
              * @example [
              *       "123e4567-e89b-12d3-a456-426614174000",
              *       "789e1234-e89b-12d3-a456-426614174000"
              *     ]
              */
-            ids: string[];
+            publicIds: string[];
         };
         RestoreManyUsersInputDto: {
             /**
-             * @description List of user IDs
+             * @description List of user public IDs
              * @example [
              *       "123e4567-e89b-12d3-a456-426614174000",
              *       "789e1234-e89b-12d3-a456-426614174000"
              *     ]
              */
-            ids: string[];
+            publicIds: string[];
         };
     };
     responses: never;
@@ -417,8 +417,8 @@ export interface operations {
     AdminUsersController_findManyUsers: {
         parameters: {
             query: {
-                /** @description List of user IDs */
-                ids: string[];
+                /** @description List of user public IDs */
+                publicIds: string[];
             };
             header?: never;
             path?: never;
@@ -463,8 +463,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description User ID */
-                id: string;
+                /** @description User public ID */
+                publicId: string;
             };
             cookie?: never;
         };
@@ -505,8 +505,8 @@ export interface operations {
     AdminUsersController_findManyDeletedUsers: {
         parameters: {
             query: {
-                /** @description List of user IDs */
-                ids: string[];
+                /** @description List of user public IDs */
+                publicIds: string[];
             };
             header?: never;
             path?: never;
@@ -551,8 +551,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description User ID */
-                id: string;
+                /** @description User public ID */
+                publicId: string;
             };
             cookie?: never;
         };
@@ -593,8 +593,8 @@ export interface operations {
     AdminUsersController_findManyAnyUsers: {
         parameters: {
             query: {
-                /** @description List of user IDs */
-                ids: string[];
+                /** @description List of user public IDs */
+                publicIds: string[];
             };
             header?: never;
             path?: never;
@@ -639,8 +639,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description User ID */
-                id: string;
+                /** @description User public ID */
+                publicId: string;
             };
             cookie?: never;
         };
@@ -774,8 +774,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description User ID */
-                id: string;
+                /** @description User public ID */
+                publicId: string;
             };
             cookie?: never;
         };
@@ -801,8 +801,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description User ID */
-                id: string;
+                /** @description User public ID */
+                publicId: string;
             };
             cookie?: never;
         };
@@ -844,8 +844,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description User ID */
-                id: string;
+                /** @description User public ID */
+                publicId: string;
             };
             cookie?: never;
         };
@@ -890,8 +890,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description User ID */
-                id: string;
+                /** @description User public ID */
+                publicId: string;
             };
             cookie?: never;
         };
