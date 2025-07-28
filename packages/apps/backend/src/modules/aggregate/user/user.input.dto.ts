@@ -6,7 +6,6 @@ import {
   IsEmail,
   IsNotEmpty,
   IsNotEmptyObject,
-  IsOptional,
   IsString,
   IsUUID,
   MaxLength,
@@ -61,16 +60,6 @@ export class CreateUserInputDto {
   @MaxLength(MAX_NAME_LENGTH)
   @IsNotEmpty()
   public name: string;
-
-  @ApiProperty({
-    description: 'The user public ID',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-    format: 'uuid',
-    required: false,
-  })
-  @IsUUID()
-  @IsOptional()
-  public publicId?: string;
 }
 
 export class CreateManyUsersInputDto {
