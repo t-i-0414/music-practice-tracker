@@ -7,7 +7,6 @@ model User {
   updatedAt DateTime  @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
-  @@index([publicId])
   @@index([createdAt])
   @@index([deletedAt])
   @@map("users")

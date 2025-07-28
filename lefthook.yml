@@ -13,12 +13,6 @@ pre-commit:
           bunx sort-package-json "$file"
           git add "$file"
         done
-    validate-prisma-schema:
-      glob: '**/prisma/schema.prisma'
-      run: |
-        for file in {staged_files}; do
-          scripts/validate-prisma-schema.sh "$file"
-        done
     check-secret-lint:
       glob: '**/*'
       run: |

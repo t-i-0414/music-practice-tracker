@@ -188,6 +188,10 @@ jobs:
           cd packages/apps/mobile
           bun run gen:api-types
 
+      - name: Check Model Definition
+        run: |
+          (find ./packages/apps/backend/prisma -name "*.prisma" -type f | while read -r f; do scripts/validate-prisma-schema.sh "$f" || exit 1; done)
+
       - name: Check Diff
         run: |
           if ! git diff --quiet -- packages/apps/mobile/generated/types/api.d.ts packages/apps/admin/generated/types/api.d.ts; then
