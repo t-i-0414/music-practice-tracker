@@ -4,17 +4,19 @@ import { Exclude, Expose, plainToInstance, Type } from 'class-transformer';
 import { MAX_EMAIL_LENGTH, MAX_NAME_LENGTH } from './user.constants';
 import { User } from './user.repository.service';
 
-const activeUserKeys = ['id', 'email', 'name', 'createdAt', 'updatedAt'] satisfies (keyof User)[];
+import { Publicize } from '@/utils/publicize';
+
+const activeUserKeys = ['publicId', 'email', 'name', 'createdAt', 'updatedAt'] satisfies (keyof User)[];
 
 @Exclude()
-class FullUserResponseDto implements User {
+class FullUserResponseDto implements Publicize<User> {
   @ApiProperty({
-    description: 'The user ID',
+    description: 'The user public ID',
     example: '123e4567-e89b-12d3-a456-426614174000',
     format: 'uuid',
   })
   @Expose()
-  public id: string;
+  public publicId: string;
 
   @ApiProperty({
     description: 'The user email address',

@@ -39,6 +39,7 @@ const config = tseslint.config(
     files: ['tests/**/*.ts'],
     rules: {
       'custom-backend-eslint/prisma-repository-only-access': 'off',
+      'custom-backend-eslint/no-internal-id': 'off',
     },
   },
   {

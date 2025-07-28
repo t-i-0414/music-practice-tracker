@@ -13,12 +13,6 @@ pre-commit:
           bunx sort-package-json "$file"
           git add "$file"
         done
-    validate-prisma-schema:
-      glob: '**/prisma/schema.prisma'
-      run: |
-        for file in {staged_files}; do
-          scripts/validate-prisma-schema.sh "$file"
-        done
     check-secret-lint:
       glob: '**/*'
       run: |
@@ -30,3 +24,10 @@ pre-commit:
         bun run lint:dotenv:compare
         bun run lint:dotenv:fix
         git add {staged_files}
+    check-prisma-model-definition:
+      glob: 'packages/apps/backend/prisma/**/*.prisma'
+      run: |
+        for file in {staged_files}; do
+          echo "Validating: $file"
+          scripts/check-prisma-model-definition.sh "$file" || exit 1
+        done

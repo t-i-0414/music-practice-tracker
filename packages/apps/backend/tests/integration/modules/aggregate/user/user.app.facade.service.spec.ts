@@ -25,17 +25,17 @@ describe('userAppFacadeService Integration', () => {
   });
 
   describe('findUserById', () => {
-    it('should find an active user by id', async () => {
+    it('should find an active user by publicId', async () => {
       expect.assertions(1);
 
       // Create user
       const user = await repositoryService.createUser({ name: 'Find Test User', email: 'find@test.com' });
 
       // Find user through facade
-      const foundUser = await facadeService.findUserById({ id: user.id });
+      const foundUser = await facadeService.findUserById({ publicId: user.publicId });
 
       expect(foundUser).toMatchObject({
-        id: user.id,
+        publicId: user.publicId,
         name: user.name,
         email: user.email,
       });
@@ -46,10 +46,10 @@ describe('userAppFacadeService Integration', () => {
 
       // Create and delete user
       const user = await repositoryService.createUser({ name: 'Deleted User', email: 'deleted@test.com' });
-      await repositoryService.deleteUser({ id: user.id });
+      await repositoryService.deleteUser({ publicId: user.publicId });
 
       // Should throw when trying to find deleted user
-      await expect(facadeService.findUserById({ id: user.id })).rejects.toThrow(Error);
+      await expect(facadeService.findUserById({ publicId: user.publicId })).rejects.toThrow(Error);
     });
   });
 
@@ -65,7 +65,7 @@ describe('userAppFacadeService Integration', () => {
       const createdUser = await facadeService.createUser(dto);
 
       expect(createdUser).toMatchObject({
-        id: expect.any(String),
+        publicId: expect.any(String),
         name: dto.name,
         email: dto.email,
         createdAt: expect.any(Date),
@@ -83,7 +83,7 @@ describe('userAppFacadeService Integration', () => {
 
       // Update through facade
       const updateDto = {
-        id: user.id,
+        publicId: user.publicId,
         data: {
           name: 'Updated Name',
         },
@@ -91,7 +91,7 @@ describe('userAppFacadeService Integration', () => {
       const updatedUser = await facadeService.updateUserById(updateDto);
 
       expect(updatedUser).toMatchObject({
-        id: user.id,
+        publicId: user.publicId,
         name: updateDto.data.name,
         email: user.email,
       });
@@ -106,14 +106,14 @@ describe('userAppFacadeService Integration', () => {
       const user = await repositoryService.createUser({ name: 'To Delete', email: 'todelete@test.com' });
 
       // Delete through facade
-      await facadeService.deleteUserById({ id: user.id });
+      await facadeService.deleteUserById({ publicId: user.publicId });
 
       // Verify user is soft deleted
-      const activeUser = await repositoryService.findUniqueActiveUser({ id: user.id });
+      const activeUser = await repositoryService.findUniqueActiveUser({ publicId: user.publicId });
 
       expect(activeUser).toBeNull();
 
-      const deletedUser = await repositoryService.findUniqueDeletedUser({ id: user.id });
+      const deletedUser = await repositoryService.findUniqueDeletedUser({ publicId: user.publicId });
 
       expect(deletedUser).toBeTruthy();
     });

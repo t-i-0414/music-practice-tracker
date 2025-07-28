@@ -56,6 +56,7 @@ export default defineConfig({
     'restoremanyandreturn',
     'rnstorybook',
     'sarif',
+    'sed',
     'setstate',
     'shellcheck',
     'simctl',

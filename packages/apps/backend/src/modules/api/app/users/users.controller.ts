@@ -11,15 +11,15 @@ import { ActiveUserResponseDto } from '@/modules/aggregate/user/user.response.dt
 export class AppUsersController {
   public constructor(private readonly userAppFacade: UserAppFacadeService) {}
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Get user by ID' })
-  @ApiParam({ name: 'id', description: 'User ID', example: '123e4567-e89b-12d3-a456-426614174000' })
+  @Get(':publicId')
+  @ApiOperation({ summary: 'Get user by public ID' })
+  @ApiParam({ name: 'publicId', description: 'User public ID', example: '123e4567-e89b-12d3-a456-426614174000' })
   @ApiResponse({ status: 200, description: 'User found', type: ActiveUserResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'User not found' })
-  public async findUserById(@Param('id', new ParseUUIDPipe()) id: string): Promise<ActiveUserResponseDto> {
-    return this.userAppFacade.findUserById({ id });
+  public async findUserById(@Param('publicId', new ParseUUIDPipe()) publicId: string): Promise<ActiveUserResponseDto> {
+    return this.userAppFacade.findUserById({ publicId });
   }
 
   @Post()
@@ -34,24 +34,24 @@ export class AppUsersController {
     return this.userAppFacade.createUser(body);
   }
 
-  @Put(':id')
-  @ApiOperation({ summary: 'Update a user by ID' })
-  @ApiParam({ name: 'id', description: 'User ID', example: '123e4567-e89b-12d3-a456-426614174000' })
+  @Put(':publicId')
+  @ApiOperation({ summary: 'Update a user by public ID' })
+  @ApiParam({ name: 'publicId', description: 'User public ID', example: '123e4567-e89b-12d3-a456-426614174000' })
   @ApiBody({ type: UpdateUserDataDto })
   @ApiResponse({ status: 200, description: 'User updated successfully', type: ActiveUserResponseDto })
   public async updateUser(
-    @Param('id', new ParseUUIDPipe()) id: string,
+    @Param('publicId', new ParseUUIDPipe()) publicId: string,
     @Body() data: UpdateUserDataDto,
   ): Promise<ActiveUserResponseDto> {
-    return this.userAppFacade.updateUserById({ id, data });
+    return this.userAppFacade.updateUserById({ publicId, data });
   }
 
-  @Delete(':id')
-  @ApiOperation({ summary: 'Delete a user by ID (soft)' })
-  @ApiParam({ name: 'id', description: 'User ID' })
+  @Delete(':publicId')
+  @ApiOperation({ summary: 'Delete a user by public ID (soft)' })
+  @ApiParam({ name: 'publicId', description: 'User public ID' })
   @ApiResponse({ status: 204, description: 'User deleted successfully' })
   @HttpCode(HttpStatus.NO_CONTENT)
-  public async deleteUser(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
-    return this.userAppFacade.deleteUserById({ id });
+  public async deleteUser(@Param('publicId', new ParseUUIDPipe()) publicId: string): Promise<void> {
+    return this.userAppFacade.deleteUserById({ publicId });
   }
 }

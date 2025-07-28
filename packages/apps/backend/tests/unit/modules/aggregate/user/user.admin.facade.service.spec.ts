@@ -18,7 +18,7 @@ describe('userAdminFacadeService', () => {
   let queryService: jest.Mocked<UserQueryService>;
 
   const mockUser = {
-    id: '123e4567-e89b-12d3-a456-426614174000',
+    publicId: '123e4567-e89b-12d3-a456-426614174000',
     email: 'test@example.com',
     name: 'Test User',
     createdAt: new Date('2024-01-01'),
@@ -80,7 +80,7 @@ describe('userAdminFacadeService', () => {
     it('should delegate to query service', async () => {
       expect.assertions(2);
 
-      const dto = { id: mockUser.id };
+      const dto = { publicId: mockUser.publicId };
       const expectedResult = toActiveUserDto(mockUser);
       queryService.findUserByIdOrFail.mockResolvedValue(expectedResult);
 
@@ -95,7 +95,7 @@ describe('userAdminFacadeService', () => {
     it('should delegate to query service', async () => {
       expect.assertions(2);
 
-      const dto = { id: mockDeletedUser.id };
+      const dto = { publicId: mockDeletedUser.publicId };
       const expectedResult = toDeletedUserDto(mockDeletedUser);
       queryService.findDeletedUserByIdOrFail.mockResolvedValue(expectedResult);
 
@@ -110,7 +110,7 @@ describe('userAdminFacadeService', () => {
     it('should delegate to query service', async () => {
       expect.assertions(2);
 
-      const dto = { id: mockUser.id };
+      const dto = { publicId: mockUser.publicId };
       const expectedResult = toAnyUserDto(mockUser);
       queryService.findAnyUserByIdOrFail.mockResolvedValue(expectedResult);
 
@@ -125,7 +125,7 @@ describe('userAdminFacadeService', () => {
     it('should delegate to query service', async () => {
       expect.assertions(2);
 
-      const dto = { ids: [mockUser.id] };
+      const dto = { publicIds: [mockUser.publicId] };
       const expectedResult = toActiveUsersDto([mockUser]);
       queryService.findManyUsers.mockResolvedValue(expectedResult);
 
@@ -140,7 +140,7 @@ describe('userAdminFacadeService', () => {
     it('should delegate to query service', async () => {
       expect.assertions(2);
 
-      const dto = { ids: [mockDeletedUser.id] };
+      const dto = { publicIds: [mockDeletedUser.publicId] };
       const expectedResult = toDeletedUsersDto([mockDeletedUser]);
       queryService.findManyDeletedUsers.mockResolvedValue(expectedResult);
 
@@ -155,7 +155,7 @@ describe('userAdminFacadeService', () => {
     it('should delegate to query service', async () => {
       expect.assertions(2);
 
-      const dto = { ids: [mockUser.id, mockDeletedUser.id] };
+      const dto = { publicIds: [mockUser.publicId, mockDeletedUser.publicId] };
       const expectedResult = toAnyUsersDto([mockUser, mockDeletedUser]);
       queryService.findManyAnyUsers.mockResolvedValue(expectedResult);
 
@@ -200,7 +200,7 @@ describe('userAdminFacadeService', () => {
     it('should delegate to command service', async () => {
       expect.assertions(2);
 
-      const dto = { id: mockUser.id, data: { name: 'Updated Name' } };
+      const dto = { publicId: mockUser.publicId, data: { name: 'Updated Name' } };
       const expectedResult = toActiveUserDto({ ...mockUser, name: 'Updated Name' });
       commandService.updateUserById.mockResolvedValue(expectedResult);
 
@@ -215,7 +215,7 @@ describe('userAdminFacadeService', () => {
     it('should delegate to command service', async () => {
       expect.assertions(1);
 
-      const dto = { id: mockUser.id };
+      const dto = { publicId: mockUser.publicId };
       commandService.deleteUserById.mockResolvedValue();
 
       await service.deleteUserById(dto);
@@ -228,7 +228,7 @@ describe('userAdminFacadeService', () => {
     it('should delegate to command service', async () => {
       expect.assertions(1);
 
-      const dto = { ids: ['id1', 'id2'] };
+      const dto = { publicIds: ['id1', 'id2'] };
       commandService.deleteManyUsersById.mockResolvedValue();
 
       await service.deleteManyUsersById(dto);
@@ -241,7 +241,7 @@ describe('userAdminFacadeService', () => {
     it('should delegate to command service', async () => {
       expect.assertions(1);
 
-      const dto = { id: mockUser.id };
+      const dto = { publicId: mockUser.publicId };
       commandService.hardDeleteUserById.mockResolvedValue();
 
       await service.hardDeleteUserById(dto);
@@ -254,7 +254,7 @@ describe('userAdminFacadeService', () => {
     it('should delegate to command service', async () => {
       expect.assertions(1);
 
-      const dto = { ids: ['id1', 'id2'] };
+      const dto = { publicIds: ['id1', 'id2'] };
       commandService.hardDeleteManyUsersById.mockResolvedValue();
 
       await service.hardDeleteManyUsersById(dto);
@@ -267,7 +267,7 @@ describe('userAdminFacadeService', () => {
     it('should delegate to command service', async () => {
       expect.assertions(2);
 
-      const dto = { id: mockDeletedUser.id };
+      const dto = { publicId: mockDeletedUser.publicId };
       const expectedResult = toActiveUserDto({ ...mockDeletedUser, deletedAt: null });
       commandService.restoreUserById.mockResolvedValue(expectedResult);
 
@@ -282,7 +282,7 @@ describe('userAdminFacadeService', () => {
     it('should delegate to command service', async () => {
       expect.assertions(2);
 
-      const dto = { ids: ['id1', 'id2'] };
+      const dto = { publicIds: ['id1', 'id2'] };
       const expectedResult = toActiveUsersDto([{ ...mockDeletedUser, deletedAt: null }]);
       commandService.restoreManyUsersById.mockResolvedValue(expectedResult);
 

@@ -40,14 +40,14 @@ describe('admin API - /api/users', () => {
         .expect(201);
 
       const response = await request(app.getHttpServer())
-        .get(`/api/users/active_users?ids=${user1.body.id}&ids=${user2.body.id}`)
+        .get(`/api/users/active_users?publicIds=${user1.body.publicId}&publicIds=${user2.body.publicId}`)
         .expect(200);
 
       expect(response.body).toHaveProperty('users');
       expect(Array.isArray(response.body.users)).toBe(true);
       expect(response.body.users).toHaveLength(2);
-      expect(response.body.users.some((u: any) => u.id === user1.body.id)).toBe(true);
-      expect(response.body.users.some((u: any) => u.id === user2.body.id)).toBe(true);
+      expect(response.body.users.some((u: any) => u.publicId === user1.body.publicId)).toBe(true);
+      expect(response.body.users.some((u: any) => u.publicId === user2.body.publicId)).toBe(true);
     });
   });
 
@@ -60,16 +60,16 @@ describe('admin API - /api/users', () => {
         .send({ name: 'Deleted User', email: `deleted-${randomUUID()}@example.com` })
         .expect(201);
 
-      await request(app.getHttpServer()).delete(`/api/users/${user.body.id}`).expect(204);
+      await request(app.getHttpServer()).delete(`/api/users/${user.body.publicId}`).expect(204);
 
       const response = await request(app.getHttpServer())
-        .get(`/api/users/deleted_users?ids=${user.body.id}`)
+        .get(`/api/users/deleted_users?publicIds=${user.body.publicId}`)
         .expect(200);
 
       expect(response.body).toHaveProperty('users');
       expect(Array.isArray(response.body.users)).toBe(true);
       expect(response.body.users).toHaveLength(1);
-      expect(response.body.users[0].id).toBe(user.body.id);
+      expect(response.body.users[0].publicId).toBe(user.body.publicId);
     });
   });
 
@@ -87,29 +87,29 @@ describe('admin API - /api/users', () => {
         .send({ name: 'Deleted User', email: `deleted-${randomUUID()}@example.com` })
         .expect(201);
 
-      await request(app.getHttpServer()).delete(`/api/users/${deletedUser.body.id}`).expect(204);
+      await request(app.getHttpServer()).delete(`/api/users/${deletedUser.body.publicId}`).expect(204);
 
       const response = await request(app.getHttpServer())
-        .get(`/api/users/any_users?ids=${activeUser.body.id}&ids=${deletedUser.body.id}`)
+        .get(`/api/users/any_users?publicIds=${activeUser.body.publicId}&publicIds=${deletedUser.body.publicId}`)
         .expect(200);
 
       expect(response.body).toHaveProperty('users');
       expect(Array.isArray(response.body.users)).toBe(true);
       expect(response.body.users).toHaveLength(2);
 
-      const activeUserInResponse = response.body.users.find((u: any) => u.id === activeUser.body.id);
+      const activeUserInResponse = response.body.users.find((u: any) => u.publicId === activeUser.body.publicId);
 
       expect(activeUserInResponse).toBeTruthy();
 
-      const deletedUserInResponse = response.body.users.find((u: any) => u.id === deletedUser.body.id);
+      const deletedUserInResponse = response.body.users.find((u: any) => u.publicId === deletedUser.body.publicId);
 
       expect(deletedUserInResponse).toBeTruthy();
       expect(deletedUserInResponse.deletedAt).not.toBeNull();
     });
   });
 
-  describe('gET /api/users/active_users/:id', () => {
-    it('should return active user by ID', async () => {
+  describe('gET /api/users/active_users/:publicId', () => {
+    it('should return active user by publicId', async () => {
       expect.assertions(3);
 
       const user = await request(app.getHttpServer())
@@ -117,9 +117,11 @@ describe('admin API - /api/users', () => {
         .send({ name: 'Test User', email: `test-${randomUUID()}@example.com` })
         .expect(201);
 
-      const response = await request(app.getHttpServer()).get(`/api/users/active_users/${user.body.id}`).expect(200);
+      const response = await request(app.getHttpServer())
+        .get(`/api/users/active_users/${user.body.publicId}`)
+        .expect(200);
 
-      expect(response.body.id).toBe(user.body.id);
+      expect(response.body.publicId).toBe(user.body.publicId);
       expect(response.body.name).toBe('Test User');
       expect(response.body.email).toMatch(/test-.*@example\.com/u);
     });
@@ -134,8 +136,8 @@ describe('admin API - /api/users', () => {
     });
   });
 
-  describe('gET /api/users/deleted_users/:id', () => {
-    it('should return deleted user by ID', async () => {
+  describe('gET /api/users/deleted_users/:publicId', () => {
+    it('should return deleted user by publicId', async () => {
       expect.assertions(3);
 
       const user = await request(app.getHttpServer())
@@ -143,11 +145,13 @@ describe('admin API - /api/users', () => {
         .send({ name: 'To Delete', email: `delete-${randomUUID()}@example.com` })
         .expect(201);
 
-      await request(app.getHttpServer()).delete(`/api/users/${user.body.id}`).expect(204);
+      await request(app.getHttpServer()).delete(`/api/users/${user.body.publicId}`).expect(204);
 
-      const response = await request(app.getHttpServer()).get(`/api/users/deleted_users/${user.body.id}`).expect(200);
+      const response = await request(app.getHttpServer())
+        .get(`/api/users/deleted_users/${user.body.publicId}`)
+        .expect(200);
 
-      expect(response.body.id).toBe(user.body.id);
+      expect(response.body.publicId).toBe(user.body.publicId);
       expect(response.body.name).toBe('To Delete');
       expect(response.body.deletedAt).not.toBeNull();
     });
@@ -164,7 +168,7 @@ describe('admin API - /api/users', () => {
 
       const response = await request(app.getHttpServer()).post('/api/users').send(userData).expect(201);
 
-      expect(response.body).toHaveProperty('id');
+      expect(response.body).toHaveProperty('publicId');
       expect(response.body.name).toBe(userData.name);
       expect(response.body.email).toBe(userData.email);
       expect(response.body).toHaveProperty('createdAt');
@@ -212,8 +216,8 @@ describe('admin API - /api/users', () => {
     });
   });
 
-  describe('pUT /api/users/:id', () => {
-    it('should update user by ID', async () => {
+  describe('pUT /api/users/:publicId', () => {
+    it('should update user by publicId', async () => {
       expect.assertions(3);
 
       const user = await request(app.getHttpServer())
@@ -224,18 +228,18 @@ describe('admin API - /api/users', () => {
       const updateData = { name: 'Updated Name' };
 
       const response = await request(app.getHttpServer())
-        .put(`/api/users/${user.body.id}`)
+        .put(`/api/users/${user.body.publicId}`)
         .send(updateData)
         .expect(200);
 
-      expect(response.body.id).toBe(user.body.id);
+      expect(response.body.publicId).toBe(user.body.publicId);
       expect(response.body.name).toBe('Updated Name');
       expect(response.body.email).toBe(user.body.email);
     });
   });
 
-  describe('dELETE /api/users/:id', () => {
-    it('should soft delete user by ID', async () => {
+  describe('dELETE /api/users/:publicId', () => {
+    it('should soft delete user by publicId', async () => {
       expect.assertions(1);
 
       const user = await request(app.getHttpServer())
@@ -243,10 +247,12 @@ describe('admin API - /api/users', () => {
         .send({ name: 'To Delete', email: `delete-${randomUUID()}@example.com` })
         .expect(201);
 
-      await request(app.getHttpServer()).delete(`/api/users/${user.body.id}`).expect(204);
+      await request(app.getHttpServer()).delete(`/api/users/${user.body.publicId}`).expect(204);
 
       // Verify user is soft deleted
-      const response = await request(app.getHttpServer()).get(`/api/users/deleted_users/${user.body.id}`).expect(200);
+      const response = await request(app.getHttpServer())
+        .get(`/api/users/deleted_users/${user.body.publicId}`)
+        .expect(200);
 
       expect(response.body.deletedAt).not.toBeNull();
     });

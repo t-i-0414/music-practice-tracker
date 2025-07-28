@@ -23,7 +23,7 @@ describe('user input DTOs', () => {
     it('should validate with valid UUID', () => {
       expect.assertions(1);
 
-      const dto = plainToInstance(FindUserByIdInputDto, { id: validUUID });
+      const dto = plainToInstance(FindUserByIdInputDto, { publicId: validUUID });
       const errors = validateSync(dto);
 
       expect(errors).toHaveLength(0);
@@ -32,17 +32,17 @@ describe('user input DTOs', () => {
     it('should fail with invalid UUID', () => {
       expect.assertions(2);
 
-      const dto = plainToInstance(FindUserByIdInputDto, { id: invalidUUID });
+      const dto = plainToInstance(FindUserByIdInputDto, { publicId: invalidUUID });
       const errors = validateSync(dto);
 
       expect(errors).toHaveLength(1);
       expect(errors[0].constraints).toHaveProperty('isUuid');
     });
 
-    it('should fail with empty id', () => {
+    it('should fail with empty publicId', () => {
       expect.assertions(2);
 
-      const dto = plainToInstance(FindUserByIdInputDto, { id: '' });
+      const dto = plainToInstance(FindUserByIdInputDto, { publicId: '' });
       const errors = validateSync(dto);
 
       expect(errors).toHaveLength(1);
@@ -54,7 +54,7 @@ describe('user input DTOs', () => {
     it('should validate with valid UUID array', () => {
       expect.assertions(1);
 
-      const dto = plainToInstance(FindManyUsersByIdInputDto, { ids: [validUUID, validUUID] });
+      const dto = plainToInstance(FindManyUsersByIdInputDto, { publicIds: [validUUID, validUUID] });
       const errors = validateSync(dto);
 
       expect(errors).toHaveLength(0);
@@ -63,7 +63,7 @@ describe('user input DTOs', () => {
     it('should fail with empty array', () => {
       expect.assertions(2);
 
-      const dto = plainToInstance(FindManyUsersByIdInputDto, { ids: [] });
+      const dto = plainToInstance(FindManyUsersByIdInputDto, { publicIds: [] });
       const errors = validateSync(dto);
 
       expect(errors).toHaveLength(1);
@@ -73,7 +73,7 @@ describe('user input DTOs', () => {
     it('should fail with invalid UUID in array', () => {
       expect.assertions(2);
 
-      const dto = plainToInstance(FindManyUsersByIdInputDto, { ids: [validUUID, invalidUUID] });
+      const dto = plainToInstance(FindManyUsersByIdInputDto, { publicIds: [validUUID, invalidUUID] });
       const errors = validateSync(dto);
 
       expect(errors).toHaveLength(1);
@@ -83,7 +83,7 @@ describe('user input DTOs', () => {
     it('should fail with non-array value', () => {
       expect.assertions(2);
 
-      const dto = plainToInstance(FindManyUsersByIdInputDto, { ids: 'not-an-array' });
+      const dto = plainToInstance(FindManyUsersByIdInputDto, { publicIds: 'not-an-array' });
       const errors = validateSync(dto);
 
       expect(errors).toHaveLength(1);
@@ -228,7 +228,7 @@ describe('user input DTOs', () => {
       expect.assertions(1);
 
       const dto = plainToInstance(UpdateUserInputDto, {
-        id: validUUID,
+        publicId: validUUID,
         data: { name: 'Updated Name' },
       });
       const errors = validateSync(dto);
@@ -240,7 +240,7 @@ describe('user input DTOs', () => {
       expect.assertions(1);
 
       const dto = plainToInstance(UpdateUserInputDto, {
-        id: validUUID,
+        publicId: validUUID,
         data: { email: 'new@example.com' },
       });
       const errors = validateSync(dto);
@@ -252,7 +252,7 @@ describe('user input DTOs', () => {
       expect.assertions(2);
 
       const dto = plainToInstance(UpdateUserInputDto, {
-        id: invalidUUID,
+        publicId: invalidUUID,
         data: { name: 'Updated Name' },
       });
       const errors = validateSync(dto);
@@ -265,7 +265,7 @@ describe('user input DTOs', () => {
       expect.assertions(2);
 
       const dto = plainToInstance(UpdateUserInputDto, {
-        id: validUUID,
+        publicId: validUUID,
         data: {},
       });
       const errors = validateSync(dto);
@@ -278,7 +278,7 @@ describe('user input DTOs', () => {
       expect.assertions(1);
 
       const dto = plainToInstance(UpdateUserInputDto, {
-        id: validUUID,
+        publicId: validUUID,
         data: { email: 'invalid-email' },
       });
       const errors = validateSync(dto);
@@ -291,7 +291,7 @@ describe('user input DTOs', () => {
     it('should validate with valid UUID', () => {
       expect.assertions(1);
 
-      const dto = plainToInstance(DeleteUserByIdInputDto, { id: validUUID });
+      const dto = plainToInstance(DeleteUserByIdInputDto, { publicId: validUUID });
       const errors = validateSync(dto);
 
       expect(errors).toHaveLength(0);
@@ -300,7 +300,7 @@ describe('user input DTOs', () => {
     it('should extend FindUserByIdInputDto validation', () => {
       expect.assertions(2);
 
-      const dto = plainToInstance(DeleteUserByIdInputDto, { id: invalidUUID });
+      const dto = plainToInstance(DeleteUserByIdInputDto, { publicId: invalidUUID });
       const errors = validateSync(dto);
 
       expect(errors).toHaveLength(1);
@@ -312,7 +312,7 @@ describe('user input DTOs', () => {
     it('should validate with valid UUID array', () => {
       expect.assertions(1);
 
-      const dto = plainToInstance(DeleteManyUsersInputDto, { ids: [validUUID] });
+      const dto = plainToInstance(DeleteManyUsersInputDto, { publicIds: [validUUID] });
       const errors = validateSync(dto);
 
       expect(errors).toHaveLength(0);
@@ -321,7 +321,7 @@ describe('user input DTOs', () => {
     it('should extend FindManyUsersByIdInputDto validation', () => {
       expect.assertions(2);
 
-      const dto = plainToInstance(DeleteManyUsersInputDto, { ids: [] });
+      const dto = plainToInstance(DeleteManyUsersInputDto, { publicIds: [] });
       const errors = validateSync(dto);
 
       expect(errors).toHaveLength(1);
@@ -333,7 +333,7 @@ describe('user input DTOs', () => {
     it('should validate with valid UUID', () => {
       expect.assertions(1);
 
-      const dto = plainToInstance(HardDeleteUserByIdInputDto, { id: validUUID });
+      const dto = plainToInstance(HardDeleteUserByIdInputDto, { publicId: validUUID });
       const errors = validateSync(dto);
 
       expect(errors).toHaveLength(0);
@@ -344,7 +344,7 @@ describe('user input DTOs', () => {
     it('should validate with valid UUID array', () => {
       expect.assertions(1);
 
-      const dto = plainToInstance(HardDeleteManyUsersInputDto, { ids: [validUUID] });
+      const dto = plainToInstance(HardDeleteManyUsersInputDto, { publicIds: [validUUID] });
       const errors = validateSync(dto);
 
       expect(errors).toHaveLength(0);
@@ -355,7 +355,7 @@ describe('user input DTOs', () => {
     it('should validate with valid UUID', () => {
       expect.assertions(1);
 
-      const dto = plainToInstance(RestoreUserByIdInputDto, { id: validUUID });
+      const dto = plainToInstance(RestoreUserByIdInputDto, { publicId: validUUID });
       const errors = validateSync(dto);
 
       expect(errors).toHaveLength(0);
@@ -366,7 +366,7 @@ describe('user input DTOs', () => {
     it('should validate with valid UUID array', () => {
       expect.assertions(1);
 
-      const dto = plainToInstance(RestoreManyUsersInputDto, { ids: [validUUID] });
+      const dto = plainToInstance(RestoreManyUsersInputDto, { publicIds: [validUUID] });
       const errors = validateSync(dto);
 
       expect(errors).toHaveLength(0);

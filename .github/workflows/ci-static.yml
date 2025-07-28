@@ -170,7 +170,7 @@ jobs:
       - name: Setup Backend Project
         uses: ./.github/actions/setup-backend
 
-      - name: Run Schema Check
+      - name: Run Schema Validation
         run: |
           cd packages/apps/backend
           bun run prisma:validate

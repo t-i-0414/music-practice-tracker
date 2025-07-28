@@ -1,4 +1,4 @@
-export const ensureIdsToArray = (value: string | string[] | undefined | null): string[] => {
+export const ensurePublicIdsToArray = (value: string | string[] | undefined | null): string[] => {
   if (value === null || value === undefined) {
     return [];
   }

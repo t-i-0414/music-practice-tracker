@@ -4,19 +4,19 @@
  */
 
 export interface paths {
-    "/api/users/{id}": {
+    "/api/users/{publicId}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get user by ID */
+        /** Get user by public ID */
         get: operations["AppUsersController_findUserById"];
-        /** Update a user by ID */
+        /** Update a user by public ID */
         put: operations["AppUsersController_updateUser"];
         post?: never;
-        /** Delete a user by ID (soft) */
+        /** Delete a user by public ID (soft) */
         delete: operations["AppUsersController_deleteUser"];
         options?: never;
         head?: never;
@@ -47,10 +47,10 @@ export interface components {
         ActiveUserResponseDto: {
             /**
              * Format: uuid
-             * @description The user ID
+             * @description The user public ID
              * @example 123e4567-e89b-12d3-a456-426614174000
              */
-            id: string;
+            publicId: string;
             /**
              * Format: email
              * @description The user email address
@@ -115,8 +115,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description User ID */
-                id: string;
+                /** @description User public ID */
+                publicId: string;
             };
             cookie?: never;
         };
@@ -159,8 +159,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description User ID */
-                id: string;
+                /** @description User public ID */
+                publicId: string;
             };
             cookie?: never;
         };
@@ -186,8 +186,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description User ID */
-                id: string;
+                /** @description User public ID */
+                publicId: string;
             };
             cookie?: never;
         };

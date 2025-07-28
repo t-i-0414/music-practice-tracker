@@ -1,3 +1,4 @@
+import noInternalId from './no-internal-id';
 import prismaCreateNamingConvention from './prisma-create-naming-convention';
 import prismaCreateNoDeletedAt from './prisma-create-no-deleted-at';
 import prismaDeleteNamingConvention from './prisma-delete-naming-convention';
@@ -12,6 +13,7 @@ const plugin = {
     version: '1.0.0',
   },
   rules: {
+    'no-internal-id': noInternalId,
     'prisma-create-naming-convention': prismaCreateNamingConvention,
     'prisma-create-no-deleted-at': prismaCreateNoDeletedAt,
     'prisma-delete-naming-convention': prismaDeleteNamingConvention,

@@ -7,7 +7,7 @@ describe('Simple MSW Test', () => {
 
     cy.window().then((win) =>
       win
-        .fetch(`http://${host}:${adminApiPort}/api/users/active_users?ids=10&ids=20`)
+        .fetch(`http://${host}:${adminApiPort}/api/users/active_users?publicIds=10&publicIds=20`)
         .then((response) => response.json())
         .then((data) => {
           expect(data).to.have.property('users');
@@ -26,7 +26,7 @@ describe('Simple MSW Test', () => {
         .fetch(`http://${host}:${adminApiPort}/api/users/active_users/123`)
         .then((response) => response.json())
         .then((data) => {
-          expect(data).to.have.property('id', '123');
+          expect(data).to.have.property('publicId', '123');
           expect(data).to.have.property('name', 'Test User 123');
           expect(data).to.have.property('email', 'user123@example.com');
         }),

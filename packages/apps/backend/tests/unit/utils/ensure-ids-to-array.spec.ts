@@ -1,11 +1,11 @@
-import { ensureIdsToArray } from '@/utils/ensure-ids-to-array';
+import { ensurePublicIdsToArray } from '@/utils/ensure-public-ids-to-array';
 
 describe('ensureIdsToArray', () => {
   describe('with null or undefined input', () => {
     it('should return empty array for null', () => {
       expect.assertions(1);
 
-      const result = ensureIdsToArray(null);
+      const result = ensurePublicIdsToArray(null);
 
       expect(result).toStrictEqual([]);
     });
@@ -13,7 +13,7 @@ describe('ensureIdsToArray', () => {
     it('should return empty array for undefined', () => {
       expect.assertions(1);
 
-      const result = ensureIdsToArray(undefined);
+      const result = ensurePublicIdsToArray(undefined);
 
       expect(result).toStrictEqual([]);
     });
@@ -23,7 +23,7 @@ describe('ensureIdsToArray', () => {
     it('should return array with single string', () => {
       expect.assertions(1);
 
-      const result = ensureIdsToArray('id1');
+      const result = ensurePublicIdsToArray('id1');
 
       expect(result).toStrictEqual(['id1']);
     });
@@ -31,7 +31,7 @@ describe('ensureIdsToArray', () => {
     it('should split comma-separated string', () => {
       expect.assertions(1);
 
-      const result = ensureIdsToArray('id1,id2,id3');
+      const result = ensurePublicIdsToArray('id1,id2,id3');
 
       expect(result).toStrictEqual(['id1', 'id2', 'id3']);
     });
@@ -39,7 +39,7 @@ describe('ensureIdsToArray', () => {
     it('should trim whitespace from comma-separated values', () => {
       expect.assertions(1);
 
-      const result = ensureIdsToArray('id1 , id2,  id3  ');
+      const result = ensurePublicIdsToArray('id1 , id2,  id3  ');
 
       expect(result).toStrictEqual(['id1', 'id2', 'id3']);
     });
@@ -47,7 +47,7 @@ describe('ensureIdsToArray', () => {
     it('should filter out empty strings', () => {
       expect.assertions(1);
 
-      const result = ensureIdsToArray('id1,,id2,,,id3,');
+      const result = ensurePublicIdsToArray('id1,,id2,,,id3,');
 
       expect(result).toStrictEqual(['id1', 'id2', 'id3']);
     });
@@ -55,7 +55,7 @@ describe('ensureIdsToArray', () => {
     it('should handle empty string', () => {
       expect.assertions(1);
 
-      const result = ensureIdsToArray('');
+      const result = ensurePublicIdsToArray('');
 
       expect(result).toStrictEqual([]);
     });
@@ -63,7 +63,7 @@ describe('ensureIdsToArray', () => {
     it('should handle string with only commas', () => {
       expect.assertions(1);
 
-      const result = ensureIdsToArray(',,,');
+      const result = ensurePublicIdsToArray(',,,');
 
       expect(result).toStrictEqual([]);
     });
@@ -74,7 +74,7 @@ describe('ensureIdsToArray', () => {
       expect.assertions(1);
 
       const input = ['id1', 'id2', 'id3'];
-      const result = ensureIdsToArray(input);
+      const result = ensurePublicIdsToArray(input);
 
       expect(result).toStrictEqual(['id1', 'id2', 'id3']);
     });
@@ -83,7 +83,7 @@ describe('ensureIdsToArray', () => {
       expect.assertions(1);
 
       const input = ['id1,id2', 'id3', 'id4,id5'];
-      const result = ensureIdsToArray(input);
+      const result = ensurePublicIdsToArray(input);
 
       expect(result).toStrictEqual(['id1', 'id2', 'id3', 'id4', 'id5']);
     });
@@ -92,7 +92,7 @@ describe('ensureIdsToArray', () => {
       expect.assertions(1);
 
       const input = ['id1', '', 'id2,id3', ',,', 'id4'];
-      const result = ensureIdsToArray(input);
+      const result = ensurePublicIdsToArray(input);
 
       expect(result).toStrictEqual(['id1', 'id2', 'id3', 'id4']);
     });
@@ -101,7 +101,7 @@ describe('ensureIdsToArray', () => {
       expect.assertions(1);
 
       const input = [' id1 ', 'id2, id3 ', '  id4  '];
-      const result = ensureIdsToArray(input);
+      const result = ensurePublicIdsToArray(input);
 
       expect(result).toStrictEqual(['id1', 'id2', 'id3', 'id4']);
     });
@@ -109,7 +109,7 @@ describe('ensureIdsToArray', () => {
     it('should handle empty array', () => {
       expect.assertions(1);
 
-      const result = ensureIdsToArray([]);
+      const result = ensurePublicIdsToArray([]);
 
       expect(result).toStrictEqual([]);
     });
@@ -120,7 +120,7 @@ describe('ensureIdsToArray', () => {
       expect.assertions(1);
 
       const input = ['', '', ''];
-      const result = ensureIdsToArray(input);
+      const result = ensurePublicIdsToArray(input);
 
       expect(result).toStrictEqual([]);
     });
@@ -129,7 +129,7 @@ describe('ensureIdsToArray', () => {
       expect.assertions(1);
 
       const input = ['a,b,c', 'd,e', 'f', 'g,h,i,j'];
-      const result = ensureIdsToArray(input);
+      const result = ensurePublicIdsToArray(input);
 
       expect(result).toStrictEqual(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']);
     });

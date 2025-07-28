@@ -23,21 +23,21 @@ export class UserQueryService {
 
   public async findUserByIdOrFail(dto: FindUserByIdInputDto): Promise<ActiveUserResponseDto> {
     const user = await this.repository.findUniqueActiveUser(dto);
-    if (!user) throw new NotFoundException(`User ${dto.id} not found`);
+    if (!user) throw new NotFoundException(`User ${dto.publicId} not found`);
 
     return toActiveUserDto(user);
   }
 
   public async findDeletedUserByIdOrFail(dto: FindUserByIdInputDto): Promise<DeletedUserResponseDto> {
     const user = await this.repository.findUniqueDeletedUser(dto);
-    if (!user) throw new NotFoundException(`Deleted user ${dto.id} not found`);
+    if (!user) throw new NotFoundException(`Deleted user ${dto.publicId} not found`);
 
     return toDeletedUserDto(user);
   }
 
   public async findAnyUserByIdOrFail(dto: FindUserByIdInputDto): Promise<AnyUserResponseDto> {
     const user = await this.repository.findUniqueAnyUser(dto);
-    if (!user) throw new NotFoundException(`User ${dto.id} not found`);
+    if (!user) throw new NotFoundException(`User ${dto.publicId} not found`);
 
     return toAnyUserDto(user);
   }
@@ -45,7 +45,7 @@ export class UserQueryService {
   public async findManyUsers(dto: FindManyUsersByIdInputDto): Promise<ActiveUsersResponseDto> {
     const users = await this.repository.findManyActiveUsers({
       where: {
-        id: { in: dto.ids },
+        publicId: { in: dto.publicIds },
       },
     });
 
@@ -55,7 +55,7 @@ export class UserQueryService {
   public async findManyDeletedUsers(dto: FindManyUsersByIdInputDto): Promise<DeletedUsersResponseDto> {
     const users = await this.repository.findManyDeletedUsers({
       where: {
-        id: { in: dto.ids },
+        publicId: { in: dto.publicIds },
       },
     });
 
@@ -65,7 +65,7 @@ export class UserQueryService {
   public async findManyAnyUsers(dto: FindManyUsersByIdInputDto): Promise<AnyUsersResponseDto> {
     const users = await this.repository.findManyAnyUsers({
       where: {
-        id: { in: dto.ids },
+        publicId: { in: dto.publicIds },
       },
     });
 
