@@ -170,7 +170,7 @@ jobs:
       - name: Setup Backend Project
         uses: ./.github/actions/setup-backend
 
-      - name: Run Schema Check
+      - name: Run Schema Validation
         run: |
           cd packages/apps/backend
           bun run prisma:validate
@@ -187,10 +187,6 @@ jobs:
         run: |
           cd packages/apps/mobile
           bun run gen:api-types
-
-      - name: Check Model Definition
-        run: |
-          (find ./packages/apps/backend/prisma -name "*.prisma" -type f | while read -r f; do scripts/validate-prisma-schema.sh "$f" || exit 1; done)
 
       - name: Check Diff
         run: |

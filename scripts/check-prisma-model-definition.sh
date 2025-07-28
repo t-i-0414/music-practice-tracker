@@ -25,7 +25,8 @@ validate_model() {
   local model_content=$2
   local model_start_line=$3
 
-  local has_id=false
+  local has_primary_id=false
+  local has_public_id=false
   local has_createdAt=false
   local has_updatedAt=false
   local has_deletedAt=false
@@ -44,11 +45,35 @@ validate_model() {
     fi
 
     # Extract field name (first word of the line)
+    # Use more portable approach
     field_name=$(echo "$line" | awk '{print $1}')
+
+    # Check id field (primary key)
+    if [[ "$field_name" = "id" ]]; then
+      has_primary_id=true
+
+      # Check Int type
+      if ! echo "$line" | grep -q "Int"; then
+        echo "Error at line $current_line: id field should be of type Int in model $model_name"
+        ((error_count++))
+      fi
+
+      # Check @id
+      if ! echo "$line" | grep -q "@id"; then
+        echo "Error at line $current_line: id field should have @id in model $model_name"
+        ((error_count++))
+      fi
+
+      # Check @default(autoincrement())
+      if ! echo "$line" | grep -q "@default(autoincrement())"; then
+        echo "Error at line $current_line: id field should have @default(autoincrement()) in model $model_name"
+        ((error_count++))
+      fi
+    fi
 
     # Check publicId/public_id field
     if [[ "$field_name" = "publicId" ]] || [[ "$field_name" = "public_id" ]]; then
-      has_id=true
+      has_public_id=true
 
       # Check String type
       if ! echo "$line" | grep -q "String"; then
@@ -130,10 +155,15 @@ validate_model() {
         has_deletedAt_index=true
       fi
     fi
-  done <<<"$model_content"
+  done <<< "$model_content"
 
   # Check if required fields exist
-  if [ "$has_id" = false ]; then
+  if [ "$has_primary_id" = false ]; then
+    echo "Error: Model $model_name is missing required field 'id' with @id @default(autoincrement())"
+    ((error_count++))
+  fi
+
+  if [ "$has_public_id" = false ]; then
     echo "Error: Model $model_name is missing required field 'publicId' or 'public_id' with @unique"
     ((error_count++))
   fi
@@ -173,23 +203,26 @@ line_num=0
 in_model=false
 
 while IFS= read -r line; do
-  ((line_num++))
+  line_num=$((line_num + 1))
 
-  # Check if this is a model declaration
-  if [[ "$line" =~ ^model[[:space:]]+([[:alnum:]_]+)[[:space:]]*\{ ]]; then
+  # Check if this is a model declaration - use more portable approach
+  if echo "$line" | grep -E '^model[[:space:]]+[[:alnum:]_]+[[:space:]]*\{' > /dev/null; then
+    # Extract model name using sed for portability
+    model_name=$(echo "$line" | sed -n 's/^model[[:space:]]\+\([[:alnum:]_]\+\)[[:space:]]*{.*/\1/p')
+
     # If we were already in a model, validate it first
     if [ "$in_model" = true ] && [ -n "$current_model" ]; then
       validate_model "$current_model" "$model_content" "$model_start_line"
     fi
 
     # Start new model
-    current_model="${BASH_REMATCH[1]}"
+    current_model="$model_name"
     model_content=""
     model_start_line=$((line_num + 1))
     in_model=true
   elif [ "$in_model" = true ]; then
     # Check if model ends
-    if [[ "$line" =~ ^[[:space:]]*\}[[:space:]]*$ ]]; then
+    if echo "$line" | grep -E '^[[:space:]]*\}[[:space:]]*$' > /dev/null; then
       # Validate the current model
       validate_model "$current_model" "$model_content" "$model_start_line"
       in_model=false
@@ -197,10 +230,10 @@ while IFS= read -r line; do
       model_content=""
     else
       # Add line to model content
-      model_content+="$line"$'\n'
+      model_content="${model_content}${line}"$'\n'
     fi
   fi
-done <"$1"
+done < "$1"
 
 # Handle case where last model doesn't have a closing brace on a separate line
 if [ "$in_model" = true ] && [ -n "$current_model" ]; then

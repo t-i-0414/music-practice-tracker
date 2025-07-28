@@ -24,3 +24,10 @@ pre-commit:
         bun run lint:dotenv:compare
         bun run lint:dotenv:fix
         git add {staged_files}
+    check-prisma-model-definition:
+      glob: 'packages/apps/backend/prisma/**/*.prisma'
+      run: |
+        for file in {staged_files}; do
+          echo "Validating: $file"
+          scripts/check-prisma-model-definition.sh "$file" || exit 1
+        done
