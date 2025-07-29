@@ -72,6 +72,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/users/suspended_users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get suspended users by public IDs */
+        get: operations["AdminUsersController_findManySuspendedUsers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/users/suspended_users/{publicId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get suspended user by public ID */
+        get: operations["AdminUsersController_findSuspendedUserById"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/users/any_users": {
         parameters: {
             query?: never;
@@ -227,6 +261,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/users/suspend/bulk": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Suspend multiple users by public IDs */
+        put: operations["AdminUsersController_suspendManyUsers"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/users/{publicId}/suspend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Suspend a user by public ID */
+        put: operations["AdminUsersController_suspendUser"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -301,9 +369,61 @@ export interface components {
              * @example 2024-07-20T10:00:00.000Z
              */
             deletedAt: string;
+            /**
+             * Format: date-time
+             * @description The user suspended at timestamp
+             * @example 2024-08-01T12:00:00.000Z
+             */
+            suspendedAt: string | null;
         };
         DeletedUsersResponseDto: {
             users: components["schemas"]["DeletedUserResponseDto"][];
+        };
+        SuspendedUserResponseDto: {
+            /**
+             * Format: uuid
+             * @description The user public ID
+             * @example 123e4567-e89b-12d3-a456-426614174000
+             */
+            publicId: string;
+            /**
+             * Format: email
+             * @description The user email address
+             * @example takuya.iwashiro@takudev.net
+             */
+            email: string;
+            /**
+             * @description The user name
+             * @example Takuya Iwashiro
+             */
+            name: string;
+            /**
+             * Format: date-time
+             * @description The user created at timestamp
+             * @example 2024-01-15T09:30:00.000Z
+             */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @description The user updated at timestamp
+             * @example 2024-06-16T14:45:30.123Z
+             */
+            updatedAt: string;
+            /**
+             * Format: date-time
+             * @description The user deleted at timestamp
+             * @example 2024-07-20T10:00:00.000Z
+             */
+            deletedAt: string | null;
+            /**
+             * Format: date-time
+             * @description The user suspended at timestamp
+             * @example 2024-08-01T12:00:00.000Z
+             */
+            suspendedAt: string;
+        };
+        SuspendedUsersResponseDto: {
+            users: components["schemas"]["SuspendedUserResponseDto"][];
         };
         AnyUserResponseDto: {
             /**
@@ -341,6 +461,12 @@ export interface components {
              * @example 2024-07-20T10:00:00.000Z
              */
             deletedAt: string | null;
+            /**
+             * Format: date-time
+             * @description The user suspended at timestamp
+             * @example 2024-08-01T12:00:00.000Z
+             */
+            suspendedAt: string | null;
         };
         AnyUsersResponseDto: {
             users: components["schemas"]["AnyUserResponseDto"][];
@@ -396,6 +522,16 @@ export interface components {
             publicIds: string[];
         };
         RestoreManyUsersInputDto: {
+            /**
+             * @description List of user public IDs
+             * @example [
+             *       "123e4567-e89b-12d3-a456-426614174000",
+             *       "789e1234-e89b-12d3-a456-426614174000"
+             *     ]
+             */
+            publicIds: string[];
+        };
+        SuspendManyUsersInputDto: {
             /**
              * @description List of user public IDs
              * @example [
@@ -582,6 +718,94 @@ export interface operations {
                 content?: never;
             };
             /** @description User not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminUsersController_findManySuspendedUsers: {
+        parameters: {
+            query: {
+                /** @description List of suspended user public IDs */
+                publicIds: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Suspended users found */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SuspendedUsersResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Suspended users not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminUsersController_findSuspendedUserById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Suspended user public ID */
+                publicId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Suspended user found */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SuspendedUserResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Suspended user not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -905,6 +1129,50 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ActiveUserResponseDto"];
                 };
+            };
+        };
+    };
+    AdminUsersController_suspendManyUsers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description IDs of users to be suspended */
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SuspendManyUsersInputDto"];
+            };
+        };
+        responses: {
+            /** @description Users suspended successfully */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminUsersController_suspendUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description User public ID */
+                publicId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description User suspended successfully */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
