@@ -4,7 +4,7 @@ networks:
 
 services:
   postgres:
-    image: postgres:15-alpine
+    image: postgres:17-alpine
     container_name: music-practice-tracker-db
     networks:
       - music_practice_tracker_net
@@ -41,7 +41,7 @@ services:
       - no-new-privileges:true
 
   postgres-test:
-    image: postgres:15-alpine
+    image: postgres:17-alpine
     container_name: music-practice-tracker-test-db
     networks:
       - music_practice_tracker_net
