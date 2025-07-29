@@ -115,7 +115,7 @@
     "npm-run-all2": "^5.0.2",
     "openapi-typescript": "^7.8.0",
     "playwright": "^1.53.2",
-    "prettier": "^3.5.3",
+    "prettier": "^3.6.2",
     "react-test-renderer": "19.0.0",
     "secretlint": "^10.2.1",
     "source-map-support": "^0.5.21",
