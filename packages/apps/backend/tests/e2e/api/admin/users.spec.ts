@@ -257,4 +257,55 @@ describe('admin API - /api/users', () => {
       expect(response.body.deletedAt).not.toBeNull();
     });
   });
+
+  describe('pUT /api/users/:publicId/suspend', () => {
+    it('should suspend user by publicId', async () => {
+      expect.assertions(2);
+
+      const user = await request(app.getHttpServer())
+        .post('/api/users')
+        .send({ name: 'To Suspend', email: `suspend-${randomUUID()}@example.com` })
+        .expect(201);
+
+      await request(app.getHttpServer()).put(`/api/users/${user.body.publicId}/suspend`).expect(204);
+
+      // Verify user is suspended
+      const response = await request(app.getHttpServer())
+        .get(`/api/users/suspended_users/${user.body.publicId}`)
+        .expect(200);
+
+      expect(response.body.publicId).toBe(user.body.publicId);
+      expect(response.body.suspendedAt).not.toBeNull();
+    });
+  });
+
+  describe('pUT /api/users/suspend/bulk', () => {
+    it('should suspend multiple users', async () => {
+      expect.assertions(4);
+
+      const user1 = await request(app.getHttpServer())
+        .post('/api/users')
+        .send({ name: 'Bulk Suspend 1', email: `bulk-suspend-1-${randomUUID()}@example.com` })
+        .expect(201);
+
+      const user2 = await request(app.getHttpServer())
+        .post('/api/users')
+        .send({ name: 'Bulk Suspend 2', email: `bulk-suspend-2-${randomUUID()}@example.com` })
+        .expect(201);
+
+      const publicIds = [user1.body.publicId, user2.body.publicId];
+
+      await request(app.getHttpServer()).put('/api/users/suspend/bulk').send({ publicIds }).expect(204);
+
+      // Verify users are suspended
+      const response = await request(app.getHttpServer())
+        .get(`/api/users/suspended_users?publicIds=${publicIds.join('&publicIds=')}`)
+        .expect(200);
+
+      expect(response.body.users).toHaveLength(2);
+      expect(response.body.users.every((u: any) => u.suspendedAt !== null)).toBe(true);
+      expect(response.body.users.some((u: any) => u.publicId === user1.body.publicId)).toBe(true);
+      expect(response.body.users.some((u: any) => u.publicId === user2.body.publicId)).toBe(true);
+    });
+  });
 });

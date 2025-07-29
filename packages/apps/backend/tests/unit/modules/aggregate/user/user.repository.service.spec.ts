@@ -9,12 +9,14 @@ describe('userRepositoryService', () => {
   let userModel: any;
 
   const mockUser = {
+    id: 1,
     publicId: '123e4567-e89b-12d3-a456-426614174000',
     email: 'test@example.com',
     name: 'Test User',
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),
     deletedAt: null,
+    suspendedAt: null,
   };
 
   const mockDeletedUser = {
@@ -70,6 +72,7 @@ describe('userRepositoryService', () => {
         where: {
           ...params,
           deletedAt: null,
+          suspendedAt: null,
         },
       });
       expect(result).toStrictEqual(mockUser);
@@ -87,6 +90,7 @@ describe('userRepositoryService', () => {
         where: {
           ...params,
           deletedAt: null,
+          suspendedAt: null,
         },
       });
       expect(result).toBeNull();
@@ -151,6 +155,7 @@ describe('userRepositoryService', () => {
         where: {
           ...params.where,
           deletedAt: null,
+          suspendedAt: null,
         },
       });
       expect(result).toStrictEqual(mockUsers);
@@ -257,6 +262,7 @@ describe('userRepositoryService', () => {
         where: {
           ...params.where,
           deletedAt: null,
+          suspendedAt: null,
         },
       });
       expect(result).toStrictEqual(updatedUser);
@@ -278,6 +284,7 @@ describe('userRepositoryService', () => {
         where: {
           ...params,
           deletedAt: null,
+          suspendedAt: null,
         },
         data: {
           deletedAt: mockDate,
@@ -386,6 +393,58 @@ describe('userRepositoryService', () => {
         },
       });
       expect(result).toStrictEqual(restoredUsers);
+    });
+  });
+
+  describe('suspendUser', () => {
+    it('should suspend an active user', async () => {
+      expect.assertions(2);
+
+      const mockDate = new Date('2024-01-15');
+      jest.useFakeTimers().setSystemTime(mockDate);
+
+      const suspendedUser = { ...mockUser, suspendedAt: mockDate };
+      userModel.update.mockResolvedValue(suspendedUser);
+      const params = { publicId: mockUser.publicId };
+
+      const result = await service.suspendUser(params);
+
+      jest.useRealTimers();
+
+      expect(userModel.update).toHaveBeenCalledWith({
+        where: {
+          ...params,
+          suspendedAt: null,
+        },
+        data: {
+          suspendedAt: mockDate,
+        },
+      });
+      expect(result).toStrictEqual(suspendedUser);
+    });
+  });
+
+  describe('suspendManyUsers', () => {
+    it('should suspend many users', async () => {
+      expect.assertions(2);
+
+      const mockDate = new Date('2024-01-15');
+      jest.useFakeTimers().setSystemTime(mockDate);
+
+      userModel.updateMany.mockResolvedValue({ count: 2 });
+      const params = { email: { contains: 'test' } };
+
+      await service.suspendManyUsers(params);
+
+      jest.useRealTimers();
+
+      expect(userModel.updateMany).toHaveBeenCalledWith({
+        where: params,
+        data: {
+          suspendedAt: mockDate,
+        },
+      });
+      expect(userModel.updateMany).toHaveBeenCalledTimes(1);
     });
   });
 });

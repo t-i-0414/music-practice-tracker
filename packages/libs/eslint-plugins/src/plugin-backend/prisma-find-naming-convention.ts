@@ -168,22 +168,37 @@ const rule = createRule<[], MessageIds>({
           prop.key.name === 'suspendedAt',
       );
 
-      // Check if deletedAt exists and is last
-      if (deletedAtIndex !== -1 && deletedAtIndex !== whereObject.properties.length - 1) {
-        context.report({
-          node: whereObject.properties[deletedAtIndex],
-          messageId: 'deletedAtNotLastInWhere',
-        });
-        return false;
-      }
-
-      // Check if suspendedAt exists and is last
-      if (suspendedAtIndex !== -1 && suspendedAtIndex !== whereObject.properties.length - 1) {
-        context.report({
-          node: whereObject.properties[suspendedAtIndex],
-          messageId: 'suspendedAtNotLastInWhere',
-        });
-        return false;
+      // For checking last property position
+      // If both deletedAt and suspendedAt exist, suspendedAt should be last
+      // If only deletedAt exists, it should be last
+      // If only suspendedAt exists, it should be last
+      if (deletedAtIndex !== -1 && suspendedAtIndex !== -1) {
+        // Both exist, suspendedAt should be last
+        if (suspendedAtIndex !== whereObject.properties.length - 1) {
+          context.report({
+            node: whereObject.properties[suspendedAtIndex],
+            messageId: 'suspendedAtNotLastInWhere',
+          });
+          return false;
+        }
+      } else if (deletedAtIndex !== -1) {
+        // Only deletedAt exists, it should be last
+        if (deletedAtIndex !== whereObject.properties.length - 1) {
+          context.report({
+            node: whereObject.properties[deletedAtIndex],
+            messageId: 'deletedAtNotLastInWhere',
+          });
+          return false;
+        }
+      } else if (suspendedAtIndex !== -1) {
+        // Only suspendedAt exists, it should be last
+        if (suspendedAtIndex !== whereObject.properties.length - 1) {
+          context.report({
+            node: whereObject.properties[suspendedAtIndex],
+            messageId: 'suspendedAtNotLastInWhere',
+          });
+          return false;
+        }
       }
 
       switch (expectedType) {
@@ -212,6 +227,21 @@ const rule = createRule<[], MessageIds>({
               },
             });
             return false;
+          }
+          // For active users, suspendedAt should also be null if present
+          if (suspendedAtIndex !== -1) {
+            const suspendedAtProp = whereObject.properties[suspendedAtIndex] as TSESTree.Property;
+            if (suspendedAtProp.value.type !== AST_NODE_TYPES.Literal || suspendedAtProp.value.value !== null) {
+              context.report({
+                node: suspendedAtProp,
+                messageId: 'incorrectSuspendedAtValue',
+                data: {
+                  functionName: getCurrentFunctionName() || 'unknown',
+                  actual: 'not null',
+                },
+              });
+              return false;
+            }
           }
           return true;
         }

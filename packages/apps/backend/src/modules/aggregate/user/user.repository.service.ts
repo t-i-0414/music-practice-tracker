@@ -14,6 +14,7 @@ export class UserRepositoryService {
       where: {
         ...params,
         deletedAt: null,
+        suspendedAt: null,
       },
     });
   }
@@ -57,6 +58,7 @@ export class UserRepositoryService {
       where: {
         ...params.where,
         deletedAt: null,
+        suspendedAt: null,
       },
     });
   }
@@ -133,6 +135,7 @@ export class UserRepositoryService {
       where: {
         ...where,
         deletedAt: null,
+        suspendedAt: null,
       },
     });
   }
@@ -142,6 +145,7 @@ export class UserRepositoryService {
       where: {
         ...params,
         deletedAt: null,
+        suspendedAt: null,
       },
       data: {
         deletedAt: new Date(),
