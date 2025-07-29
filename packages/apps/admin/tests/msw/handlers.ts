@@ -49,6 +49,7 @@ export const handlers = [
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         deletedAt: new Date().toISOString(),
+        suspendedAt: null,
       })),
     };
 
@@ -63,6 +64,7 @@ export const handlers = [
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       deletedAt: new Date().toISOString(),
+      suspendedAt: null,
     };
 
     return HttpResponse.json(response);
@@ -81,6 +83,7 @@ export const handlers = [
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         deletedAt: index % 2 === 0 ? null : new Date().toISOString(),
+        suspendedAt: null,
       })),
     };
 
@@ -96,6 +99,7 @@ export const handlers = [
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       deletedAt: isDeleted ? new Date().toISOString() : null,
+      suspendedAt: null,
     };
 
     return HttpResponse.json(response);

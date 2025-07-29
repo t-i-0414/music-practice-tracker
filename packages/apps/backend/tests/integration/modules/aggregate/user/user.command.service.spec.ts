@@ -55,6 +55,7 @@ describe('userCommandService Integration', () => {
         ...createdUser,
         id: expect.any(Number),
         deletedAt: null,
+        suspendedAt: null,
       });
     });
   });

@@ -7,7 +7,8 @@ type MessageIds =
   | 'invalidUpdateMethodName'
   | 'deleteShouldHaveDeletedAt'
   | 'restoreShouldHaveDeletedAtNull'
-  | 'updateShouldNotHaveDeletedAt';
+  | 'updateShouldNotHaveDeletedAt'
+  | 'suspendShouldHaveSuspendedAt';
 
 const createRule = ESLintUtils.RuleCreator((name) => `https://github.com/music-practice-tracker/rules/${name}`);
 
@@ -26,6 +27,8 @@ const rule = createRule<[], MessageIds>({
       restoreShouldHaveDeletedAtNull:
         'Function "{{functionName}}" starts with "restore" but doesn\'t set deletedAt to null',
       updateShouldNotHaveDeletedAt: 'Function "{{functionName}}" starts with "update" but includes deletedAt field',
+      suspendShouldHaveSuspendedAt:
+        'Function "{{functionName}}" starts with "suspend" but doesn\'t set suspendedAt to a Date value',
     },
     schema: [],
   },
@@ -72,8 +75,10 @@ const rule = createRule<[], MessageIds>({
       return deletedAtSymbol !== undefined;
     }
 
-    // Analyze the data object to find deletedAt field
-    function analyzeDataObject(node: TSESTree.Expression): 'delete' | 'restore' | 'update' | 'unknown' | null {
+    // Analyze the data object to find deletedAt or suspendedAt field
+    function analyzeDataObject(
+      node: TSESTree.Expression,
+    ): 'delete' | 'restore' | 'update' | 'suspend' | 'unknown' | null {
       // Handle MemberExpression like params.data
       if (node.type === AST_NODE_TYPES.MemberExpression || node.type === AST_NODE_TYPES.Identifier) {
         // Get TypeScript node and check type
@@ -121,6 +126,29 @@ const rule = createRule<[], MessageIds>({
           // Check if it's a variable/expression that might be a Date
           if (value.type === AST_NODE_TYPES.Identifier || value.type === AST_NODE_TYPES.MemberExpression) {
             return 'delete';
+          }
+        }
+
+        // Check for suspendedAt field
+        if (
+          property.type === AST_NODE_TYPES.Property &&
+          property.key.type === AST_NODE_TYPES.Identifier &&
+          property.key.name === 'suspendedAt'
+        ) {
+          const { value } = property;
+
+          // Check if suspendedAt is a Date
+          if (
+            value.type === AST_NODE_TYPES.NewExpression &&
+            value.callee.type === AST_NODE_TYPES.Identifier &&
+            value.callee.name === 'Date'
+          ) {
+            return 'suspend';
+          }
+
+          // Check if it's a variable/expression that might be a Date
+          if (value.type === AST_NODE_TYPES.Identifier || value.type === AST_NODE_TYPES.MemberExpression) {
+            return 'suspend';
           }
         }
 
@@ -359,6 +387,20 @@ const rule = createRule<[], MessageIds>({
                 });
               }
             }
+          } else if (expectedPrefix === 'suspend') {
+            // For update with suspendedAt, expect suspendX
+            if (!functionNameLower.startsWith('suspend')) {
+              context.report({
+                node: node.callee,
+                messageId: 'invalidUpdateMethodName',
+                data: {
+                  functionName,
+                  method: methodName,
+                  operation: 'with suspendedAt: Date',
+                  expectedPrefix: 'suspend',
+                },
+              });
+            }
           } else if (expectedPrefix === 'update') {
             // For update operation without deletedAt, we expect the method name as prefix
             if (!functionNameLower.startsWith(methodName.toLowerCase())) {
@@ -388,7 +430,17 @@ const rule = createRule<[], MessageIds>({
               messageId: 'restoreShouldHaveDeletedAtNull',
               data: { functionName },
             });
-          } else if (functionNameLower.startsWith('update') && expectedPrefix !== 'update') {
+          } else if (functionNameLower.startsWith('suspend') && expectedPrefix !== 'suspend') {
+            context.report({
+              node: node.callee,
+              messageId: 'suspendShouldHaveSuspendedAt',
+              data: { functionName },
+            });
+          } else if (
+            functionNameLower.startsWith('update') &&
+            expectedPrefix !== 'update' &&
+            expectedPrefix !== 'suspend'
+          ) {
             context.report({
               node: node.callee,
               messageId: 'updateShouldNotHaveDeletedAt',

@@ -65,6 +65,17 @@ class FullUserResponseDto implements Publicize<User> {
   @Type(() => Date)
   @Expose()
   public deletedAt: Date | null;
+
+  @ApiProperty({
+    description: 'The user suspended at timestamp',
+    example: '2024-08-01T12:00:00.000Z',
+    type: String,
+    format: 'date-time',
+    nullable: true,
+  })
+  @Type(() => Date)
+  @Expose()
+  public suspendedAt: Date | null;
 }
 
 /**
@@ -113,6 +124,36 @@ export class DeletedUsersResponseDto {
 export function toDeletedUsersDto(users: unknown[]): DeletedUsersResponseDto {
   return {
     users: plainToInstance(DeletedUserResponseDto, users),
+  };
+}
+
+/**
+ * Suspended User response DTO - Read-only fields returned from API
+ */
+@Exclude()
+export class SuspendedUserResponseDto extends FullUserResponseDto {
+  @ApiProperty({
+    description: 'The user suspended at timestamp',
+    example: '2024-08-01T12:00:00.000Z',
+    type: String,
+    format: 'date-time',
+    nullable: false,
+  })
+  @Type(() => Date)
+  @Expose()
+  declare public suspendedAt: Date;
+}
+export function toSuspendedUserDto(user: unknown): SuspendedUserResponseDto {
+  return plainToInstance(SuspendedUserResponseDto, user);
+}
+
+export class SuspendedUsersResponseDto {
+  @ApiProperty({ type: [SuspendedUserResponseDto] })
+  public users: SuspendedUserResponseDto[];
+}
+export function toSuspendedUsersDto(users: unknown[]): SuspendedUsersResponseDto {
+  return {
+    users: plainToInstance(SuspendedUserResponseDto, users),
   };
 }
 

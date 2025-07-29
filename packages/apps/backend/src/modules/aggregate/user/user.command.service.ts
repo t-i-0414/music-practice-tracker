@@ -75,4 +75,15 @@ export class UserCommandService {
     });
     return toActiveUsersDto(restoredUsers);
   }
+
+  public async suspendUserById({ publicId }: { publicId: string }): Promise<void> {
+    await this.queryService.findUserByIdOrFail({ publicId });
+    await this.repository.suspendUser({ publicId });
+  }
+
+  public async suspendManyUsersById({ publicIds }: { publicIds: string[] }): Promise<void> {
+    await this.repository.suspendManyUsers({
+      publicId: { in: publicIds },
+    });
+  }
 }

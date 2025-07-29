@@ -10,6 +10,8 @@ import {
   toAnyUsersDto,
   toDeletedUserDto,
   toDeletedUsersDto,
+  toSuspendedUserDto,
+  toSuspendedUsersDto,
 } from '@/modules/aggregate/user/user.response.dto';
 
 describe('userQueryService', () => {
@@ -24,6 +26,7 @@ describe('userQueryService', () => {
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),
     deletedAt: null,
+    suspendedAt: null,
   };
 
   const mockDeletedUser = {
@@ -31,13 +34,20 @@ describe('userQueryService', () => {
     deletedAt: new Date('2024-01-02'),
   };
 
+  const mockSuspendedUser = {
+    ...mockUser,
+    suspendedAt: new Date('2024-01-03'),
+  };
+
   beforeEach(async () => {
     const mockRepository: jest.Mocked<UserRepositoryService> = {
       findUniqueActiveUser: jest.fn(),
       findUniqueDeletedUser: jest.fn(),
+      findUniqueSuspendedUser: jest.fn(),
       findUniqueAnyUser: jest.fn(),
       findManyActiveUsers: jest.fn(),
       findManyDeletedUsers: jest.fn(),
+      findManySuspendedUsers: jest.fn(),
       findManyAnyUsers: jest.fn(),
     } as any;
 
@@ -108,6 +118,32 @@ describe('userQueryService', () => {
         new NotFoundException(`Deleted user ${dto.publicId} not found`),
       );
       expect(repository.findUniqueDeletedUser).toHaveBeenCalledWith(dto);
+    });
+  });
+
+  describe('findSuspendedUserByIdOrFail', () => {
+    it('should return suspended user when found', async () => {
+      expect.assertions(2);
+
+      repository.findUniqueSuspendedUser.mockResolvedValue(mockSuspendedUser);
+      const dto = { publicId: mockSuspendedUser.publicId };
+
+      const result = await service.findSuspendedUserByIdOrFail(dto);
+
+      expect(repository.findUniqueSuspendedUser).toHaveBeenCalledWith(dto);
+      expect(result).toStrictEqual(toSuspendedUserDto(mockSuspendedUser));
+    });
+
+    it('should throw NotFoundException when suspended user not found', async () => {
+      expect.assertions(2);
+
+      repository.findUniqueSuspendedUser.mockResolvedValue(null);
+      const dto = { publicId: mockSuspendedUser.publicId };
+
+      await expect(service.findSuspendedUserByIdOrFail(dto)).rejects.toThrow(
+        new NotFoundException(`Suspended user ${dto.publicId} not found`),
+      );
+      expect(repository.findUniqueSuspendedUser).toHaveBeenCalledWith(dto);
     });
   });
 
@@ -196,6 +232,37 @@ describe('userQueryService', () => {
         where: { publicId: { in: dto.publicIds } },
       });
       expect(result).toStrictEqual(toDeletedUsersDto([]));
+    });
+  });
+
+  describe('findManySuspendedUsers', () => {
+    it('should return suspended users when found', async () => {
+      expect.assertions(2);
+
+      const mockUsers = [mockSuspendedUser];
+      repository.findManySuspendedUsers.mockResolvedValue(mockUsers);
+      const dto = { publicIds: [mockSuspendedUser.publicId] };
+
+      const result = await service.findManySuspendedUsers(dto);
+
+      expect(repository.findManySuspendedUsers).toHaveBeenCalledWith({
+        where: { publicId: { in: dto.publicIds } },
+      });
+      expect(result).toStrictEqual(toSuspendedUsersDto(mockUsers));
+    });
+
+    it('should return empty array when no suspended users found', async () => {
+      expect.assertions(2);
+
+      repository.findManySuspendedUsers.mockResolvedValue([]);
+      const dto = { publicIds: [mockSuspendedUser.publicId] };
+
+      const result = await service.findManySuspendedUsers(dto);
+
+      expect(repository.findManySuspendedUsers).toHaveBeenCalledWith({
+        where: { publicId: { in: dto.publicIds } },
+      });
+      expect(result).toStrictEqual(toSuspendedUsersDto([]));
     });
   });
 

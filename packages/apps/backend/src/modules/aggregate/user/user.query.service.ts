@@ -9,12 +9,16 @@ import {
   AnyUsersResponseDto,
   DeletedUserResponseDto,
   DeletedUsersResponseDto,
+  SuspendedUserResponseDto,
+  SuspendedUsersResponseDto,
   toActiveUserDto,
   toActiveUsersDto,
   toAnyUserDto,
   toAnyUsersDto,
   toDeletedUserDto,
   toDeletedUsersDto,
+  toSuspendedUserDto,
+  toSuspendedUsersDto,
 } from './user.response.dto';
 
 @Injectable()
@@ -33,6 +37,13 @@ export class UserQueryService {
     if (!user) throw new NotFoundException(`Deleted user ${dto.publicId} not found`);
 
     return toDeletedUserDto(user);
+  }
+
+  public async findSuspendedUserByIdOrFail(dto: FindUserByIdInputDto): Promise<SuspendedUserResponseDto> {
+    const user = await this.repository.findUniqueSuspendedUser(dto);
+    if (!user) throw new NotFoundException(`Suspended user ${dto.publicId} not found`);
+
+    return toSuspendedUserDto(user);
   }
 
   public async findAnyUserByIdOrFail(dto: FindUserByIdInputDto): Promise<AnyUserResponseDto> {
@@ -60,6 +71,16 @@ export class UserQueryService {
     });
 
     return toDeletedUsersDto(users);
+  }
+
+  public async findManySuspendedUsers(dto: FindManyUsersByIdInputDto): Promise<SuspendedUsersResponseDto> {
+    const users = await this.repository.findManySuspendedUsers({
+      where: {
+        publicId: { in: dto.publicIds },
+      },
+    });
+
+    return toSuspendedUsersDto(users);
   }
 
   public async findManyAnyUsers(dto: FindManyUsersByIdInputDto): Promise<AnyUsersResponseDto> {

@@ -18,6 +18,7 @@ describe('userCommandService', () => {
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),
     deletedAt: null,
+    suspendedAt: null,
   };
 
   const mockDeletedUser = {
@@ -36,6 +37,8 @@ describe('userCommandService', () => {
       hardDeleteManyUsers: jest.fn(),
       restoreUser: jest.fn(),
       restoreManyAndReturnUsers: jest.fn(),
+      suspendUser: jest.fn(),
+      suspendManyUsers: jest.fn(),
     } as any;
 
     const mockQueryService: jest.Mocked<UserQueryService> = {
@@ -240,6 +243,46 @@ describe('userCommandService', () => {
         publicId: { in: publicIds },
       });
       expect(result).toStrictEqual(toActiveUsersDto(restoredUsers));
+    });
+  });
+
+  describe('suspendUserById', () => {
+    it('should suspend user successfully', async () => {
+      expect.assertions(2);
+
+      const { publicId } = mockUser;
+      queryService.findUserByIdOrFail.mockResolvedValue(toActiveUserDto(mockUser));
+      repository.suspendUser.mockResolvedValue({ ...mockUser, suspendedAt: new Date() });
+
+      await service.suspendUserById({ publicId });
+
+      expect(queryService.findUserByIdOrFail).toHaveBeenCalledWith({ publicId });
+      expect(repository.suspendUser).toHaveBeenCalledWith({ publicId });
+    });
+
+    it('should throw error if user not found', async () => {
+      expect.assertions(2);
+
+      const publicId = 'non-existent-id';
+      queryService.findUserByIdOrFail.mockRejectedValue(new Error('User not found'));
+
+      await expect(service.suspendUserById({ publicId })).rejects.toThrow('User not found');
+      expect(repository.suspendUser).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('suspendManyUsersById', () => {
+    it('should suspend many users successfully', async () => {
+      expect.assertions(1);
+
+      const publicIds = ['id1', 'id2'];
+      repository.suspendManyUsers.mockResolvedValue();
+
+      await service.suspendManyUsersById({ publicIds });
+
+      expect(repository.suspendManyUsers).toHaveBeenCalledWith({
+        publicId: { in: publicIds },
+      });
     });
   });
 });

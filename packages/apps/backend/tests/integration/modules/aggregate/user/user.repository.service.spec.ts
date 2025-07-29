@@ -41,6 +41,7 @@ describe('userRepositoryService Integration', () => {
         createdAt: expect.any(Date),
         updatedAt: expect.any(Date),
         deletedAt: null,
+        suspendedAt: null,
       });
 
       const foundUser = await service.findUniqueActiveUser({ publicId: createdUser.publicId });
@@ -121,6 +122,7 @@ describe('userRepositoryService Integration', () => {
         createdAt: createdUser.createdAt,
         updatedAt: expect.any(Date),
         deletedAt: null,
+        suspendedAt: null,
       });
       expect(updatedUser.updatedAt.getTime()).toBeGreaterThan(createdUser.updatedAt.getTime());
     });
@@ -148,6 +150,7 @@ describe('userRepositoryService Integration', () => {
         createdAt: createdUser.createdAt,
         updatedAt: expect.any(Date),
         deletedAt: expect.any(Date),
+        suspendedAt: null,
       });
 
       const activeUser = await service.findUniqueActiveUser({ publicId: createdUser.publicId });
@@ -182,6 +185,7 @@ describe('userRepositoryService Integration', () => {
         createdAt: createdUser.createdAt,
         updatedAt: expect.any(Date),
         deletedAt: null,
+        suspendedAt: null,
       });
 
       const activeUser = await service.findUniqueActiveUser({ publicId: createdUser.publicId });
@@ -238,6 +242,70 @@ describe('userRepositoryService Integration', () => {
       const allUsers = await service.findManyAnyUsers({});
 
       expect(allUsers).toHaveLength(3);
+    });
+  });
+
+  describe('suspendUser', () => {
+    it('should suspend an active user', async () => {
+      expect.assertions(3);
+
+      const userData = {
+        name: 'User to Suspend',
+        email: `suspend-${randomUUID()}@test.com`,
+      };
+      const createdUser = await service.createUser(userData);
+
+      const suspendedUser = await service.suspendUser({ publicId: createdUser.publicId });
+
+      expect(suspendedUser.publicId).toBe(createdUser.publicId);
+      expect(suspendedUser.suspendedAt).not.toBeNull();
+      expect(suspendedUser.suspendedAt).toBeInstanceOf(Date);
+    });
+
+    it('should not suspend already suspended user', async () => {
+      expect.assertions(1);
+
+      const userData = {
+        name: 'Already Suspended User',
+        email: `already-suspended-${randomUUID()}@test.com`,
+      };
+      const createdUser = await service.createUser(userData);
+      await service.suspendUser({ publicId: createdUser.publicId });
+
+      await expect(service.suspendUser({ publicId: createdUser.publicId })).rejects.toThrow(
+        expect.objectContaining({
+          code: 'P2025',
+        }),
+      );
+    });
+  });
+
+  describe('suspendManyUsers', () => {
+    it('should suspend multiple users', async () => {
+      expect.assertions(3);
+
+      const user1 = await service.createUser({
+        name: 'User 1',
+        email: `suspend-many-1-${randomUUID()}@test.com`,
+      });
+      const user2 = await service.createUser({
+        name: 'User 2',
+        email: `suspend-many-2-${randomUUID()}@test.com`,
+      });
+
+      await service.suspendManyUsers({
+        publicId: { in: [user1.publicId, user2.publicId] },
+      });
+
+      const suspendedUser1 = await service.findUniqueActiveUser({ publicId: user1.publicId });
+      const suspendedUser2 = await service.findUniqueActiveUser({ publicId: user2.publicId });
+
+      expect(suspendedUser1).toBeNull();
+      expect(suspendedUser2).toBeNull();
+
+      const anyUser1 = await service.findUniqueAnyUser({ publicId: user1.publicId });
+
+      expect(anyUser1?.suspendedAt).not.toBeNull();
     });
   });
 });
