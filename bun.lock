@@ -75,7 +75,7 @@
         "eslint-plugin-storybook": "^9.0.16",
         "eslint-plugin-testing-library": "^7.5.3",
         "eslint-plugin-unused-imports": "^4.1.4",
-        "globals": "^16.2.0",
+        "globals": "^16.3.0",
         "jest": "^30.0.5",
         "jest-mock-extended": "^4.0.0",
         "jsdom": "^26.1.0",
