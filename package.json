@@ -112,7 +112,7 @@
     "majestic": "^1.8.1",
     "markdownlint-cli": "^0.45.0",
     "msw": "^2.10.3",
-    "npm-run-all": "^4.1.5",
+    "npm-run-all2": "^5.0.0",
     "openapi-typescript": "^7.8.0",
     "playwright": "^1.53.2",
     "prettier": "^3.5.3",
