@@ -109,3 +109,7 @@ export class HardDeleteManyUsersInputDto extends FindManyUsersByIdInputDto {}
 export class RestoreUserByIdInputDto extends FindUserByIdInputDto {}
 
 export class RestoreManyUsersInputDto extends FindManyUsersByIdInputDto {}
+
+export class SuspendUserByIdInputDto extends FindUserByIdInputDto {}
+
+export class SuspendManyUsersInputDto extends FindManyUsersByIdInputDto {}

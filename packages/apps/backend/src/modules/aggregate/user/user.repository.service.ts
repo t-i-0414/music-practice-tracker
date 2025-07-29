@@ -26,6 +26,16 @@ export class UserRepositoryService {
       },
     });
   }
+
+  public async findUniqueSuspendedUser(params: Prisma.UserWhereUniqueInput): Promise<User | null> {
+    return this.repository.user.findUnique({
+      where: {
+        ...params,
+        suspendedAt: { not: null },
+      },
+    });
+  }
+
   public async findUniqueAnyUser(params: Prisma.UserWhereUniqueInput): Promise<User | null> {
     return this.repository.user.findUnique({
       where: {
@@ -63,6 +73,22 @@ export class UserRepositoryService {
       where: {
         ...params.where,
         deletedAt: { not: null },
+      },
+    });
+  }
+
+  public async findManySuspendedUsers(params: {
+    skip?: number;
+    take?: number;
+    cursor?: Prisma.UserWhereUniqueInput;
+    where?: Prisma.UserWhereInput;
+    orderBy?: Prisma.UserOrderByWithRelationInput;
+  }): Promise<User[]> {
+    return this.repository.user.findMany({
+      ...params,
+      where: {
+        ...params.where,
+        suspendedAt: { not: null },
       },
     });
   }
@@ -164,6 +190,27 @@ export class UserRepositoryService {
       },
       data: {
         deletedAt: null,
+      },
+    });
+  }
+
+  public async suspendUser(params: Prisma.UserWhereUniqueInput): Promise<User> {
+    return this.repository.user.update({
+      where: {
+        ...params,
+        suspendedAt: null,
+      },
+      data: {
+        suspendedAt: new Date(),
+      },
+    });
+  }
+
+  public async suspendManyUsers(params: Prisma.UserWhereInput): Promise<void> {
+    await this.repository.user.updateMany({
+      where: params,
+      data: {
+        suspendedAt: new Date(),
       },
     });
   }

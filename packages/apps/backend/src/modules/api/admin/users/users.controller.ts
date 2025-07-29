@@ -9,6 +9,7 @@ import {
   DeleteManyUsersInputDto,
   HardDeleteManyUsersInputDto,
   RestoreManyUsersInputDto,
+  SuspendManyUsersInputDto,
   UpdateUserDataDto,
 } from '@/modules/aggregate/user/user.input.dto';
 import {
@@ -18,6 +19,8 @@ import {
   AnyUsersResponseDto,
   DeletedUserResponseDto,
   DeletedUsersResponseDto,
+  SuspendedUserResponseDto,
+  SuspendedUsersResponseDto,
 } from '@/modules/aggregate/user/user.response.dto';
 import { ensurePublicIdsToArray } from '@/utils/ensure-public-ids-to-array';
 
@@ -88,6 +91,44 @@ export class AdminUsersController {
     @Param('publicId', new ParseUUIDPipe()) publicId: string,
   ): Promise<DeletedUserResponseDto> {
     return this.userAdminFacade.findDeletedUserById({ publicId });
+  }
+
+  @Get('suspended_users')
+  @ApiOperation({ summary: 'Get suspended users by public IDs' })
+  @ApiQuery({
+    name: 'publicIds',
+    description: 'List of suspended user public IDs',
+    type: String,
+    isArray: true,
+    style: 'form',
+    explode: true,
+    example: ['123e4567-e89b-12d3-a456-426614174000', '456e7891-e89b-12d3-a456-426614174000'],
+  })
+  @ApiResponse({ status: 200, description: 'Suspended users found', type: SuspendedUsersResponseDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({ status: 404, description: 'Suspended users not found' })
+  public async findManySuspendedUsers(
+    @Query('publicIds') publicIds: string | string[],
+  ): Promise<SuspendedUsersResponseDto> {
+    return this.userAdminFacade.findManySuspendedUsers({ publicIds: ensurePublicIdsToArray(publicIds) });
+  }
+
+  @Get('suspended_users/:publicId')
+  @ApiOperation({ summary: 'Get suspended user by public ID' })
+  @ApiParam({
+    name: 'publicId',
+    description: 'Suspended user public ID',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiResponse({ status: 200, description: 'Suspended user found', type: SuspendedUserResponseDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({ status: 404, description: 'Suspended user not found' })
+  public async findSuspendedUserById(
+    @Param('publicId', new ParseUUIDPipe()) publicId: string,
+  ): Promise<SuspendedUserResponseDto> {
+    return this.userAdminFacade.findSuspendedUserById({ publicId });
   }
 
   @Get('any_users')
@@ -212,5 +253,32 @@ export class AdminUsersController {
   @ApiResponse({ status: 200, description: 'User restored successfully', type: ActiveUserResponseDto })
   public async restoreUser(@Param('publicId', new ParseUUIDPipe()) publicId: string): Promise<ActiveUserResponseDto> {
     return this.userAdminFacade.restoreUserById({ publicId });
+  }
+
+  @Put('suspend/bulk')
+  @ApiOperation({ summary: 'Suspend multiple users by public IDs' })
+  @ApiBody({
+    type: SuspendManyUsersInputDto,
+    description: 'IDs of users to be suspended',
+    examples: {
+      example: {
+        summary: 'Suspend users by public IDs',
+        value: { publicIds: ['123e4567-e89b-12d3-a456-426614174000', '456e7891-e89b-12d3-a456-426614174000'] },
+      },
+    },
+  })
+  @ApiResponse({ status: 204, description: 'Users suspended successfully' })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  public async suspendManyUsers(@Body() body: { publicIds: string[] }): Promise<void> {
+    return this.userAdminFacade.suspendManyUsersById({ publicIds: body.publicIds });
+  }
+
+  @Put(':publicId/suspend')
+  @ApiOperation({ summary: 'Suspend a user by public ID' })
+  @ApiParam({ name: 'publicId', description: 'User public ID' })
+  @ApiResponse({ status: 204, description: 'User suspended successfully' })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  public async suspendUser(@Param('publicId', new ParseUUIDPipe()) publicId: string): Promise<void> {
+    return this.userAdminFacade.suspendUserById({ publicId });
   }
 }

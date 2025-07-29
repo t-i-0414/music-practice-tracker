@@ -22,6 +22,8 @@ import {
   AnyUsersResponseDto,
   DeletedUserResponseDto,
   DeletedUsersResponseDto,
+  SuspendedUserResponseDto,
+  SuspendedUsersResponseDto,
 } from './user.response.dto';
 
 @Injectable()
@@ -39,6 +41,10 @@ export class UserAdminFacadeService {
     return this.userQueryService.findDeletedUserByIdOrFail(dto);
   }
 
+  public async findSuspendedUserById(dto: FindUserByIdInputDto): Promise<SuspendedUserResponseDto> {
+    return this.userQueryService.findSuspendedUserByIdOrFail(dto);
+  }
+
   public async findAnyUserById(dto: FindUserByIdInputDto): Promise<AnyUserResponseDto> {
     return this.userQueryService.findAnyUserByIdOrFail(dto);
   }
@@ -49,6 +55,10 @@ export class UserAdminFacadeService {
 
   public async findManyDeletedUsers(dto: FindManyUsersByIdInputDto): Promise<DeletedUsersResponseDto> {
     return this.userQueryService.findManyDeletedUsers(dto);
+  }
+
+  public async findManySuspendedUsers(dto: FindManyUsersByIdInputDto): Promise<SuspendedUsersResponseDto> {
+    return this.userQueryService.findManySuspendedUsers(dto);
   }
 
   public async findManyAnyUsers(dto: FindManyUsersByIdInputDto): Promise<AnyUsersResponseDto> {
@@ -89,5 +99,13 @@ export class UserAdminFacadeService {
 
   public async restoreManyUsersById({ publicIds }: RestoreManyUsersInputDto): Promise<ActiveUsersResponseDto> {
     return this.userCommandService.restoreManyUsersById({ publicIds });
+  }
+
+  public async suspendUserById({ publicId }: { publicId: string }): Promise<void> {
+    return this.userCommandService.suspendUserById({ publicId });
+  }
+
+  public async suspendManyUsersById({ publicIds }: { publicIds: string[] }): Promise<void> {
+    return this.userCommandService.suspendManyUsersById({ publicIds });
   }
 }
