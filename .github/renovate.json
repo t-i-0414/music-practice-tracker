@@ -61,9 +61,9 @@
       "matchUpdateTypes": ["patch", "minor", "major"],
       "addLabels": ["backend"],
       "commitMessagePrefix": "chore(backend): ",
-      "matchPackagePatterns": ["^@nestjs/", "^nest-"],
       "groupName": "NestJS packages",
-      "groupSlug": "nestjs"
+      "groupSlug": "nestjs",
+      "matchPackageNames": ["/^@nestjs//", "/^nest-/"]
     },
     {
       "description": "Admin dependencies",
@@ -95,20 +95,20 @@
       "matchUpdateTypes": ["patch", "minor", "major"],
       "addLabels": ["admin"],
       "commitMessagePrefix": "chore(admin): ",
-      "matchPackagePatterns": ["^next$", "^@next/", "^eslint-config-next"],
       "groupName": "Next.js packages",
-      "groupSlug": "nextjs"
+      "groupSlug": "nextjs",
+      "matchPackageNames": ["/^next$/", "/^@next//", "/^eslint-config-next/"]
     },
     {
       "description": "Group Prisma packages",
-      "matchPackagePatterns": ["^@prisma/", "^prisma"],
       "matchFileNames": ["package.json", "packages/apps/backend/package.json"],
       "matchManagers": ["npm"],
       "matchDepTypes": ["dependencies", "devDependencies"],
       "matchUpdateTypes": ["patch", "minor", "major"],
       "commitMessagePrefix": "chore: ",
       "groupName": "Prisma packages",
-      "groupSlug": "prisma"
+      "groupSlug": "prisma",
+      "matchPackageNames": ["/^@prisma//", "/^prisma/"]
     },
     {
       "description": "Disable all updates for @prisma/client",
