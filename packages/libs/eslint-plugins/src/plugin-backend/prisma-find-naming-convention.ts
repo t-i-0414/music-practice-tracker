@@ -5,9 +5,12 @@ import { getFunctionNameExtended, isPrismaFindMethod } from './utils/prisma-help
 type MessageIds =
   | 'invalidFindMethodName'
   | 'missingDeletedAtFilter'
+  | 'missingSuspendedAtFilter'
   | 'missingAnyIndicator'
   | 'deletedAtNotLastInWhere'
-  | 'incorrectDeletedAtValue';
+  | 'suspendedAtNotLastInWhere'
+  | 'incorrectDeletedAtValue'
+  | 'incorrectSuspendedAtValue';
 
 const createRule = ESLintUtils.RuleCreator((name) => `https://github.com/music-practice-tracker/rules/${name}`);
 
@@ -20,14 +23,19 @@ const rule = createRule<[], MessageIds>({
     },
     messages: {
       invalidFindMethodName:
-        'Prisma find method "{{method}}" must be in a function named "{{method}}(Active|Deleted|Any)[suffix]". Current function: "{{functionName}}"',
+        'Prisma find method "{{method}}" must be in a function named "{{method}}(Active|Deleted|Suspended|Any)[suffix]". Current function: "{{functionName}}"',
       missingDeletedAtFilter:
         'Function "{{functionName}}" must include deletedAt filter. Use deletedAt: null for active, deletedAt: { not: null } for deleted',
+      missingSuspendedAtFilter:
+        'Function "{{functionName}}" must include suspendedAt filter. Use suspendedAt: { not: null } for suspended users',
       missingAnyIndicator:
         'Function "{{functionName}}" for "any" must include OR: [{ deletedAt: null }, { deletedAt: { not: null } }] as the last property in where clause',
       deletedAtNotLastInWhere: 'deletedAt or OR filter must be the last property in the where clause',
+      suspendedAtNotLastInWhere: 'suspendedAt must be the last property in the where clause',
       incorrectDeletedAtValue:
         'Function "{{functionName}}" has incorrect deletedAt value. Expected {{expected}} but got {{actual}}',
+      incorrectSuspendedAtValue:
+        'Function "{{functionName}}" has incorrect suspendedAt value. Expected { not: null } but got {{actual}}',
     },
     schema: [],
   },
@@ -43,7 +51,10 @@ const rule = createRule<[], MessageIds>({
     }
 
     // Check if function name follows the convention
-    function validateFunctionName(functionName: string, method: string): 'active' | 'deleted' | 'any' | null {
+    function validateFunctionName(
+      functionName: string,
+      method: string,
+    ): 'active' | 'deleted' | 'suspended' | 'any' | null {
       // Case-insensitive check if function starts with the find method name
       if (!functionName.toLowerCase().startsWith(method.toLowerCase())) {
         return null;
@@ -57,6 +68,8 @@ const rule = createRule<[], MessageIds>({
         return 'active';
       } else if (suffixLower.startsWith('deleted')) {
         return 'deleted';
+      } else if (suffixLower.startsWith('suspended')) {
+        return 'suspended';
       } else if (suffixLower.startsWith('any')) {
         return 'any';
       }
@@ -65,7 +78,10 @@ const rule = createRule<[], MessageIds>({
     }
 
     // Check if where clause has correct deletedAt filter
-    function checkWhereClause(node: TSESTree.CallExpression, expectedType: 'active' | 'deleted' | 'any'): boolean {
+    function checkWhereClause(
+      node: TSESTree.CallExpression,
+      expectedType: 'active' | 'deleted' | 'suspended' | 'any',
+    ): boolean {
       if (!node.arguments[0] || node.arguments[0].type !== AST_NODE_TYPES.ObjectExpression) {
         // Any types need a where clause
         if (expectedType === 'any') {
@@ -99,7 +115,7 @@ const rule = createRule<[], MessageIds>({
           });
           return false;
         }
-        return expectedType !== 'active' && expectedType !== 'deleted';
+        return expectedType !== 'active' && expectedType !== 'deleted' && expectedType !== 'suspended';
       }
 
       const whereObject = whereProperty.value;
@@ -137,7 +153,7 @@ const rule = createRule<[], MessageIds>({
         return true;
       }
 
-      // For active/deleted types
+      // For active/deleted/suspended types
       const deletedAtIndex = whereObject.properties.findIndex(
         (prop): prop is TSESTree.Property =>
           prop.type === AST_NODE_TYPES.Property &&
@@ -145,11 +161,27 @@ const rule = createRule<[], MessageIds>({
           prop.key.name === 'deletedAt',
       );
 
+      const suspendedAtIndex = whereObject.properties.findIndex(
+        (prop): prop is TSESTree.Property =>
+          prop.type === AST_NODE_TYPES.Property &&
+          prop.key.type === AST_NODE_TYPES.Identifier &&
+          prop.key.name === 'suspendedAt',
+      );
+
       // Check if deletedAt exists and is last
       if (deletedAtIndex !== -1 && deletedAtIndex !== whereObject.properties.length - 1) {
         context.report({
           node: whereObject.properties[deletedAtIndex],
           messageId: 'deletedAtNotLastInWhere',
+        });
+        return false;
+      }
+
+      // Check if suspendedAt exists and is last
+      if (suspendedAtIndex !== -1 && suspendedAtIndex !== whereObject.properties.length - 1) {
+        context.report({
+          node: whereObject.properties[suspendedAtIndex],
+          messageId: 'suspendedAtNotLastInWhere',
         });
         return false;
       }
@@ -223,6 +255,51 @@ const rule = createRule<[], MessageIds>({
               data: {
                 functionName: getCurrentFunctionName() || 'unknown',
                 expected: '{ not: null }',
+                actual: 'incorrect structure',
+              },
+            });
+            return false;
+          }
+          return true;
+        }
+        case 'suspended': {
+          // Should have suspendedAt: { not: null }
+          if (suspendedAtIndex === -1) {
+            context.report({
+              node: whereObject,
+              messageId: 'missingSuspendedAtFilter',
+              data: {
+                functionName: getCurrentFunctionName() || 'unknown',
+              },
+            });
+            return false;
+          }
+          // Check if suspendedAt value is { not: null }
+          const suspendedAtProp = whereObject.properties[suspendedAtIndex] as TSESTree.Property;
+          if (suspendedAtProp.value.type !== AST_NODE_TYPES.ObjectExpression) {
+            context.report({
+              node: suspendedAtProp,
+              messageId: 'incorrectSuspendedAtValue',
+              data: {
+                functionName: getCurrentFunctionName() || 'unknown',
+                actual: 'null',
+              },
+            });
+            return false;
+          }
+          // Check if it has { not: null } structure
+          const notProp = suspendedAtProp.value.properties.find(
+            (prop): prop is TSESTree.Property =>
+              prop.type === AST_NODE_TYPES.Property &&
+              prop.key.type === AST_NODE_TYPES.Identifier &&
+              prop.key.name === 'not',
+          );
+          if (!notProp || notProp.value.type !== AST_NODE_TYPES.Literal || notProp.value.value !== null) {
+            context.report({
+              node: suspendedAtProp,
+              messageId: 'incorrectSuspendedAtValue',
+              data: {
+                functionName: getCurrentFunctionName() || 'unknown',
                 actual: 'incorrect structure',
               },
             });

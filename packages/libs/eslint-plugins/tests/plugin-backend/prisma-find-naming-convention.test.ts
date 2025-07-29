@@ -112,6 +112,42 @@ describe('prisma-find-naming-convention', () => {
       },
       {
         code: `
+        async function findUniqueSuspendedUser() {
+          return await prisma.user.findUnique({
+            where: {
+              id: 1,
+              suspendedAt: { not: null }
+            }
+          });
+        }
+      `,
+      },
+      {
+        code: `
+        async function findManySuspendedUsers() {
+          return await prisma.user.findMany({
+            where: {
+              role: 'USER',
+              suspendedAt: { not: null }
+            }
+          });
+        }
+      `,
+      },
+      {
+        code: `
+        async function findFirstSuspendedComment() {
+          return await prisma.comment.findFirst({
+            where: {
+              reported: true,
+              suspendedAt: { not: null }
+            }
+          });
+        }
+      `,
+      },
+      {
+        code: `
         async function findManyAnyComments() {
           return await prisma.comment.findMany({
             where: {
@@ -601,6 +637,101 @@ describe('prisma-find-naming-convention', () => {
               functionName: 'findUniqueDeletedUser',
               expected: '{ not: null }',
               actual: 'incorrect structure',
+            },
+          },
+        ],
+      },
+      {
+        code: `
+        async function findUniqueSuspendedUser() {
+          return await prisma.user.findUnique({
+            where: {
+              id: 1
+            }
+          });
+        }
+      `,
+        errors: [
+          {
+            messageId: 'missingSuspendedAtFilter',
+            data: {
+              functionName: 'findUniqueSuspendedUser',
+            },
+          },
+        ],
+      },
+      {
+        code: `
+        async function findManySuspendedUsers() {
+          return await prisma.user.findMany({
+            where: {
+              role: 'USER',
+              suspendedAt: null
+            }
+          });
+        }
+      `,
+        errors: [
+          {
+            messageId: 'incorrectSuspendedAtValue',
+            data: {
+              functionName: 'findManySuspendedUsers',
+              actual: 'null',
+            },
+          },
+        ],
+      },
+      {
+        code: `
+        async function findFirstSuspendedPost() {
+          return await prisma.post.findFirst({
+            where: {
+              suspendedAt: { not: null },
+              published: false
+            }
+          });
+        }
+      `,
+        errors: [
+          {
+            messageId: 'suspendedAtNotLastInWhere',
+          },
+        ],
+      },
+      {
+        code: `
+        async function findUniqueSuspendedUser() {
+          return await prisma.user.findUnique({
+            where: {
+              id: 1,
+              suspendedAt: { notEqual: null }
+            }
+          });
+        }
+      `,
+        errors: [
+          {
+            messageId: 'incorrectSuspendedAtValue',
+            data: {
+              functionName: 'findUniqueSuspendedUser',
+              actual: 'incorrect structure',
+            },
+          },
+        ],
+      },
+      {
+        code: `
+        async function findManyAnyUsers() {
+          return await prisma.user.findMany({
+            select: { id: true }
+          });
+        }
+      `,
+        errors: [
+          {
+            messageId: 'missingAnyIndicator',
+            data: {
+              functionName: 'findManyAnyUsers',
             },
           },
         ],
