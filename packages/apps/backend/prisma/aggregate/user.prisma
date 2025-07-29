@@ -1,11 +1,12 @@
 model User {
-  id        Int       @id @default(autoincrement())
-  publicId  String    @unique @default(uuid()) @map("public_id") @db.Uuid
-  email     String    @unique
-  name      String
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
-  deletedAt DateTime? @map("deleted_at")
+  id          Int       @id @default(autoincrement())
+  publicId    String    @unique @default(uuid()) @map("public_id") @db.Uuid
+  email       String    @unique
+  name        String
+  deletedAt   DateTime? @map("deleted_at")
+  suspendedAt DateTime? @map("suspended_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
 
   @@index([createdAt])
   @@index([deletedAt])
