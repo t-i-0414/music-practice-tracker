@@ -26,7 +26,7 @@
     "prisma:reset:test": "dotenv -e .env.test -- prisma migrate reset --force",
     "prisma:studio": "prisma studio",
     "prisma:validate": "prisma validate",
-    "start:debug": "npm-p start:debug:*",
+    "start:debug": "run-p start:debug:*",
     "start:debug:admin-api": "nest start admin-api --debug --watch",
     "start:debug:app-api": "nest start app-api --debug --watch",
     "start:dev": "run-p start:dev:*",
