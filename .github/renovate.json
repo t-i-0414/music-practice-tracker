@@ -142,6 +142,11 @@
       "description": "Pin GitHub Actions digests",
       "matchManagers": ["github-actions"],
       "pinDigests": true
+    },
+    {
+      "description": "Disable updates for anthropics/claude-code-action",
+      "matchPackageNames": ["anthropics/claude-code-action"],
+      "enabled": false
     }
   ],
   "ignorePaths": ["**/node_modules/**", "packages/apps/mobile/**"],
