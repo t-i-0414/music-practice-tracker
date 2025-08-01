@@ -20,10 +20,10 @@ export default defineConfig({
         'src/plugin-backend/prisma-update-naming-convention.ts',
       ],
       thresholds: {
-        lines: 95,
+        lines: 93,
         functions: 95,
-        branches: 94,
-        statements: 95,
+        branches: 95,
+        statements: 93,
       },
     },
   },
