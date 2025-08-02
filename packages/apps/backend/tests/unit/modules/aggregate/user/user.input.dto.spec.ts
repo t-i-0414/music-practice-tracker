@@ -257,8 +257,6 @@ describe('user input DTOs', () => {
       expect(errors[0].constraints).toHaveProperty('isUuid');
     });
 
-
-
     it('should fail with invalid data in update', () => {
       expect.assertions(1);
 
@@ -313,6 +311,4 @@ describe('user input DTOs', () => {
       expect(errors[0].constraints).toHaveProperty('arrayNotEmpty');
     });
   });
-
-
 });

@@ -312,7 +312,7 @@ prisma/
 
 - Docker Compose (PostgreSQL)
 - Environment configuration (.env files)
-- Path aliases (@/* for cleaner imports)
+- Path aliases (@/\* for cleaner imports)
 - Monorepo with Bun workspaces
 
 ## Main Entry Points
@@ -344,7 +344,7 @@ npm run start:dev            # Starts both APIs
 ```typescript
 // Main entry for administrators
 // Port: 3001 (configurable via PORT env)
-// Module: AdminApiModule  
+// Module: AdminApiModule
 // Features: Full CRUD, bulk operations, deleted records access
 ```
 
@@ -360,16 +360,16 @@ npm run start:prod:admin-api  # Production
 
 ```typescript
 // Global pipes for validation
-app.useGlobalPipes(new ValidationPipe({
-  whitelist: true,
-  transform: true,
-  transformOptions: { enableImplicitConversion: true }
-}));
+app.useGlobalPipes(
+  new ValidationPipe({
+    whitelist: true,
+    transform: true,
+    transformOptions: { enableImplicitConversion: true },
+  }),
+);
 
 // Response transformation
-app.useGlobalInterceptors(
-  new ClassSerializerInterceptor(app.get(Reflector))
-);
+app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
 // Swagger documentation (dev only)
 if (!isProduction) {
@@ -787,7 +787,7 @@ User: postgres
 Password: postgres
 
 # Test
-Host: localhost  
+Host: localhost
 Port: 15433
 Database: music_practice_tracker_test
 
@@ -802,7 +802,7 @@ DATABASE_URL="postgresql://postgres:postgres@localhost:15432/music_practice_trac
 ```prisma
 enum UserStatus {
   ACTIVE
-  INACTIVE  
+  INACTIVE
   SUSPENDED
   PENDING
   BANNED
@@ -915,11 +915,11 @@ model PracticeSession {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   deletedAt    DateTime?
-  
+
   user       User       @relation(fields: [userId], references: [id])
   instrument Instrument @relation(fields: [instrumentId], references: [id])
   exercises  PracticeSessionExercise[]
-  
+
   @@index([userId])
   @@index([instrumentId])
   @@index([startTime])
@@ -941,10 +941,10 @@ model Instrument {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   deletedAt DateTime?
-  
+
   userInstruments UserInstrument[]
   sessions        PracticeSession[]
-  
+
   @@index([type])
   @@index([createdAt])
   @@index([deletedAt])
@@ -966,10 +966,10 @@ model Exercise {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   deletedAt  DateTime?
-  
+
   sessions PracticeSessionExercise[]
   progress ExerciseProgress[]
-  
+
   @@index([category])
   @@index([difficulty])
   @@index([createdAt])
@@ -992,10 +992,10 @@ model Goal {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   deletedAt   DateTime?
-  
+
   user     User              @relation(fields: [userId], references: [id])
   progress GoalProgress[]
-  
+
   @@index([userId])
   @@index([targetDate])
   @@index([completed])
@@ -1328,22 +1328,22 @@ Services implement business logic:
 ```typescript
 // Query Service (read operations)
 class UserQueryService {
-  findUserByIdOrFail(dto: FindUserByIdInputDto): Promise<User>
-  findManyUsers(dto: FindManyUsersInputDto): Promise<User[]>
-  checkUserExists(dto: CheckUserExistsInputDto): Promise<boolean>
+  findUserByIdOrFail(dto: FindUserByIdInputDto): Promise<User>;
+  findManyUsers(dto: FindManyUsersInputDto): Promise<User[]>;
+  checkUserExists(dto: CheckUserExistsInputDto): Promise<boolean>;
 }
 
 // Command Service (write operations)
 class UserCommandService {
-  createUser(dto: CreateUserInputDto): Promise<User>
-  updateUser(dto: UpdateUserInputDto): Promise<User>
-  deleteUser(dto: DeleteUserInputDto): Promise<void>
+  createUser(dto: CreateUserInputDto): Promise<User>;
+  updateUser(dto: UpdateUserInputDto): Promise<User>;
+  deleteUser(dto: DeleteUserInputDto): Promise<void>;
 }
 
 // Facade Services (orchestration)
 class UserAdminFacadeService {
   // Combines multiple services for admin operations
-  bulkUpdateUserStatus(dto: BulkUpdateDto): Promise<User[]>
+  bulkUpdateUserStatus(dto: BulkUpdateDto): Promise<User[]>;
 }
 ```
 
@@ -1404,7 +1404,7 @@ targetTempo: number;
 email: string;
 
 // Parse comma-separated IDs
-@Transform(({ value }) => 
+@Transform(({ value }) =>
   typeof value === 'string' ? value.split(',') : value
 )
 publicIds: string[];
@@ -1472,26 +1472,26 @@ The backend implements Domain-Driven Design with clear aggregate boundaries:
 class UserRepositoryService {
   // Only place with Prisma access
   // Implements soft delete pattern
-  findUniqueActiveUser()
-  findUniqueDeletedUser()
-  findUniqueAnyUser()
+  findUniqueActiveUser();
+  findUniqueDeletedUser();
+  findUniqueAnyUser();
 }
 
 // 2. Query Service (Read Operations)
 class UserQueryService {
   // All read operations
   // Implements OrFail pattern
-  findUserByIdOrFail() // Throws NotFoundException
-  findManyUsers()
+  findUserByIdOrFail(); // Throws NotFoundException
+  findManyUsers();
 }
 
 // 3. Command Service (Write Operations)
 class UserCommandService {
   // Create, Update, Delete operations
   // Uses QueryService for validation
-  createUser()
-  updateUserById()
-  deleteUserById() // Soft delete
+  createUser();
+  updateUserById();
+  deleteUserById(); // Soft delete
 }
 
 // 4. Facade Services (API Orchestration)
@@ -1518,9 +1518,9 @@ class UserAppFacadeService {
 
 ```typescript
 // Every repository implements three variants
-findUniqueActiveUser()   // WHERE deletedAt IS NULL
-findUniqueDeletedUser()  // WHERE deletedAt IS NOT NULL  
-findUniqueAnyUser()      // No deletedAt filter
+findUniqueActiveUser(); // WHERE deletedAt IS NULL
+findUniqueDeletedUser(); // WHERE deletedAt IS NOT NULL
+findUniqueAnyUser(); // No deletedAt filter
 ```
 
 ### DTO Pattern
@@ -1536,14 +1536,14 @@ class CreateUserInputDto {
 
 // Response DTOs - API responses
 class ActiveUserResponseDto {
-  @Exclude() id: number;  // Internal ID hidden
+  @Exclude() id: number; // Internal ID hidden
   @Expose() publicId: string;
   @Expose() email: string;
   @Expose() name: string;
 }
 
 // Transformation functions
-toActiveUserDto(user) // Converts entity to response
+toActiveUserDto(user); // Converts entity to response
 ```
 
 ### Dependency Injection
@@ -1704,7 +1704,7 @@ Before starting any task, **you must review**:
 
 - Do what has been asked; nothing more, nothing less
 - NEVER create files unless absolutely necessary - prefer editing existing files
-- NEVER proactively create documentation files (*.md) or README files
+- NEVER proactively create documentation files (\*.md) or README files
 - Minimize in-code comments. When adding, include type (e.g., NOTE:)
 - Install shared packages at workspace root, not in individual apps
 
@@ -1800,11 +1800,11 @@ Each aggregate has 4 service layers:
 
 ```typescript
 // Example structure for User aggregate
-UserRepositoryService         // Database layer
-UserQueryService              // Reads (throws NotFoundException)
-UserCommandService            // Writes (uses QueryService for validation)
-UserAdminFacadeService        // Admin API orchestration
-UserAppFacadeService          // App API orchestration
+UserRepositoryService; // Database layer
+UserQueryService; // Reads (throws NotFoundException)
+UserCommandService; // Writes (uses QueryService for validation)
+UserAdminFacadeService; // Admin API orchestration
+UserAppFacadeService; // App API orchestration
 ```
 
 ### Repository Method Naming
