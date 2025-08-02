@@ -3,27 +3,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Prisma } from '@/generated/prisma';
 import { UserRepositoryService } from '@/modules/aggregate/user/user.repository.service';
 import { RepositoryService } from '@/modules/repository/repository.service';
+import { buildUserResponseDto } from '@/tests/factory/user.factory';
 
 describe('userRepositoryService', () => {
   let service: UserRepositoryService;
   let userModel: any;
-
-  const mockUser = {
-    id: 1,
-    publicId: '123e4567-e89b-12d3-a456-426614174000',
-    email: 'test@example.com',
-    name: 'Test User',
-    createdAt: new Date('2024-01-01'),
-    updatedAt: new Date('2024-01-01'),
-    deletedAt: null,
-    suspendedAt: null,
-  };
-
-  const mockDeletedUser = {
-    ...mockUser,
-    publicId: '223e4567-e89b-12d3-a456-426614174001',
-    deletedAt: new Date('2024-01-02'),
-  };
 
   beforeEach(async () => {
     userModel = {
@@ -59,21 +43,18 @@ describe('userRepositoryService', () => {
     jest.clearAllMocks();
   });
 
-  describe('findUniqueActiveUser', () => {
-    it('should find active user with deletedAt null', async () => {
+  describe('findUniqueUser', () => {
+    it('should find user', async () => {
       expect.assertions(2);
 
+      const mockUser = buildUserResponseDto();
       userModel.findUnique.mockResolvedValue(mockUser);
       const params = { publicId: mockUser.publicId };
 
-      const result = await service.findUniqueActiveUser(params);
+      const result = await service.findUniqueUser(params);
 
       expect(userModel.findUnique).toHaveBeenCalledWith({
-        where: {
-          ...params,
-          deletedAt: null,
-          suspendedAt: null,
-        },
+        where: params,
       });
       expect(result).toStrictEqual(mockUser);
     });
@@ -84,61 +65,20 @@ describe('userRepositoryService', () => {
       userModel.findUnique.mockResolvedValue(null);
       const params = { publicId: 'non-existent-publicId' };
 
-      const result = await service.findUniqueActiveUser(params);
+      const result = await service.findUniqueUser(params);
 
       expect(userModel.findUnique).toHaveBeenCalledWith({
-        where: {
-          ...params,
-          deletedAt: null,
-          suspendedAt: null,
-        },
+        where: params,
       });
       expect(result).toBeNull();
     });
   });
 
-  describe('findUniqueDeletedUser', () => {
-    it('should find deleted user', async () => {
+  describe('findManyUsers', () => {
+    it('should find many users with pagination', async () => {
       expect.assertions(2);
 
-      userModel.findUnique.mockResolvedValue(mockDeletedUser);
-      const params = { publicId: mockDeletedUser.publicId };
-
-      const result = await service.findUniqueDeletedUser(params);
-
-      expect(userModel.findUnique).toHaveBeenCalledWith({
-        where: {
-          ...params,
-          deletedAt: { not: null },
-        },
-      });
-      expect(result).toStrictEqual(mockDeletedUser);
-    });
-  });
-
-  describe('findUniqueAnyUser', () => {
-    it('should find any user regardless of deletion status', async () => {
-      expect.assertions(2);
-
-      userModel.findUnique.mockResolvedValue(mockUser);
-      const params = { publicId: mockUser.publicId };
-
-      const result = await service.findUniqueAnyUser(params);
-
-      expect(userModel.findUnique).toHaveBeenCalledWith({
-        where: {
-          ...params,
-          OR: [{ deletedAt: null }, { deletedAt: { not: null } }],
-        },
-      });
-      expect(result).toStrictEqual(mockUser);
-    });
-  });
-
-  describe('findManyActiveUsers', () => {
-    it('should find many active users with pagination', async () => {
-      expect.assertions(2);
-
+      const mockUser = buildUserResponseDto();
       const mockUsers = [mockUser];
       userModel.findMany.mockResolvedValue(mockUsers);
       const params = {
@@ -148,62 +88,9 @@ describe('userRepositoryService', () => {
         orderBy: { createdAt: Prisma.SortOrder.desc },
       };
 
-      const result = await service.findManyActiveUsers(params);
+      const result = await service.findManyUsers(params);
 
-      expect(userModel.findMany).toHaveBeenCalledWith({
-        ...params,
-        where: {
-          ...params.where,
-          deletedAt: null,
-          suspendedAt: null,
-        },
-      });
-      expect(result).toStrictEqual(mockUsers);
-    });
-  });
-
-  describe('findManyDeletedUsers', () => {
-    it('should find many deleted users', async () => {
-      expect.assertions(2);
-
-      const mockUsers = [mockDeletedUser];
-      userModel.findMany.mockResolvedValue(mockUsers);
-      const params = {
-        where: { email: { contains: 'test' } },
-      };
-
-      const result = await service.findManyDeletedUsers(params);
-
-      expect(userModel.findMany).toHaveBeenCalledWith({
-        ...params,
-        where: {
-          ...params.where,
-          deletedAt: { not: null },
-        },
-      });
-      expect(result).toStrictEqual(mockUsers);
-    });
-  });
-
-  describe('findManyAnyUsers', () => {
-    it('should find many users regardless of deletion status', async () => {
-      expect.assertions(2);
-
-      const mockUsers = [mockUser, mockDeletedUser];
-      userModel.findMany.mockResolvedValue(mockUsers);
-      const params = {
-        where: { email: { contains: 'test' } },
-      };
-
-      const result = await service.findManyAnyUsers(params);
-
-      expect(userModel.findMany).toHaveBeenCalledWith({
-        ...params,
-        where: {
-          ...params.where,
-          OR: [{ deletedAt: null }, { deletedAt: { not: null } }],
-        },
-      });
+      expect(userModel.findMany).toHaveBeenCalledWith(params);
       expect(result).toStrictEqual(mockUsers);
     });
   });
@@ -212,6 +99,7 @@ describe('userRepositoryService', () => {
     it('should create a new user', async () => {
       expect.assertions(2);
 
+      const mockUser = buildUserResponseDto();
       userModel.create.mockResolvedValue(mockUser);
       const params = { email: mockUser.email, name: mockUser.name };
 
@@ -228,11 +116,13 @@ describe('userRepositoryService', () => {
     it('should create many users and return them', async () => {
       expect.assertions(2);
 
+      const mockUser = buildUserResponseDto();
+      const mockUser2 = buildUserResponseDto();
       const params = [
-        { email: 'user1@example.com', name: 'User 1' },
-        { email: 'user2@example.com', name: 'User 2' },
+        { email: mockUser.email, name: mockUser.name },
+        { email: mockUser2.email, name: mockUser2.name },
       ];
-      const mockUsers = [mockUser, { ...mockUser, publicId: '223e4567-e89b-12d3-a456-426614174002' }];
+      const mockUsers = [mockUser, mockUser2];
       userModel.createManyAndReturn.mockResolvedValue(mockUsers);
 
       const result = await service.createManyAndReturnUsers(params);
@@ -245,9 +135,10 @@ describe('userRepositoryService', () => {
   });
 
   describe('updateUser', () => {
-    it('should update an active user', async () => {
+    it('should update a user', async () => {
       expect.assertions(2);
 
+      const mockUser = buildUserResponseDto();
       const updatedUser = { ...mockUser, name: 'Updated Name' };
       userModel.update.mockResolvedValue(updatedUser);
       const params = {
@@ -257,72 +148,20 @@ describe('userRepositoryService', () => {
 
       const result = await service.updateUser(params);
 
-      expect(userModel.update).toHaveBeenCalledWith({
-        data: params.data,
-        where: {
-          ...params.where,
-          deletedAt: null,
-          suspendedAt: null,
-        },
-      });
+      expect(userModel.update).toHaveBeenCalledWith(params);
       expect(result).toStrictEqual(updatedUser);
     });
   });
 
   describe('deleteUser', () => {
-    it('should soft delete a user', async () => {
+    it('should delete a user', async () => {
       expect.assertions(2);
 
-      const mockDate = new Date('2024-01-03');
-      jest.spyOn(global, 'Date').mockImplementation(() => mockDate as any);
-      userModel.update.mockResolvedValue({ ...mockUser, deletedAt: mockDate });
-      const params = { publicId: mockUser.publicId };
-
-      await service.deleteUser(params);
-
-      expect(userModel.update).toHaveBeenCalledWith({
-        where: {
-          ...params,
-          deletedAt: null,
-          suspendedAt: null,
-        },
-        data: {
-          deletedAt: mockDate,
-        },
-      });
-      expect(userModel.update).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('deleteManyUsers', () => {
-    it('should soft delete many users', async () => {
-      expect.assertions(2);
-
-      const mockDate = new Date('2024-01-03');
-      jest.spyOn(global, 'Date').mockImplementation(() => mockDate as any);
-      userModel.updateMany.mockResolvedValue({ count: 2 });
-      const params = { email: { contains: 'test' } };
-
-      await service.deleteManyUsers(params);
-
-      expect(userModel.updateMany).toHaveBeenCalledWith({
-        where: params,
-        data: {
-          deletedAt: mockDate,
-        },
-      });
-      expect(userModel.updateMany).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('hardDeleteUser', () => {
-    it('should permanently delete a user', async () => {
-      expect.assertions(2);
-
+      const mockUser = buildUserResponseDto();
       userModel.delete.mockResolvedValue(mockUser);
       const params = { publicId: mockUser.publicId };
 
-      await service.hardDeleteUser(params);
+      await service.deleteUser(params);
 
       expect(userModel.delete).toHaveBeenCalledWith({
         where: params,
@@ -331,120 +170,19 @@ describe('userRepositoryService', () => {
     });
   });
 
-  describe('hardDeleteManyUsers', () => {
-    it('should permanently delete many users', async () => {
+  describe('deleteManyUsers', () => {
+    it('should delete many users', async () => {
       expect.assertions(2);
 
       userModel.deleteMany.mockResolvedValue({ count: 2 });
       const params = { email: { contains: 'test' } };
 
-      await service.hardDeleteManyUsers(params);
+      await service.deleteManyUsers(params);
 
       expect(userModel.deleteMany).toHaveBeenCalledWith({
         where: params,
       });
       expect(userModel.deleteMany).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('restoreUser', () => {
-    it('should restore a deleted user', async () => {
-      expect.assertions(2);
-
-      const restoredUser = { ...mockDeletedUser, deletedAt: null };
-      userModel.update.mockResolvedValue(restoredUser);
-      const params = { publicId: mockDeletedUser.publicId };
-
-      const result = await service.restoreUser(params);
-
-      expect(userModel.update).toHaveBeenCalledWith({
-        where: {
-          ...params,
-          deletedAt: { not: null },
-        },
-        data: {
-          deletedAt: null,
-        },
-      });
-      expect(result).toStrictEqual(restoredUser);
-    });
-  });
-
-  describe('restoreManyAndReturnUsers', () => {
-    it('should restore many deleted users and return them', async () => {
-      expect.assertions(2);
-
-      const restoredUsers = [
-        { ...mockDeletedUser, deletedAt: null },
-        { ...mockDeletedUser, publicId: '323e4567-e89b-12d3-a456-426614174003', deletedAt: null },
-      ];
-      userModel.updateManyAndReturn.mockResolvedValue(restoredUsers);
-      const params = { email: { contains: 'test' } };
-
-      const result = await service.restoreManyAndReturnUsers(params);
-
-      expect(userModel.updateManyAndReturn).toHaveBeenCalledWith({
-        where: {
-          ...params,
-          deletedAt: { not: null },
-        },
-        data: {
-          deletedAt: null,
-        },
-      });
-      expect(result).toStrictEqual(restoredUsers);
-    });
-  });
-
-  describe('suspendUser', () => {
-    it('should suspend an active user', async () => {
-      expect.assertions(2);
-
-      const mockDate = new Date('2024-01-15');
-      jest.useFakeTimers().setSystemTime(mockDate);
-
-      const suspendedUser = { ...mockUser, suspendedAt: mockDate };
-      userModel.update.mockResolvedValue(suspendedUser);
-      const params = { publicId: mockUser.publicId };
-
-      const result = await service.suspendUser(params);
-
-      jest.useRealTimers();
-
-      expect(userModel.update).toHaveBeenCalledWith({
-        where: {
-          ...params,
-          suspendedAt: null,
-        },
-        data: {
-          suspendedAt: mockDate,
-        },
-      });
-      expect(result).toStrictEqual(suspendedUser);
-    });
-  });
-
-  describe('suspendManyUsers', () => {
-    it('should suspend many users', async () => {
-      expect.assertions(2);
-
-      const mockDate = new Date('2024-01-15');
-      jest.useFakeTimers().setSystemTime(mockDate);
-
-      userModel.updateMany.mockResolvedValue({ count: 2 });
-      const params = { email: { contains: 'test' } };
-
-      await service.suspendManyUsers(params);
-
-      jest.useRealTimers();
-
-      expect(userModel.updateMany).toHaveBeenCalledWith({
-        where: params,
-        data: {
-          suspendedAt: mockDate,
-        },
-      });
-      expect(userModel.updateMany).toHaveBeenCalledTimes(1);
     });
   });
 });

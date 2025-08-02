@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 
 import { UserCommandService } from './user.command.service';
-import { CreateUserInputDto, DeleteUserByIdInputDto, FindUserByIdInputDto, UpdateUserInputDto } from './user.input.dto';
+import { CreateUserInputDto, FindUserByIdInputDto, UpdateUserInputDto } from './user.input.dto';
 import { UserQueryService } from './user.query.service';
-import { ActiveUserResponseDto } from './user.response.dto';
+import { UserResponseDto } from './user.response.dto';
 
 @Injectable()
 export class UserAppFacadeService {
@@ -12,19 +12,15 @@ export class UserAppFacadeService {
     private readonly userQueryService: UserQueryService,
   ) {}
 
-  public async findUserById(dto: FindUserByIdInputDto): Promise<ActiveUserResponseDto> {
+  public async findUserById(dto: FindUserByIdInputDto): Promise<UserResponseDto> {
     return this.userQueryService.findUserByIdOrFail(dto);
   }
 
-  public async createUser(dto: CreateUserInputDto): Promise<ActiveUserResponseDto> {
+  public async createUser(dto: CreateUserInputDto): Promise<UserResponseDto> {
     return this.userCommandService.createUser(dto);
   }
 
-  public async updateUserById(dto: UpdateUserInputDto): Promise<ActiveUserResponseDto> {
+  public async updateUserById(dto: UpdateUserInputDto): Promise<UserResponseDto> {
     return this.userCommandService.updateUserById(dto);
-  }
-
-  public async deleteUserById(dto: DeleteUserByIdInputDto): Promise<void> {
-    await this.userCommandService.deleteUserById(dto);
   }
 }

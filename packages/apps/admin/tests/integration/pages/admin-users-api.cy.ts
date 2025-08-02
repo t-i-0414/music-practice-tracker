@@ -8,15 +8,15 @@ describe('Admin Users API Tests', () => {
   const host = process.env.HOST ?? 'localhost';
   const adminApiPort = process.env.ADMIN_API_PORT ?? '3001';
 
-  it('should fetch active users list', () => {
+  it('should fetch users list', () => {
     cy.window().then((win) =>
       win
-        .fetch(`http://${host}:${adminApiPort}/api/users/active_users?publicIds=1&publicIds=2`)
+        .fetch(`http://${host}:${adminApiPort}/api/users?publicIds=1&publicIds=2`)
         .then((response) => {
           expect(response.status).to.equal(200);
           return response.json();
         })
-        .then((data: components['schemas']['ActiveUsersResponseDto']) => {
+        .then((data: components['schemas']['UsersResponseDto']) => {
           expect(data).to.have.property('users');
           expect(data.users).to.be.an('array').with.length(2);
 
@@ -35,17 +35,17 @@ describe('Admin Users API Tests', () => {
     );
   });
 
-  it('should fetch specific active user', () => {
-    const userId = '42';
+  it('should fetch specific user', () => {
+    const userId = '123';
 
     cy.window().then((win) =>
       win
-        .fetch(`http://${host}:${adminApiPort}/api/users/active_users/${userId}`)
+        .fetch(`http://${host}:${adminApiPort}/api/users/${userId}`)
         .then((response) => {
           expect(response.status).to.equal(200);
           return response.json();
         })
-        .then((data: components['schemas']['ActiveUserResponseDto']) => {
+        .then((data: components['schemas']['UserResponseDto']) => {
           expect(data).to.include({
             publicId: userId,
             name: `Test User ${userId}`,
@@ -53,48 +53,6 @@ describe('Admin Users API Tests', () => {
           });
           expect(data).to.have.property('createdAt');
           expect(data).to.have.property('updatedAt');
-        }),
-    );
-  });
-
-  it('should fetch deleted users', () => {
-    cy.window().then((win) =>
-      win
-        .fetch(`http://${host}:${adminApiPort}/api/users/deleted_users?publicIds=100&publicIds=101`)
-        .then((response) => {
-          expect(response.status).to.equal(200);
-          return response.json();
-        })
-        .then((data: components['schemas']['DeletedUsersResponseDto']) => {
-          expect(data).to.have.property('users');
-          expect(data.users).to.be.an('array').with.length(2);
-
-          data.users.forEach((user) => {
-            expect(user).to.have.property('deletedAt');
-            expect(user.deletedAt).to.not.be.null;
-          });
-        }),
-    );
-  });
-
-  it('should fetch any users (active or deleted)', () => {
-    cy.window().then((win) =>
-      win
-        .fetch(`http://${host}:${adminApiPort}/api/users/any_users?publicIds=1&publicIds=2&publicIds=3`)
-        .then((response) => {
-          expect(response.status).to.equal(200);
-          return response.json();
-        })
-        .then((data: components['schemas']['AnyUsersResponseDto']) => {
-          expect(data).to.have.property('users');
-          expect(data.users).to.be.an('array').with.length(3);
-
-          // Check that some users are deleted and some are not
-          const deletedUsers = data.users.filter((user) => user.deletedAt !== null);
-          const activeUsers = data.users.filter((user) => user.deletedAt === null);
-
-          expect(deletedUsers.length).to.be.greaterThan(0);
-          expect(activeUsers.length).to.be.greaterThan(0);
         }),
     );
   });
@@ -118,7 +76,7 @@ describe('Admin Users API Tests', () => {
           expect(response.status).to.equal(201); // 201 Created
           return response.json();
         })
-        .then((data: components['schemas']['ActiveUserResponseDto']) => {
+        .then((data: components['schemas']['UserResponseDto']) => {
           expect(data).to.have.property('publicId');
           expect(data.publicId).to.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu); // UUID format
           expect(data).to.include(newUser);
@@ -149,7 +107,7 @@ describe('Admin Users API Tests', () => {
           expect(response.status).to.equal(201); // 201 Created
           return response.json();
         })
-        .then((data: components['schemas']['ActiveUsersResponseDto']) => {
+        .then((data: components['schemas']['UsersResponseDto']) => {
           expect(data).to.have.property('users');
           expect(data.users).to.have.length(2);
 
@@ -181,7 +139,7 @@ describe('Admin Users API Tests', () => {
           expect(response.status).to.equal(200);
           return response.json();
         })
-        .then((data: components['schemas']['ActiveUserResponseDto']) => {
+        .then((data: components['schemas']['UserResponseDto']) => {
           expect(data).to.include({
             publicId: userId,
             ...updates,
@@ -191,7 +149,7 @@ describe('Admin Users API Tests', () => {
     );
   });
 
-  it('should soft delete a user', () => {
+  it('should delete a user', () => {
     const userId = '999';
 
     cy.window().then((win) =>
@@ -201,44 +159,6 @@ describe('Admin Users API Tests', () => {
         })
         .then((response) => {
           expect(response.status).to.equal(204);
-        }),
-    );
-  });
-
-  it('should hard delete a user', () => {
-    const userId = '888';
-
-    cy.window().then((win) =>
-      win
-        .fetch(`http://${host}:${adminApiPort}/api/users/hard/${userId}`, {
-          method: 'DELETE',
-        })
-        .then((response) => {
-          expect(response.status).to.equal(204);
-        }),
-    );
-  });
-
-  it('should restore a soft-deleted user', () => {
-    const userId = '777';
-
-    cy.window().then((win) =>
-      win
-        .fetch(`http://${host}:${adminApiPort}/api/users/${userId}/restore`, {
-          method: 'PUT',
-        })
-        .then((response) => {
-          expect(response.status).to.equal(200);
-          return response.json();
-        })
-        .then((data: components['schemas']['ActiveUserResponseDto']) => {
-          expect(data).to.include({
-            publicId: userId,
-          });
-          // ActiveUserResponseDto doesn't include deletedAt
-          expect(data).to.have.property('createdAt');
-          expect(data).to.have.property('updatedAt');
-          expect(data).to.not.have.property('deletedAt');
         }),
     );
   });

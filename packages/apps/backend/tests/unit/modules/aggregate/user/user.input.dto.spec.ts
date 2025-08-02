@@ -9,10 +9,6 @@ import {
   UpdateUserInputDto,
   DeleteUserByIdInputDto,
   DeleteManyUsersInputDto,
-  HardDeleteUserByIdInputDto,
-  HardDeleteManyUsersInputDto,
-  RestoreUserByIdInputDto,
-  RestoreManyUsersInputDto,
 } from '@/modules/aggregate/user/user.input.dto';
 
 describe('user input DTOs', () => {
@@ -261,19 +257,6 @@ describe('user input DTOs', () => {
       expect(errors[0].constraints).toHaveProperty('isUuid');
     });
 
-    it('should fail with empty data object', () => {
-      expect.assertions(2);
-
-      const dto = plainToInstance(UpdateUserInputDto, {
-        publicId: validUUID,
-        data: {},
-      });
-      const errors = validateSync(dto);
-
-      expect(errors).toHaveLength(1);
-      expect(errors[0].constraints).toHaveProperty('isNotEmptyObject');
-    });
-
     it('should fail with invalid data in update', () => {
       expect.assertions(1);
 
@@ -326,50 +309,6 @@ describe('user input DTOs', () => {
 
       expect(errors).toHaveLength(1);
       expect(errors[0].constraints).toHaveProperty('arrayNotEmpty');
-    });
-  });
-
-  describe('hardDeleteUserByIdInputDto', () => {
-    it('should validate with valid UUID', () => {
-      expect.assertions(1);
-
-      const dto = plainToInstance(HardDeleteUserByIdInputDto, { publicId: validUUID });
-      const errors = validateSync(dto);
-
-      expect(errors).toHaveLength(0);
-    });
-  });
-
-  describe('hardDeleteManyUsersInputDto', () => {
-    it('should validate with valid UUID array', () => {
-      expect.assertions(1);
-
-      const dto = plainToInstance(HardDeleteManyUsersInputDto, { publicIds: [validUUID] });
-      const errors = validateSync(dto);
-
-      expect(errors).toHaveLength(0);
-    });
-  });
-
-  describe('restoreUserByIdInputDto', () => {
-    it('should validate with valid UUID', () => {
-      expect.assertions(1);
-
-      const dto = plainToInstance(RestoreUserByIdInputDto, { publicId: validUUID });
-      const errors = validateSync(dto);
-
-      expect(errors).toHaveLength(0);
-    });
-  });
-
-  describe('restoreManyUsersInputDto', () => {
-    it('should validate with valid UUID array', () => {
-      expect.assertions(1);
-
-      const dto = plainToInstance(RestoreManyUsersInputDto, { publicIds: [validUUID] });
-      const errors = validateSync(dto);
-
-      expect(errors).toHaveLength(0);
     });
   });
 });

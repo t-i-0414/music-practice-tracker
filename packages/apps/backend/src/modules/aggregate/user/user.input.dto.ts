@@ -4,15 +4,17 @@ import {
   ArrayNotEmpty,
   IsArray,
   IsEmail,
+  IsEnum,
   IsNotEmpty,
   IsNotEmptyObject,
+  IsOptional,
   IsString,
   IsUUID,
   MaxLength,
   ValidateNested,
 } from 'class-validator';
 
-import { MAX_EMAIL_LENGTH, MAX_NAME_LENGTH } from './user.constants';
+import { MAX_EMAIL_LENGTH, MAX_NAME_LENGTH, UserStatusRecord, UserStatusType } from './user.constants';
 
 export class FindUserByIdInputDto {
   @ApiProperty({
@@ -75,7 +77,17 @@ export class CreateManyUsersInputDto {
   public users: CreateUserInputDto[];
 }
 
-export class UpdateUserDataDto extends PartialType(CreateUserInputDto) {}
+export class UpdateUserDataDto extends PartialType(CreateUserInputDto) {
+  @ApiProperty({
+    description: 'The user status',
+    example: UserStatusRecord.ACTIVE,
+    enum: Object.values(UserStatusRecord),
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum(Object.values(UserStatusRecord))
+  public status?: UserStatusType;
+}
 
 export class UpdateUserInputDto {
   @ApiProperty({
@@ -101,15 +113,3 @@ export class UpdateUserInputDto {
 export class DeleteUserByIdInputDto extends FindUserByIdInputDto {}
 
 export class DeleteManyUsersInputDto extends FindManyUsersByIdInputDto {}
-
-export class HardDeleteUserByIdInputDto extends FindUserByIdInputDto {}
-
-export class HardDeleteManyUsersInputDto extends FindManyUsersByIdInputDto {}
-
-export class RestoreUserByIdInputDto extends FindUserByIdInputDto {}
-
-export class RestoreManyUsersInputDto extends FindManyUsersByIdInputDto {}
-
-export class SuspendUserByIdInputDto extends FindUserByIdInputDto {}
-
-export class SuspendManyUsersInputDto extends FindManyUsersByIdInputDto {}

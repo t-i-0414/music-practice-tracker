@@ -24,51 +24,33 @@ describe('userAdminFacadeService Integration', () => {
     await helper.teardown();
   });
 
-  describe('findManyAnyUsers', () => {
-    it('should return both active and deleted users', async () => {
-      expect.assertions(3);
+  describe('findManyUsers', () => {
+    it('should find multiple users', async () => {
+      expect.assertions(2);
 
-      // Create active users
-      const user1 = await repositoryService.createUser({ name: 'Active User 1', email: 'active1@test.com' });
-      const user2 = await repositoryService.createUser({ name: 'Active User 2', email: 'active2@test.com' });
+      const user1 = await repositoryService.createUser({ name: 'User 1', email: 'user1@test.com' });
+      const user2 = await repositoryService.createUser({ name: 'User 2', email: 'user2@test.com' });
 
-      // Create and delete user
-      const deletedUser = await repositoryService.createUser({ name: 'Deleted User', email: 'deleted@test.com' });
-      await repositoryService.deleteUser({ publicId: deletedUser.publicId });
-
-      // Get all users including deleted
-      const result = await facadeService.findManyAnyUsers({
-        publicIds: [user1.publicId, user2.publicId, deletedUser.publicId],
+      const result = await facadeService.findManyUsers({
+        publicIds: [user1.publicId, user2.publicId],
       });
 
-      expect(result.users).toHaveLength(3);
-
-      const activeUsers = result.users.filter((u) => u.deletedAt === null);
-
-      expect(activeUsers).toHaveLength(2);
-
-      const deletedUsers = result.users.filter((u) => u.deletedAt !== null);
-
-      expect(deletedUsers).toHaveLength(1);
+      expect(result.users).toHaveLength(2);
+      expect(result.users.map((u) => u.email).sort()).toStrictEqual(['user1@test.com', 'user2@test.com']);
     });
   });
 
-  describe('findDeletedUserById', () => {
-    it('should find a deleted user', async () => {
+  describe('findUserById', () => {
+    it('should find a user by id', async () => {
       expect.assertions(1);
 
-      // Create and delete user
-      const user = await repositoryService.createUser({ name: 'To Delete', email: 'todelete@test.com' });
-      await repositoryService.deleteUser({ publicId: user.publicId });
-
-      // Find deleted user
-      const foundUser = await facadeService.findDeletedUserById({ publicId: user.publicId });
+      const user = await repositoryService.createUser({ name: 'Test User', email: 'test@test.com' });
+      const foundUser = await facadeService.findUserById({ publicId: user.publicId });
 
       expect(foundUser).toMatchObject({
         publicId: user.publicId,
         name: user.name,
         email: user.email,
-        deletedAt: expect.any(Date),
       });
     });
   });
@@ -88,76 +70,28 @@ describe('userAdminFacadeService Integration', () => {
       const result = await facadeService.createManyAndReturnUsers(dto);
 
       expect(result.users).toHaveLength(3);
-
-      const emails = result.users.map((u) => u.email).sort();
-
-      expect(emails).toStrictEqual(['batch1@test.com', 'batch2@test.com', 'batch3@test.com']);
+      expect(result.users.map((u) => u.email).sort()).toStrictEqual([
+        'batch1@test.com',
+        'batch2@test.com',
+        'batch3@test.com',
+      ]);
     });
   });
 
   describe('deleteManyUsersById', () => {
-    it('should soft delete multiple users', async () => {
-      expect.assertions(2);
+    it('should delete multiple users', async () => {
+      expect.assertions(1);
 
-      // Create users
       const user1 = await repositoryService.createUser({ name: 'Delete 1', email: 'delete1@test.com' });
       const user2 = await repositoryService.createUser({ name: 'Delete 2', email: 'delete2@test.com' });
 
-      // Delete users
       await facadeService.deleteManyUsersById({ publicIds: [user1.publicId, user2.publicId] });
 
-      // Verify users are deleted
-      const activeUsers = await repositoryService.findManyActiveUsers({});
+      const users = await repositoryService.findManyUsers({
+        where: { publicId: { in: [user1.publicId, user2.publicId] } },
+      });
 
-      expect(activeUsers).toHaveLength(0);
-
-      const deletedUsers = await repositoryService.findManyDeletedUsers({});
-
-      expect(deletedUsers).toHaveLength(2);
-    });
-  });
-
-  describe('hardDeleteManyUsersById', () => {
-    it('should permanently delete multiple users', async () => {
-      expect.assertions(1);
-
-      // Create users
-      const user1 = await repositoryService.createUser({ name: 'Hard Delete 1', email: 'harddelete1@test.com' });
-      const user2 = await repositoryService.createUser({ name: 'Hard Delete 2', email: 'harddelete2@test.com' });
-
-      // Hard delete users
-      await facadeService.hardDeleteManyUsersById({ publicIds: [user1.publicId, user2.publicId] });
-
-      // Verify users are completely gone
-      const allUsers = await repositoryService.findManyAnyUsers({});
-
-      expect(allUsers).toHaveLength(0);
-    });
-  });
-
-  describe('restoreManyUsersById', () => {
-    it('should restore multiple soft-deleted users', async () => {
-      expect.assertions(3);
-
-      // Create and delete users
-      const user1 = await repositoryService.createUser({ name: 'Restore 1', email: 'restore1@test.com' });
-      const user2 = await repositoryService.createUser({ name: 'Restore 2', email: 'restore2@test.com' });
-      await repositoryService.deleteUser({ publicId: user1.publicId });
-      await repositoryService.deleteUser({ publicId: user2.publicId });
-
-      // Restore users
-      const result = await facadeService.restoreManyUsersById({ publicIds: [user1.publicId, user2.publicId] });
-
-      expect(result.users).toHaveLength(2);
-
-      // Verify users are active again
-      const activeUsers = await repositoryService.findManyActiveUsers({});
-
-      expect(activeUsers).toHaveLength(2);
-
-      const deletedUsers = await repositoryService.findManyDeletedUsers({});
-
-      expect(deletedUsers).toHaveLength(0);
+      expect(users).toHaveLength(0);
     });
   });
 });

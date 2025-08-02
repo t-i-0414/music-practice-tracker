@@ -4,20 +4,17 @@ import { createIntegrationTestHelper, type IntegrationTestHelper } from '../../.
 
 import { UserCommandService } from '@/modules/aggregate/user/user.command.service';
 import { UserModule } from '@/modules/aggregate/user/user.module';
-import { UserQueryService } from '@/modules/aggregate/user/user.query.service';
 import { UserRepositoryService } from '@/modules/aggregate/user/user.repository.service';
 
 describe('userCommandService Integration', () => {
   let helper: IntegrationTestHelper;
   let commandService: UserCommandService;
-  let queryService: UserQueryService;
   let repositoryService: UserRepositoryService;
 
   beforeAll(async () => {
     helper = createIntegrationTestHelper();
     const { module } = await helper.setup([UserModule], []);
     commandService = module.get<UserCommandService>(UserCommandService);
-    queryService = module.get<UserQueryService>(UserQueryService);
     repositoryService = module.get<UserRepositoryService>(UserRepositoryService);
   });
 
@@ -48,14 +45,11 @@ describe('userCommandService Integration', () => {
         updatedAt: expect.any(Date),
       });
 
-      // Verify in database
-      const foundUser = await repositoryService.findUniqueActiveUser({ publicId: createdUser.publicId });
+      const foundUser = await repositoryService.findUniqueUser({ publicId: createdUser.publicId });
 
       expect(foundUser).toStrictEqual({
         ...createdUser,
         id: expect.any(Number),
-        deletedAt: null,
-        suspendedAt: null,
       });
     });
   });
@@ -64,14 +58,12 @@ describe('userCommandService Integration', () => {
     it('should update an existing user', async () => {
       expect.assertions(2);
 
-      // Create user first
       const createDto = {
         name: 'Original Name',
         email: 'original@test.com',
       };
       const createdUser = await commandService.createUser(createDto);
 
-      // Update user
       const updateDto = {
         publicId: createdUser.publicId,
         data: {
@@ -88,8 +80,7 @@ describe('userCommandService Integration', () => {
         updatedAt: expect.any(Date),
       });
 
-      // Verify in database
-      const foundUser = await repositoryService.findUniqueActiveUser({ publicId: createdUser.publicId });
+      const foundUser = await repositoryService.findUniqueUser({ publicId: createdUser.publicId });
 
       expect(foundUser?.name).toBe(updateDto.data.name);
     });
@@ -109,28 +100,20 @@ describe('userCommandService Integration', () => {
   });
 
   describe('deleteUserById', () => {
-    it('should soft delete a user', async () => {
-      expect.assertions(3);
+    it('should delete a user', async () => {
+      expect.assertions(1);
 
-      // Create user first
       const createDto = {
         name: 'To Delete',
         email: 'todelete@test.com',
       };
       const createdUser = await commandService.createUser(createDto);
 
-      // Delete user
       await commandService.deleteUserById({ publicId: createdUser.publicId });
 
-      // Verify user is soft deleted
-      const activeUser = await repositoryService.findUniqueActiveUser({ publicId: createdUser.publicId });
+      const user = await repositoryService.findUniqueUser({ publicId: createdUser.publicId });
 
-      expect(activeUser).toBeNull();
-
-      const deletedUser = await repositoryService.findUniqueDeletedUser({ publicId: createdUser.publicId });
-
-      expect(deletedUser).toBeTruthy();
-      expect(deletedUser?.deletedAt).toBeInstanceOf(Date);
+      expect(user).toBeNull();
     });
 
     it('should throw NotFoundException for non-existent user', async () => {
@@ -139,73 +122,6 @@ describe('userCommandService Integration', () => {
       const dto = { publicId: '00000000-0000-0000-0000-000000000000' };
 
       await expect(commandService.deleteUserById(dto)).rejects.toThrow(NotFoundException);
-    });
-  });
-
-  describe('hardDeleteUserById', () => {
-    it('should permanently delete a user', async () => {
-      expect.assertions(2);
-
-      // Create user first
-      const createDto = {
-        name: 'To Hard Delete',
-        email: 'toharddelete@test.com',
-      };
-      const createdUser = await commandService.createUser(createDto);
-
-      // Hard delete user
-      await commandService.hardDeleteUserById({ publicId: createdUser.publicId });
-
-      // Verify user is completely gone
-      const anyUser = await repositoryService.findUniqueAnyUser({ publicId: createdUser.publicId });
-
-      expect(anyUser).toBeNull();
-
-      // Should throw when trying to find
-      await expect(queryService.findUserByIdOrFail({ publicId: createdUser.publicId })).rejects.toThrow(
-        NotFoundException,
-      );
-    });
-
-    it('should throw NotFoundException for non-existent user', async () => {
-      expect.assertions(1);
-
-      const dto = { publicId: '00000000-0000-0000-0000-000000000000' };
-
-      await expect(commandService.hardDeleteUserById(dto)).rejects.toThrow(NotFoundException);
-    });
-  });
-
-  describe('restoreUserById', () => {
-    it('should restore a soft-deleted user', async () => {
-      expect.assertions(1);
-
-      // Create and delete user first
-      const createDto = {
-        name: 'To Restore',
-        email: 'torestore@test.com',
-      };
-      const createdUser = await commandService.createUser(createDto);
-      await commandService.deleteUserById({ publicId: createdUser.publicId });
-
-      // Restore user
-      const restoredUser = await commandService.restoreUserById({ publicId: createdUser.publicId });
-
-      expect(restoredUser).toMatchObject({
-        publicId: createdUser.publicId,
-        name: createdUser.name,
-        email: createdUser.email,
-        createdAt: createdUser.createdAt,
-        updatedAt: expect.any(Date),
-      });
-    });
-
-    it('should throw error for non-existent user', async () => {
-      expect.assertions(1);
-
-      const dto = { publicId: '00000000-0000-0000-0000-000000000000' };
-
-      await expect(commandService.restoreUserById(dto)).rejects.toThrow(Error);
     });
   });
 
@@ -225,8 +141,7 @@ describe('userCommandService Integration', () => {
 
       expect(createdUsers.users).toHaveLength(3);
 
-      // Verify all users were created
-      const users = await repositoryService.findManyActiveUsers({});
+      const users = await repositoryService.findManyUsers({});
 
       expect(users).toHaveLength(3);
 
@@ -240,22 +155,13 @@ describe('userCommandService Integration', () => {
     it('should update multiple users', async () => {
       expect.assertions(1);
 
-      // Create users first
       const user1 = await commandService.createUser({ name: 'User 1', email: 'user1@test.com' });
       const user2 = await commandService.createUser({ name: 'User 2', email: 'user2@test.com' });
 
-      // Update users
-      await commandService.deleteManyUsersById({ publicIds: [user1.publicId, user2.publicId] });
-      await commandService.restoreManyUsersById({ publicIds: [user1.publicId, user2.publicId] });
-
-      // Update separately as there's no updateManyUsersById
       await commandService.updateUserById({ publicId: user1.publicId, data: { name: 'Updated Name' } });
       await commandService.updateUserById({ publicId: user2.publicId, data: { name: 'Updated Name' } });
 
-      // Verify both users were updated
-
-      // Verify updates
-      const users = await repositoryService.findManyActiveUsers({
+      const users = await repositoryService.findManyUsers({
         where: { publicId: { in: [user1.publicId, user2.publicId] } },
       });
 
@@ -266,27 +172,18 @@ describe('userCommandService Integration', () => {
   });
 
   describe('deleteManyUsersById', () => {
-    it('should soft delete multiple users', async () => {
-      expect.assertions(2);
+    it('should delete multiple users', async () => {
+      expect.assertions(1);
 
-      // Create users first
       const user1 = await commandService.createUser({ name: 'User 1', email: 'user1@test.com' });
       const user2 = await commandService.createUser({ name: 'User 2', email: 'user2@test.com' });
 
-      // Delete users
       const dto = { publicIds: [user1.publicId, user2.publicId] };
       await commandService.deleteManyUsersById(dto);
 
-      // Verify deletion
+      const users = await repositoryService.findManyUsers({});
 
-      // Verify soft deletes
-      const activeUsers = await repositoryService.findManyActiveUsers({});
-
-      expect(activeUsers).toHaveLength(0);
-
-      const deletedUsers = await repositoryService.findManyDeletedUsers({});
-
-      expect(deletedUsers).toHaveLength(2);
+      expect(users).toHaveLength(0);
     });
   });
 });

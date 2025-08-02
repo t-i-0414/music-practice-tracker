@@ -7,9 +7,8 @@ set -eu
 # 3. Check that publicId/public_id fields have @unique
 # 4. Check that each model has createdAt field with DateTime @default(now())
 # 5. Check that each model has updatedAt field with DateTime @updatedAt
-# 6. Check that each model has deletedAt field with DateTime? (optional)
-# 7. Check that each model has @@index([createdAt]) and @@index([updatedAt]) and @@index([deletedAt])
-# 8. Support both camelCase with @map and snake_case naming
+# 6. Check that each model has @@index([createdAt])
+# 7. Support both camelCase with @map and snake_case naming
 
 error_count=0
 
@@ -29,9 +28,7 @@ validate_model() {
   local has_public_id=false
   local has_createdAt=false
   local has_updatedAt=false
-  local has_deletedAt=false
   local has_createdAt_index=false
-  local has_deletedAt_index=false
 
   # Process each line in the model
   local line_offset=0
@@ -133,15 +130,6 @@ validate_model() {
       fi
     fi
 
-    # Check deletedAt/deleted_at field
-    if [[ "$field_name" = "deletedAt" ]] || [[ "$field_name" = "deleted_at" ]]; then
-      has_deletedAt=true
-
-      if ! echo "$line" | grep -q "DateTime?"; then
-        echo "Error at line $current_line: $field_name field should be of type DateTime? (optional) in model $model_name"
-        ((error_count++))
-      fi
-    fi
 
     # Check for @@index directives
     if echo "$line" | grep -q "@@index"; then
@@ -150,10 +138,6 @@ validate_model() {
         has_createdAt_index=true
       fi
 
-      # Check for deletedAt index (both camelCase and snake_case)
-      if echo "$line" | grep -q "@@index.*\[deletedAt\]" || echo "$line" | grep -q "@@index.*\[deleted_at\]"; then
-        has_deletedAt_index=true
-      fi
     fi
   done <<< "$model_content"
 
@@ -178,10 +162,6 @@ validate_model() {
     ((error_count++))
   fi
 
-  if [ "$has_deletedAt" = false ]; then
-    echo "Error: Model $model_name is missing required field 'deletedAt' or 'deleted_at'"
-    ((error_count++))
-  fi
 
   # Check if required indexes exist
   if [ "$has_createdAt_index" = false ]; then
@@ -189,10 +169,6 @@ validate_model() {
     ((error_count++))
   fi
 
-  if [ "$has_deletedAt_index" = false ]; then
-    echo "Error: Model $model_name is missing required index @@index([deletedAt]) or @@index([deleted_at])"
-    ((error_count++))
-  fi
 }
 
 # Read file and extract models

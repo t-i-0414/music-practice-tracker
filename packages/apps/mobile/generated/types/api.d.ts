@@ -11,13 +11,12 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get user by public ID */
+        /** Get a user by public ID */
         get: operations["AppUsersController_findUserById"];
         /** Update a user by public ID */
         put: operations["AppUsersController_updateUser"];
         post?: never;
-        /** Delete a user by public ID (soft) */
-        delete: operations["AppUsersController_deleteUser"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -44,7 +43,7 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        ActiveUserResponseDto: {
+        UserResponseDto: {
             /**
              * Format: uuid
              * @description The user public ID
@@ -62,6 +61,12 @@ export interface components {
              * @example Takuya Iwashiro
              */
             name: string;
+            /**
+             * @description The user status
+             * @example ACTIVE
+             * @enum {string}
+             */
+            status: "ACTIVE" | "INACTIVE" | "SUSPENDED" | "PENDING" | "BANNED";
             /**
              * Format: date-time
              * @description The user created at timestamp
@@ -100,6 +105,12 @@ export interface components {
              * @example Takuya Iwashiro
              */
             name?: string;
+            /**
+             * @description The user status
+             * @example ACTIVE
+             * @enum {string}
+             */
+            status?: "ACTIVE" | "INACTIVE" | "SUSPENDED" | "PENDING" | "BANNED";
         };
     };
     responses: never;
@@ -128,7 +139,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ActiveUserResponseDto"];
+                    "application/json": components["schemas"]["UserResponseDto"];
                 };
             };
             /** @description Unauthorized */
@@ -176,29 +187,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ActiveUserResponseDto"];
+                    "application/json": components["schemas"]["UserResponseDto"];
                 };
-            };
-        };
-    };
-    AppUsersController_deleteUser: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description User public ID */
-                publicId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description User deleted successfully */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
@@ -221,7 +211,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ActiveUserResponseDto"];
+                    "application/json": components["schemas"]["UserResponseDto"];
                 };
             };
             /** @description Bad request */

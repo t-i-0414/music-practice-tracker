@@ -2,12 +2,12 @@ describe('Simple MSW Test', () => {
   const host = process.env.HOST ?? 'localhost';
   const adminApiPort = process.env.ADMIN_API_PORT ?? '3001';
 
-  it('should work with active users endpoint', () => {
+  it('should work with users endpoint', () => {
     cy.visit('/');
 
     cy.window().then((win) =>
       win
-        .fetch(`http://${host}:${adminApiPort}/api/users/active_users?publicIds=10&publicIds=20`)
+        .fetch(`http://${host}:${adminApiPort}/api/users?publicIds=10&publicIds=20`)
         .then((response) => response.json())
         .then((data) => {
           expect(data).to.have.property('users');
@@ -18,12 +18,12 @@ describe('Simple MSW Test', () => {
     );
   });
 
-  it('should work with specific active user endpoint', () => {
+  it('should work with specific user endpoint', () => {
     cy.visit('/');
 
     cy.window().then((win) =>
       win
-        .fetch(`http://${host}:${adminApiPort}/api/users/active_users/123`)
+        .fetch(`http://${host}:${adminApiPort}/api/users/123`)
         .then((response) => response.json())
         .then((data) => {
           expect(data).to.have.property('publicId', '123');

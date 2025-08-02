@@ -25,8 +25,8 @@ describe('app API - /api/users', () => {
     await helper.teardown();
   });
 
-  describe('gET /api/users/:publicId', () => {
-    it('should return active user by publicId', async () => {
+  describe('get /api/users/:publicId', () => {
+    it('should return user by publicId', async () => {
       expect.assertions(3);
 
       const user = await request(app.getHttpServer())
@@ -49,31 +49,9 @@ describe('app API - /api/users', () => {
         status: 404,
       });
     });
-
-    it('should return 404 for deleted user', async () => {
-      expect.assertions(1);
-
-      const user = await request(app.getHttpServer())
-        .post('/api/users')
-        .send({ name: 'To Delete', email: `delete-${randomUUID()}@example.com` })
-        .expect(201);
-
-      await request(app.getHttpServer()).delete(`/api/users/${user.body.publicId}`).expect(204);
-
-      await expect(request(app.getHttpServer()).get(`/api/users/${user.body.publicId}`)).resolves.toMatchObject({
-        status: 404,
-      });
-    });
-
-    it('should return 400 for invalid UUID', async () => {
-      expect.assertions(1);
-      await expect(request(app.getHttpServer()).get('/api/users/invalid-uuid')).resolves.toMatchObject({
-        status: 400,
-      });
-    });
   });
 
-  describe('pOST /api/users', () => {
+  describe('post /api/users', () => {
     it('should create a new user', async () => {
       expect.assertions(4);
 
@@ -110,7 +88,7 @@ describe('app API - /api/users', () => {
     });
   });
 
-  describe('pUT /api/users/:publicId', () => {
+  describe('put /api/users/:publicId', () => {
     it('should update user by publicId', async () => {
       expect.assertions(3);
 
@@ -129,21 +107,6 @@ describe('app API - /api/users', () => {
       expect(response.body.publicId).toBe(user.body.publicId);
       expect(response.body.name).toBe('Updated Name');
       expect(response.body.email).toBe(user.body.email);
-    });
-  });
-
-  describe('dELETE /api/users/:publicId', () => {
-    it('should soft delete user by publicId', async () => {
-      expect.assertions(1);
-
-      const user = await request(app.getHttpServer())
-        .post('/api/users')
-        .send({ name: 'To Delete', email: `delete-${randomUUID()}@example.com` })
-        .expect(201);
-
-      await expect(request(app.getHttpServer()).delete(`/api/users/${user.body.publicId}`)).resolves.toMatchObject({
-        status: 204,
-      });
     });
   });
 });

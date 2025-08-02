@@ -25,13 +25,10 @@ describe('userAppFacadeService Integration', () => {
   });
 
   describe('findUserById', () => {
-    it('should find an active user by publicId', async () => {
+    it('should find an user by publicId', async () => {
       expect.assertions(1);
 
-      // Create user
       const user = await repositoryService.createUser({ name: 'Find Test User', email: 'find@test.com' });
-
-      // Find user through facade
       const foundUser = await facadeService.findUserById({ publicId: user.publicId });
 
       expect(foundUser).toMatchObject({
@@ -44,11 +41,9 @@ describe('userAppFacadeService Integration', () => {
     it('should not find deleted users', async () => {
       expect.assertions(1);
 
-      // Create and delete user
       const user = await repositoryService.createUser({ name: 'Deleted User', email: 'deleted@test.com' });
       await repositoryService.deleteUser({ publicId: user.publicId });
 
-      // Should throw when trying to find deleted user
       await expect(facadeService.findUserById({ publicId: user.publicId })).rejects.toThrow(Error);
     });
   });
@@ -78,10 +73,7 @@ describe('userAppFacadeService Integration', () => {
     it('should update an existing user', async () => {
       expect.assertions(1);
 
-      // Create user
       const user = await repositoryService.createUser({ name: 'Original Name', email: 'original@test.com' });
-
-      // Update through facade
       const updateDto = {
         publicId: user.publicId,
         data: {
@@ -95,27 +87,6 @@ describe('userAppFacadeService Integration', () => {
         name: updateDto.data.name,
         email: user.email,
       });
-    });
-  });
-
-  describe('deleteUserById', () => {
-    it('should soft delete a user', async () => {
-      expect.assertions(2);
-
-      // Create user
-      const user = await repositoryService.createUser({ name: 'To Delete', email: 'todelete@test.com' });
-
-      // Delete through facade
-      await facadeService.deleteUserById({ publicId: user.publicId });
-
-      // Verify user is soft deleted
-      const activeUser = await repositoryService.findUniqueActiveUser({ publicId: user.publicId });
-
-      expect(activeUser).toBeNull();
-
-      const deletedUser = await repositoryService.findUniqueDeletedUser({ publicId: user.publicId });
-
-      expect(deletedUser).toBeTruthy();
     });
   });
 });
