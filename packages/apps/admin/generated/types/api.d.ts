@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-    "/api/users/active_users": {
+    "/api/users": {
         parameters: {
             query?: never;
             header?: never;
@@ -14,144 +14,29 @@ export interface paths {
         /** Get users by public IDs */
         get: operations["AdminUsersController_findManyUsers"];
         put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/users/active_users/{publicId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get user by public ID */
-        get: operations["AdminUsersController_findUserById"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/users/deleted_users": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get users by public IDs */
-        get: operations["AdminUsersController_findManyDeletedUsers"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/users/deleted_users/{publicId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get user by public ID */
-        get: operations["AdminUsersController_findDeletedUserById"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/users/suspended_users": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get suspended users by public IDs */
-        get: operations["AdminUsersController_findManySuspendedUsers"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/users/suspended_users/{publicId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get suspended user by public ID */
-        get: operations["AdminUsersController_findSuspendedUserById"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/users/any_users": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get users by public IDs */
-        get: operations["AdminUsersController_findManyAnyUsers"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/users/any_users/{publicId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get user by public ID */
-        get: operations["AdminUsersController_findAnyUserById"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/users": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
         /** Create a new user */
         post: operations["AdminUsersController_createUser"];
-        delete?: never;
+        /** Delete multiple users by public IDs */
+        delete: operations["AdminUsersController_deleteManyUsers"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/users/{publicId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a user by public ID */
+        get: operations["AdminUsersController_findUserById"];
+        /** Update a user by public ID */
+        put: operations["AdminUsersController_updateUser"];
+        post?: never;
+        /** Delete a user by public ID */
+        delete: operations["AdminUsersController_deleteUser"];
         options?: never;
         head?: never;
         patch?: never;
@@ -168,127 +53,6 @@ export interface paths {
         put?: never;
         /** Create multiple users */
         post: operations["AdminUsersController_createManyUsers"];
-        /** Delete multiple users by public IDs (soft) */
-        delete: operations["AdminUsersController_deleteManyUsers"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/users/{publicId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Update a user by public ID */
-        put: operations["AdminUsersController_updateUser"];
-        post?: never;
-        /** Delete a user by public ID (soft) */
-        delete: operations["AdminUsersController_deleteUser"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/users/hard/bulk": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Hard delete multiple users by public IDs */
-        delete: operations["AdminUsersController_hardDeleteManyUsers"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/users/hard/{publicId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Hard delete a user by public ID */
-        delete: operations["AdminUsersController_hardDeleteUser"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/users/restore/bulk": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Restore multiple soft-deleted users by public IDs */
-        put: operations["AdminUsersController_restoreManyUsers"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/users/{publicId}/restore": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Restore a soft-deleted user by public ID */
-        put: operations["AdminUsersController_restoreUser"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/users/suspend/bulk": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Suspend multiple users by public IDs */
-        put: operations["AdminUsersController_suspendManyUsers"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/users/{publicId}/suspend": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Suspend a user by public ID */
-        put: operations["AdminUsersController_suspendUser"];
-        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -299,7 +63,7 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        ActiveUserResponseDto: {
+        UserResponseDto: {
             /**
              * Format: uuid
              * @description The user public ID
@@ -318,39 +82,11 @@ export interface components {
              */
             name: string;
             /**
-             * Format: date-time
-             * @description The user created at timestamp
-             * @example 2024-01-15T09:30:00.000Z
+             * @description The user status
+             * @example ACTIVE
+             * @enum {string}
              */
-            createdAt: string;
-            /**
-             * Format: date-time
-             * @description The user updated at timestamp
-             * @example 2024-06-16T14:45:30.123Z
-             */
-            updatedAt: string;
-        };
-        ActiveUsersResponseDto: {
-            users: components["schemas"]["ActiveUserResponseDto"][];
-        };
-        DeletedUserResponseDto: {
-            /**
-             * Format: uuid
-             * @description The user public ID
-             * @example 123e4567-e89b-12d3-a456-426614174000
-             */
-            publicId: string;
-            /**
-             * Format: email
-             * @description The user email address
-             * @example takuya.iwashiro@takudev.net
-             */
-            email: string;
-            /**
-             * @description The user name
-             * @example Takuya Iwashiro
-             */
-            name: string;
+            status: "ACTIVE" | "INACTIVE" | "SUSPENDED" | "PENDING" | "BANNED";
             /**
              * Format: date-time
              * @description The user created at timestamp
@@ -363,113 +99,9 @@ export interface components {
              * @example 2024-06-16T14:45:30.123Z
              */
             updatedAt: string;
-            /**
-             * Format: date-time
-             * @description The user deleted at timestamp
-             * @example 2024-07-20T10:00:00.000Z
-             */
-            deletedAt: string;
-            /**
-             * Format: date-time
-             * @description The user suspended at timestamp
-             * @example 2024-08-01T12:00:00.000Z
-             */
-            suspendedAt: string | null;
         };
-        DeletedUsersResponseDto: {
-            users: components["schemas"]["DeletedUserResponseDto"][];
-        };
-        SuspendedUserResponseDto: {
-            /**
-             * Format: uuid
-             * @description The user public ID
-             * @example 123e4567-e89b-12d3-a456-426614174000
-             */
-            publicId: string;
-            /**
-             * Format: email
-             * @description The user email address
-             * @example takuya.iwashiro@takudev.net
-             */
-            email: string;
-            /**
-             * @description The user name
-             * @example Takuya Iwashiro
-             */
-            name: string;
-            /**
-             * Format: date-time
-             * @description The user created at timestamp
-             * @example 2024-01-15T09:30:00.000Z
-             */
-            createdAt: string;
-            /**
-             * Format: date-time
-             * @description The user updated at timestamp
-             * @example 2024-06-16T14:45:30.123Z
-             */
-            updatedAt: string;
-            /**
-             * Format: date-time
-             * @description The user deleted at timestamp
-             * @example 2024-07-20T10:00:00.000Z
-             */
-            deletedAt: string | null;
-            /**
-             * Format: date-time
-             * @description The user suspended at timestamp
-             * @example 2024-08-01T12:00:00.000Z
-             */
-            suspendedAt: string;
-        };
-        SuspendedUsersResponseDto: {
-            users: components["schemas"]["SuspendedUserResponseDto"][];
-        };
-        AnyUserResponseDto: {
-            /**
-             * Format: uuid
-             * @description The user public ID
-             * @example 123e4567-e89b-12d3-a456-426614174000
-             */
-            publicId: string;
-            /**
-             * Format: email
-             * @description The user email address
-             * @example takuya.iwashiro@takudev.net
-             */
-            email: string;
-            /**
-             * @description The user name
-             * @example Takuya Iwashiro
-             */
-            name: string;
-            /**
-             * Format: date-time
-             * @description The user created at timestamp
-             * @example 2024-01-15T09:30:00.000Z
-             */
-            createdAt: string;
-            /**
-             * Format: date-time
-             * @description The user updated at timestamp
-             * @example 2024-06-16T14:45:30.123Z
-             */
-            updatedAt: string;
-            /**
-             * Format: date-time
-             * @description The user deleted at timestamp
-             * @example 2024-07-20T10:00:00.000Z
-             */
-            deletedAt: string | null;
-            /**
-             * Format: date-time
-             * @description The user suspended at timestamp
-             * @example 2024-08-01T12:00:00.000Z
-             */
-            suspendedAt: string | null;
-        };
-        AnyUsersResponseDto: {
-            users: components["schemas"]["AnyUserResponseDto"][];
+        UsersResponseDto: {
+            users: components["schemas"]["UserResponseDto"][];
         };
         CreateUserInputDto: {
             /**
@@ -500,38 +132,14 @@ export interface components {
              * @example Takuya Iwashiro
              */
             name?: string;
+            /**
+             * @description The user status
+             * @example ACTIVE
+             * @enum {string}
+             */
+            status?: "ACTIVE" | "INACTIVE" | "SUSPENDED" | "PENDING" | "BANNED";
         };
         DeleteManyUsersInputDto: {
-            /**
-             * @description List of user public IDs
-             * @example [
-             *       "123e4567-e89b-12d3-a456-426614174000",
-             *       "789e1234-e89b-12d3-a456-426614174000"
-             *     ]
-             */
-            publicIds: string[];
-        };
-        HardDeleteManyUsersInputDto: {
-            /**
-             * @description List of user public IDs
-             * @example [
-             *       "123e4567-e89b-12d3-a456-426614174000",
-             *       "789e1234-e89b-12d3-a456-426614174000"
-             *     ]
-             */
-            publicIds: string[];
-        };
-        RestoreManyUsersInputDto: {
-            /**
-             * @description List of user public IDs
-             * @example [
-             *       "123e4567-e89b-12d3-a456-426614174000",
-             *       "789e1234-e89b-12d3-a456-426614174000"
-             *     ]
-             */
-            publicIds: string[];
-        };
-        SuspendManyUsersInputDto: {
             /**
              * @description List of user public IDs
              * @example [
@@ -568,7 +176,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ActiveUsersResponseDto"];
+                    "application/json": components["schemas"]["UsersResponseDto"];
                 };
             };
             /** @description Unauthorized */
@@ -586,314 +194,6 @@ export interface operations {
                 content?: never;
             };
             /** @description Users not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    AdminUsersController_findUserById: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description User public ID */
-                publicId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description User found */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ActiveUserResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description User not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    AdminUsersController_findManyDeletedUsers: {
-        parameters: {
-            query: {
-                /** @description List of user public IDs */
-                publicIds: string[];
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Users found */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DeletedUsersResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Users not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    AdminUsersController_findDeletedUserById: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description User public ID */
-                publicId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description User found */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DeletedUserResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description User not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    AdminUsersController_findManySuspendedUsers: {
-        parameters: {
-            query: {
-                /** @description List of suspended user public IDs */
-                publicIds: string[];
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Suspended users found */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SuspendedUsersResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Suspended users not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    AdminUsersController_findSuspendedUserById: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Suspended user public ID */
-                publicId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Suspended user found */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SuspendedUserResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Suspended user not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    AdminUsersController_findManyAnyUsers: {
-        parameters: {
-            query: {
-                /** @description List of user public IDs */
-                publicIds: string[];
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Users found */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AnyUsersResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Users not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    AdminUsersController_findAnyUserById: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description User public ID */
-                publicId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description User found */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AnyUserResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description User not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -921,7 +221,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ActiveUserResponseDto"];
+                    "application/json": components["schemas"]["UserResponseDto"];
                 };
             };
             /** @description Bad request */
@@ -947,30 +247,6 @@ export interface operations {
             };
         };
     };
-    AdminUsersController_createManyUsers: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateManyUsersInputDto"];
-            };
-        };
-        responses: {
-            /** @description Users created successfully */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ActiveUsersResponseDto"];
-                };
-            };
-        };
-    };
     AdminUsersController_deleteManyUsers: {
         parameters: {
             query?: never;
@@ -984,8 +260,52 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Users deleted successfully */
+            /** @description Users deleted */
             204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminUsersController_findUserById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description User public ID */
+                publicId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description User found */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description User not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1015,7 +335,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ActiveUserResponseDto"];
+                    "application/json": components["schemas"]["UserResponseDto"];
                 };
             };
         };
@@ -1032,7 +352,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description User deleted successfully */
+            /** @description User deleted */
             204: {
                 headers: {
                     [name: string]: unknown;
@@ -1041,7 +361,7 @@ export interface operations {
             };
         };
     };
-    AdminUsersController_hardDeleteManyUsers: {
+    AdminUsersController_createManyUsers: {
         parameters: {
             query?: never;
             header?: never;
@@ -1050,129 +370,18 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["HardDeleteManyUsersInputDto"];
+                "application/json": components["schemas"]["CreateManyUsersInputDto"];
             };
         };
         responses: {
-            /** @description Users permanently deleted */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    AdminUsersController_hardDeleteUser: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description User public ID */
-                publicId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description User permanently deleted */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    AdminUsersController_restoreManyUsers: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description IDs of users to be restored */
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RestoreManyUsersInputDto"];
-            };
-        };
-        responses: {
-            /** @description Users restored successfully */
-            200: {
+            /** @description Users created successfully */
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ActiveUsersResponseDto"];
+                    "application/json": components["schemas"]["UsersResponseDto"];
                 };
-            };
-        };
-    };
-    AdminUsersController_restoreUser: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description User public ID */
-                publicId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description User restored successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ActiveUserResponseDto"];
-                };
-            };
-        };
-    };
-    AdminUsersController_suspendManyUsers: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description IDs of users to be suspended */
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SuspendManyUsersInputDto"];
-            };
-        };
-        responses: {
-            /** @description Users suspended successfully */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    AdminUsersController_suspendUser: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description User public ID */
-                publicId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description User suspended successfully */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
