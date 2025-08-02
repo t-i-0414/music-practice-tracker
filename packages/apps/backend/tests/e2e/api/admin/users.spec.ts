@@ -157,4 +157,48 @@ describe('admin API - /api/users', () => {
       expect(response.body.email).toBe(user.body.email);
     });
   });
+
+  describe('delete /api/users/:publicId', () => {
+    it('should delete user by publicId', async () => {
+      expect.assertions(1);
+
+      const user = await request(app.getHttpServer())
+        .post('/api/users')
+        .send({ name: 'User to Delete', email: `delete-${randomUUID()}@example.com` })
+        .expect(201);
+
+      await request(app.getHttpServer()).delete(`/api/users/${user.body.publicId}`).expect(204);
+
+      await expect(request(app.getHttpServer()).get(`/api/users/${user.body.publicId}`)).resolves.toMatchObject({
+        status: 404,
+      });
+    });
+  });
+
+  describe('delete /api/users', () => {
+    it('should delete multiple users by publicIds', async () => {
+      expect.assertions(2);
+
+      const user1 = await request(app.getHttpServer())
+        .post('/api/users')
+        .send({ name: 'User 1', email: `user1-${randomUUID()}@example.com` })
+        .expect(201);
+
+      const user2 = await request(app.getHttpServer())
+        .post('/api/users')
+        .send({ name: 'User 2', email: `user2-${randomUUID()}@example.com` })
+        .expect(201);
+
+      await request(app.getHttpServer())
+        .delete('/api/users')
+        .send({ publicIds: [user1.body.publicId, user2.body.publicId] })
+        .expect(204);
+
+      const response1 = await request(app.getHttpServer()).get(`/api/users/${user1.body.publicId}`);
+      const response2 = await request(app.getHttpServer()).get(`/api/users/${user2.body.publicId}`);
+
+      expect(response1.status).toBe(404);
+      expect(response2.status).toBe(404);
+    });
+  });
 });
