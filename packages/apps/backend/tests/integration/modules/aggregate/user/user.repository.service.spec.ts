@@ -99,7 +99,6 @@ describe('userRepositoryService Integration', () => {
       };
       const createdUser = await service.createUser(userData);
 
-      // Wait a bit to ensure updatedAt timestamp changes
       await new Promise((resolve) => {
         setTimeout(resolve, 10);
       });

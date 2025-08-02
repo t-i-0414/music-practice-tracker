@@ -28,19 +28,15 @@ describe('userAdminFacadeService Integration', () => {
     it('should find multiple users', async () => {
       expect.assertions(2);
 
-      // Create users
       const user1 = await repositoryService.createUser({ name: 'User 1', email: 'user1@test.com' });
       const user2 = await repositoryService.createUser({ name: 'User 2', email: 'user2@test.com' });
 
-      // Find users
       const result = await facadeService.findManyUsers({
         publicIds: [user1.publicId, user2.publicId],
       });
 
       expect(result.users).toHaveLength(2);
-
-      const emails = result.users.map((u) => u.email).sort();
-      expect(emails).toStrictEqual(['user1@test.com', 'user2@test.com']);
+      expect(result.users.map((u) => u.email).sort()).toStrictEqual(['user1@test.com', 'user2@test.com']);
     });
   });
 
@@ -48,10 +44,7 @@ describe('userAdminFacadeService Integration', () => {
     it('should find a user by id', async () => {
       expect.assertions(1);
 
-      // Create user
       const user = await repositoryService.createUser({ name: 'Test User', email: 'test@test.com' });
-
-      // Find user
       const foundUser = await facadeService.findUserById({ publicId: user.publicId });
 
       expect(foundUser).toMatchObject({
@@ -77,10 +70,11 @@ describe('userAdminFacadeService Integration', () => {
       const result = await facadeService.createManyAndReturnUsers(dto);
 
       expect(result.users).toHaveLength(3);
-
-      const emails = result.users.map((u) => u.email).sort();
-
-      expect(emails).toStrictEqual(['batch1@test.com', 'batch2@test.com', 'batch3@test.com']);
+      expect(result.users.map((u) => u.email).sort()).toStrictEqual([
+        'batch1@test.com',
+        'batch2@test.com',
+        'batch3@test.com',
+      ]);
     });
   });
 
@@ -88,15 +82,14 @@ describe('userAdminFacadeService Integration', () => {
     it('should delete multiple users', async () => {
       expect.assertions(1);
 
-      // Create users
       const user1 = await repositoryService.createUser({ name: 'Delete 1', email: 'delete1@test.com' });
       const user2 = await repositoryService.createUser({ name: 'Delete 2', email: 'delete2@test.com' });
 
-      // Delete users
       await facadeService.deleteManyUsersById({ publicIds: [user1.publicId, user2.publicId] });
 
-      // Verify users are deleted
-      const users = await repositoryService.findManyUsers({});
+      const users = await repositoryService.findManyUsers({
+        where: { publicId: { in: [user1.publicId, user2.publicId] } },
+      });
 
       expect(users).toHaveLength(0);
     });

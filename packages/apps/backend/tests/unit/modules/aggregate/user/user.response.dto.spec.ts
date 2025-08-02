@@ -1,24 +1,12 @@
-import { type UserStatus } from '@/generated/prisma';
-import {
-  UserResponseDto,
-  toUserResponseDto,
-  toUsersResponseDto,
-} from '@/modules/aggregate/user/user.response.dto';
+import { UserResponseDto, toUserResponseDto, toUsersResponseDto } from '@/modules/aggregate/user/user.response.dto';
+import { buildUserResponseDto } from '@/tests/factory/user.factory';
 
 describe('user response DTOs', () => {
-  const mockUser = {
-    publicId: '123e4567-e89b-12d3-a456-426614174000',
-    email: 'test@example.com',
-    name: 'Test User',
-    status: 'ACTIVE' as UserStatus,
-    createdAt: new Date('2024-01-01'),
-    updatedAt: new Date('2024-01-01'),
-  };
-
   describe('toUserResponseDto', () => {
     it('should transform user to UserResponseDto', () => {
       expect.assertions(7);
 
+      const mockUser = buildUserResponseDto();
       const result = toUserResponseDto(mockUser);
 
       expect(result).toBeInstanceOf(UserResponseDto);
@@ -30,11 +18,10 @@ describe('user response DTOs', () => {
       expect(result.updatedAt).toStrictEqual(mockUser.updatedAt);
     });
 
-
-
     it('should exclude extra fields not in DTO', () => {
       expect.assertions(2);
 
+      const mockUser = buildUserResponseDto();
       const userWithExtraFields = {
         ...mockUser,
         id: 1,
@@ -52,7 +39,9 @@ describe('user response DTOs', () => {
     it('should transform users array to UsersResponseDto', () => {
       expect.assertions(4);
 
-      const users = [mockUser, { ...mockUser, publicId: '223e4567-e89b-12d3-a456-426614174001' }];
+      const mockUser = buildUserResponseDto();
+      const mockUser2 = buildUserResponseDto();
+      const users = [mockUser, mockUser2];
       const result = toUsersResponseDto(users);
 
       expect(result).toHaveProperty('users');
@@ -73,10 +62,8 @@ describe('user response DTOs', () => {
     it('should transform each user correctly', () => {
       expect.assertions(3);
 
-      const users = [
-        mockUser,
-        { ...mockUser, publicId: '223e4567-e89b-12d3-a456-426614174001', name: 'Another User' }
-      ];
+      const mockUser = buildUserResponseDto();
+      const users = [mockUser, { ...mockUser, publicId: '223e4567-e89b-12d3-a456-426614174001', name: 'Another User' }];
       const result = toUsersResponseDto(users);
 
       expect(result.users[0].publicId).toBe(mockUser.publicId);
@@ -89,6 +76,7 @@ describe('user response DTOs', () => {
     it('should have correct class name for UserResponseDto', () => {
       expect.assertions(2);
 
+      const mockUser = buildUserResponseDto();
       const result = toUserResponseDto(mockUser);
 
       expect(result).toBeInstanceOf(UserResponseDto);
@@ -98,6 +86,7 @@ describe('user response DTOs', () => {
     it('should serialize dates correctly', () => {
       expect.assertions(2);
 
+      const mockUser = buildUserResponseDto();
       const result = toUserResponseDto(mockUser);
 
       expect(result.createdAt).toBeInstanceOf(Date);

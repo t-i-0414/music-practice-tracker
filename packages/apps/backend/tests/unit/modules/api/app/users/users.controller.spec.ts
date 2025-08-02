@@ -1,22 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { UserStatus } from '@/generated/prisma';
 import { UserAppFacadeService } from '@/modules/aggregate/user/user.app.facade.service';
 import { toUserResponseDto } from '@/modules/aggregate/user/user.response.dto';
 import { AppUsersController } from '@/modules/api/app/users/users.controller';
+import { buildUserResponseDto } from '@/tests/factory/user.factory';
 
 describe('appUsersController', () => {
   let controller: AppUsersController;
   let facadeService: jest.Mocked<UserAppFacadeService>;
-
-  const mockUser = {
-    publicId: '123e4567-e89b-12d3-a456-426614174000',
-    email: 'test@example.com',
-    name: 'Test User',
-    status: UserStatus.ACTIVE,
-    createdAt: new Date('2024-01-01'),
-    updatedAt: new Date('2024-01-01'),
-  };
 
   beforeEach(async () => {
     const mockFacadeService: jest.Mocked<UserAppFacadeService> = {
@@ -48,6 +39,7 @@ describe('appUsersController', () => {
     it('should find user by publicId', async () => {
       expect.assertions(2);
 
+      const mockUser = buildUserResponseDto();
       const { publicId } = mockUser;
       const expectedResult = toUserResponseDto(mockUser);
       facadeService.findUserById.mockResolvedValue(expectedResult);
@@ -63,6 +55,7 @@ describe('appUsersController', () => {
     it('should create user', async () => {
       expect.assertions(2);
 
+      const mockUser = buildUserResponseDto();
       const createDto = { email: mockUser.email, name: mockUser.name };
       const expectedResult = toUserResponseDto(mockUser);
       facadeService.createUser.mockResolvedValue(expectedResult);
@@ -78,6 +71,7 @@ describe('appUsersController', () => {
     it('should update user', async () => {
       expect.assertions(2);
 
+      const mockUser = buildUserResponseDto();
       const { publicId } = mockUser;
       const data = { name: 'Updated Name' };
       const expectedResult = toUserResponseDto({ ...mockUser, name: 'Updated Name' });
@@ -89,5 +83,4 @@ describe('appUsersController', () => {
       expect(result).toStrictEqual(expectedResult);
     });
   });
-
 });

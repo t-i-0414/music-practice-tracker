@@ -1,22 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { Prisma, type UserStatus } from '@/generated/prisma';
+import { Prisma } from '@/generated/prisma';
 import { UserRepositoryService } from '@/modules/aggregate/user/user.repository.service';
 import { RepositoryService } from '@/modules/repository/repository.service';
+import { buildUserResponseDto } from '@/tests/factory/user.factory';
 
 describe('userRepositoryService', () => {
   let service: UserRepositoryService;
   let userModel: any;
-
-  const mockUser = {
-    id: 1,
-    publicId: '123e4567-e89b-12d3-a456-426614174000',
-    email: 'test@example.com',
-    name: 'Test User',
-    status: 'ACTIVE' as UserStatus,
-    createdAt: new Date('2024-01-01'),
-    updatedAt: new Date('2024-01-01'),
-  };
 
   beforeEach(async () => {
     userModel = {
@@ -56,6 +47,7 @@ describe('userRepositoryService', () => {
     it('should find user', async () => {
       expect.assertions(2);
 
+      const mockUser = buildUserResponseDto();
       userModel.findUnique.mockResolvedValue(mockUser);
       const params = { publicId: mockUser.publicId };
 
@@ -82,12 +74,11 @@ describe('userRepositoryService', () => {
     });
   });
 
-
-
   describe('findManyUsers', () => {
     it('should find many users with pagination', async () => {
       expect.assertions(2);
 
+      const mockUser = buildUserResponseDto();
       const mockUsers = [mockUser];
       userModel.findMany.mockResolvedValue(mockUsers);
       const params = {
@@ -104,12 +95,11 @@ describe('userRepositoryService', () => {
     });
   });
 
-
-
   describe('createUser', () => {
     it('should create a new user', async () => {
       expect.assertions(2);
 
+      const mockUser = buildUserResponseDto();
       userModel.create.mockResolvedValue(mockUser);
       const params = { email: mockUser.email, name: mockUser.name };
 
@@ -126,11 +116,13 @@ describe('userRepositoryService', () => {
     it('should create many users and return them', async () => {
       expect.assertions(2);
 
+      const mockUser = buildUserResponseDto();
+      const mockUser2 = buildUserResponseDto();
       const params = [
-        { email: 'user1@example.com', name: 'User 1' },
-        { email: 'user2@example.com', name: 'User 2' },
+        { email: mockUser.email, name: mockUser.name },
+        { email: mockUser2.email, name: mockUser2.name },
       ];
-      const mockUsers = [mockUser, { ...mockUser, publicId: '223e4567-e89b-12d3-a456-426614174002' }];
+      const mockUsers = [mockUser, mockUser2];
       userModel.createManyAndReturn.mockResolvedValue(mockUsers);
 
       const result = await service.createManyAndReturnUsers(params);
@@ -146,6 +138,7 @@ describe('userRepositoryService', () => {
     it('should update a user', async () => {
       expect.assertions(2);
 
+      const mockUser = buildUserResponseDto();
       const updatedUser = { ...mockUser, name: 'Updated Name' };
       userModel.update.mockResolvedValue(updatedUser);
       const params = {
@@ -164,6 +157,7 @@ describe('userRepositoryService', () => {
     it('should delete a user', async () => {
       expect.assertions(2);
 
+      const mockUser = buildUserResponseDto();
       userModel.delete.mockResolvedValue(mockUser);
       const params = { publicId: mockUser.publicId };
 
@@ -191,6 +185,4 @@ describe('userRepositoryService', () => {
       expect(userModel.deleteMany).toHaveBeenCalledTimes(1);
     });
   });
-
-
 });

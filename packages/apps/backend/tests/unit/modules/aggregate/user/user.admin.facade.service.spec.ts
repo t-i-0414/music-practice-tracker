@@ -1,24 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { type UserStatus } from '@/generated/prisma';
 import { UserAdminFacadeService } from '@/modules/aggregate/user/user.admin.facade.service';
 import { UserCommandService } from '@/modules/aggregate/user/user.command.service';
 import { UserQueryService } from '@/modules/aggregate/user/user.query.service';
 import { toUserResponseDto, toUsersResponseDto } from '@/modules/aggregate/user/user.response.dto';
+import { buildUserResponseDto } from '@/tests/factory/user.factory';
 
 describe('userAdminFacadeService', () => {
   let service: UserAdminFacadeService;
   let commandService: jest.Mocked<UserCommandService>;
   let queryService: jest.Mocked<UserQueryService>;
-
-  const mockUser = {
-    publicId: '123e4567-e89b-12d3-a456-426614174000',
-    email: 'test@example.com',
-    name: 'Test User',
-    status: 'ACTIVE' as UserStatus,
-    createdAt: new Date('2024-01-01'),
-    updatedAt: new Date('2024-01-01'),
-  };
 
   beforeEach(async () => {
     const mockCommandService: jest.Mocked<UserCommandService> = {
@@ -61,8 +52,8 @@ describe('userAdminFacadeService', () => {
     it('should delegate to query service', async () => {
       expect.assertions(2);
 
-      const dto = { publicId: mockUser.publicId };
-      const expectedResult = toUserResponseDto(mockUser);
+      const expectedResult = buildUserResponseDto();
+      const dto = { publicId: expectedResult.publicId };
       queryService.findUserByIdOrFail.mockResolvedValue(expectedResult);
 
       const result = await service.findUserById(dto);
@@ -76,8 +67,9 @@ describe('userAdminFacadeService', () => {
     it('should delegate to query service', async () => {
       expect.assertions(2);
 
-      const dto = { publicIds: [mockUser.publicId] };
+      const mockUser = buildUserResponseDto();
       const expectedResult = toUsersResponseDto([mockUser]);
+      const dto = { publicIds: [mockUser.publicId] };
       queryService.findManyUsers.mockResolvedValue(expectedResult);
 
       const result = await service.findManyUsers(dto);
@@ -87,20 +79,18 @@ describe('userAdminFacadeService', () => {
     });
   });
 
-
-
   describe('createUser', () => {
     it('should delegate to command service', async () => {
       expect.assertions(2);
 
+      const mockUser = buildUserResponseDto();
       const dto = { email: mockUser.email, name: mockUser.name };
-      const expectedResult = toUserResponseDto(mockUser);
-      commandService.createUser.mockResolvedValue(expectedResult);
+      commandService.createUser.mockResolvedValue(mockUser);
 
       const result = await service.createUser(dto);
 
       expect(commandService.createUser).toHaveBeenCalledWith(dto);
-      expect(result).toStrictEqual(expectedResult);
+      expect(result).toStrictEqual(mockUser);
     });
   });
 
@@ -108,7 +98,8 @@ describe('userAdminFacadeService', () => {
     it('should delegate to command service', async () => {
       expect.assertions(2);
 
-      const dto = { users: [{ email: 'user1@example.com', name: 'User 1' }] };
+      const mockUser = buildUserResponseDto();
+      const dto = { users: [{ email: mockUser.email, name: mockUser.name }] };
       const expectedResult = toUsersResponseDto([mockUser]);
       commandService.createManyAndReturnUsers.mockResolvedValue(expectedResult);
 
@@ -123,6 +114,7 @@ describe('userAdminFacadeService', () => {
     it('should delegate to command service', async () => {
       expect.assertions(2);
 
+      const mockUser = buildUserResponseDto();
       const dto = { publicId: mockUser.publicId, data: { name: 'Updated Name' } };
       const expectedResult = toUserResponseDto({ ...mockUser, name: 'Updated Name' });
       commandService.updateUserById.mockResolvedValue(expectedResult);
@@ -138,6 +130,7 @@ describe('userAdminFacadeService', () => {
     it('should delegate to command service', async () => {
       expect.assertions(1);
 
+      const mockUser = buildUserResponseDto();
       const dto = { publicId: mockUser.publicId };
       commandService.deleteUserById.mockResolvedValue();
 

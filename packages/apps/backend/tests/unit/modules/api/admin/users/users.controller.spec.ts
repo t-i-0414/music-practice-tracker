@@ -1,22 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { UserAdminFacadeService } from '@/modules/aggregate/user/user.admin.facade.service';
-import { UserStatusRecord } from '@/modules/aggregate/user/user.constants';
 import { toUserResponseDto, toUsersResponseDto } from '@/modules/aggregate/user/user.response.dto';
 import { AdminUsersController } from '@/modules/api/admin/users/users.controller';
+import { buildUserResponseDto } from '@/tests/factory/user.factory';
 
 describe('adminUsersController', () => {
   let controller: AdminUsersController;
   let facadeService: jest.Mocked<UserAdminFacadeService>;
-
-  const mockUser = {
-    publicId: '123e4567-e89b-12d3-a456-426614174000',
-    email: 'test@example.com',
-    name: 'Test User',
-    status: UserStatusRecord.ACTIVE,
-    createdAt: new Date('2024-01-01'),
-    updatedAt: new Date('2024-01-01'),
-  };
 
   beforeEach(async () => {
     const mockFacadeService: jest.Mocked<UserAdminFacadeService> = {
@@ -57,6 +48,7 @@ describe('adminUsersController', () => {
     it('should find many active users with array of publicIds', async () => {
       expect.assertions(2);
 
+      const mockUser = buildUserResponseDto();
       const publicIds = ['id1', 'id2'];
       const expectedResult = toUsersResponseDto([mockUser]);
       facadeService.findManyUsers.mockResolvedValue(expectedResult);
@@ -70,6 +62,7 @@ describe('adminUsersController', () => {
     it('should find many active users with single publicId string', async () => {
       expect.assertions(2);
 
+      const mockUser = buildUserResponseDto();
       const publicId = 'id1';
       const expectedResult = toUsersResponseDto([mockUser]);
       facadeService.findManyUsers.mockResolvedValue(expectedResult);
@@ -85,6 +78,7 @@ describe('adminUsersController', () => {
     it('should find active user by publicId', async () => {
       expect.assertions(2);
 
+      const mockUser = buildUserResponseDto();
       const { publicId } = mockUser;
       const expectedResult = toUserResponseDto(mockUser);
       facadeService.findUserById.mockResolvedValue(expectedResult);
@@ -100,6 +94,7 @@ describe('adminUsersController', () => {
     it('should create user', async () => {
       expect.assertions(2);
 
+      const mockUser = buildUserResponseDto();
       const createDto = { email: mockUser.email, name: mockUser.name };
       const expectedResult = toUserResponseDto(mockUser);
       facadeService.createUser.mockResolvedValue(expectedResult);
@@ -115,6 +110,7 @@ describe('adminUsersController', () => {
     it('should create many users', async () => {
       expect.assertions(2);
 
+      const mockUser = buildUserResponseDto();
       const createDto = { users: [{ email: 'user1@example.com', name: 'User 1' }] };
       const expectedResult = toUsersResponseDto([mockUser]);
       facadeService.createManyAndReturnUsers.mockResolvedValue(expectedResult);
@@ -130,6 +126,7 @@ describe('adminUsersController', () => {
     it('should update user', async () => {
       expect.assertions(2);
 
+      const mockUser = buildUserResponseDto();
       const { publicId } = mockUser;
       const data = { name: 'Updated Name' };
       const expectedResult = toUserResponseDto({ ...mockUser, name: 'Updated Name' });
@@ -159,6 +156,7 @@ describe('adminUsersController', () => {
     it('should delete user', async () => {
       expect.assertions(1);
 
+      const mockUser = buildUserResponseDto();
       const { publicId } = mockUser;
       facadeService.deleteUserById.mockResolvedValue();
 
