@@ -27,7 +27,9 @@
     "test:unit:cov": "bun run test:unit --coverage",
     "test:unit:debug": "node --inspect-brk ./node_modules/.bin/jest --runInBand",
     "test:unit:watch": "bun run test:unit --watch",
-    "type:check": "tsc --noEmit"
+    "type:check": "run-p type:check:base type:check:storybook",
+    "type:check:base": "tsc --noEmit",
+    "type:check:storybook": "tsc --noEmit -p tsconfig.storybook.json"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
