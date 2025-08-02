@@ -1,7 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
+import { UserStatus } from '@/generated/prisma';
 import { UserAppFacadeService } from '@/modules/aggregate/user/user.app.facade.service';
-import { toActiveUserDto } from '@/modules/aggregate/user/user.response.dto';
+import { toUserResponseDto } from '@/modules/aggregate/user/user.response.dto';
 import { AppUsersController } from '@/modules/api/app/users/users.controller';
 
 describe('appUsersController', () => {
@@ -12,9 +13,9 @@ describe('appUsersController', () => {
     publicId: '123e4567-e89b-12d3-a456-426614174000',
     email: 'test@example.com',
     name: 'Test User',
+    status: UserStatus.ACTIVE,
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),
-    deletedAt: null,
   };
 
   beforeEach(async () => {
@@ -48,7 +49,7 @@ describe('appUsersController', () => {
       expect.assertions(2);
 
       const { publicId } = mockUser;
-      const expectedResult = toActiveUserDto(mockUser);
+      const expectedResult = toUserResponseDto(mockUser);
       facadeService.findUserById.mockResolvedValue(expectedResult);
 
       const result = await controller.findUserById(publicId);
@@ -63,7 +64,7 @@ describe('appUsersController', () => {
       expect.assertions(2);
 
       const createDto = { email: mockUser.email, name: mockUser.name };
-      const expectedResult = toActiveUserDto(mockUser);
+      const expectedResult = toUserResponseDto(mockUser);
       facadeService.createUser.mockResolvedValue(expectedResult);
 
       const result = await controller.createUser(createDto);
@@ -79,7 +80,7 @@ describe('appUsersController', () => {
 
       const { publicId } = mockUser;
       const data = { name: 'Updated Name' };
-      const expectedResult = toActiveUserDto({ ...mockUser, name: 'Updated Name' });
+      const expectedResult = toUserResponseDto({ ...mockUser, name: 'Updated Name' });
       facadeService.updateUserById.mockResolvedValue(expectedResult);
 
       const result = await controller.updateUser(publicId, data);
@@ -89,16 +90,4 @@ describe('appUsersController', () => {
     });
   });
 
-  describe('deleteUser', () => {
-    it('should delete user', async () => {
-      expect.assertions(1);
-
-      const { publicId } = mockUser;
-      facadeService.deleteUserById.mockResolvedValue();
-
-      await controller.deleteUser(publicId);
-
-      expect(facadeService.deleteUserById).toHaveBeenCalledWith({ publicId });
-    });
-  });
 });

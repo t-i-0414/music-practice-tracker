@@ -98,24 +98,4 @@ describe('userAppFacadeService Integration', () => {
     });
   });
 
-  describe('deleteUserById', () => {
-    it('should soft delete a user', async () => {
-      expect.assertions(2);
-
-      // Create user
-      const user = await repositoryService.createUser({ name: 'To Delete', email: 'todelete@test.com' });
-
-      // Delete through facade
-      await facadeService.deleteUserById({ publicId: user.publicId });
-
-      // Verify user is soft deleted
-      const activeUser = await repositoryService.findUniqueActiveUser({ publicId: user.publicId });
-
-      expect(activeUser).toBeNull();
-
-      const deletedUser = await repositoryService.findUniqueDeletedUser({ publicId: user.publicId });
-
-      expect(deletedUser).toBeTruthy();
-    });
-  });
 });

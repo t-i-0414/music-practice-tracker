@@ -1,9 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
+import { type UserStatus } from '@/generated/prisma';
 import { UserAppFacadeService } from '@/modules/aggregate/user/user.app.facade.service';
 import { UserCommandService } from '@/modules/aggregate/user/user.command.service';
 import { UserQueryService } from '@/modules/aggregate/user/user.query.service';
-import { toActiveUserDto } from '@/modules/aggregate/user/user.response.dto';
+import { toUserResponseDto } from '@/modules/aggregate/user/user.response.dto';
 
 describe('userAppFacadeService', () => {
   let service: UserAppFacadeService;
@@ -14,16 +15,15 @@ describe('userAppFacadeService', () => {
     publicId: '123e4567-e89b-12d3-a456-426614174000',
     email: 'test@example.com',
     name: 'Test User',
+    status: 'ACTIVE' as UserStatus,
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),
-    deletedAt: null,
   };
 
   beforeEach(async () => {
     const mockCommandService: jest.Mocked<UserCommandService> = {
       createUser: jest.fn(),
       updateUserById: jest.fn(),
-      deleteUserById: jest.fn(),
     } as any;
 
     const mockQueryService: jest.Mocked<UserQueryService> = {
@@ -58,7 +58,7 @@ describe('userAppFacadeService', () => {
       expect.assertions(2);
 
       const dto = { publicId: mockUser.publicId };
-      const expectedResult = toActiveUserDto(mockUser);
+      const expectedResult = toUserResponseDto(mockUser);
       queryService.findUserByIdOrFail.mockResolvedValue(expectedResult);
 
       const result = await service.findUserById(dto);
@@ -73,7 +73,7 @@ describe('userAppFacadeService', () => {
       expect.assertions(2);
 
       const dto = { email: mockUser.email, name: mockUser.name };
-      const expectedResult = toActiveUserDto(mockUser);
+      const expectedResult = toUserResponseDto(mockUser);
       commandService.createUser.mockResolvedValue(expectedResult);
 
       const result = await service.createUser(dto);
@@ -88,7 +88,7 @@ describe('userAppFacadeService', () => {
       expect.assertions(2);
 
       const dto = { publicId: mockUser.publicId, data: { name: 'Updated Name' } };
-      const expectedResult = toActiveUserDto({ ...mockUser, name: 'Updated Name' });
+      const expectedResult = toUserResponseDto({ ...mockUser, name: 'Updated Name' });
       commandService.updateUserById.mockResolvedValue(expectedResult);
 
       const result = await service.updateUserById(dto);
@@ -98,16 +98,5 @@ describe('userAppFacadeService', () => {
     });
   });
 
-  describe('deleteUserById', () => {
-    it('should delegate to command service', async () => {
-      expect.assertions(1);
 
-      const dto = { publicId: mockUser.publicId };
-      commandService.deleteUserById.mockResolvedValue();
-
-      await service.deleteUserById(dto);
-
-      expect(commandService.deleteUserById).toHaveBeenCalledWith(dto);
-    });
-  });
 });

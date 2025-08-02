@@ -7,6 +7,7 @@ import {
   IsEnum,
   IsNotEmpty,
   IsNotEmptyObject,
+  IsOptional,
   IsString,
   IsUUID,
   MaxLength,
@@ -83,6 +84,7 @@ export class UpdateUserDataDto extends PartialType(CreateUserInputDto) {
     enum: Object.values(UserStatusRecord),
     required: false,
   })
+  @IsOptional()
   @IsEnum(Object.values(UserStatusRecord))
   public status?: UserStatusType;
 }
