@@ -4,27 +4,14 @@ import { UserCommandService } from './user.command.service';
 import {
   CreateManyUsersInputDto,
   CreateUserInputDto,
-  DeleteManyUsersInputDto,
-  DeleteUserByIdInputDto,
   FindManyUsersByIdInputDto,
   FindUserByIdInputDto,
-  HardDeleteManyUsersInputDto,
-  HardDeleteUserByIdInputDto,
-  RestoreManyUsersInputDto,
-  RestoreUserByIdInputDto,
+  DeleteManyUsersInputDto,
+  DeleteUserByIdInputDto,
   UpdateUserInputDto,
 } from './user.input.dto';
 import { UserQueryService } from './user.query.service';
-import {
-  ActiveUserResponseDto,
-  ActiveUsersResponseDto,
-  AnyUserResponseDto,
-  AnyUsersResponseDto,
-  DeletedUserResponseDto,
-  DeletedUsersResponseDto,
-  SuspendedUserResponseDto,
-  SuspendedUsersResponseDto,
-} from './user.response.dto';
+import { UserResponseDto, UsersResponseDto } from './user.response.dto';
 
 @Injectable()
 export class UserAdminFacadeService {
@@ -33,79 +20,31 @@ export class UserAdminFacadeService {
     private readonly userQueryService: UserQueryService,
   ) {}
 
-  public async findUserById(dto: FindUserByIdInputDto): Promise<ActiveUserResponseDto> {
+  public async findUserById(dto: FindUserByIdInputDto): Promise<UserResponseDto> {
     return this.userQueryService.findUserByIdOrFail(dto);
   }
 
-  public async findDeletedUserById(dto: FindUserByIdInputDto): Promise<DeletedUserResponseDto> {
-    return this.userQueryService.findDeletedUserByIdOrFail(dto);
-  }
-
-  public async findSuspendedUserById(dto: FindUserByIdInputDto): Promise<SuspendedUserResponseDto> {
-    return this.userQueryService.findSuspendedUserByIdOrFail(dto);
-  }
-
-  public async findAnyUserById(dto: FindUserByIdInputDto): Promise<AnyUserResponseDto> {
-    return this.userQueryService.findAnyUserByIdOrFail(dto);
-  }
-
-  public async findManyUsers(dto: FindManyUsersByIdInputDto): Promise<ActiveUsersResponseDto> {
+  public async findManyUsers(dto: FindManyUsersByIdInputDto): Promise<UsersResponseDto> {
     return this.userQueryService.findManyUsers(dto);
   }
 
-  public async findManyDeletedUsers(dto: FindManyUsersByIdInputDto): Promise<DeletedUsersResponseDto> {
-    return this.userQueryService.findManyDeletedUsers(dto);
-  }
-
-  public async findManySuspendedUsers(dto: FindManyUsersByIdInputDto): Promise<SuspendedUsersResponseDto> {
-    return this.userQueryService.findManySuspendedUsers(dto);
-  }
-
-  public async findManyAnyUsers(dto: FindManyUsersByIdInputDto): Promise<AnyUsersResponseDto> {
-    return this.userQueryService.findManyAnyUsers(dto);
-  }
-
-  public async createUser(dto: CreateUserInputDto): Promise<ActiveUserResponseDto> {
+  public async createUser(dto: CreateUserInputDto): Promise<UserResponseDto> {
     return this.userCommandService.createUser(dto);
   }
 
-  public async createManyAndReturnUsers(dto: CreateManyUsersInputDto): Promise<ActiveUsersResponseDto> {
+  public async createManyAndReturnUsers(dto: CreateManyUsersInputDto): Promise<UsersResponseDto> {
     return this.userCommandService.createManyAndReturnUsers(dto);
   }
 
-  public async updateUserById(dto: UpdateUserInputDto): Promise<ActiveUserResponseDto> {
+  public async updateUserById(dto: UpdateUserInputDto): Promise<UserResponseDto> {
     return this.userCommandService.updateUserById(dto);
   }
 
-  public async deleteUserById(dto: DeleteUserByIdInputDto): Promise<void> {
-    await this.userCommandService.deleteUserById(dto);
+  public async deleteUserById({ publicId }: DeleteUserByIdInputDto): Promise<void> {
+    await this.userCommandService.deleteUserById({ publicId });
   }
 
   public async deleteManyUsersById({ publicIds }: DeleteManyUsersInputDto): Promise<void> {
     await this.userCommandService.deleteManyUsersById({ publicIds });
-  }
-
-  public async hardDeleteUserById({ publicId }: HardDeleteUserByIdInputDto): Promise<void> {
-    await this.userCommandService.hardDeleteUserById({ publicId });
-  }
-
-  public async hardDeleteManyUsersById({ publicIds }: HardDeleteManyUsersInputDto): Promise<void> {
-    await this.userCommandService.hardDeleteManyUsersById({ publicIds });
-  }
-
-  public async restoreUserById({ publicId }: RestoreUserByIdInputDto): Promise<ActiveUserResponseDto> {
-    return this.userCommandService.restoreUserById({ publicId });
-  }
-
-  public async restoreManyUsersById({ publicIds }: RestoreManyUsersInputDto): Promise<ActiveUsersResponseDto> {
-    return this.userCommandService.restoreManyUsersById({ publicIds });
-  }
-
-  public async suspendUserById({ publicId }: { publicId: string }): Promise<void> {
-    return this.userCommandService.suspendUserById({ publicId });
-  }
-
-  public async suspendManyUsersById({ publicIds }: { publicIds: string[] }): Promise<void> {
-    return this.userCommandService.suspendManyUsersById({ publicIds });
   }
 }

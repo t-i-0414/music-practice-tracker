@@ -2,51 +2,21 @@ import { Injectable } from '@nestjs/common';
 
 import { Prisma, User } from '@/generated/prisma';
 import { RepositoryService } from '@/modules/repository/repository.service';
-import { StrictOmit } from '@/utils/strict-omit';
-export type { User };
+export type { User, UserStatus as UserStatusEnumType } from '@/generated/prisma';
 
 @Injectable()
 export class UserRepositoryService {
   public constructor(private readonly repository: RepositoryService) {}
 
-  public async findUniqueActiveUser(params: Prisma.UserWhereUniqueInput): Promise<User | null> {
+  public async findUniqueUser(params: Prisma.UserWhereUniqueInput): Promise<User | null> {
     return this.repository.user.findUnique({
       where: {
         ...params,
-        deletedAt: null,
-        suspendedAt: null,
       },
     });
   }
 
-  public async findUniqueDeletedUser(params: Prisma.UserWhereUniqueInput): Promise<User | null> {
-    return this.repository.user.findUnique({
-      where: {
-        ...params,
-        deletedAt: { not: null },
-      },
-    });
-  }
-
-  public async findUniqueSuspendedUser(params: Prisma.UserWhereUniqueInput): Promise<User | null> {
-    return this.repository.user.findUnique({
-      where: {
-        ...params,
-        suspendedAt: { not: null },
-      },
-    });
-  }
-
-  public async findUniqueAnyUser(params: Prisma.UserWhereUniqueInput): Promise<User | null> {
-    return this.repository.user.findUnique({
-      where: {
-        ...params,
-        OR: [{ deletedAt: null }, { deletedAt: { not: null } }],
-      },
-    });
-  }
-
-  public async findManyActiveUsers(params: {
+  public async findManyUsers(params: {
     skip?: number;
     take?: number;
     cursor?: Prisma.UserWhereUniqueInput;
@@ -57,76 +27,23 @@ export class UserRepositoryService {
       ...params,
       where: {
         ...params.where,
-        deletedAt: null,
-        suspendedAt: null,
       },
     });
   }
 
-  public async findManyDeletedUsers(params: {
-    skip?: number;
-    take?: number;
-    cursor?: Prisma.UserWhereUniqueInput;
-    where?: Prisma.UserWhereInput;
-    orderBy?: Prisma.UserOrderByWithRelationInput;
-  }): Promise<User[]> {
-    return this.repository.user.findMany({
-      ...params,
-      where: {
-        ...params.where,
-        deletedAt: { not: null },
-      },
-    });
-  }
-
-  public async findManySuspendedUsers(params: {
-    skip?: number;
-    take?: number;
-    cursor?: Prisma.UserWhereUniqueInput;
-    where?: Prisma.UserWhereInput;
-    orderBy?: Prisma.UserOrderByWithRelationInput;
-  }): Promise<User[]> {
-    return this.repository.user.findMany({
-      ...params,
-      where: {
-        ...params.where,
-        suspendedAt: { not: null },
-      },
-    });
-  }
-
-  public async findManyAnyUsers(params: {
-    skip?: number;
-    take?: number;
-    cursor?: Prisma.UserWhereUniqueInput;
-    where?: Prisma.UserWhereInput;
-    orderBy?: Prisma.UserOrderByWithRelationInput;
-  }): Promise<User[]> {
-    return this.repository.user.findMany({
-      ...params,
-      where: {
-        ...params.where,
-        OR: [{ deletedAt: null }, { deletedAt: { not: null } }],
-      },
-    });
-  }
-
-  public async createUser(params: StrictOmit<Prisma.UserCreateInput, 'deletedAt'>): Promise<User> {
+  public async createUser(params: Prisma.UserCreateInput): Promise<User> {
     return this.repository.user.create({
       data: params,
     });
   }
 
-  public async createManyAndReturnUsers(params: StrictOmit<Prisma.UserCreateInput, 'deletedAt'>[]): Promise<User[]> {
+  public async createManyAndReturnUsers(params: Prisma.UserCreateInput[]): Promise<User[]> {
     return this.repository.user.createManyAndReturn({
       data: params,
     });
   }
 
-  public async updateUser(params: {
-    where: Prisma.UserWhereUniqueInput;
-    data: StrictOmit<Prisma.UserUpdateInput, 'deletedAt'>;
-  }): Promise<User> {
+  public async updateUser(params: { where: Prisma.UserWhereUniqueInput; data: Prisma.UserUpdateInput }): Promise<User> {
     const { where, data } = params;
     return this.repository.user.update({
       data: {
@@ -134,88 +51,19 @@ export class UserRepositoryService {
       },
       where: {
         ...where,
-        deletedAt: null,
-        suspendedAt: null,
       },
     });
   }
 
   public async deleteUser(params: Prisma.UserWhereUniqueInput): Promise<void> {
-    await this.repository.user.update({
-      where: {
-        ...params,
-        deletedAt: null,
-        suspendedAt: null,
-      },
-      data: {
-        deletedAt: new Date(),
-      },
-    });
-  }
-
-  public async deleteManyUsers(params: Prisma.UserWhereInput): Promise<void> {
-    await this.repository.user.updateMany({
-      where: params,
-      data: {
-        deletedAt: new Date(),
-      },
-    });
-  }
-
-  public async hardDeleteUser(params: Prisma.UserWhereUniqueInput): Promise<void> {
     await this.repository.user.delete({
       where: params,
     });
   }
 
-  public async hardDeleteManyUsers(params: Prisma.UserWhereInput): Promise<void> {
+  public async deleteManyUsers(params: Prisma.UserWhereInput): Promise<void> {
     await this.repository.user.deleteMany({
       where: params,
-    });
-  }
-
-  public async restoreUser(params: Prisma.UserWhereUniqueInput): Promise<User> {
-    return this.repository.user.update({
-      where: {
-        ...params,
-        deletedAt: { not: null },
-      },
-      data: {
-        deletedAt: null,
-      },
-    });
-  }
-
-  public async restoreManyAndReturnUsers(params: Prisma.UserWhereInput): Promise<User[]> {
-    return this.repository.user.updateManyAndReturn({
-      where: {
-        ...params,
-        deletedAt: { not: null },
-      },
-      data: {
-        deletedAt: null,
-      },
-    });
-  }
-
-  public async suspendUser(params: Prisma.UserWhereUniqueInput): Promise<User> {
-    return this.repository.user.update({
-      where: {
-        ...params,
-        suspendedAt: null,
-      },
-      data: {
-        suspendedAt: new Date(),
-      },
-    });
-  }
-
-  public async suspendManyUsers(params: Prisma.UserWhereInput): Promise<void> {
-    await this.repository.user.updateMany({
-      where: params,
-      data: {
-        suspendedAt: new Date(),
-      },
     });
   }
 }

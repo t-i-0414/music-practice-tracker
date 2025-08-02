@@ -7,21 +7,9 @@ import {
   CreateManyUsersInputDto,
   CreateUserInputDto,
   DeleteManyUsersInputDto,
-  HardDeleteManyUsersInputDto,
-  RestoreManyUsersInputDto,
-  SuspendManyUsersInputDto,
   UpdateUserDataDto,
 } from '@/modules/aggregate/user/user.input.dto';
-import {
-  ActiveUserResponseDto,
-  ActiveUsersResponseDto,
-  AnyUserResponseDto,
-  AnyUsersResponseDto,
-  DeletedUserResponseDto,
-  DeletedUsersResponseDto,
-  SuspendedUserResponseDto,
-  SuspendedUsersResponseDto,
-} from '@/modules/aggregate/user/user.response.dto';
+import { UserResponseDto, UsersResponseDto } from '@/modules/aggregate/user/user.response.dto';
 import { ensurePublicIdsToArray } from '@/utils/ensure-public-ids-to-array';
 
 @ApiTags('users')
@@ -29,7 +17,7 @@ import { ensurePublicIdsToArray } from '@/utils/ensure-public-ids-to-array';
 export class AdminUsersController {
   public constructor(private readonly userAdminFacade: UserAdminFacadeService) {}
 
-  @Get('active_users')
+  @Get()
   @ApiOperation({ summary: 'Get users by public IDs' })
   @ApiQuery({
     name: 'publicIds',
@@ -40,136 +28,34 @@ export class AdminUsersController {
     explode: true,
     example: ['123e4567-e89b-12d3-a456-426614174000', '456e7891-e89b-12d3-a456-426614174000'],
   })
-  @ApiResponse({ status: 200, description: 'Users found', type: ActiveUsersResponseDto })
+  @ApiResponse({ status: 200, description: 'Users found', type: UsersResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Users not found' })
-  public async findManyUsers(@Query('publicIds') publicIds: string | string[]): Promise<ActiveUsersResponseDto> {
+  public async findManyUsers(@Query('publicIds') publicIds: string | string[]): Promise<UsersResponseDto> {
     return this.userAdminFacade.findManyUsers({ publicIds: ensurePublicIdsToArray(publicIds) });
   }
 
-  @Get('active_users/:publicId')
-  @ApiOperation({ summary: 'Get user by public ID' })
+  @Get(':publicId')
+  @ApiOperation({ summary: 'Get a user by public ID' })
   @ApiParam({ name: 'publicId', description: 'User public ID', example: '123e4567-e89b-12d3-a456-426614174000' })
-  @ApiResponse({ status: 200, description: 'User found', type: ActiveUserResponseDto })
+  @ApiResponse({ status: 200, description: 'User found', type: UserResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'User not found' })
-  public async findUserById(@Param('publicId', new ParseUUIDPipe()) publicId: string): Promise<ActiveUserResponseDto> {
+  public async findUserById(@Param('publicId', new ParseUUIDPipe()) publicId: string): Promise<UserResponseDto> {
     return this.userAdminFacade.findUserById({ publicId });
-  }
-
-  @Get('deleted_users')
-  @ApiOperation({ summary: 'Get users by public IDs' })
-  @ApiQuery({
-    name: 'publicIds',
-    description: 'List of user public IDs',
-    type: String,
-    isArray: true,
-    style: 'form',
-    explode: true,
-    example: ['123e4567-e89b-12d3-a456-426614174000', '456e7891-e89b-12d3-a456-426614174000'],
-  })
-  @ApiResponse({ status: 200, description: 'Users found', type: DeletedUsersResponseDto })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden' })
-  @ApiResponse({ status: 404, description: 'Users not found' })
-  public async findManyDeletedUsers(
-    @Query('publicIds') publicIds: string | string[],
-  ): Promise<DeletedUsersResponseDto> {
-    return this.userAdminFacade.findManyDeletedUsers({ publicIds: ensurePublicIdsToArray(publicIds) });
-  }
-
-  @Get('deleted_users/:publicId')
-  @ApiOperation({ summary: 'Get user by public ID' })
-  @ApiParam({ name: 'publicId', description: 'User public ID', example: '123e4567-e89b-12d3-a456-426614174000' })
-  @ApiResponse({ status: 200, description: 'User found', type: DeletedUserResponseDto })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden' })
-  @ApiResponse({ status: 404, description: 'User not found' })
-  public async findDeletedUserById(
-    @Param('publicId', new ParseUUIDPipe()) publicId: string,
-  ): Promise<DeletedUserResponseDto> {
-    return this.userAdminFacade.findDeletedUserById({ publicId });
-  }
-
-  @Get('suspended_users')
-  @ApiOperation({ summary: 'Get suspended users by public IDs' })
-  @ApiQuery({
-    name: 'publicIds',
-    description: 'List of suspended user public IDs',
-    type: String,
-    isArray: true,
-    style: 'form',
-    explode: true,
-    example: ['123e4567-e89b-12d3-a456-426614174000', '456e7891-e89b-12d3-a456-426614174000'],
-  })
-  @ApiResponse({ status: 200, description: 'Suspended users found', type: SuspendedUsersResponseDto })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden' })
-  @ApiResponse({ status: 404, description: 'Suspended users not found' })
-  public async findManySuspendedUsers(
-    @Query('publicIds') publicIds: string | string[],
-  ): Promise<SuspendedUsersResponseDto> {
-    return this.userAdminFacade.findManySuspendedUsers({ publicIds: ensurePublicIdsToArray(publicIds) });
-  }
-
-  @Get('suspended_users/:publicId')
-  @ApiOperation({ summary: 'Get suspended user by public ID' })
-  @ApiParam({
-    name: 'publicId',
-    description: 'Suspended user public ID',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-  })
-  @ApiResponse({ status: 200, description: 'Suspended user found', type: SuspendedUserResponseDto })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden' })
-  @ApiResponse({ status: 404, description: 'Suspended user not found' })
-  public async findSuspendedUserById(
-    @Param('publicId', new ParseUUIDPipe()) publicId: string,
-  ): Promise<SuspendedUserResponseDto> {
-    return this.userAdminFacade.findSuspendedUserById({ publicId });
-  }
-
-  @Get('any_users')
-  @ApiOperation({ summary: 'Get users by public IDs' })
-  @ApiQuery({
-    name: 'publicIds',
-    description: 'List of user public IDs',
-    type: String,
-    isArray: true,
-    style: 'form',
-    explode: true,
-    example: ['123e4567-e89b-12d3-a456-426614174000', '456e7891-e89b-12d3-a456-426614174000'],
-  })
-  @ApiResponse({ status: 200, description: 'Users found', type: AnyUsersResponseDto })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden' })
-  @ApiResponse({ status: 404, description: 'Users not found' })
-  public async findManyAnyUsers(@Query('publicIds') publicIds: string | string[]): Promise<AnyUsersResponseDto> {
-    return this.userAdminFacade.findManyAnyUsers({ publicIds: ensurePublicIdsToArray(publicIds) });
-  }
-
-  @Get('any_users/:publicId')
-  @ApiOperation({ summary: 'Get user by public ID' })
-  @ApiParam({ name: 'publicId', description: 'User public ID', example: '123e4567-e89b-12d3-a456-426614174000' })
-  @ApiResponse({ status: 200, description: 'User found', type: AnyUserResponseDto })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden' })
-  @ApiResponse({ status: 404, description: 'User not found' })
-  public async findAnyUserById(@Param('publicId', new ParseUUIDPipe()) publicId: string): Promise<AnyUserResponseDto> {
-    return this.userAdminFacade.findAnyUserById({ publicId });
   }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new user' })
   @ApiBody({ type: CreateUserInputDto })
-  @ApiResponse({ status: 201, description: 'The user has been successfully created.', type: ActiveUserResponseDto })
+  @ApiResponse({ status: 201, description: 'The user has been successfully created.', type: UserResponseDto })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
-  public async createUser(@Body() body: CreateUserInputDto): Promise<ActiveUserResponseDto> {
+  public async createUser(@Body() body: CreateUserInputDto): Promise<UserResponseDto> {
     return this.userAdminFacade.createUser(body);
   }
 
@@ -177,8 +63,8 @@ export class AdminUsersController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create multiple users' })
   @ApiBody({ type: CreateManyUsersInputDto })
-  @ApiResponse({ status: 201, description: 'Users created successfully', type: ActiveUsersResponseDto })
-  public async createManyUsers(@Body() body: CreateManyUsersInputDto): Promise<ActiveUsersResponseDto> {
+  @ApiResponse({ status: 201, description: 'Users created successfully', type: UsersResponseDto })
+  public async createManyUsers(@Body() body: CreateManyUsersInputDto): Promise<UsersResponseDto> {
     return this.userAdminFacade.createManyAndReturnUsers(body);
   }
 
@@ -186,99 +72,29 @@ export class AdminUsersController {
   @ApiOperation({ summary: 'Update a user by public ID' })
   @ApiParam({ name: 'publicId', description: 'User public ID', example: '123e4567-e89b-12d3-a456-426614174000' })
   @ApiBody({ type: UpdateUserDataDto })
-  @ApiResponse({ status: 200, description: 'User updated successfully', type: ActiveUserResponseDto })
+  @ApiResponse({ status: 200, description: 'User updated successfully', type: UserResponseDto })
   public async updateUser(
     @Param('publicId', new ParseUUIDPipe()) publicId: string,
     @Body() data: UpdateUserDataDto,
-  ): Promise<ActiveUserResponseDto> {
+  ): Promise<UserResponseDto> {
     return this.userAdminFacade.updateUserById({ publicId, data });
   }
 
-  @Delete('bulk')
-  @ApiOperation({ summary: 'Delete multiple users by public IDs (soft)' })
+  @Delete()
+  @ApiOperation({ summary: 'Delete multiple users by public IDs' })
   @ApiBody({ type: DeleteManyUsersInputDto })
-  @ApiResponse({ status: 204, description: 'Users deleted successfully' })
+  @ApiResponse({ status: 204, description: 'Users deleted' })
   @HttpCode(HttpStatus.NO_CONTENT)
   public async deleteManyUsers(@Body() body: DeleteManyUsersInputDto): Promise<void> {
     return this.userAdminFacade.deleteManyUsersById(body);
   }
 
-  @Delete('hard/bulk')
-  @ApiOperation({ summary: 'Hard delete multiple users by public IDs' })
-  @ApiBody({ type: HardDeleteManyUsersInputDto })
-  @ApiResponse({ status: 204, description: 'Users permanently deleted' })
-  @HttpCode(HttpStatus.NO_CONTENT)
-  public async hardDeleteManyUsers(@Body() body: HardDeleteManyUsersInputDto): Promise<void> {
-    return this.userAdminFacade.hardDeleteManyUsersById(body);
-  }
-
-  @Delete('hard/:publicId')
-  @ApiOperation({ summary: 'Hard delete a user by public ID' })
-  @ApiParam({ name: 'publicId', description: 'User public ID' })
-  @ApiResponse({ status: 204, description: 'User permanently deleted' })
-  @HttpCode(HttpStatus.NO_CONTENT)
-  public async hardDeleteUser(@Param('publicId', new ParseUUIDPipe()) publicId: string): Promise<void> {
-    return this.userAdminFacade.hardDeleteUserById({ publicId });
-  }
-
   @Delete(':publicId')
-  @ApiOperation({ summary: 'Delete a user by public ID (soft)' })
+  @ApiOperation({ summary: 'Delete a user by public ID' })
   @ApiParam({ name: 'publicId', description: 'User public ID' })
-  @ApiResponse({ status: 204, description: 'User deleted successfully' })
+  @ApiResponse({ status: 204, description: 'User deleted' })
   @HttpCode(HttpStatus.NO_CONTENT)
   public async deleteUser(@Param('publicId', new ParseUUIDPipe()) publicId: string): Promise<void> {
     return this.userAdminFacade.deleteUserById({ publicId });
-  }
-
-  @Put('restore/bulk')
-  @ApiOperation({ summary: 'Restore multiple soft-deleted users by public IDs' })
-  @ApiBody({
-    type: RestoreManyUsersInputDto,
-    description: 'IDs of users to be restored',
-    examples: {
-      example: {
-        summary: 'Restore users by public IDs',
-        value: { publicIds: ['123e4567-e89b-12d3-a456-426614174000', '456e7891-e89b-12d3-a456-426614174000'] },
-      },
-    },
-  })
-  @ApiResponse({ status: 200, description: 'Users restored successfully', type: ActiveUsersResponseDto })
-  public async restoreManyUsers(@Body() body: RestoreManyUsersInputDto): Promise<ActiveUsersResponseDto> {
-    return this.userAdminFacade.restoreManyUsersById(body);
-  }
-
-  @Put(':publicId/restore')
-  @ApiOperation({ summary: 'Restore a soft-deleted user by public ID' })
-  @ApiParam({ name: 'publicId', description: 'User public ID' })
-  @ApiResponse({ status: 200, description: 'User restored successfully', type: ActiveUserResponseDto })
-  public async restoreUser(@Param('publicId', new ParseUUIDPipe()) publicId: string): Promise<ActiveUserResponseDto> {
-    return this.userAdminFacade.restoreUserById({ publicId });
-  }
-
-  @Put('suspend/bulk')
-  @ApiOperation({ summary: 'Suspend multiple users by public IDs' })
-  @ApiBody({
-    type: SuspendManyUsersInputDto,
-    description: 'IDs of users to be suspended',
-    examples: {
-      example: {
-        summary: 'Suspend users by public IDs',
-        value: { publicIds: ['123e4567-e89b-12d3-a456-426614174000', '456e7891-e89b-12d3-a456-426614174000'] },
-      },
-    },
-  })
-  @ApiResponse({ status: 204, description: 'Users suspended successfully' })
-  @HttpCode(HttpStatus.NO_CONTENT)
-  public async suspendManyUsers(@Body() body: { publicIds: string[] }): Promise<void> {
-    return this.userAdminFacade.suspendManyUsersById({ publicIds: body.publicIds });
-  }
-
-  @Put(':publicId/suspend')
-  @ApiOperation({ summary: 'Suspend a user by public ID' })
-  @ApiParam({ name: 'publicId', description: 'User public ID' })
-  @ApiResponse({ status: 204, description: 'User suspended successfully' })
-  @HttpCode(HttpStatus.NO_CONTENT)
-  public async suspendUser(@Param('publicId', new ParseUUIDPipe()) publicId: string): Promise<void> {
-    return this.userAdminFacade.suspendUserById({ publicId });
   }
 }

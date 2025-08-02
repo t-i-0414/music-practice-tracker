@@ -5,15 +5,11 @@ import {
   CreateUserInputDto,
   DeleteManyUsersInputDto,
   DeleteUserByIdInputDto,
-  HardDeleteManyUsersInputDto,
-  HardDeleteUserByIdInputDto,
-  RestoreManyUsersInputDto,
-  RestoreUserByIdInputDto,
   UpdateUserInputDto,
 } from './user.input.dto';
 import { UserQueryService } from './user.query.service';
 import { UserRepositoryService } from './user.repository.service';
-import { ActiveUserResponseDto, ActiveUsersResponseDto, toActiveUserDto, toActiveUsersDto } from './user.response.dto';
+import { toUserResponseDto, toUsersResponseDto, UserResponseDto, UsersResponseDto } from './user.response.dto';
 
 @Injectable()
 export class UserCommandService {
@@ -22,19 +18,19 @@ export class UserCommandService {
     private readonly queryService: UserQueryService,
   ) {}
 
-  public async createUser(dto: CreateUserInputDto): Promise<ActiveUserResponseDto> {
-    return toActiveUserDto(await this.repository.createUser(dto));
+  public async createUser(dto: CreateUserInputDto): Promise<UserResponseDto> {
+    return toUserResponseDto(await this.repository.createUser(dto));
   }
 
-  public async createManyAndReturnUsers({ users }: CreateManyUsersInputDto): Promise<ActiveUsersResponseDto> {
+  public async createManyAndReturnUsers({ users }: CreateManyUsersInputDto): Promise<UsersResponseDto> {
     const createdUsers = await this.repository.createManyAndReturnUsers(users);
-    return toActiveUsersDto(createdUsers);
+    return toUsersResponseDto(createdUsers);
   }
 
-  public async updateUserById({ publicId, data }: UpdateUserInputDto): Promise<ActiveUserResponseDto> {
+  public async updateUserById({ publicId, data }: UpdateUserInputDto): Promise<UserResponseDto> {
     await this.queryService.findUserByIdOrFail({ publicId });
 
-    return toActiveUserDto(
+    return toUserResponseDto(
       await this.repository.updateUser({
         where: { publicId },
         data,
@@ -49,40 +45,6 @@ export class UserCommandService {
 
   public async deleteManyUsersById({ publicIds }: DeleteManyUsersInputDto): Promise<void> {
     await this.repository.deleteManyUsers({
-      publicId: { in: publicIds },
-    });
-  }
-
-  public async hardDeleteUserById({ publicId }: HardDeleteUserByIdInputDto): Promise<void> {
-    await this.queryService.findAnyUserByIdOrFail({ publicId });
-    await this.repository.hardDeleteUser({ publicId });
-  }
-
-  public async hardDeleteManyUsersById({ publicIds }: HardDeleteManyUsersInputDto): Promise<void> {
-    await this.repository.hardDeleteManyUsers({
-      publicId: { in: publicIds },
-    });
-  }
-
-  public async restoreUserById({ publicId }: RestoreUserByIdInputDto): Promise<ActiveUserResponseDto> {
-    const restoredUser = await this.repository.restoreUser({ publicId });
-    return toActiveUserDto(restoredUser);
-  }
-
-  public async restoreManyUsersById({ publicIds }: RestoreManyUsersInputDto): Promise<ActiveUsersResponseDto> {
-    const restoredUsers = await this.repository.restoreManyAndReturnUsers({
-      publicId: { in: publicIds },
-    });
-    return toActiveUsersDto(restoredUsers);
-  }
-
-  public async suspendUserById({ publicId }: { publicId: string }): Promise<void> {
-    await this.queryService.findUserByIdOrFail({ publicId });
-    await this.repository.suspendUser({ publicId });
-  }
-
-  public async suspendManyUsersById({ publicIds }: { publicIds: string[] }): Promise<void> {
-    await this.repository.suspendManyUsers({
       publicId: { in: publicIds },
     });
   }
