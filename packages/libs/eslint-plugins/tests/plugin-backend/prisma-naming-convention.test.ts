@@ -56,8 +56,7 @@ describe('prisma-naming-convention', () => {
           async function findUniqueActiveUser() {
             return await prisma.user.findUnique({
               where: {
-                id: 1,
-                deletedAt: null
+                id: 1
               }
             });
           }
@@ -68,8 +67,7 @@ describe('prisma-naming-convention', () => {
           async function findFirstActiveComment() {
             return await prisma.comment.findFirst({
               where: {
-                userId: 1,
-                deletedAt: null
+                userId: 1
               }
             });
           }
@@ -80,8 +78,7 @@ describe('prisma-naming-convention', () => {
           async function findManyActiveUsers() {
             return await prisma.user.findMany({
               where: {
-                active: true,
-                deletedAt: null
+                active: true
               }
             });
           }
@@ -92,8 +89,7 @@ describe('prisma-naming-convention', () => {
           const findFirstActiveProduct = async (name: string) => {
             return await prisma.product.findFirst({
               where: {
-                name,
-                deletedAt: null
+                name
               }
             });
           };
@@ -133,7 +129,7 @@ describe('prisma-naming-convention', () => {
       // DELETE method tests
       {
         code: `
-          async function hardDeleteUser() {
+          async function deleteUser() {
             return await prisma.user.delete({
               where: { id: 1 }
             });
@@ -142,7 +138,7 @@ describe('prisma-naming-convention', () => {
       },
       {
         code: `
-          async function hardDeleteManyUsers() {
+          async function deleteManyUsers() {
             return await prisma.user.deleteMany({
               where: { active: false }
             });
@@ -151,7 +147,7 @@ describe('prisma-naming-convention', () => {
       },
       {
         code: `
-          async function hardDeleteUserById(id: number) {
+          async function deleteUserById(id: number) {
             return await prisma.user.delete({
               where: { id }
             });
@@ -161,7 +157,7 @@ describe('prisma-naming-convention', () => {
       {
         code: `
           class UserRepository {
-            async hardDeleteUser(id: number) {
+            async deleteUser(id: number) {
               return await this.repository.user.delete({
                 where: { id }
               });
@@ -184,8 +180,7 @@ describe('prisma-naming-convention', () => {
           async function FindUniqueActiveUser() {
             return await prisma.user.findUnique({
               where: {
-                id: 1,
-                deletedAt: null
+                id: 1
               }
             });
           }
@@ -193,7 +188,7 @@ describe('prisma-naming-convention', () => {
       },
       {
         code: `
-          async function HardDeleteUser() {
+          async function DeleteUser() {
             return await prisma.user.delete({
               where: { id: 1 }
             });
@@ -341,7 +336,7 @@ describe('prisma-naming-convention', () => {
       // DELETE method errors
       {
         code: `
-          async function deleteUser() {
+          async function destroyUser() {
             return await prisma.user.delete({
               where: { id: 1 }
             });
@@ -351,9 +346,9 @@ describe('prisma-naming-convention', () => {
           {
             messageId: 'invalidDeleteMethodName',
             data: {
-              functionName: 'deleteUser',
+              functionName: 'destroyUser',
               method: 'delete',
-              expectedPrefix: 'hardDelete',
+              expectedPrefix: 'delete',
             },
           },
         ],
@@ -372,14 +367,14 @@ describe('prisma-naming-convention', () => {
             data: {
               functionName: 'removeUser',
               method: 'delete',
-              expectedPrefix: 'hardDelete',
+              expectedPrefix: 'delete',
             },
           },
         ],
       },
       {
         code: `
-          async function deleteManyUsers() {
+          async function removeManyUsers() {
             return await prisma.user.deleteMany({
               where: { active: false }
             });
@@ -389,9 +384,9 @@ describe('prisma-naming-convention', () => {
           {
             messageId: 'invalidDeleteMethodName',
             data: {
-              functionName: 'deleteManyUsers',
+              functionName: 'removeManyUsers',
               method: 'deleteMany',
-              expectedPrefix: 'hardDeleteMany',
+              expectedPrefix: 'deleteMany',
             },
           },
         ],
@@ -411,7 +406,7 @@ describe('prisma-naming-convention', () => {
             });
           }
 
-          async function deleteComment() {
+          async function removeComment() {
             return await prisma.comment.delete({
               where: { id: 1 }
             });
@@ -437,9 +432,9 @@ describe('prisma-naming-convention', () => {
           {
             messageId: 'invalidDeleteMethodName',
             data: {
-              functionName: 'deleteComment',
+              functionName: 'removeComment',
               method: 'delete',
-              expectedPrefix: 'hardDelete',
+              expectedPrefix: 'delete',
             },
           },
         ],
@@ -482,7 +477,7 @@ describe('prisma-naming-convention', () => {
             data: {
               functionName: 'removeUser',
               method: 'delete',
-              expectedPrefix: 'hardDelete',
+              expectedPrefix: 'delete',
             },
           },
         ],
@@ -507,68 +502,7 @@ describe('prisma-naming-convention', () => {
         `,
       },
       // Update without TypeScript services (basic patterns)
-      {
-        code: `
-          async function updateUser() {
-            return await prisma.user.update({
-              where: { id: 1 },
-              data: { deletedAt: new Date() }
-            });
-          }
-        `,
-      },
-      {
-        code: `
-          async function updateUser() {
-            return await prisma.user.update({
-              where: { id: 1 },
-              data: { deletedAt: null }
-            });
-          }
-        `,
-      },
-      {
-        code: `
-          async function updateUser() {
-            return await prisma.user.update({
-              where: { id: 1 },
-              data: { suspendedAt: new Date() }
-            });
-          }
-        `,
-      },
-      {
-        code: `
-          async function updateUser() {
-            return await prisma.user.update({
-              where: { id: 1 },
-              data: { suspendedAt: null }
-            });
-          }
-        `,
-      },
       // Update with identifiers and member expressions
-      {
-        code: `
-          async function updateUser() {
-            const date = new Date();
-            return await prisma.user.update({
-              where: { id: 1 },
-              data: { deletedAt: date }
-            });
-          }
-        `,
-      },
-      {
-        code: `
-          async function updateUser() {
-            return await prisma.user.update({
-              where: { id: 1 },
-              data: { deletedAt: params.deletedAt }
-            });
-          }
-        `,
-      },
       // Update with spread operators
       {
         code: `
@@ -645,7 +579,7 @@ describe('prisma-naming-convention', () => {
           }
         `,
       },
-      // Pattern 3: data property references a variable  
+      // Pattern 3: data property references a variable
       {
         code: `
           async function updateManyAndReturnUsers() {
@@ -713,28 +647,6 @@ describe('prisma-naming-convention', () => {
   // Tests for specific code paths to improve coverage
   ruleTester.run('prisma-naming-convention (coverage improvement)', rule, {
     valid: [
-      // analyzeDataObject with non-Date values for deletedAt
-      {
-        code: `
-          async function updateUser() {
-            return await prisma.user.update({
-              where: { id: 1 },
-              data: { deletedAt: { not: null } }
-            });
-          }
-        `,
-      },
-      // suspendedAt with non-Date, non-identifier values
-      {
-        code: `
-          async function updateUser() {
-            return await prisma.user.update({
-              where: { id: 1 },
-              data: { suspendedAt: { not: null } }
-            });
-          }
-        `,
-      },
       // Update method without data object to trigger early returns
       {
         code: `
