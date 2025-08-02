@@ -45,7 +45,7 @@ describe('adminUsersController', () => {
   });
 
   describe('findManyUsers', () => {
-    it('should find many active users with array of publicIds', async () => {
+    it('should find many users with array of publicIds', async () => {
       expect.assertions(2);
 
       const mockUser = buildUserResponseDto();
@@ -59,7 +59,7 @@ describe('adminUsersController', () => {
       expect(result).toStrictEqual(expectedResult);
     });
 
-    it('should find many active users with single publicId string', async () => {
+    it('should find many users with single publicId string', async () => {
       expect.assertions(2);
 
       const mockUser = buildUserResponseDto();
@@ -75,7 +75,7 @@ describe('adminUsersController', () => {
   });
 
   describe('findUserById', () => {
-    it('should find active user by publicId', async () => {
+    it('should find user by publicId', async () => {
       expect.assertions(2);
 
       const mockUser = buildUserResponseDto();

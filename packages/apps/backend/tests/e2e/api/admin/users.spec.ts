@@ -52,7 +52,7 @@ describe('admin API - /api/users', () => {
   });
 
   describe('get /api/users/:publicId', () => {
-    it('should return active user by publicId', async () => {
+    it('should return user by publicId', async () => {
       expect.assertions(3);
 
       const user = await request(app.getHttpServer())

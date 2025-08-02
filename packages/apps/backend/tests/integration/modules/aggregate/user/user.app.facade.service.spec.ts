@@ -25,7 +25,7 @@ describe('userAppFacadeService Integration', () => {
   });
 
   describe('findUserById', () => {
-    it('should find an active user by publicId', async () => {
+    it('should find an user by publicId', async () => {
       expect.assertions(1);
 
       const user = await repositoryService.createUser({ name: 'Find Test User', email: 'find@test.com' });

@@ -50,7 +50,7 @@ describe('userRepositoryService Integration', () => {
   });
 
   describe('findUniqueUser', () => {
-    it('should find an active user by publicId', async () => {
+    it('should find an user by publicId', async () => {
       expect.assertions(1);
 
       const userData = {
@@ -72,7 +72,7 @@ describe('userRepositoryService Integration', () => {
       expect(foundUser).toBeNull();
     });
 
-    it('should not find soft-deleted users', async () => {
+    it('should not find deleted users', async () => {
       expect.assertions(1);
 
       const userData = {
