@@ -15,15 +15,15 @@ description: Token-efficient Serena MCP command for structured app development a
 
 ## Options
 
-| Option | Description | Usage | Use Case |
-|--------|-------------|-------|----------|
-| `-q` | Quick mode (3-5 thoughts/steps) | `/serena "fix button" -q` | Simple bugs, minor features |
-| `-d` | Deep mode (10-15 thoughts/steps) | `/serena "architecture design" -d` | Complex systems, major decisions |
-| `-c` | Code-focused analysis | `/serena "optimize performance" -c` | Code review, refactoring |
-| `-s` | Step-by-step implementation | `/serena "build dashboard" -s` | Full feature development |
-| `-v` | Verbose output (show process) | `/serena "debug issue" -v` | Learning, understanding process |
-| `-r` | Include research phase | `/serena "choose framework" -r` | Technology decisions |
-| `-t` | Create implementation todos | `/serena "new feature" -t` | Project management |
+| Option | Description                      | Usage                               | Use Case                         |
+| ------ | -------------------------------- | ----------------------------------- | -------------------------------- |
+| `-q`   | Quick mode (3-5 thoughts/steps)  | `/serena "fix button" -q`           | Simple bugs, minor features      |
+| `-d`   | Deep mode (10-15 thoughts/steps) | `/serena "architecture design" -d`  | Complex systems, major decisions |
+| `-c`   | Code-focused analysis            | `/serena "optimize performance" -c` | Code review, refactoring         |
+| `-s`   | Step-by-step implementation      | `/serena "build dashboard" -s`      | Full feature development         |
+| `-v`   | Verbose output (show process)    | `/serena "debug issue" -v`          | Learning, understanding process  |
+| `-r`   | Include research phase           | `/serena "choose framework" -r`     | Technology decisions             |
+| `-t`   | Create implementation todos      | `/serena "new feature" -t`          | Project management               |
 
 ## Usage Patterns
 
