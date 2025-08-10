@@ -84,7 +84,8 @@ All Tasks → Serena MCP
 - API development
 - Feature building
 - System architecture
-- Problem solving and analysis
+- All App Development Tasks, plus:
+  - Problem solving and analysis
 ```
 
 ### 3. Output Modes
