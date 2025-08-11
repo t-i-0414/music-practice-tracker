@@ -229,13 +229,13 @@ tests/
 
 ```bash
 # Run Vitest in UI mode
-npm run test:unit -- --ui
+bun run test:unit -- --ui
 
 # Debug Cypress test
-npm run test:integration -- --headed
+bun run test:integration -- --headed
 
 # Playwright debug mode
-npm run test:e2e -- --debug
+bun run test:e2e -- --debug
 ```
 
 ### Common Issues

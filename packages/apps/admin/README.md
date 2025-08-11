@@ -45,7 +45,7 @@ bun install
 
 ```bash
 # Start development server with Turbopack
-npm run dev
+bun run dev
 
 # Server runs on http://localhost:8000
 ```
@@ -54,10 +54,10 @@ npm run dev
 
 ```bash
 # Build for production
-npm run build
+bun run build
 
 # Start production server
-npm run start
+bun run start
 ```
 
 ## Environment Variables
@@ -77,14 +77,14 @@ NEXT_PUBLIC_ENABLE_MSW=true
 
 | Command                    | Description                                |
 | -------------------------- | ------------------------------------------ |
-| `npm run dev`              | Start development server with Turbopack    |
-| `npm run build`            | Build for production                       |
-| `npm run start`            | Start production server                    |
-| `npm run test:unit`        | Run Vitest unit tests                      |
-| `npm run test:e2e`         | Run Playwright E2E tests                   |
-| `npm run test:integration` | Run Cypress integration tests              |
-| `npm run storybook`        | Start Storybook development                |
-| `npm run gen:api-types`    | Generate TypeScript types from backend API |
+| `bun run dev`              | Start development server with Turbopack    |
+| `bun run build`            | Build for production                       |
+| `bun run start`            | Start production server                    |
+| `bun run test:unit`        | Run Vitest unit tests                      |
+| `bun run test:e2e`         | Run Playwright E2E tests                   |
+| `bun run test:integration` | Run Cypress integration tests              |
+| `bun run storybook`        | Start Storybook development                |
+| `bun run gen:api-types`    | Generate TypeScript types from backend API |
 
 ## Project Structure
 

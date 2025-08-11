@@ -535,10 +535,10 @@ jobs:
           node-version: '18'
 
       - name: Install dependencies
-        run: npm ci
+        run: bun install --frozen-lockfile
 
       - name: Run tests
-        run: npm test -- --coverage
+        run: bun test --coverage
 
       - name: Upload coverage
         uses: codecov/codecov-action@v3

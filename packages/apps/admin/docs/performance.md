@@ -69,10 +69,10 @@ const HeavyChart = dynamic(
 
 ```bash
 # Analyze bundle size
-npm run build:analyze
+bun run build:analyze
 
 # Check bundle composition
-npm run bundle:stats
+bun run bundle:stats
 ```
 
 ## Runtime Optimizations

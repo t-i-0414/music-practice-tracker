@@ -8,7 +8,7 @@ Custom ESLint rules for enforcing architectural patterns and best practices in t
 
 ```bash
 # From the monorepo root
-npm install @music-practice-tracker/eslint-plugins --save-dev
+bun add @music-practice-tracker/eslint-plugins --dev
 ```
 
 ## Available Rules
@@ -248,14 +248,14 @@ ruleTester.run('my-new-rule', myNewRule, {
 
 ```bash
 cd packages/libs/eslint-plugins
-npm run test
-npm run test:watch
+bun run test
+bun run test:watch
 ```
 
 ### Building
 
 ```bash
-npm run build
+bun run build
 ```
 
 ## Utilities

@@ -36,13 +36,13 @@ We follow [Semantic Versioning](https://semver.org/):
 
 ```bash
 # Development build
-npm run build:dev
+bun run build:dev
 
 # Production build
-npm run build
+bun run build
 
 # Build with analysis
-npm run build:analyze
+bun run build:analyze
 ```
 
 ### Build Outputs
@@ -75,10 +75,10 @@ git tag -a v1.2.3 -m "Release version 1.2.3"
 git push origin v1.2.3
 
 # Deploy to staging
-npm run deploy:staging
+bun run deploy:staging
 
 # Deploy to production (requires approval)
-npm run deploy:production
+bun run deploy:production
 ```
 
 ## Rollback Procedures
@@ -87,10 +87,10 @@ npm run deploy:production
 
 ```bash
 # Revert to previous version
-npm run rollback:production
+bun run rollback:production
 
 # Or specify version
-npm run rollback:production -- --version=1.2.2
+bun run rollback:production -- --version=1.2.2
 ```
 
 ### Database Rollback
@@ -180,13 +180,13 @@ Managing feature rollouts:
 
 ```bash
 # Check outdated packages
-npm outdated
+bun outdated
 
 # Update dependencies
-npm update
+bun update
 
 # Update major versions carefully
-npm install package@latest
+bun add package@latest
 ```
 
 ### Security Updates

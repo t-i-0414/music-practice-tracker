@@ -220,11 +220,11 @@ it('admin facade should access deleted records', async () => {
 bunx jest user.query.service.spec.ts
 
 # Run with coverage
-npm run test:cov
+bun run test:cov
 
 # Debug mode
-npm run test:debug
+bun run test:debug
 
 # Watch mode
-npm run test:watch
+bun run test:watch
 ```

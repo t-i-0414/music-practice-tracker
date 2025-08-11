@@ -8,7 +8,7 @@ Shared ESLint configuration presets for the Music Practice Tracker monorepo. Thi
 
 ```bash
 # From the monorepo root
-npm install @music-practice-tracker/eslint-configs --save-dev
+bun add @music-practice-tracker/eslint-configs --dev
 ```
 
 ## Available Configurations
@@ -216,13 +216,13 @@ export default [
 
 ```bash
 cd packages/libs/eslint-configs
-npm run build
+bun run build
 ```
 
 ### Testing
 
 ```bash
-npm run test
+bun run test
 ```
 
 ### Adding New Configurations
@@ -268,7 +268,7 @@ export default [
 
 #### Issue: Configuration not found
 
-**Solution:** Ensure package is built (`npm run build`)
+**Solution:** Ensure package is built (`bun run build`)
 
 #### Issue: Rule conflicts
 

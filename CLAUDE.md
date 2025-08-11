@@ -91,7 +91,7 @@ bun run lint:es:check   # Lint code
 bun run type:check      # Type checking
 
 # Or run all at once
-npm run ci:temp
+bun run ci:temp
 ```
 
 ### Quality Enforcement Principle
@@ -443,9 +443,9 @@ The backend has **two separate NestJS applications** with different entry points
 
 ```bash
 cd packages/apps/backend
-npm run start:dev:app-api    # Development
-npm run start:prod:app-api   # Production
-npm run start:dev            # Starts both APIs
+bun run start:dev:app-api    # Development
+bun run start:prod:app-api   # Production
+bun run start:dev            # Starts both APIs
 ```
 
 #### 2. Admin API (`packages/apps/backend/src/admin-api.main.ts`)
@@ -461,8 +461,8 @@ npm run start:dev            # Starts both APIs
 
 ```bash
 cd packages/apps/backend
-npm run start:dev:admin-api   # Development
-npm run start:prod:admin-api  # Production
+bun run start:dev:admin-api   # Development
+bun run start:prod:admin-api  # Production
 ```
 
 **Common initialization** (both APIs):
@@ -500,9 +500,9 @@ if (!isProduction) {
 
 ```bash
 cd packages/apps/admin
-npm run dev    # Development with Turbopack
-npm run build  # Production build
-npm run start  # Production server
+bun run dev    # Development with Turbopack
+bun run build  # Production build
+bun run start  # Production server
 ```
 
 #### Mobile App (React Native/Expo)
@@ -516,10 +516,10 @@ npm run start  # Production server
 
 ```bash
 cd packages/apps/mobile
-npm run dev          # All platforms
-npm run dev:ios      # iOS simulator
-npm run dev:android  # Android emulator
-npm run dev:web      # Web browser
+bun run dev          # All platforms
+bun run dev:ios      # iOS simulator
+bun run dev:android  # Android emulator
+bun run dev:web      # Web browser
 ```
 
 ### Database Entry Point
@@ -538,9 +538,9 @@ make setup
 
 # Start everything
 docker compose up -d              # Database
-cd packages/apps/backend && npm run start:dev  # Both APIs
-cd packages/apps/admin && npm run dev           # Admin dashboard
-cd packages/apps/mobile && npm run dev          # Mobile app
+cd packages/apps/backend && bun run start:dev  # Both APIs
+cd packages/apps/admin && bun run dev           # Admin dashboard
+cd packages/apps/mobile && bun run dev          # Mobile app
 ```
 
 ### Build Entry Points
@@ -553,8 +553,8 @@ make -C packages/libs/eslint-configs build
 make -C packages/libs/eslint-plugins build
 
 # Then build applications
-cd packages/apps/backend && npm run build
-cd packages/apps/admin && npm run build
+cd packages/apps/backend && bun run build
+cd packages/apps/admin && bun run build
 cd packages/apps/mobile && expo export
 ```
 
@@ -563,7 +563,7 @@ cd packages/apps/mobile && expo export
 **Run all tests** (from root):
 
 ```bash
-npm run test  # Runs tests in all packages
+bun run test  # Runs tests in all packages
 ```
 
 **Package-specific tests**:
@@ -571,18 +571,18 @@ npm run test  # Runs tests in all packages
 ```bash
 # Backend
 cd packages/apps/backend
-npm run test      # Unit tests
-npm run test:e2e  # E2E tests
-npm run test:cov  # Coverage
+bun run test      # Unit tests
+bun run test:e2e  # E2E tests
+bun run test:cov  # Coverage
 
 # Admin
 cd packages/apps/admin
-npm run test:unit  # Vitest
-npm run test:e2e   # Playwright
+bun run test:unit  # Vitest
+bun run test:e2e   # Playwright
 
 # Mobile
 cd packages/apps/mobile
-npm run test       # Jest
+bun run test       # Jest
 ```
 
 ## Folder Structure
@@ -1840,16 +1840,16 @@ docker compose up -d          # Start PostgreSQL (port 15432)
 cd packages/apps/backend
 
 # Start servers
-npm run start:dev             # Both APIs
-npm run start:dev:app-api     # App API only (port 3000)
-npm run start:dev:admin-api   # Admin API only (port 3001)
-npm run start:debug           # Debug mode
+bun run start:dev             # Both APIs
+bun run start:dev:app-api     # App API only (port 3000)
+bun run start:dev:admin-api   # Admin API only (port 3001)
+bun run start:debug           # Debug mode
 
 # Testing
-npm run test                  # All unit tests
-npm run test:watch            # Watch mode
-npm run test:cov              # Coverage report
-npm run test:e2e              # E2E tests
+bun run test                  # All unit tests
+bun run test:watch            # Watch mode
+bun run test:cov              # Coverage report
+bun run test:e2e              # E2E tests
 bunx jest path/to/test.spec.ts                    # Single test file
 bunx jest --testNamePattern="should create"        # Pattern matching
 bunx jest user.command.service.spec.ts             # Specific suite
@@ -1864,19 +1864,19 @@ bunx prisma generate                               # Regenerate client
 
 ```bash
 cd packages/apps/admin
-npm run dev                   # Development with Turbopack (port 8000)
-npm run build                 # Production build
-npm run start                 # Production server
+bun run dev                   # Development with Turbopack (port 8000)
+bun run build                 # Production build
+bun run start                 # Production server
 ```
 
 #### Mobile App (React Native/Expo)
 
 ```bash
 cd packages/apps/mobile
-npm run dev                   # All platforms
-npm run dev:ios               # iOS only
-npm run dev:android           # Android only
-npm run dev:web               # Web only
+bun run dev                   # All platforms
+bun run dev:ios               # iOS only
+bun run dev:android           # Android only
+bun run dev:web               # Web only
 ```
 
 ### Quality Checks (Run from root)
@@ -1893,7 +1893,7 @@ bun run test                  # All tests
 bun run test:cov              # Coverage check
 
 # Combined check
-npm run ci:temp               # Run all checks
+bun run ci:temp               # Run all checks
 ```
 
 ## Architecture Overview
