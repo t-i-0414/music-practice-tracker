@@ -2,6 +2,115 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Documentation Management Policy
+
+### Principle
+
+- Root keeps global architecture only (`/docs/architecture.md` + optional `/docs/adr/*`)
+- Each project under `packages/apps/*` or `packages/libs/*` has its own `README.md` (overview, setup, env, Notion/Figma/API links)
+- Each app keeps app-specific docs in `packages/apps/<app>/docs/*.md` (state-management, testing-strategy, error-handling, performance, release)
+- Authoring templates live in `packages/apps/<app>/templates/` (e.g., `component.md`, `module.md`). Finalized Notion specs are poured into these
+- Components/modules must collocate a `README.md` next to the code (usage, props, states, a11y, story links)
+- Notion is for ideation; the repo holds finalized implementation docs
+
+### Directory Conventions
+
+- `root/docs/architecture.md` – C4 System/Container view, bounded contexts, key flows, public contracts, security boundaries
+- `root/docs/adr/*` – Major design decisions (optional)
+- `packages/apps/<app>/README.md` – Overview, setup, env, links (Notion, Figma, API, monitoring)
+- `packages/apps/<app>/docs/*.md` – State management, testing strategy, error handling, performance SLOs, build/release notes, i18n/a11y guidelines
+- `packages/apps/<app>/docs/templates/` – `component.md`, `module.md` (authoring forms for specs)
+- `packages/apps/<app>/src/**/README.md` – Collocated docs for components/modules
+
+### When & Where to Write (Matrix)
+
+| What                       | Where                                                 | When                    |
+| -------------------------- | ----------------------------------------------------- | ----------------------- |
+| Feature spec (finalized)   | `packages/apps/<app>/docs/<feature-name>.md`          | After Notion ideation   |
+| Component spec/README      | `packages/apps/<app>/src/components/<Name>/README.md` | With component creation |
+| Module spec/README         | `packages/apps/<app>/src/modules/<Name>/README.md`    | With module creation    |
+| Architecture-wide          | `root/docs/architecture.md`                           | System changes          |
+| Big decisions              | `root/docs/adr/NNNN-title.md`                         | Major technical choices |
+| Setup/how-to for a project | `packages/apps/<app>/README.md`                       | Project initialization  |
+
+### PR Author Checklist (DoD)
+
+- [ ] If code changes feature behavior, updated the relevant `packages/apps/<app>/docs/*.md`
+- [ ] If you added/changed a component/module, wrote/updated its collocated `README.md`
+- [ ] If this affects cross-app architecture, updated `root/docs/architecture.md` (and ADR if needed)
+- [ ] Linked Notion page(s) and Figma master where relevant
+- [ ] Included migration notes (if breaking)
+
+### Reviewer Checklist
+
+- [ ] Does the PR include docs where this policy expects them?
+- [ ] Are component props/states/a11y documented near the code?
+- [ ] Are cross-cutting changes reflected in `docs/architecture.md` or an ADR?
+- [ ] Are links to Notion/Figma/API present and accurate?
+
+### Commit Message Template
+
+```
+feat(app-<name>): <summary>
+
+docs: <files touched>
+- packages/apps/<app>/docs/<topic>.md (updated)
+- packages/apps/<app>/src/components/<Name>/README.md (new)
+
+BREAKING CHANGE (optional): <impact + migration>
+Refs: <issue>, <notion>, <figma>
+```
+
+### PR Description Template
+
+- **Context**: What changed and why
+- **Scope**: Affected apps/modules/components
+- **Docs**: Files updated/created (paths)
+- **User impact**: UX/API changes
+- **Risks & rollback**
+
+### Migration Playbook
+
+1. Identify stray docs at root; move app-specific ones into `packages/apps/<app>/docs/`
+2. For components without `README.md`, generate from `packages/apps/<app>/templates/component.md`
+3. Consolidate global material into `root/docs/architecture.md`
+4. Add ADRs for big past decisions (summaries are fine)
+5. Enable CI reminder (Danger/Action) to check docs presence on PRs
+
+## Code Quality Standards
+
+### Required Quality Checks
+
+**IMPORTANT**: After making any code changes, you **MUST** ensure all these commands pass before considering work complete:
+
+```bash
+# Run all checks (required before committing)
+bun run format:fix      # Fix formatting
+bun run cspell          # Check spelling
+bun run lint:es:check   # Lint code
+bun run type:check      # Type checking
+
+# Or run all at once
+npm run ci:temp
+```
+
+### Quality Enforcement Principle
+
+- **Never** submit code that fails quality checks
+- **Always** run quality checks before committing
+- **Fix** all issues before pushing code
+- **Document** any necessary exceptions
+
+### Key Standards
+
+1. **TypeScript**: Strict mode, no `any` types
+2. **Testing**: Minimum 80% coverage
+3. **Documentation**: Collocated with code
+4. **Commits**: Follow Conventional Commits
+5. **Security**: Never commit secrets
+
+For detailed code quality standards, see `/docs/code-quality.md`
+
 ## Project Overview
 
 **Music Practice Tracker** is a comprehensive platform for musicians to track and manage their music practice sessions. The project helps users:
