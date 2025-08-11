@@ -15,6 +15,7 @@
   "scripts": {
     "changeset:add": "changeset",
     "changeset:version": "changeset version",
+    "ci:temp": "bun run format:fix && bun run cspell && bun run lint:es:check && bun run type:check",
     "cspell": "cspell '**'",
     "format:check": "prettier --check .",
     "format:fix": "prettier --write . && bun run format:prisma",
@@ -30,6 +31,8 @@
     "lint:secret:check": "secretlint '**/*'",
     "lint:secret:fix": "secretlint --fix '**/*'",
     "lint:shell:check": "sh scripts/lint-shell.sh",
+    "quality:check": "bun run format:check && bun run cspell && bun run lint:es:check && bun run type:check",
+    "quality:fix": "bun run format:fix && bun run cspell && bun run lint:es:fix && bun run type:check",
     "type:check": "tsc --noEmit && sh scripts/type_check.sh"
   },
   "dependencies": {
