@@ -16,8 +16,8 @@ docker compose up -d
 
 ```bash
 cd packages/apps/backend
-npm run start:dev           # Start both APIs
-npm run test:watch          # Run tests in watch mode
+bun run start:dev           # Start both APIs
+bun run test:watch          # Run tests in watch mode
 bunx prisma studio          # Database GUI
 ```
 
@@ -25,17 +25,17 @@ bunx prisma studio          # Database GUI
 
 ```bash
 cd packages/apps/admin
-npm run dev                 # Start dev server (port 8000)
-npm run test:unit          # Run unit tests
+bun run dev                 # Start dev server (port 8000)
+bun run test:unit          # Run unit tests
 ```
 
 #### Mobile
 
 ```bash
 cd packages/apps/mobile
-npm run dev                # Start Expo
-npm run dev:ios           # iOS simulator
-npm run dev:android       # Android emulator
+bun run dev                # Start Expo
+bun run dev:ios           # iOS simulator
+bun run dev:android       # Android emulator
 ```
 
 ### Before Committing
@@ -50,7 +50,7 @@ bun run type:check       # 4. Type check
 bun run test             # 5. Run tests
 
 # Or all at once:
-npm run ci:temp
+bun run ci:temp
 ```
 
 ## 📁 Project Structure
@@ -110,10 +110,10 @@ Controller → Facade → Command/Query → Repository → Database
 ### Test Commands
 
 ```bash
-npm run test              # All tests
-npm run test:unit        # Unit only
-npm run test:e2e         # E2E only
-npm run test:cov         # Coverage report
+bun run test              # All tests
+bun run test:unit        # Unit only
+bun run test:e2e         # E2E only
+bun run test:cov         # Coverage report
 ```
 
 ## 🔍 Common Tasks
@@ -160,18 +160,18 @@ bunx prisma studio
 ### Backend
 
 ```bash
-npm run start:debug      # Debug mode
-npm run test:debug      # Debug tests
+bun run start:debug      # Debug mode
+bun run test:debug      # Debug tests
 ```
 
 ### Frontend
 
 ```bash
 # Next.js Admin
-npm run dev -- --inspect
+bun run dev -- --inspect
 
 # React Native
-npm run dev -- --dev-client
+bun run dev -- --dev-client
 ```
 
 ### Database

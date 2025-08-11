@@ -33,7 +33,7 @@ Run all checks at once:
 
 ```bash
 # Run all quality checks
-npm run ci:temp
+bun run ci:temp
 ```
 
 ## Code Standards
@@ -391,7 +391,7 @@ Strict configuration:
 bun run format:fix && bun run cspell && bun run lint:es:check && bun run type:check
 
 # Or use the combined command
-npm run ci:temp
+bun run ci:temp
 ```
 
 ### Common Issues

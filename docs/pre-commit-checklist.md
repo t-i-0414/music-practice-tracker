@@ -12,7 +12,7 @@ bun run lint:es:check   # Step 3: Lint code
 bun run type:check      # Step 4: Type check
 
 # Option 2: Run all at once
-npm run ci:temp
+bun run ci:temp
 ```
 
 ✅ **All must pass with zero errors**
@@ -194,7 +194,7 @@ bun run lint:es:fix  # Try auto-fix first
 ### Test Failures
 
 ```bash
-npm run test -- --watch  # Fix in watch mode
+bun run test -- --watch  # Fix in watch mode
 ```
 
 ## 🎉 Ready to Commit
@@ -213,14 +213,14 @@ Run this to see what needs fixing:
 
 ```bash
 # Check everything at once
-npm run ci:temp
+bun run ci:temp
 
 # If something fails, check individually:
 bun run format:check    # Formatting issues?
 bun run cspell          # Spelling issues?
 bun run lint:es:check   # Linting issues?
 bun run type:check      # Type issues?
-npm run test            # Test issues?
+bun run test            # Test issues?
 ```
 
 ## 💡 Pro Tips
