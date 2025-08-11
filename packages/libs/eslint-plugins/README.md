@@ -208,7 +208,7 @@ export const myNewRule: Rule.RuleModule = {
 };
 ```
 
-2. Export from plugin index:
+1. Export from plugin index:
 
 ```typescript
 // src/plugin-backend/index.ts
@@ -221,7 +221,7 @@ export default {
 };
 ```
 
-3. Add tests:
+1. Add tests:
 
 ```typescript
 // tests/plugin-backend/my-new-rule.spec.ts
