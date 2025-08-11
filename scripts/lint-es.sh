@@ -3,15 +3,18 @@ set -eu
 
 # Determine command based on argument
 CMD="lint:es:${1:-check}"
-if [[ "$CMD" != "lint:es:check" && "$CMD" != "lint:es:fix" ]]; then
-  echo "Usage: $0 [check|fix]"
-  exit 1
-fi
+case "$CMD" in
+  lint:es:check|lint:es:fix) ;;
+  *)
+    echo "Usage: $0 [check|fix]"
+    exit 1
+    ;;
+esac
 
 echo "🔍 Running ESLint ($CMD)..."
 
 # Debug info for CI
-if [[ "${CI:-false}" = "true" ]]; then
+if [ "${CI:-false}" = "true" ]; then
   echo "Running in CI environment"
   echo "Current directory: $(pwd)"
 fi
@@ -46,7 +49,7 @@ while IFS= read -r package_json; do
 done < "$TEMP_FILE"
 
 # Report results
-if [[ $found -eq 0 ]]; then
+if [ $found -eq 0 ]; then
   echo "❌ No packages with $CMD found"
   exit 1
 fi
@@ -54,6 +57,6 @@ fi
 echo "✅ Processed $processed of $found packages"
 
 # Exit with error if any package failed
-if [[ -s "$FAIL_FILE" ]]; then
+if [ -s "$FAIL_FILE" ]; then
   exit 1
 fi
