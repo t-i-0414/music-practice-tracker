@@ -7,11 +7,15 @@ setup:
 	@${MAKE} setup-env
 	@${MAKE} setup-dotenv-linter
 	bun install
+	@make -C packages/libs/tsconfig-base setup
+	@make -C packages/libs/eslint-configs setup
 	@make -C packages/libs/eslint-configs build
+	@make -C packages/libs/eslint-plugins setup
 	@make -C packages/libs/eslint-plugins build
 	@make -C packages/apps/backend setup
 	@make -C packages/apps/mobile setup
 	@make -C packages/apps/admin setup
+	@mkdir -p .vscode && printf '{\n  "files.exclude": {\n    ".postgres-backups": true\n  },\n  "jest.enable": false\n}' > .vscode/settings.json
 	@echo "✅ Setup complete!"
 
 .PHONY: setup-env

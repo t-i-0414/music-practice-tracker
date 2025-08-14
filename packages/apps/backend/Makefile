@@ -16,6 +16,7 @@ setup:
 	@${MAKE} setup-env
 	@${MAKE} setup-docker
 	@${MAKE} setup-database
+	@mkdir -p .vscode && printf '{\n  "files.exclude": {\n    "dist": true,\n    "build": true,\n    "coverage": true,\n    "tests/coverage": true,\n    "node_modules": true\n  },\n  "jest.runMode": "on-demand",\n  "editor.codeActionsOnSave": {\n    "source.organizeImports": "never"\n  }\n}' > .vscode/settings.json
 	@echo "✅ Backend environment setup complete!"
 
 # -------------------------------------------------------------
