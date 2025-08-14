@@ -1,71 +1,155 @@
 # Component: [ComponentName]
 
-## Overview
-
-[Brief description of what this component does and why it exists]
-
-## Visual Design
-
-- [Figma Link](link-to-figma-design)
-- [Screenshot/Mockup]
+> Template for React Native components in Mobile app.
 
 ## Props Interface
 
 ```typescript
 interface [ComponentName]Props {
-  // Required props
-  propName: Type;
-
-  // Optional props
-  optionalProp?: Type;
-
-  // Event handlers
-  onEvent?: (param: Type) => void;
+  id: string;
+  title: string;
+  description?: string;
+  isLoading?: boolean;
+  onPress?: (id: string) => void;
+  onError?: (error: Error) => void;
+  children?: React.ReactNode;
 }
 ```
 
-## Component States
-
-- **Default** - Initial render state
-- **Loading** - While fetching data
-- **Error** - When an error occurs
-- **Success** - After successful action
-
-## Usage Example
+## Implementation
 
 ```tsx
-<ComponentName propName='value' onEvent={handleEvent} />
+import React, { useCallback } from 'react';
+import { View, Text, Pressable, ActivityIndicator, StyleSheet } from 'react-native';
+import { useThemeColor } from '@/hooks/useThemeColor';
+
+export function ComponentName({
+  id,
+  title,
+  description,
+  isLoading = false,
+  onPress,
+  onError,
+  children,
+}: ComponentNameProps) {
+  const textColor = useThemeColor({}, 'text');
+  const backgroundColor = useThemeColor({}, 'background');
+
+  const handlePress = useCallback(() => {
+    try {
+      onPress?.(id);
+    } catch (error) {
+      onError?.(error as Error);
+    }
+  }, [id, onPress, onError]);
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size='large' />
+      </View>
+    );
+  }
+
+  return (
+    <Pressable
+      style={[styles.container, { backgroundColor }]}
+      onPress={handlePress}
+      disabled={!onPress}
+      accessible={true}
+      accessibilityLabel={title}
+      accessibilityRole='button'
+    >
+      <Text style={[styles.title, { color: textColor }]}>{title}</Text>
+      {description && <Text style={[styles.description, { color: textColor }]}>{description}</Text>}
+      {children}
+    </Pressable>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 16,
+    borderRadius: 8,
+    marginVertical: 8,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: 100,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  description: {
+    fontSize: 14,
+    opacity: 0.7,
+  },
+});
 ```
 
-## Accessibility
+## Platform-Specific
 
-- ARIA labels: [Required labels]
-- Keyboard navigation: [Support details]
-- Screen reader: [How it's announced]
+```tsx
+import { Platform } from 'react-native';
 
-## Testing Requirements
+// iOS specific
+if (Platform.OS === 'ios') {
+  // iOS implementation
+}
 
-- Render test: Component renders without crashing
-- Props test: Props are handled correctly
-- Event test: Event handlers are called
-- Accessibility test: ARIA compliance
+// Android specific
+if (Platform.OS === 'android') {
+  // Android implementation
+}
+```
 
-## Performance Considerations
+## Testing
 
-- Use React.memo if expensive to render
-- Lazy load if not immediately visible
-- Optimize images and assets
+```tsx
+import React from 'react';
+import { render, fireEvent } from '@testing-library/react-native';
+import { ComponentName } from '../ComponentName';
 
-## Dependencies
+describe('ComponentName', () => {
+  it('renders correctly', () => {
+    const { getByText } = render(<ComponentName id='1' title='Test' />);
+    expect(getByText('Test')).toBeTruthy();
+  });
 
-- Internal: [List of internal dependencies]
-- External: [List of external libraries]
+  it('handles press', () => {
+    const handlePress = jest.fn();
+    const { getByText } = render(<ComponentName id='1' title='Test' onPress={handlePress} />);
+    fireEvent.press(getByText('Test'));
+    expect(handlePress).toHaveBeenCalledWith('1');
+  });
+});
+```
 
-## Related Components
+## Animation (Optional)
 
-- [List of related components]
+```tsx
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
-## Storybook
+const opacity = useSharedValue(0);
 
-- Story file: `ComponentName.stories.tsx`
-- [Link to Storybook]
+const animatedStyle = useAnimatedStyle(() => ({
+  opacity: opacity.value,
+}));
+
+// Trigger animation
+opacity.value = withTiming(1, { duration: 300 });
+```
+
+## Checklist
+
+- [ ] TypeScript props defined
+- [ ] Loading & error states handled
+- [ ] Theme colors used (not hardcoded)
+- [ ] Accessibility properties added
+- [ ] Platform differences handled (if needed)
+- [ ] Unit tests written
+- [ ] Performance optimized (memo if needed)

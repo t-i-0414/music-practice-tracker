@@ -1,93 +1,168 @@
 # Component: [ComponentName]
 
-## Overview
-
-[Brief description of what this component does in the admin context]
-
-## Visual Design
-
-- [Figma Link](link-to-figma-design)
-- [Screenshot/Mockup]
+> Template for React components in Admin Dashboard (Next.js).
 
 ## Props Interface
 
 ```typescript
 interface [ComponentName]Props {
-  // Required props
-  propName: Type;
-
-  // Optional props
-  optionalProp?: Type;
-
-  // Event handlers
-  onEvent?: (param: Type) => void;
+  id: string;
+  title: string;
+  description?: string;
+  isLoading?: boolean;
+  variant?: 'primary' | 'secondary' | 'danger';
+  onClick?: (id: string) => void;
+  onError?: (error: Error) => void;
+  children?: React.ReactNode;
 }
 ```
 
-## Component States
+## Implementation
 
-- **Default** - Initial render state
-- **Loading** - While fetching data
-- **Error** - When an error occurs
-- **Success** - After successful action
-- **Empty** - No data available
-
-## Usage Example
+### Client Component
 
 ```tsx
-<ComponentName propName='value' onEvent={handleEvent} />
+'use client';
+
+import React, { useCallback } from 'react';
+import styles from './ComponentName.module.css';
+
+export function ComponentName({
+  id,
+  title,
+  description,
+  isLoading = false,
+  variant = 'primary',
+  onClick,
+  onError,
+  children,
+}: ComponentNameProps) {
+  const handleClick = useCallback(() => {
+    try {
+      onClick?.(id);
+    } catch (error) {
+      onError?.(error as Error);
+    }
+  }, [id, onClick, onError]);
+
+  if (isLoading) {
+    return <div className={styles.skeleton}>Loading...</div>;
+  }
+
+  return (
+    <div className={`${styles.container} ${styles[variant]}`}>
+      <h3 className={styles.title}>{title}</h3>
+      {description && <p className={styles.description}>{description}</p>}
+      {onClick && (
+        <button onClick={handleClick} type='button'>
+          Action
+        </button>
+      )}
+      {children}
+    </div>
+  );
+}
 ```
 
-## Data Fetching
+### Server Component
 
-```typescript
-// Server Component (if applicable)
-const data = await fetchData();
+```tsx
+import { fetchData } from '@/lib/api';
 
-// Client Component with React Query
-const { data, isLoading, error } = useQuery({
-  queryKey: ['resource'],
-  queryFn: fetchResource,
+export async function ServerComponentName({ id }: { id: string }) {
+  const data = await fetchData(id);
+
+  return (
+    <div>
+      <h2>{data.title}</h2>
+      <p>{data.description}</p>
+    </div>
+  );
+}
+```
+
+## CSS Module
+
+```css
+/* ComponentName.module.css */
+.container {
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  background: var(--color-background);
+}
+
+.primary {
+  background: var(--color-primary);
+}
+.secondary {
+  background: var(--color-secondary);
+}
+.danger {
+  background: var(--color-danger);
+}
+
+.skeleton {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+```
+
+## Testing
+
+```tsx
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { ComponentName } from '../ComponentName';
+
+describe('ComponentName', () => {
+  it('renders correctly', () => {
+    render(<ComponentName id='1' title='Test' />);
+    expect(screen.getByText('Test')).toBeInTheDocument();
+  });
+
+  it('handles click', () => {
+    const handleClick = vi.fn();
+    render(<ComponentName id='1' title='Test' onClick={handleClick} />);
+    fireEvent.click(screen.getByRole('button'));
+    expect(handleClick).toHaveBeenCalledWith('1');
+  });
 });
 ```
 
-## Styling
-
-- CSS Modules: `ComponentName.module.css`
-- Design tokens from globals.css
-- Responsive breakpoints
-
-## Accessibility
-
-- ARIA labels: [Required labels]
-- Keyboard navigation: [Support details]
-- Screen reader: [How it's announced]
-- Focus management: [Tab order]
-
-## Testing Requirements
-
-- Unit tests with Vitest
-- Integration tests with Cypress
-- E2E tests with Playwright
-- MSW mocks for API calls
-
-## Performance Considerations
-
-- Use Next.js Image for images
-- Implement virtual scrolling for long lists
-- Code splitting with dynamic imports
-- Memoization where appropriate
-
-## Dependencies
-
-- Internal: [List of internal dependencies]
-- External: [List of external libraries]
-
-## Related Components
-
-- [List of related components]
-
 ## Storybook
 
-- Story file: `ComponentName.stories.ts`
-- [Link to Storybook]
+```tsx
+import type { Meta, StoryObj } from '@storybook/react';
+import { ComponentName } from './ComponentName';
+
+const meta = {
+  title: 'Components/ComponentName',
+  component: ComponentName,
+} satisfies Meta<typeof ComponentName>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const Default: Story = {
+  args: {
+    id: '1',
+    title: 'Component Title',
+    description: 'Description',
+  },
+};
+```
+
+## Checklist
+
+- [ ] TypeScript props defined
+- [ ] Client/Server component decision made
+- [ ] Loading & error states handled
+- [ ] CSS variables used (not hardcoded)
+- [ ] Unit tests written
+- [ ] Storybook story created
+- [ ] Accessibility attributes added
