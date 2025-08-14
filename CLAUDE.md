@@ -436,7 +436,7 @@ The backend has **two separate NestJS applications** with different entry points
 // Main entry for regular users
 // Port: 3000 (configurable via PORT env)
 // Module: AppApiModule
-// Features: User-specific operations, active records only
+// Features: User-specific operations
 ```
 
 **Start commands**:
@@ -454,7 +454,7 @@ bun run start:dev            # Starts both APIs
 // Main entry for administrators
 // Port: 3001 (configurable via PORT env)
 // Module: AdminApiModule
-// Features: Full CRUD, bulk operations, deleted records access
+// Features: Full CRUD, bulk operations
 ```
 
 **Start commands**:
@@ -970,21 +970,6 @@ updatedAt DateTime @updatedAt
 @@index([createdAt])
 ```
 
-#### Soft Delete Pattern
-
-While the current User model doesn't implement soft delete, future models will include:
-
-```prisma
-deletedAt DateTime? @map("deleted_at")
-@@index([deletedAt])
-```
-
-This enables three-tier data access:
-
-- Active: `WHERE deletedAt IS NULL`
-- Deleted: `WHERE deletedAt IS NOT NULL`
-- Any: No filter
-
 ### Database Migrations
 
 Migrations are managed through Prisma:
@@ -1136,15 +1121,11 @@ Each model's repository follows consistent naming:
 
 ```typescript
 // User repository example
-findUniqueActiveUser(where: { publicId })
-findUniqueDeletedUser(where: { publicId })
-findUniqueAnyUser(where: { publicId })
-findManyActiveUsers(where: { status: 'ACTIVE' })
+findUniqueUser(where: { publicId })
+findManyUsers(where: { status: 'ACTIVE' })
 createUser(data: { email, name })
 updateUser(where: { publicId }, data: { name })
-deleteUser(where: { publicId }) // Soft delete
-hardDeleteUser(where: { publicId }) // Permanent
-restoreUser(where: { publicId }) // Undo soft delete
+deleteUser(where: { publicId })
 ```
 
 #### Query Optimization
@@ -1278,8 +1259,7 @@ class ActiveUserResponseDto {
 
 // Admin User Response (includes additional fields)
 class FullUserResponseDto extends ActiveUserResponseDto {
-  @Expose() deletedAt?: Date;
-  // Admin can see soft-deleted users
+  // Admin has same fields as active user
 }
 ```
 
@@ -1289,7 +1269,6 @@ class FullUserResponseDto extends ActiveUserResponseDto {
 2. Name is required and limited to 50 characters
 3. New users start in PENDING status
 4. Only admins can change user status
-5. Soft delete preserves user data for audit
 
 ### Planned Data Models
 
@@ -1420,14 +1399,7 @@ findUnique[Model](where: WhereInput)
 findMany[Model]s(where: WhereInput, options?: QueryOptions)
 create[Model](data: CreateInput)
 update[Model](where: WhereInput, data: UpdateInput)
-delete[Model](where: WhereInput) // Soft delete
-hardDelete[Model](where: WhereInput) // Permanent
-restore[Model](where: WhereInput) // Undo soft delete
-
-// With soft delete support
-findUniqueActive[Model](where: WhereInput)
-findUniqueDeleted[Model](where: WhereInput)
-findUniqueAny[Model](where: WhereInput)
+delete[Model](where: WhereInput)
 ```
 
 #### Service Layer
@@ -1580,10 +1552,8 @@ The backend implements Domain-Driven Design with clear aggregate boundaries:
 // 1. Repository Layer (Data Access)
 class UserRepositoryService {
   // Only place with Prisma access
-  // Implements soft delete pattern
-  findUniqueActiveUser();
-  findUniqueDeletedUser();
-  findUniqueAnyUser();
+  findUniqueUser();
+  findManyUsers();
 }
 
 // 2. Query Service (Read Operations)
@@ -1600,17 +1570,15 @@ class UserCommandService {
   // Uses QueryService for validation
   createUser();
   updateUserById();
-  deleteUserById(); // Soft delete
+  deleteUserById();
 }
 
 // 4. Facade Services (API Orchestration)
 class UserAdminFacadeService {
   // Orchestrates services for admin operations
-  // Can access deleted records
 }
 class UserAppFacadeService {
   // Orchestrates services for app operations
-  // Only active records
 }
 ```
 
@@ -1620,17 +1588,7 @@ class UserAppFacadeService {
 
 - Database access ONLY through `*.repository.service.ts` files
 - Consistent method naming enforced by ESLint
-- Three-tier data access (Active/Deleted/Any)
 - No business logic in repositories
-
-**Soft Delete Pattern**:
-
-```typescript
-// Every repository implements three variants
-findUniqueActiveUser(); // WHERE deletedAt IS NULL
-findUniqueDeletedUser(); // WHERE deletedAt IS NOT NULL
-findUniqueAnyUser(); // No deletedAt filter
-```
 
 ### DTO Pattern
 
@@ -1756,13 +1714,11 @@ await helper.teardown();
 
 **Audit Fields Pattern**:
 
-- Every table has: createdAt, updatedAt, deletedAt
+- Every table has: createdAt, updatedAt
 - Automatic timestamp management
-- Soft delete by default
 
 **Index Strategy**:
 
-- Index on deletedAt for filtering
 - Index on createdAt for sorting
 - Composite indexes for common queries
 
@@ -1855,18 +1811,18 @@ bunx jest --testNamePattern="should create"        # Pattern matching
 bunx jest user.command.service.spec.ts             # Specific suite
 
 # Database
-bunx prisma migrate dev --name [name]              # Create migration
-bunx prisma studio                                 # GUI for database
-bunx prisma generate                               # Regenerate client
+bun run prisma:migrate:dev -- --name [name]        # Create migration
+bun run prisma:studio                              # GUI for database
+bun run prisma:generate                            # Regenerate client
 ```
 
 #### Admin Dashboard (Next.js)
 
 ```bash
 cd packages/apps/admin
-bun run dev                   # Development with Turbopack (port 8000)
+bun run start:dev             # Development with Turbopack (port 8000)
 bun run build                 # Production build
-bun run start                 # Production server
+bun run start:prod            # Production server
 ```
 
 #### Mobile App (React Native/Expo)
@@ -1923,31 +1879,22 @@ Enforced by custom ESLint rules:
 - `findUnique*/findMany*` - queries
 - `create*/createMany*` - creation
 - `update*/updateMany*` - updates
-- `delete*/deleteMany*` - soft deletes
-- `hardDelete*` - permanent deletion
-- `restore*` - undo soft delete
-
-Soft delete pattern:
-
-- `findUniqueActiveUser` - WHERE deletedAt IS NULL
-- `findUniqueDeletedUser` - WHERE deletedAt IS NOT NULL
-- `findUniqueAnyUser` - all records
+- `delete*/deleteMany*` - deletes
 
 ### Database Schema Requirements
 
-Every model must have:
+Every Prisma model must include:
 
 ```prisma
-id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-createdAt DateTime  @default(now())
-updatedAt DateTime  @updatedAt
-deletedAt DateTime?
+id        Int      @id @default(autoincrement())
+publicId  String   @unique @default(uuid()) @db.Uuid @map("public_id")
+createdAt DateTime @default(now()) @map("created_at")
+updatedAt DateTime @updatedAt @map("updated_at")
 
 @@index([createdAt])
-@@index([deletedAt])
 ```
 
-Enforced by `validate-prisma-schema.sh` script.
+Enforced by `scripts/check-prisma-model-definition.sh` script.
 
 ### Testing Patterns
 
