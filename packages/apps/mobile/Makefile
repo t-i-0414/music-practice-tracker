@@ -6,7 +6,7 @@ setup:
 	@echo "🔧 Setting up the mobile environment..."
 	@${MAKE} setup-env
 	npm install -g eas-cli
-	@mkdir -p .vscode && printf '{\n  "files.exclude": {\n    ".expo": true,\n    "dist": true,\n    "build": true,\n    "coverage": true,\n    "expo-env.d.ts": true,\n    "node_modules": true\n  },\n  "editor.codeActionsOnSave": {\n    "source.organizeImports": "never"\n  }\n}' > .vscode/settings.json
+	@mkdir -p .vscode && printf '{\n  "files.exclude": {\n    ".expo": true,\n    "dist": true,\n    "build": true,\n    "coverage": true,\n    "expo-env.d.ts": true,\n    "node_modules": true\n  },\n  "jest.enable": false,\n  "editor.codeActionsOnSave": {\n    "source.organizeImports": "never"\n  }\n}' > .vscode/settings.json
 	@echo "✅ mobile environment setup complete!"
 
 .PHONY: setup-env
