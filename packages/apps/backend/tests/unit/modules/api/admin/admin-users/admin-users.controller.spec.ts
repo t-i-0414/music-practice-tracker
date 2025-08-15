@@ -48,7 +48,7 @@ describe('admin admin users controller', () => {
     jest.clearAllMocks();
   });
 
-  describe('gET /admin-users', () => {
+  describe('get /admin-users', () => {
     it('should return all admin users when no publicIds provided', async () => {
       expect.assertions(2);
 
@@ -91,7 +91,7 @@ describe('admin admin users controller', () => {
     });
   });
 
-  describe('gET /admin-users/:publicId', () => {
+  describe('get /admin-users/:publicId', () => {
     it('should return admin user by public ID', async () => {
       expect.assertions(2);
 
@@ -116,7 +116,7 @@ describe('admin admin users controller', () => {
     });
   });
 
-  describe('pOST /admin-users', () => {
+  describe('post /admin-users', () => {
     it('should create a new admin user', async () => {
       expect.assertions(2);
 
@@ -136,7 +136,7 @@ describe('admin admin users controller', () => {
     });
   });
 
-  describe('pOST /admin-users/bulk', () => {
+  describe('post /admin-users/bulk', () => {
     it('should create multiple admin users', async () => {
       expect.assertions(2);
 
@@ -168,7 +168,7 @@ describe('admin admin users controller', () => {
     });
   });
 
-  describe('pUT /admin-users', () => {
+  describe('put /admin-users', () => {
     it('should update an admin user', async () => {
       expect.assertions(2);
 
@@ -194,7 +194,7 @@ describe('admin admin users controller', () => {
     });
   });
 
-  describe('dELETE /admin-users/:publicId', () => {
+  describe('delete /admin-users/:publicId', () => {
     it('should delete an admin user', async () => {
       expect.assertions(2);
 
@@ -208,7 +208,7 @@ describe('admin admin users controller', () => {
     });
   });
 
-  describe('dELETE /admin-users', () => {
+  describe('delete /admin-users', () => {
     it('should delete multiple admin users', async () => {
       expect.assertions(2);
 

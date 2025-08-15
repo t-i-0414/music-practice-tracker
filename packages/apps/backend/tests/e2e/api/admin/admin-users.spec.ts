@@ -26,7 +26,7 @@ describe('admin API - AdminUsers (e2e)', () => {
     await testHelper.teardown();
   });
 
-  describe('gET /admin-users', () => {
+  describe('get /admin-users', () => {
     it('should return an array of admin users', async () => {
       expect.assertions(4);
 
@@ -86,7 +86,7 @@ describe('admin API - AdminUsers (e2e)', () => {
     });
   });
 
-  describe('gET /admin-users with publicIds query', () => {
+  describe('get /admin-users with publicIds query', () => {
     it('should return admin users by public IDs', async () => {
       expect.assertions(4);
 
@@ -122,7 +122,7 @@ describe('admin API - AdminUsers (e2e)', () => {
     });
   });
 
-  describe('gET /admin-users/:publicId', () => {
+  describe('get /admin-users/:publicId', () => {
     it('should return an admin user by public ID', async () => {
       expect.assertions(2);
 
@@ -163,7 +163,7 @@ describe('admin API - AdminUsers (e2e)', () => {
     });
   });
 
-  describe('pOST /admin-users', () => {
+  describe('post /admin-users', () => {
     it('should create a new admin user', async () => {
       expect.assertions(3);
 
@@ -215,7 +215,7 @@ describe('admin API - AdminUsers (e2e)', () => {
     });
   });
 
-  describe('pUT /admin-users/:publicId', () => {
+  describe('put /admin-users/:publicId', () => {
     it('should update an admin user', async () => {
       expect.assertions(4);
 
@@ -271,7 +271,7 @@ describe('admin API - AdminUsers (e2e)', () => {
     });
   });
 
-  describe('dELETE /admin-users/:publicId', () => {
+  describe('delete /admin-users/:publicId', () => {
     it('should delete an admin user', async () => {
       expect.assertions(1);
 
