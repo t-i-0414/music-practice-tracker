@@ -2,7 +2,7 @@ import { ClassSerializerInterceptor, ValidationPipe, type INestApplication } fro
 import { Reflector } from '@nestjs/core';
 import { Test, type TestingModule } from '@nestjs/testing';
 
-import { cleanupDatabase, disconnectDatabase } from '../../helpers';
+import { cleanupDatabase, disconnectDatabase } from '@/tests/helpers/database-test-utils';
 
 export class E2ETestHelper {
   private app: INestApplication | null = null;

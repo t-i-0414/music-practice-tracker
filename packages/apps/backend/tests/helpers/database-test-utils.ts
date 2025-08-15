@@ -15,8 +15,13 @@ export const getPrismaClient = (): PrismaClient => {
 
 export const cleanupDatabase = async (): Promise<void> => {
   const client = getPrismaClient();
+  const models = Object.keys(client).filter((key) => {
+    if (key.startsWith('$') || key.startsWith('_')) return false;
+    const prop = (client as any)[key];
+    return prop && typeof prop === 'object' && 'deleteMany' in prop;
+  });
 
-  await client.user.deleteMany({});
+  await Promise.allSettled(models.map((m) => (client as any)[m].deleteMany()));
 };
 
 export const disconnectDatabase = async (): Promise<void> => {

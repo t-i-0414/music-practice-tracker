@@ -4,14 +4,17 @@ import { UserAdminFacadeService } from '@/modules/aggregate/user/user.admin.faca
 import { UserCommandService } from '@/modules/aggregate/user/user.command.service';
 import { UserQueryService } from '@/modules/aggregate/user/user.query.service';
 import { toUserResponseDto, toUsersResponseDto } from '@/modules/aggregate/user/user.response.dto';
-import { buildUserResponseDto } from '@/tests/factory/user.factory';
+import { UserResponseDtoFactory } from '@/tests/factory';
 
 describe('userAdminFacadeService', () => {
   let service: UserAdminFacadeService;
   let commandService: jest.Mocked<UserCommandService>;
   let queryService: jest.Mocked<UserQueryService>;
+  let userResponseDtoFactory: UserResponseDtoFactory;
 
   beforeEach(async () => {
+    userResponseDtoFactory = new UserResponseDtoFactory();
+
     const mockCommandService: jest.Mocked<UserCommandService> = {
       createUser: jest.fn(),
       createManyAndReturnUsers: jest.fn(),
@@ -52,7 +55,7 @@ describe('userAdminFacadeService', () => {
     it('should delegate to query service', async () => {
       expect.assertions(2);
 
-      const expectedResult = buildUserResponseDto();
+      const expectedResult = userResponseDtoFactory.build();
       const dto = { publicId: expectedResult.publicId };
       queryService.findUserByIdOrFail.mockResolvedValue(expectedResult);
 
@@ -67,7 +70,7 @@ describe('userAdminFacadeService', () => {
     it('should delegate to query service', async () => {
       expect.assertions(2);
 
-      const mockUser = buildUserResponseDto();
+      const mockUser = userResponseDtoFactory.build();
       const expectedResult = toUsersResponseDto([mockUser]);
       const dto = { publicIds: [mockUser.publicId] };
       queryService.findManyUsers.mockResolvedValue(expectedResult);
@@ -83,7 +86,7 @@ describe('userAdminFacadeService', () => {
     it('should delegate to command service', async () => {
       expect.assertions(2);
 
-      const mockUser = buildUserResponseDto();
+      const mockUser = userResponseDtoFactory.build();
       const dto = { email: mockUser.email, name: mockUser.name };
       commandService.createUser.mockResolvedValue(mockUser);
 
@@ -98,7 +101,7 @@ describe('userAdminFacadeService', () => {
     it('should delegate to command service', async () => {
       expect.assertions(2);
 
-      const mockUser = buildUserResponseDto();
+      const mockUser = userResponseDtoFactory.build();
       const dto = { users: [{ email: mockUser.email, name: mockUser.name }] };
       const expectedResult = toUsersResponseDto([mockUser]);
       commandService.createManyAndReturnUsers.mockResolvedValue(expectedResult);
@@ -114,7 +117,7 @@ describe('userAdminFacadeService', () => {
     it('should delegate to command service', async () => {
       expect.assertions(2);
 
-      const mockUser = buildUserResponseDto();
+      const mockUser = userResponseDtoFactory.build();
       const dto = { publicId: mockUser.publicId, data: { name: 'Updated Name' } };
       const expectedResult = toUserResponseDto({ ...mockUser, name: 'Updated Name' });
       commandService.updateUserById.mockResolvedValue(expectedResult);
@@ -130,7 +133,7 @@ describe('userAdminFacadeService', () => {
     it('should delegate to command service', async () => {
       expect.assertions(1);
 
-      const mockUser = buildUserResponseDto();
+      const mockUser = userResponseDtoFactory.build();
       const dto = { publicId: mockUser.publicId };
       commandService.deleteUserById.mockResolvedValue();
 

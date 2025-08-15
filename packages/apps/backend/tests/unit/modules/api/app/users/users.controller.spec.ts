@@ -3,13 +3,16 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UserAppFacadeService } from '@/modules/aggregate/user/user.app.facade.service';
 import { toUserResponseDto } from '@/modules/aggregate/user/user.response.dto';
 import { AppUsersController } from '@/modules/api/app/users/users.controller';
-import { buildUserResponseDto } from '@/tests/factory/user.factory';
+import { UserResponseDtoFactory } from '@/tests/factory';
 
 describe('appUsersController', () => {
   let controller: AppUsersController;
   let facadeService: jest.Mocked<UserAppFacadeService>;
+  let userResponseDtoFactory: UserResponseDtoFactory;
 
   beforeEach(async () => {
+    userResponseDtoFactory = new UserResponseDtoFactory();
+
     const mockFacadeService: jest.Mocked<UserAppFacadeService> = {
       findUserById: jest.fn(),
       createUser: jest.fn(),
@@ -39,7 +42,7 @@ describe('appUsersController', () => {
     it('should find user by publicId', async () => {
       expect.assertions(2);
 
-      const mockUser = buildUserResponseDto();
+      const mockUser = userResponseDtoFactory.build();
       const { publicId } = mockUser;
       const expectedResult = toUserResponseDto(mockUser);
       facadeService.findUserById.mockResolvedValue(expectedResult);
@@ -55,7 +58,7 @@ describe('appUsersController', () => {
     it('should create user', async () => {
       expect.assertions(2);
 
-      const mockUser = buildUserResponseDto();
+      const mockUser = userResponseDtoFactory.build();
       const createDto = { email: mockUser.email, name: mockUser.name };
       const expectedResult = toUserResponseDto(mockUser);
       facadeService.createUser.mockResolvedValue(expectedResult);
@@ -71,7 +74,7 @@ describe('appUsersController', () => {
     it('should update user', async () => {
       expect.assertions(2);
 
-      const mockUser = buildUserResponseDto();
+      const mockUser = userResponseDtoFactory.build();
       const { publicId } = mockUser;
       const data = { name: 'Updated Name' };
       const expectedResult = toUserResponseDto({ ...mockUser, name: 'Updated Name' });
