@@ -1,0 +1,36 @@
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
+  EDITOR
+  MODERATOR
+  ANALYST
+  VIEWER
+
+  @@map("admin_role")
+}
+
+enum AdminStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING
+
+  @@map("admin_status")
+}
+
+model AdminUser {
+  id        Int         @id @default(autoincrement())
+  publicId  String      @unique @default(uuid()) @map("public_id") @db.Uuid
+  email     String      @unique
+  name      String
+  role      AdminRole   @default(VIEWER)
+  status    AdminStatus @default(PENDING)
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
+
+  @@index([email])
+  @@index([role])
+  @@index([status])
+  @@index([createdAt])
+  @@map("admin_users")
+}

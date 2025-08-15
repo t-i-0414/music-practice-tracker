@@ -59,6 +59,61 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin-users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get admin users by public IDs or all admin users */
+        get: operations["AdminAdminUsersController_findManyAdminUsers"];
+        put?: never;
+        /** Create a new admin user */
+        post: operations["AdminAdminUsersController_createAdminUser"];
+        /** Delete multiple admin users by public IDs */
+        delete: operations["AdminAdminUsersController_deleteManyAdminUsers"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin-users/{publicId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get an admin user by public ID */
+        get: operations["AdminAdminUsersController_findAdminUserById"];
+        /** Update an admin user by public ID */
+        put: operations["AdminAdminUsersController_updateAdminUser"];
+        post?: never;
+        /** Delete an admin user by public ID */
+        delete: operations["AdminAdminUsersController_deleteAdminUser"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin-users/bulk": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create multiple admin users */
+        post: operations["AdminAdminUsersController_createManyAdminUsers"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -142,6 +197,117 @@ export interface components {
         DeleteManyUsersInputDto: {
             /**
              * @description List of user public IDs
+             * @example [
+             *       "123e4567-e89b-12d3-a456-426614174000",
+             *       "789e1234-e89b-12d3-a456-426614174000"
+             *     ]
+             */
+            publicIds: string[];
+        };
+        AdminUserResponseDto: {
+            /**
+             * Format: uuid
+             * @description The admin user public ID
+             * @example 123e4567-e89b-12d3-a456-426614174000
+             */
+            publicId: string;
+            /**
+             * Format: email
+             * @description The admin user email address
+             * @example admin@example.com
+             */
+            email: string;
+            /**
+             * @description The admin user name
+             * @example Admin User
+             */
+            name: string;
+            /**
+             * @description The admin user role
+             * @example ADMIN
+             * @enum {string}
+             */
+            role: "SUPER_ADMIN" | "ADMIN" | "EDITOR" | "MODERATOR" | "ANALYST" | "VIEWER";
+            /**
+             * @description The admin user status
+             * @example ACTIVE
+             * @enum {string}
+             */
+            status: "ACTIVE" | "INACTIVE" | "SUSPENDED" | "PENDING";
+            /**
+             * Format: date-time
+             * @description The admin user created at timestamp
+             * @example 2024-01-15T09:30:00.000Z
+             */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @description The admin user updated at timestamp
+             * @example 2024-06-16T14:45:30.123Z
+             */
+            updatedAt: string;
+        };
+        AdminUsersResponseDto: {
+            /** @description The list of admin users */
+            adminUsers: components["schemas"]["AdminUserResponseDto"][];
+        };
+        CreateAdminUserInputDto: {
+            /**
+             * Format: email
+             * @description The admin user email address
+             * @example admin@example.com
+             */
+            email: string;
+            /**
+             * @description The admin user name
+             * @example Admin User
+             */
+            name: string;
+            /**
+             * @description The admin user role
+             * @example VIEWER
+             * @enum {string}
+             */
+            role?: "SUPER_ADMIN" | "ADMIN" | "EDITOR" | "MODERATOR" | "ANALYST" | "VIEWER";
+            /**
+             * @description The admin user status
+             * @example PENDING
+             * @enum {string}
+             */
+            status?: "ACTIVE" | "INACTIVE" | "SUSPENDED" | "PENDING";
+        };
+        CreateManyAdminUsersInputDto: {
+            /** @description Admin users to create */
+            adminUsers: components["schemas"]["CreateAdminUserInputDto"][];
+        };
+        UpdateAdminUserDataInputDto: {
+            /**
+             * Format: email
+             * @description The admin user email address
+             * @example admin@example.com
+             */
+            email?: string;
+            /**
+             * @description The admin user name
+             * @example Admin User
+             */
+            name?: string;
+            /**
+             * @description The admin user role
+             * @example ADMIN
+             * @enum {string}
+             */
+            role?: "SUPER_ADMIN" | "ADMIN" | "EDITOR" | "MODERATOR" | "ANALYST" | "VIEWER";
+            /**
+             * @description The admin user status
+             * @example ACTIVE
+             * @enum {string}
+             */
+            status?: "ACTIVE" | "INACTIVE" | "SUSPENDED" | "PENDING";
+        };
+        DeleteManyAdminUsersInputDto: {
+            /**
+             * @description List of admin user public IDs to delete
              * @example [
              *       "123e4567-e89b-12d3-a456-426614174000",
              *       "789e1234-e89b-12d3-a456-426614174000"
@@ -382,6 +548,324 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["UsersResponseDto"];
                 };
+            };
+        };
+    };
+    AdminAdminUsersController_findManyAdminUsers: {
+        parameters: {
+            query?: {
+                /** @description List of admin user public IDs (optional) */
+                publicIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Admin users found */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminUsersResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Admin users not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminAdminUsersController_createAdminUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateAdminUserInputDto"];
+            };
+        };
+        responses: {
+            /** @description The admin user has been successfully created. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminUserResponseDto"];
+                };
+            };
+            /** @description Bad request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminAdminUsersController_deleteManyAdminUsers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeleteManyAdminUsersInputDto"];
+            };
+        };
+        responses: {
+            /** @description Admin users deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminAdminUsersController_findAdminUserById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Admin user public ID */
+                publicId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Admin user found */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminUserResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Admin user not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminAdminUsersController_updateAdminUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Admin user public ID */
+                publicId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateAdminUserDataInputDto"];
+            };
+        };
+        responses: {
+            /** @description Admin user updated successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminUserResponseDto"];
+                };
+            };
+            /** @description Bad request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Admin user not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminAdminUsersController_deleteAdminUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Admin user public ID */
+                publicId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Admin user deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Admin user not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminAdminUsersController_createManyAdminUsers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateManyAdminUsersInputDto"];
+            };
+        };
+        responses: {
+            /** @description Admin users created successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminUsersResponseDto"];
+                };
+            };
+            /** @description Bad request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
