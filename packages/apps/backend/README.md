@@ -101,3 +101,27 @@ NODE_ENV=development
 - Admin API: <http://localhost:3001/api>
 
 (Swagger available in development only)
+
+### API Type Generation
+
+⚠️ **Important**: When API endpoints are modified, client types must be regenerated:
+
+1. Start the backend API server:
+
+   ```bash
+   bun run start:dev
+   ```
+
+2. In the affected client project(s), regenerate the API types:
+
+   ```bash
+   # For Admin Dashboard
+   cd packages/apps/admin
+   bun run gen:api-types
+
+   # For Mobile App
+   cd packages/apps/mobile
+   bun run gen:api-types
+   ```
+
+This ensures TypeScript types stay in sync with the backend API schema.
