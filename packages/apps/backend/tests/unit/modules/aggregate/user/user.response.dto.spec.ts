@@ -1,12 +1,18 @@
 import { UserResponseDto, toUserResponseDto, toUsersResponseDto } from '@/modules/aggregate/user/user.response.dto';
-import { buildUserResponseDto } from '@/tests/factory/user.factory';
+import { UserResponseDtoFactory } from '@/tests/factory';
 
 describe('user response DTOs', () => {
+  let userResponseDtoFactory: UserResponseDtoFactory;
+
+  beforeEach(() => {
+    userResponseDtoFactory = new UserResponseDtoFactory();
+  });
+
   describe('toUserResponseDto', () => {
     it('should transform user to UserResponseDto', () => {
       expect.assertions(7);
 
-      const mockUser = buildUserResponseDto();
+      const mockUser = userResponseDtoFactory.build();
       const result = toUserResponseDto(mockUser);
 
       expect(result).toBeInstanceOf(UserResponseDto);
@@ -21,7 +27,7 @@ describe('user response DTOs', () => {
     it('should exclude extra fields not in DTO', () => {
       expect.assertions(2);
 
-      const mockUser = buildUserResponseDto();
+      const mockUser = userResponseDtoFactory.build();
       const userWithExtraFields = {
         ...mockUser,
         id: 1,
@@ -39,8 +45,8 @@ describe('user response DTOs', () => {
     it('should transform users array to UsersResponseDto', () => {
       expect.assertions(4);
 
-      const mockUser = buildUserResponseDto();
-      const mockUser2 = buildUserResponseDto();
+      const mockUser = userResponseDtoFactory.build();
+      const mockUser2 = userResponseDtoFactory.build();
       const users = [mockUser, mockUser2];
       const result = toUsersResponseDto(users);
 
@@ -62,7 +68,7 @@ describe('user response DTOs', () => {
     it('should transform each user correctly', () => {
       expect.assertions(3);
 
-      const mockUser = buildUserResponseDto();
+      const mockUser = userResponseDtoFactory.build();
       const users = [mockUser, { ...mockUser, publicId: '223e4567-e89b-12d3-a456-426614174001', name: 'Another User' }];
       const result = toUsersResponseDto(users);
 
@@ -76,7 +82,7 @@ describe('user response DTOs', () => {
     it('should have correct class name for UserResponseDto', () => {
       expect.assertions(2);
 
-      const mockUser = buildUserResponseDto();
+      const mockUser = userResponseDtoFactory.build();
       const result = toUserResponseDto(mockUser);
 
       expect(result).toBeInstanceOf(UserResponseDto);
@@ -86,7 +92,7 @@ describe('user response DTOs', () => {
     it('should serialize dates correctly', () => {
       expect.assertions(2);
 
-      const mockUser = buildUserResponseDto();
+      const mockUser = userResponseDtoFactory.build();
       const result = toUserResponseDto(mockUser);
 
       expect(result.createdAt).toBeInstanceOf(Date);

@@ -1,10 +1,9 @@
 import { type INestApplication } from '@nestjs/common';
 import { Test, type TestingModule } from '@nestjs/testing';
 
-import { cleanupDatabase, disconnectDatabase, getPrismaClient } from '../../helpers';
-
 import { RepositoryModule } from '@/modules/repository/repository.module';
 import { RepositoryService } from '@/modules/repository/repository.service';
+import { cleanupDatabase, disconnectDatabase, getPrismaClient } from '@/tests/helpers/database-test-utils';
 
 export class IntegrationTestHelper {
   private app: INestApplication | null = null;

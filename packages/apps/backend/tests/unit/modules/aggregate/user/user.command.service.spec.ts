@@ -4,14 +4,17 @@ import { UserCommandService } from '@/modules/aggregate/user/user.command.servic
 import { UserQueryService } from '@/modules/aggregate/user/user.query.service';
 import { UserRepositoryService } from '@/modules/aggregate/user/user.repository.service';
 import { toUserResponseDto, toUsersResponseDto } from '@/modules/aggregate/user/user.response.dto';
-import { buildUserResponseDto } from '@/tests/factory/user.factory';
+import { UserFactory } from '@/tests/factory';
 
 describe('userCommandService', () => {
   let service: UserCommandService;
   let repository: jest.Mocked<UserRepositoryService>;
   let queryService: jest.Mocked<UserQueryService>;
+  let userFactory: UserFactory;
 
   beforeEach(async () => {
+    userFactory = new UserFactory();
+
     const mockRepository: jest.Mocked<UserRepositoryService> = {
       createUser: jest.fn(),
       createManyAndReturnUsers: jest.fn(),
@@ -51,7 +54,7 @@ describe('userCommandService', () => {
     it('should create and return user', async () => {
       expect.assertions(2);
 
-      const mockUser = buildUserResponseDto();
+      const mockUser = userFactory.build();
       const createDto = { email: mockUser.email, name: mockUser.name };
       repository.createUser.mockResolvedValue({ ...mockUser, id: 1 });
 
@@ -66,8 +69,8 @@ describe('userCommandService', () => {
     it('should create many users and return them', async () => {
       expect.assertions(2);
 
-      const mockUser = buildUserResponseDto();
-      const mockUser2 = buildUserResponseDto();
+      const mockUser = userFactory.build();
+      const mockUser2 = userFactory.build();
       const mockUsers = [mockUser, mockUser2];
       repository.createManyAndReturnUsers.mockResolvedValue([
         { ...mockUser, id: 1 },
@@ -85,7 +88,7 @@ describe('userCommandService', () => {
     it('should update user when user exists', async () => {
       expect.assertions(3);
 
-      const mockUser = buildUserResponseDto();
+      const mockUser = userFactory.build();
       const updateDto = { publicId: mockUser.publicId, data: { name: 'Updated Name' } };
       const updatedUser = { ...mockUser, name: 'Updated Name' };
       queryService.findUserByIdOrFail.mockResolvedValue(toUserResponseDto(mockUser));
@@ -104,7 +107,7 @@ describe('userCommandService', () => {
     it('should throw when user not found', async () => {
       expect.assertions(2);
 
-      const mockUser = buildUserResponseDto();
+      const mockUser = userFactory.build();
       const updateDto = { publicId: mockUser.publicId, data: { name: 'Updated Name' } };
       queryService.findUserByIdOrFail.mockRejectedValue(new Error('User not found'));
 
@@ -117,7 +120,7 @@ describe('userCommandService', () => {
     it('should delete user when user exists', async () => {
       expect.assertions(2);
 
-      const mockUser = buildUserResponseDto();
+      const mockUser = userFactory.build();
       const deleteDto = { publicId: mockUser.publicId };
       queryService.findUserByIdOrFail.mockResolvedValue(toUserResponseDto(mockUser));
       repository.deleteUser.mockResolvedValue();
@@ -131,7 +134,7 @@ describe('userCommandService', () => {
     it('should throw when user not found', async () => {
       expect.assertions(2);
 
-      const mockUser = buildUserResponseDto();
+      const mockUser = userFactory.build();
       const deleteDto = { publicId: mockUser.publicId };
       queryService.findUserByIdOrFail.mockRejectedValue(new Error('User not found'));
 

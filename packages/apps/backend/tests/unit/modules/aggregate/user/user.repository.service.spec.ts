@@ -3,13 +3,16 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Prisma } from '@/generated/prisma';
 import { UserRepositoryService } from '@/modules/aggregate/user/user.repository.service';
 import { RepositoryService } from '@/modules/repository/repository.service';
-import { buildUserResponseDto } from '@/tests/factory/user.factory';
+import { UserFactory } from '@/tests/factory';
 
 describe('userRepositoryService', () => {
   let service: UserRepositoryService;
   let userModel: any;
+  let userFactory: UserFactory;
 
   beforeEach(async () => {
+    userFactory = new UserFactory();
+
     userModel = {
       findUnique: jest.fn(),
       findMany: jest.fn(),
@@ -47,7 +50,7 @@ describe('userRepositoryService', () => {
     it('should find user', async () => {
       expect.assertions(2);
 
-      const mockUser = buildUserResponseDto();
+      const mockUser = userFactory.build();
       userModel.findUnique.mockResolvedValue(mockUser);
       const params = { publicId: mockUser.publicId };
 
@@ -78,7 +81,7 @@ describe('userRepositoryService', () => {
     it('should find many users with pagination', async () => {
       expect.assertions(2);
 
-      const mockUser = buildUserResponseDto();
+      const mockUser = userFactory.build();
       const mockUsers = [mockUser];
       userModel.findMany.mockResolvedValue(mockUsers);
       const params = {
@@ -99,7 +102,7 @@ describe('userRepositoryService', () => {
     it('should create a new user', async () => {
       expect.assertions(2);
 
-      const mockUser = buildUserResponseDto();
+      const mockUser = userFactory.build();
       userModel.create.mockResolvedValue(mockUser);
       const params = { email: mockUser.email, name: mockUser.name };
 
@@ -116,8 +119,8 @@ describe('userRepositoryService', () => {
     it('should create many users and return them', async () => {
       expect.assertions(2);
 
-      const mockUser = buildUserResponseDto();
-      const mockUser2 = buildUserResponseDto();
+      const mockUser = userFactory.build();
+      const mockUser2 = userFactory.build();
       const params = [
         { email: mockUser.email, name: mockUser.name },
         { email: mockUser2.email, name: mockUser2.name },
@@ -138,7 +141,7 @@ describe('userRepositoryService', () => {
     it('should update a user', async () => {
       expect.assertions(2);
 
-      const mockUser = buildUserResponseDto();
+      const mockUser = userFactory.build();
       const updatedUser = { ...mockUser, name: 'Updated Name' };
       userModel.update.mockResolvedValue(updatedUser);
       const params = {
@@ -157,7 +160,7 @@ describe('userRepositoryService', () => {
     it('should delete a user', async () => {
       expect.assertions(2);
 
-      const mockUser = buildUserResponseDto();
+      const mockUser = userFactory.build();
       userModel.delete.mockResolvedValue(mockUser);
       const params = { publicId: mockUser.publicId };
 

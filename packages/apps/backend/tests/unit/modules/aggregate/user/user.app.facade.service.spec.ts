@@ -4,14 +4,17 @@ import { UserAppFacadeService } from '@/modules/aggregate/user/user.app.facade.s
 import { UserCommandService } from '@/modules/aggregate/user/user.command.service';
 import { UserQueryService } from '@/modules/aggregate/user/user.query.service';
 import { toUserResponseDto } from '@/modules/aggregate/user/user.response.dto';
-import { buildUserResponseDto } from '@/tests/factory/user.factory';
+import { UserResponseDtoFactory } from '@/tests/factory';
 
 describe('userAppFacadeService', () => {
   let service: UserAppFacadeService;
   let commandService: jest.Mocked<UserCommandService>;
   let queryService: jest.Mocked<UserQueryService>;
+  let userResponseDtoFactory: UserResponseDtoFactory;
 
   beforeEach(async () => {
+    userResponseDtoFactory = new UserResponseDtoFactory();
+
     const mockCommandService: jest.Mocked<UserCommandService> = {
       createUser: jest.fn(),
       updateUserById: jest.fn(),
@@ -48,7 +51,7 @@ describe('userAppFacadeService', () => {
     it('should delegate to query service', async () => {
       expect.assertions(2);
 
-      const mockUser = buildUserResponseDto();
+      const mockUser = userResponseDtoFactory.build();
       const dto = { publicId: mockUser.publicId };
       const expectedResult = toUserResponseDto(mockUser);
       queryService.findUserByIdOrFail.mockResolvedValue(expectedResult);
@@ -64,7 +67,7 @@ describe('userAppFacadeService', () => {
     it('should delegate to command service', async () => {
       expect.assertions(2);
 
-      const mockUser = buildUserResponseDto();
+      const mockUser = userResponseDtoFactory.build();
       const dto = { email: mockUser.email, name: mockUser.name };
       const expectedResult = toUserResponseDto(mockUser);
       commandService.createUser.mockResolvedValue(expectedResult);
@@ -80,7 +83,7 @@ describe('userAppFacadeService', () => {
     it('should delegate to command service', async () => {
       expect.assertions(2);
 
-      const mockUser = buildUserResponseDto();
+      const mockUser = userResponseDtoFactory.build();
       const dto = { publicId: mockUser.publicId, data: { name: 'Updated Name' } };
       const expectedResult = toUserResponseDto({ ...mockUser, name: 'Updated Name' });
       commandService.updateUserById.mockResolvedValue(expectedResult);
