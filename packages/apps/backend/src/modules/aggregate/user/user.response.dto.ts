@@ -60,6 +60,15 @@ export class UserResponseDto implements Publicize<User> {
   @Type(() => Date)
   @Expose()
   public updatedAt: Date;
+
+  @Exclude()
+  public googleId: string | null;
+
+  @Exclude()
+  public appleId: string | null;
+
+  @Exclude()
+  public passwordHash: string | null;
 }
 
 export function toUserResponseDto(user: unknown): UserResponseDto {
