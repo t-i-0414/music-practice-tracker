@@ -66,4 +66,54 @@ export class UserRepositoryService {
       where: params,
     });
   }
+
+  public async updateUserPassword(userId: number, passwordHash: string): Promise<User> {
+    return this.repository.user.update({
+      where: { id: userId },
+      data: { passwordHash },
+    });
+  }
+
+  public async findUniqueUserByEmail(email: string): Promise<User | null> {
+    return this.repository.user.findUnique({
+      where: { email },
+    });
+  }
+
+  public async createUserWithOAuth(data: Prisma.UserCreateInput): Promise<User> {
+    return this.repository.user.create({
+      data,
+    });
+  }
+
+  public async updateOAuthProvider(
+    userPublicId: string,
+    provider: 'google' | 'apple',
+    providerId: string,
+  ): Promise<User> {
+    const updateData: Prisma.UserUpdateInput = {};
+    if (provider === 'google') {
+      updateData.googleId = providerId;
+    } else {
+      updateData.appleId = providerId;
+    }
+
+    return this.repository.user.update({
+      where: { publicId: userPublicId },
+      data: updateData,
+    });
+  }
+
+  public async findFirstUserByOAuthProvider(provider: 'google' | 'apple', providerId: string): Promise<User | null> {
+    const whereClause: Prisma.UserWhereInput = {};
+    if (provider === 'google') {
+      whereClause.googleId = providerId;
+    } else {
+      whereClause.appleId = providerId;
+    }
+
+    return this.repository.user.findFirst({
+      where: whereClause,
+    });
+  }
 }

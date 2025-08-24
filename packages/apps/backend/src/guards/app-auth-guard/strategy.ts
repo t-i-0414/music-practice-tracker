@@ -5,6 +5,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 
 import { UserStatusRecord } from '@/modules/aggregate/user/user.constants';
 import { UserQueryService } from '@/modules/aggregate/user/user.query.service';
+import { USER_AUTH_TOKEN_CONSTANTS } from '@/modules/aggregate/user-auth-token/user-auth-token.constants';
 
 export type Payload = {
   sub: string;
@@ -21,7 +22,7 @@ export class AppPassportStrategy extends PassportStrategy(Strategy, 'app') {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.getOrThrow<string>('JWT_SECRET'),
+      secretOrKey: configService.getOrThrow<string>(USER_AUTH_TOKEN_CONSTANTS.JWT.SECRET_KEY),
     });
   }
 

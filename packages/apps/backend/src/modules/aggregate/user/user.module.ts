@@ -17,6 +17,6 @@ import { RepositoryModule } from '@/modules/repository/repository.module';
     UserAdminFacadeService,
     UserAppFacadeService,
   ],
-  exports: [UserAdminFacadeService, UserAppFacadeService],
+  exports: [UserAdminFacadeService, UserAppFacadeService, UserQueryService, UserRepositoryService],
 })
 export class UserModule {}
