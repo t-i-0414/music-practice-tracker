@@ -32,12 +32,12 @@ export class UserAuthTokenResponseDto implements Publicize<UserAuthToken> {
   public type: UserAuthTokenType;
 
   @ApiProperty({
-    description: 'The user ID associated with this token',
-    example: 1,
-    type: Number,
+    description: 'The user public ID associated with this token',
+    example: '123e4567-e89b-12d3-a456-426614174001',
+    format: 'uuid',
   })
   @Expose()
-  public userId: number;
+  public userPublicId: string;
 
   @ApiProperty({
     description: 'The token expiration timestamp',

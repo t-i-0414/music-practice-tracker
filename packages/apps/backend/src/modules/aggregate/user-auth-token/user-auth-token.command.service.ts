@@ -111,18 +111,18 @@ export class UserAuthTokenCommandService {
   public async signOut(refreshToken: string): Promise<void> {
     try {
       const authToken = await this.authQuery.findRefreshTokenByTokenOrFail(refreshToken);
-      await this.authRepository.deleteManyUserTokens(authToken.userId, { equals: UserAuthTokenRecord.REFRESH });
+      await this.authRepository.deleteManyUserTokens(authToken.userPublicId, { equals: UserAuthTokenRecord.REFRESH });
     } catch {
       // Silently fail if token is invalid
     }
   }
 
   public async changePassword(
-    userId: number,
+    userPublicId: string,
     currentPassword: string,
     newPassword: string,
   ): Promise<{ accessToken: string; refreshToken: string; expiresIn: number }> {
-    const user = await this.userRepository.findUniqueUser({ id: userId });
+    const user = await this.userRepository.findUniqueUser({ publicId: userPublicId });
 
     if (!user) {
       throw new BadRequestException('User not found');
@@ -136,8 +136,8 @@ export class UserAuthTokenCommandService {
     const bcrypt = await import('bcrypt');
     const passwordHash = await bcrypt.hash(newPassword, 10);
 
-    await this.userRepository.updateUserPassword(userId, passwordHash);
-    await this.authRepository.deleteManyUserTokens(userId, { equals: UserAuthTokenRecord.REFRESH });
+    await this.userRepository.updateUserPassword(userPublicId, passwordHash);
+    await this.authRepository.deleteManyUserTokens(userPublicId, { equals: UserAuthTokenRecord.REFRESH });
 
     return this.generateTokens(user.publicId);
   }

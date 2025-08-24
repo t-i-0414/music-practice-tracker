@@ -49,10 +49,10 @@ export class UserAuthTokenRepositoryService {
     });
   }
 
-  public async deleteManyUserTokens(userId: number, type?: Prisma.EnumTokenTypeFilter): Promise<void> {
+  public async deleteManyUserTokens(userPublicId: string, type?: Prisma.EnumTokenTypeFilter): Promise<void> {
     await this.repository.userAuthToken.deleteMany({
       where: {
-        userId,
+        userPublicId,
         type,
       },
     });
@@ -82,9 +82,9 @@ export class UserAuthTokenRepositoryService {
     }) as Promise<(UserAuthToken & { user: User }) | null>;
   }
 
-  public async findManyAuthTokensByUserId(userId: number): Promise<UserAuthToken[]> {
+  public async findManyAuthTokensByUserId(userPublicId: string): Promise<UserAuthToken[]> {
     return this.repository.userAuthToken.findMany({
-      where: { userId },
+      where: { userPublicId },
     });
   }
 

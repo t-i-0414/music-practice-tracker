@@ -87,7 +87,7 @@ export class AppAuthController {
     @CurrentUser() user: CurrentUserData,
     @Body() body: ChangePasswordInputDto,
   ): Promise<AuthTokenResponseDto> {
-    return this.authFacade.changePassword(user.userId, body);
+    return this.authFacade.changePassword(user.publicId, body);
   }
 
   @Get('me')

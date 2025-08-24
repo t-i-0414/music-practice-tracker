@@ -58,8 +58,8 @@ export class UserAuthTokenAppFacadeService {
     await this.authCommand.signOut(refreshToken);
   }
 
-  public async changePassword(userId: number, input: ChangePasswordInputDto): Promise<AuthTokenResponseDto> {
-    const tokens = await this.authCommand.changePassword(userId, input.currentPassword, input.newPassword);
+  public async changePassword(userPublicId: string, input: ChangePasswordInputDto): Promise<AuthTokenResponseDto> {
+    const tokens = await this.authCommand.changePassword(userPublicId, input.currentPassword, input.newPassword);
 
     return new AuthTokenResponseDto(tokens);
   }

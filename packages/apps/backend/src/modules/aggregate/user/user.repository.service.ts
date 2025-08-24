@@ -67,9 +67,9 @@ export class UserRepositoryService {
     });
   }
 
-  public async updateUserPassword(userId: number, passwordHash: string): Promise<User> {
+  public async updateUserPassword(userPublicId: string, passwordHash: string): Promise<User> {
     return this.repository.user.update({
-      where: { id: userId },
+      where: { publicId: userPublicId },
       data: { passwordHash },
     });
   }

@@ -71,8 +71,8 @@ export class UserAuthTokenQueryService {
     return !!user;
   }
 
-  public async getUserActiveRefreshTokens(userId: number): Promise<UserAuthToken[]> {
-    const tokens = await this.authRepository.findManyAuthTokensByUserId(userId);
+  public async getUserActiveRefreshTokens(userPublicId: string): Promise<UserAuthToken[]> {
+    const tokens = await this.authRepository.findManyAuthTokensByUserId(userPublicId);
 
     return tokens.filter((token) => token.type === 'REFRESH' && token.expiresAt > new Date());
   }
