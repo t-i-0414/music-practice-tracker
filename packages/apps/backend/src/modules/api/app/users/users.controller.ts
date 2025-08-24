@@ -2,6 +2,7 @@ import { Body, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Put } from
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { ApiController } from '@/decorators/api-controller.decorator';
+import { Public } from '@/decorators/public.decorator';
 import { UserAppFacadeService } from '@/modules/aggregate/user/user.app.facade.service';
 import { CreateUserInputDto, UpdateUserDataDto } from '@/modules/aggregate/user/user.input.dto';
 import { UserResponseDto } from '@/modules/aggregate/user/user.response.dto';
@@ -12,6 +13,7 @@ export class AppUsersController {
   public constructor(private readonly userAppFacade: UserAppFacadeService) {}
 
   @Get(':publicId')
+  @Public()
   @ApiOperation({ summary: 'Get a user by public ID' })
   @ApiParam({ name: 'publicId', description: 'User public ID', example: '123e4567-e89b-12d3-a456-426614174000' })
   @ApiResponse({ status: 200, description: 'User found', type: UserResponseDto })
@@ -23,6 +25,7 @@ export class AppUsersController {
   }
 
   @Post()
+  @Public()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new user' })
   @ApiBody({ type: CreateUserInputDto })
@@ -35,6 +38,7 @@ export class AppUsersController {
   }
 
   @Put(':publicId')
+  @Public()
   @ApiOperation({ summary: 'Update a user by public ID' })
   @ApiParam({ name: 'publicId', description: 'User public ID', example: '123e4567-e89b-12d3-a456-426614174000' })
   @ApiBody({ type: UpdateUserDataDto })

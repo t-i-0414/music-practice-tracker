@@ -47,9 +47,14 @@ describe('userCommandService Integration', () => {
 
       const foundUser = await repositoryService.findUniqueUser({ publicId: createdUser.publicId });
 
+      const { appleId, googleId, passwordHash, ...rest } = createdUser;
+
       expect(foundUser).toStrictEqual({
-        ...createdUser,
+        ...rest,
         id: expect.any(Number),
+        appleId: null,
+        googleId: null,
+        passwordHash: null,
       });
     });
   });

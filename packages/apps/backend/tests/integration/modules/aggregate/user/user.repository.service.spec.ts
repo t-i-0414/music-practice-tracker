@@ -41,6 +41,9 @@ describe('userRepositoryService Integration', () => {
         status: 'PENDING',
         createdAt: expect.any(Date),
         updatedAt: expect.any(Date),
+        appleId: null,
+        googleId: null,
+        passwordHash: null,
       });
 
       const foundUser = await service.findUniqueUser({ publicId: createdUser.publicId });
@@ -120,6 +123,9 @@ describe('userRepositoryService Integration', () => {
         status: createdUser.status,
         createdAt: createdUser.createdAt,
         updatedAt: expect.any(Date),
+        appleId: null,
+        googleId: null,
+        passwordHash: null,
       });
       expect(updatedUser.updatedAt.getTime()).toBeGreaterThan(createdUser.updatedAt.getTime());
     });
