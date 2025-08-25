@@ -1,21 +1,25 @@
 import { Body, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Put, Query } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-import { ApiController } from '@/decorators/api-controller.decorator';
-import { UserAdminFacadeService } from '@/aggregates/user/user.admin.facade.service';
+import { UserCommandService } from '@/aggregates/user/user.command.service';
 import {
   CreateManyUsersInputDto,
   CreateUserInputDto,
   DeleteManyUsersInputDto,
   UpdateUserDataDto,
 } from '@/aggregates/user/user.input.dto';
+import { UserQueryService } from '@/aggregates/user/user.query.service';
 import { UserResponseDto, UsersResponseDto } from '@/aggregates/user/user.response.dto';
+import { ApiController } from '@/decorators/api-controller.decorator';
 import { ensurePublicIdsToArray } from '@/utils/ensure-public-ids-to-array';
 
 @ApiTags('users')
 @ApiController('users')
 export class AdminUsersController {
-  public constructor(private readonly userAdminFacade: UserAdminFacadeService) {}
+  public constructor(
+    private readonly userQuery: UserQueryService,
+    private readonly userCommand: UserCommandService,
+  ) {}
 
   @Get()
   @ApiOperation({ summary: 'Get users by public IDs' })
@@ -33,7 +37,7 @@ export class AdminUsersController {
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Users not found' })
   public async findManyUsers(@Query('publicIds') publicIds: string | string[]): Promise<UsersResponseDto> {
-    return this.userAdminFacade.findManyUsers({ publicIds: ensurePublicIdsToArray(publicIds) });
+    return this.userQuery.findManyUsers({ publicIds: ensurePublicIdsToArray(publicIds) });
   }
 
   @Get(':publicId')
@@ -44,7 +48,7 @@ export class AdminUsersController {
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'User not found' })
   public async findUserById(@Param('publicId', new ParseUUIDPipe()) publicId: string): Promise<UserResponseDto> {
-    return this.userAdminFacade.findUserById({ publicId });
+    return this.userQuery.findUserByIdOrFail({ publicId });
   }
 
   @Post()
@@ -56,7 +60,7 @@ export class AdminUsersController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   public async createUser(@Body() body: CreateUserInputDto): Promise<UserResponseDto> {
-    return this.userAdminFacade.createUser(body);
+    return this.userCommand.createUser(body);
   }
 
   @Post('bulk')
@@ -65,7 +69,7 @@ export class AdminUsersController {
   @ApiBody({ type: CreateManyUsersInputDto })
   @ApiResponse({ status: 201, description: 'Users created successfully', type: UsersResponseDto })
   public async createManyUsers(@Body() body: CreateManyUsersInputDto): Promise<UsersResponseDto> {
-    return this.userAdminFacade.createManyAndReturnUsers(body);
+    return this.userCommand.createManyAndReturnUsers(body);
   }
 
   @Put(':publicId')
@@ -77,7 +81,7 @@ export class AdminUsersController {
     @Param('publicId', new ParseUUIDPipe()) publicId: string,
     @Body() data: UpdateUserDataDto,
   ): Promise<UserResponseDto> {
-    return this.userAdminFacade.updateUserById({ publicId, data });
+    return this.userCommand.updateUserById({ publicId, data });
   }
 
   @Delete()
@@ -86,7 +90,7 @@ export class AdminUsersController {
   @ApiResponse({ status: 204, description: 'Users deleted' })
   @HttpCode(HttpStatus.NO_CONTENT)
   public async deleteManyUsers(@Body() body: DeleteManyUsersInputDto): Promise<void> {
-    return this.userAdminFacade.deleteManyUsersById(body);
+    await this.userCommand.deleteManyUsersById(body);
   }
 
   @Delete(':publicId')
@@ -95,6 +99,6 @@ export class AdminUsersController {
   @ApiResponse({ status: 204, description: 'User deleted' })
   @HttpCode(HttpStatus.NO_CONTENT)
   public async deleteUser(@Param('publicId', new ParseUUIDPipe()) publicId: string): Promise<void> {
-    return this.userAdminFacade.deleteUserById({ publicId });
+    await this.userCommand.deleteUserById({ publicId });
   }
 }

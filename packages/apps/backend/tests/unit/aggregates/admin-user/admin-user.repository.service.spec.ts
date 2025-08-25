@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { Prisma } from '@/generated/prisma';
 import { AdminUserRepositoryService } from '@/aggregates/admin-user/admin-user.repository.service';
+import { Prisma } from '@/generated/prisma';
 import { RepositoryService } from '@/repository/repository.service';
 import { AdminUserFactory } from '@/tests/factory';
 

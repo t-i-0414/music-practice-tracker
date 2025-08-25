@@ -1,25 +1,30 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { AdminRole } from '@/generated/prisma';
-import { AdminUserAdminFacadeService } from '@/aggregates/admin-user/admin-user.admin.facade.service';
+import { AdminUserCommandService } from '@/aggregates/admin-user/admin-user.command.service';
 import { CreateAdminUserInputDto, UpdateAdminUserInputDto } from '@/aggregates/admin-user/admin-user.input.dto';
+import { AdminUserQueryService } from '@/aggregates/admin-user/admin-user.query.service';
 import { toAdminUserResponseDto, toAdminUsersResponseDto } from '@/aggregates/admin-user/admin-user.response.dto';
 import { AdminAdminUsersController } from '@/apis/admin/admin-users/admin-users.controller';
+import { AdminRole } from '@/generated/prisma';
 import { AdminUserFactory } from '@/tests/factory';
 
 describe('admin admin users controller', () => {
   let controller: AdminAdminUsersController;
-  let facadeService: jest.Mocked<AdminUserAdminFacadeService>;
+  let queryService: jest.Mocked<AdminUserQueryService>;
+  let commandService: jest.Mocked<AdminUserCommandService>;
   let adminUserFactory: AdminUserFactory;
 
   beforeEach(async () => {
     adminUserFactory = new AdminUserFactory();
 
-    const mockFacadeService = {
-      findAdminUserById: jest.fn(),
+    const mockQueryService = {
+      findAdminUserByIdOrFail: jest.fn(),
       findManyAdminUsers: jest.fn(),
       findAllAdminUsers: jest.fn(),
+    };
+
+    const mockCommandService = {
       createAdminUser: jest.fn(),
       createManyAndReturnAdminUsers: jest.fn(),
       updateAdminUserById: jest.fn(),
@@ -31,14 +36,19 @@ describe('admin admin users controller', () => {
       controllers: [AdminAdminUsersController],
       providers: [
         {
-          provide: AdminUserAdminFacadeService,
-          useValue: mockFacadeService,
+          provide: AdminUserQueryService,
+          useValue: mockQueryService,
+        },
+        {
+          provide: AdminUserCommandService,
+          useValue: mockCommandService,
         },
       ],
     }).compile();
 
     controller = module.get<AdminAdminUsersController>(AdminAdminUsersController);
-    facadeService = module.get(AdminUserAdminFacadeService);
+    queryService = module.get(AdminUserQueryService);
+    commandService = module.get(AdminUserCommandService);
   });
 
   afterEach(() => {
@@ -51,11 +61,11 @@ describe('admin admin users controller', () => {
 
       const mockAdminUsers = [adminUserFactory.build(), adminUserFactory.build()];
       const mockResponse = toAdminUsersResponseDto(mockAdminUsers);
-      facadeService.findAllAdminUsers.mockResolvedValue(mockResponse);
+      queryService.findAllAdminUsers.mockResolvedValue(mockResponse);
 
       const result = await controller.findManyAdminUsers(undefined);
 
-      expect(facadeService.findAllAdminUsers).toHaveBeenCalledWith();
+      expect(queryService.findAllAdminUsers).toHaveBeenCalledWith();
       expect(result).toStrictEqual(mockResponse);
     });
 
@@ -65,11 +75,11 @@ describe('admin admin users controller', () => {
       const mockAdminUsers = [adminUserFactory.build(), adminUserFactory.build()];
       const publicIds = mockAdminUsers.map((user) => user.publicId);
       const mockResponse = toAdminUsersResponseDto(mockAdminUsers);
-      facadeService.findManyAdminUsers.mockResolvedValue(mockResponse);
+      queryService.findManyAdminUsers.mockResolvedValue(mockResponse);
 
       const result = await controller.findManyAdminUsers(publicIds);
 
-      expect(facadeService.findManyAdminUsers).toHaveBeenCalledWith({ publicIds });
+      expect(queryService.findManyAdminUsers).toHaveBeenCalledWith({ publicIds });
       expect(result).toStrictEqual(mockResponse);
     });
 
@@ -79,11 +89,11 @@ describe('admin admin users controller', () => {
       const mockAdminUser = adminUserFactory.build();
       const { publicId } = mockAdminUser;
       const mockResponse = toAdminUsersResponseDto([mockAdminUser]);
-      facadeService.findManyAdminUsers.mockResolvedValue(mockResponse);
+      queryService.findManyAdminUsers.mockResolvedValue(mockResponse);
 
       const result = await controller.findManyAdminUsers(publicId);
 
-      expect(facadeService.findManyAdminUsers).toHaveBeenCalledWith({ publicIds: [publicId] });
+      expect(queryService.findManyAdminUsers).toHaveBeenCalledWith({ publicIds: [publicId] });
       expect(result).toStrictEqual(mockResponse);
     });
   });
@@ -94,11 +104,11 @@ describe('admin admin users controller', () => {
 
       const mockAdminUser = adminUserFactory.build();
       const mockResponseDto = toAdminUserResponseDto(mockAdminUser);
-      facadeService.findAdminUserById.mockResolvedValue(mockResponseDto);
+      queryService.findAdminUserByIdOrFail.mockResolvedValue(mockResponseDto);
 
       const result = await controller.findAdminUserById(mockAdminUser.publicId);
 
-      expect(facadeService.findAdminUserById).toHaveBeenCalledWith({ publicId: mockAdminUser.publicId });
+      expect(queryService.findAdminUserByIdOrFail).toHaveBeenCalledWith({ publicId: mockAdminUser.publicId });
       expect(result).toStrictEqual(mockResponseDto);
     });
 
@@ -106,10 +116,10 @@ describe('admin admin users controller', () => {
       expect.assertions(2);
 
       const publicId = 'non-existent-id';
-      facadeService.findAdminUserById.mockRejectedValue(new NotFoundException('AdminUser not found'));
+      queryService.findAdminUserByIdOrFail.mockRejectedValue(new NotFoundException('AdminUser not found'));
 
       await expect(controller.findAdminUserById(publicId)).rejects.toThrow(NotFoundException);
-      expect(facadeService.findAdminUserById).toHaveBeenCalledWith({ publicId });
+      expect(queryService.findAdminUserByIdOrFail).toHaveBeenCalledWith({ publicId });
     });
   });
 
@@ -124,11 +134,11 @@ describe('admin admin users controller', () => {
       };
       const mockAdminUser = adminUserFactory.build(createDto);
       const mockResponseDto = toAdminUserResponseDto(mockAdminUser);
-      facadeService.createAdminUser.mockResolvedValue(mockResponseDto);
+      commandService.createAdminUser.mockResolvedValue(mockResponseDto);
 
       const result = await controller.createAdminUser(createDto);
 
-      expect(facadeService.createAdminUser).toHaveBeenCalledWith(createDto);
+      expect(commandService.createAdminUser).toHaveBeenCalledWith(createDto);
       expect(result).toStrictEqual(mockResponseDto);
     });
   });
@@ -156,11 +166,11 @@ describe('admin admin users controller', () => {
         adminUserFactory.build(createDto.adminUsers[1]),
       ];
       const mockResponse = toAdminUsersResponseDto(mockAdminUsers);
-      facadeService.createManyAndReturnAdminUsers.mockResolvedValue(mockResponse);
+      commandService.createManyAndReturnAdminUsers.mockResolvedValue(mockResponse);
 
       const result = await controller.createManyAdminUsers(createDto);
 
-      expect(facadeService.createManyAndReturnAdminUsers).toHaveBeenCalledWith(createDto);
+      expect(commandService.createManyAndReturnAdminUsers).toHaveBeenCalledWith(createDto);
       expect(result).toStrictEqual(mockResponse);
     });
   });
@@ -182,11 +192,11 @@ describe('admin admin users controller', () => {
         ...updateDto.data,
       });
       const mockResponseDto = toAdminUserResponseDto(mockUpdatedAdminUser);
-      facadeService.updateAdminUserById.mockResolvedValue(mockResponseDto);
+      commandService.updateAdminUserById.mockResolvedValue(mockResponseDto);
 
       const result = await controller.updateAdminUser(publicId, updateDto.data);
 
-      expect(facadeService.updateAdminUserById).toHaveBeenCalledWith({ publicId, data: updateDto.data });
+      expect(commandService.updateAdminUserById).toHaveBeenCalledWith({ publicId, data: updateDto.data });
       expect(result).toStrictEqual(mockResponseDto);
     });
   });
@@ -196,12 +206,12 @@ describe('admin admin users controller', () => {
       expect.assertions(2);
 
       const publicId = 'admin-public-id';
-      facadeService.deleteAdminUserById.mockResolvedValue(undefined);
+      commandService.deleteAdminUserById.mockResolvedValue(undefined);
 
       await controller.deleteAdminUser(publicId);
 
-      expect(facadeService.deleteAdminUserById).toHaveBeenCalledWith({ publicId });
-      expect(facadeService.deleteAdminUserById).toHaveBeenCalledTimes(1);
+      expect(commandService.deleteAdminUserById).toHaveBeenCalledWith({ publicId });
+      expect(commandService.deleteAdminUserById).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -211,12 +221,12 @@ describe('admin admin users controller', () => {
 
       const publicIds = ['id1', 'id2', 'id3'];
       const deleteDto = { publicIds };
-      facadeService.deleteManyAdminUsersById.mockResolvedValue(undefined);
+      commandService.deleteManyAdminUsersById.mockResolvedValue(undefined);
 
       await controller.deleteManyAdminUsers(deleteDto);
 
-      expect(facadeService.deleteManyAdminUsersById).toHaveBeenCalledWith(deleteDto);
-      expect(facadeService.deleteManyAdminUsersById).toHaveBeenCalledTimes(1);
+      expect(commandService.deleteManyAdminUsersById).toHaveBeenCalledWith(deleteDto);
+      expect(commandService.deleteManyAdminUsersById).toHaveBeenCalledTimes(1);
     });
   });
 });

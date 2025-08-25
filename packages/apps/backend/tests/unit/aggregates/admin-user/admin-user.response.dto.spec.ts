@@ -1,12 +1,12 @@
 import { plainToInstance } from 'class-transformer';
 
-import { AdminRole, AdminStatus } from '@/generated/prisma';
 import {
   AdminUserResponseDto,
   AdminUsersResponseDto,
   toAdminUserResponseDto,
   toAdminUsersResponseDto,
 } from '@/aggregates/admin-user/admin-user.response.dto';
+import { AdminRole, AdminStatus } from '@/generated/prisma';
 import { AdminUserFactory } from '@/tests/factory';
 
 describe('adminUserResponseDto', () => {

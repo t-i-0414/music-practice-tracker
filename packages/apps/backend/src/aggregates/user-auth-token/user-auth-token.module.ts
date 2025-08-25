@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 
-import { UserAuthTokenAppFacadeService } from './user-auth-token.app.facade.service';
 import { UserAuthTokenCommandService } from './user-auth-token.command.service';
 import { USER_AUTH_TOKEN_CONSTANTS } from './user-auth-token.constants';
 import { UserAuthTokenQueryService } from './user-auth-token.query.service';
@@ -24,12 +23,7 @@ import { RepositoryModule } from '@/repository/repository.module';
       inject: [ConfigService],
     }),
   ],
-  providers: [
-    UserAuthTokenRepositoryService,
-    UserAuthTokenQueryService,
-    UserAuthTokenCommandService,
-    UserAuthTokenAppFacadeService,
-  ],
-  exports: [UserAuthTokenAppFacadeService, UserAuthTokenQueryService, JwtModule],
+  providers: [UserAuthTokenRepositoryService, UserAuthTokenQueryService, UserAuthTokenCommandService],
+  exports: [UserAuthTokenQueryService, UserAuthTokenCommandService, JwtModule],
 })
 export class UserAuthTokenModule {}

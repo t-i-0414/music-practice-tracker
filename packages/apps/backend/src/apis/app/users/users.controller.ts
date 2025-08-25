@@ -1,16 +1,20 @@
 import { Body, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Put } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 
+import { UserCommandService } from '@/aggregates/user/user.command.service';
+import { CreateUserInputDto, UpdateUserDataDto } from '@/aggregates/user/user.input.dto';
+import { UserQueryService } from '@/aggregates/user/user.query.service';
+import { UserResponseDto } from '@/aggregates/user/user.response.dto';
 import { ApiController } from '@/decorators/api-controller.decorator';
 import { Public } from '@/decorators/public.decorator';
-import { UserAppFacadeService } from '@/aggregates/user/user.app.facade.service';
-import { CreateUserInputDto, UpdateUserDataDto } from '@/aggregates/user/user.input.dto';
-import { UserResponseDto } from '@/aggregates/user/user.response.dto';
 
 @ApiTags('users')
 @ApiController('users')
 export class AppUsersController {
-  public constructor(private readonly userAppFacade: UserAppFacadeService) {}
+  public constructor(
+    private readonly userQuery: UserQueryService,
+    private readonly userCommand: UserCommandService,
+  ) {}
 
   @Get(':publicId')
   @Public()
@@ -21,7 +25,7 @@ export class AppUsersController {
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'User not found' })
   public async findUserById(@Param('publicId', new ParseUUIDPipe()) publicId: string): Promise<UserResponseDto> {
-    return this.userAppFacade.findUserById({ publicId });
+    return this.userQuery.findUserByIdOrFail({ publicId });
   }
 
   @Post()
@@ -34,7 +38,7 @@ export class AppUsersController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   public async createUser(@Body() body: CreateUserInputDto): Promise<UserResponseDto> {
-    return this.userAppFacade.createUser(body);
+    return this.userCommand.createUser(body);
   }
 
   @Put(':publicId')
@@ -47,6 +51,6 @@ export class AppUsersController {
     @Param('publicId', new ParseUUIDPipe()) publicId: string,
     @Body() data: UpdateUserDataDto,
   ): Promise<UserResponseDto> {
-    return this.userAppFacade.updateUserById({ publicId, data });
+    return this.userCommand.updateUserById({ publicId, data });
   }
 }

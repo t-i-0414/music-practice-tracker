@@ -2,9 +2,9 @@ import { faker } from '@faker-js/faker';
 
 import { BaseFactory } from './base-factory';
 
+import type { UserResponseDto } from '@/aggregates/user/user.response.dto';
 import type { User } from '@/generated/prisma';
 import { UserStatus } from '@/generated/prisma';
-import type { UserResponseDto } from '@/aggregates/user/user.response.dto';
 
 const DEFAULT_USER = {
   status: UserStatus.ACTIVE,

@@ -1,37 +1,46 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { UserAppFacadeService } from '@/aggregates/user/user.app.facade.service';
+import { UserCommandService } from '@/aggregates/user/user.command.service';
+import { UserQueryService } from '@/aggregates/user/user.query.service';
 import { toUserResponseDto } from '@/aggregates/user/user.response.dto';
 import { AppUsersController } from '@/apis/app/users/users.controller';
 import { UserResponseDtoFactory } from '@/tests/factory';
 
 describe('appUsersController', () => {
   let controller: AppUsersController;
-  let facadeService: jest.Mocked<UserAppFacadeService>;
+  let queryService: jest.Mocked<UserQueryService>;
+  let commandService: jest.Mocked<UserCommandService>;
   let userResponseDtoFactory: UserResponseDtoFactory;
 
   beforeEach(async () => {
     userResponseDtoFactory = new UserResponseDtoFactory();
 
-    const mockFacadeService: jest.Mocked<UserAppFacadeService> = {
-      findUserById: jest.fn(),
+    const mockQueryService = {
+      findUserByIdOrFail: jest.fn(),
+    };
+
+    const mockCommandService = {
       createUser: jest.fn(),
       updateUserById: jest.fn(),
-      deleteUserById: jest.fn(),
-    } as any;
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AppUsersController],
       providers: [
         {
-          provide: UserAppFacadeService,
-          useValue: mockFacadeService,
+          provide: UserQueryService,
+          useValue: mockQueryService,
+        },
+        {
+          provide: UserCommandService,
+          useValue: mockCommandService,
         },
       ],
     }).compile();
 
     controller = module.get<AppUsersController>(AppUsersController);
-    facadeService = module.get(UserAppFacadeService);
+    queryService = module.get(UserQueryService);
+    commandService = module.get(UserCommandService);
   });
 
   afterEach(() => {
@@ -45,11 +54,11 @@ describe('appUsersController', () => {
       const mockUser = userResponseDtoFactory.build();
       const { publicId } = mockUser;
       const expectedResult = toUserResponseDto(mockUser);
-      facadeService.findUserById.mockResolvedValue(expectedResult);
+      queryService.findUserByIdOrFail.mockResolvedValue(expectedResult);
 
       const result = await controller.findUserById(publicId);
 
-      expect(facadeService.findUserById).toHaveBeenCalledWith({ publicId });
+      expect(queryService.findUserByIdOrFail).toHaveBeenCalledWith({ publicId });
       expect(result).toStrictEqual(expectedResult);
     });
   });
@@ -61,11 +70,11 @@ describe('appUsersController', () => {
       const mockUser = userResponseDtoFactory.build();
       const createDto = { email: mockUser.email, name: mockUser.name };
       const expectedResult = toUserResponseDto(mockUser);
-      facadeService.createUser.mockResolvedValue(expectedResult);
+      commandService.createUser.mockResolvedValue(expectedResult);
 
       const result = await controller.createUser(createDto);
 
-      expect(facadeService.createUser).toHaveBeenCalledWith(createDto);
+      expect(commandService.createUser).toHaveBeenCalledWith(createDto);
       expect(result).toStrictEqual(expectedResult);
     });
   });
@@ -78,11 +87,11 @@ describe('appUsersController', () => {
       const { publicId } = mockUser;
       const data = { name: 'Updated Name' };
       const expectedResult = toUserResponseDto({ ...mockUser, name: 'Updated Name' });
-      facadeService.updateUserById.mockResolvedValue(expectedResult);
+      commandService.updateUserById.mockResolvedValue(expectedResult);
 
       const result = await controller.updateUser(publicId, data);
 
-      expect(facadeService.updateUserById).toHaveBeenCalledWith({ publicId, data });
+      expect(commandService.updateUserById).toHaveBeenCalledWith({ publicId, data });
       expect(result).toStrictEqual(expectedResult);
     });
   });

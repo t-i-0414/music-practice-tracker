@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { AdminRole } from '@/generated/prisma';
 import { AdminUserCommandService } from '@/aggregates/admin-user/admin-user.command.service';
 import { AdminUserQueryService } from '@/aggregates/admin-user/admin-user.query.service';
 import { AdminUserRepositoryService } from '@/aggregates/admin-user/admin-user.repository.service';
 import { toAdminUserResponseDto, toAdminUsersResponseDto } from '@/aggregates/admin-user/admin-user.response.dto';
+import { AdminRole } from '@/generated/prisma';
 import { AdminUserFactory } from '@/tests/factory';
 
 describe('adminUserCommandService', () => {

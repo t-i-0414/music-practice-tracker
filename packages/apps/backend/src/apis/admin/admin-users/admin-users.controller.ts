@@ -1,21 +1,25 @@
 import { Body, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Put, Query } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-import { ApiController } from '@/decorators/api-controller.decorator';
-import { AdminUserAdminFacadeService } from '@/aggregates/admin-user/admin-user.admin.facade.service';
+import { AdminUserCommandService } from '@/aggregates/admin-user/admin-user.command.service';
 import {
   CreateManyAdminUsersInputDto,
   CreateAdminUserInputDto,
   DeleteManyAdminUsersInputDto,
   UpdateAdminUserDataInputDto,
 } from '@/aggregates/admin-user/admin-user.input.dto';
+import { AdminUserQueryService } from '@/aggregates/admin-user/admin-user.query.service';
 import { AdminUserResponseDto, AdminUsersResponseDto } from '@/aggregates/admin-user/admin-user.response.dto';
+import { ApiController } from '@/decorators/api-controller.decorator';
 import { ensurePublicIdsToArray } from '@/utils/ensure-public-ids-to-array';
 
 @ApiTags('admin-users')
 @ApiController('admin-users')
 export class AdminAdminUsersController {
-  public constructor(private readonly adminUserAdminFacade: AdminUserAdminFacadeService) {}
+  public constructor(
+    private readonly adminUserQuery: AdminUserQueryService,
+    private readonly adminUserCommand: AdminUserCommandService,
+  ) {}
 
   @Get()
   @ApiOperation({ summary: 'Get admin users by public IDs or all admin users' })
@@ -35,9 +39,9 @@ export class AdminAdminUsersController {
   @ApiResponse({ status: 404, description: 'Admin users not found' })
   public async findManyAdminUsers(@Query('publicIds') publicIds?: string | string[]): Promise<AdminUsersResponseDto> {
     if (publicIds !== undefined) {
-      return this.adminUserAdminFacade.findManyAdminUsers({ publicIds: ensurePublicIdsToArray(publicIds) });
+      return this.adminUserQuery.findManyAdminUsers({ publicIds: ensurePublicIdsToArray(publicIds) });
     }
-    return this.adminUserAdminFacade.findAllAdminUsers();
+    return this.adminUserQuery.findAllAdminUsers();
   }
 
   @Get(':publicId')
@@ -50,7 +54,7 @@ export class AdminAdminUsersController {
   public async findAdminUserById(
     @Param('publicId', new ParseUUIDPipe()) publicId: string,
   ): Promise<AdminUserResponseDto> {
-    return this.adminUserAdminFacade.findAdminUserById({ publicId });
+    return this.adminUserQuery.findAdminUserByIdOrFail({ publicId });
   }
 
   @Post()
@@ -66,7 +70,7 @@ export class AdminAdminUsersController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   public async createAdminUser(@Body() body: CreateAdminUserInputDto): Promise<AdminUserResponseDto> {
-    return this.adminUserAdminFacade.createAdminUser(body);
+    return this.adminUserCommand.createAdminUser(body);
   }
 
   @Post('bulk')
@@ -78,7 +82,7 @@ export class AdminAdminUsersController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   public async createManyAdminUsers(@Body() body: CreateManyAdminUsersInputDto): Promise<AdminUsersResponseDto> {
-    return this.adminUserAdminFacade.createManyAndReturnAdminUsers(body);
+    return this.adminUserCommand.createManyAndReturnAdminUsers(body);
   }
 
   @Put(':publicId')
@@ -94,7 +98,7 @@ export class AdminAdminUsersController {
     @Param('publicId', new ParseUUIDPipe()) publicId: string,
     @Body() data: UpdateAdminUserDataInputDto,
   ): Promise<AdminUserResponseDto> {
-    return this.adminUserAdminFacade.updateAdminUserById({ publicId, data });
+    return this.adminUserCommand.updateAdminUserById({ publicId, data });
   }
 
   @Delete()
@@ -106,7 +110,7 @@ export class AdminAdminUsersController {
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @HttpCode(HttpStatus.NO_CONTENT)
   public async deleteManyAdminUsers(@Body() body: DeleteManyAdminUsersInputDto): Promise<void> {
-    return this.adminUserAdminFacade.deleteManyAdminUsersById(body);
+    await this.adminUserCommand.deleteManyAdminUsersById(body);
   }
 
   @Delete(':publicId')
@@ -118,6 +122,6 @@ export class AdminAdminUsersController {
   @ApiResponse({ status: 404, description: 'Admin user not found' })
   @HttpCode(HttpStatus.NO_CONTENT)
   public async deleteAdminUser(@Param('publicId', new ParseUUIDPipe()) publicId: string): Promise<void> {
-    return this.adminUserAdminFacade.deleteAdminUserById({ publicId });
+    await this.adminUserCommand.deleteAdminUserById({ publicId });
   }
 }

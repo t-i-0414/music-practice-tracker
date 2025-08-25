@@ -1,11 +1,7 @@
 import { Body, Post, HttpCode, HttpStatus, UseGuards, Get } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
-import { ApiController } from '@/decorators/api-controller.decorator';
-import { CurrentUser, CurrentUserData } from '@/decorators/current-user.decorator';
-import { Public } from '@/decorators/public.decorator';
-import { AppAuthGuard } from '@/guards/app-auth-guard/guard';
-import { UserAuthTokenAppFacadeService } from '@/aggregates/user-auth-token/user-auth-token.app.facade.service';
+import { UserAuthTokenCommandService } from '@/aggregates/user-auth-token/user-auth-token.command.service';
 import {
   SignUpInputDto,
   SignInInputDto,
@@ -14,12 +10,16 @@ import {
   OAuthSignInInputDto,
 } from '@/aggregates/user-auth-token/user-auth-token.input.dto';
 import { AuthTokenResponseDto } from '@/aggregates/user-auth-token/user-auth-token.response.dto';
+import { ApiController } from '@/decorators/api-controller.decorator';
+import { CurrentUser, CurrentUserData } from '@/decorators/current-user.decorator';
+import { Public } from '@/decorators/public.decorator';
+import { AppAuthGuard } from '@/guards/app-auth-guard/guard';
 
 @ApiTags('auth')
 @ApiController('auth')
 @UseGuards(AppAuthGuard)
 export class AppAuthController {
-  public constructor(private readonly authFacade: UserAuthTokenAppFacadeService) {}
+  public constructor(private readonly authCommand: UserAuthTokenCommandService) {}
 
   @Post('signup')
   @Public()
@@ -29,7 +29,12 @@ export class AppAuthController {
   @ApiResponse({ status: 201, description: 'User successfully registered', type: AuthTokenResponseDto })
   @ApiResponse({ status: 400, description: 'Bad request' })
   public async signUp(@Body() body: SignUpInputDto): Promise<AuthTokenResponseDto> {
-    return this.authFacade.signUp(body);
+    const tokens = await this.authCommand.signUp({
+      email: body.email,
+      password: body.password,
+      name: body.name,
+    });
+    return new AuthTokenResponseDto(tokens);
   }
 
   @Post('signin')
@@ -40,7 +45,11 @@ export class AppAuthController {
   @ApiResponse({ status: 200, description: 'Successfully signed in', type: AuthTokenResponseDto })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   public async signIn(@Body() body: SignInInputDto): Promise<AuthTokenResponseDto> {
-    return this.authFacade.signIn(body);
+    const tokens = await this.authCommand.signIn({
+      email: body.email,
+      password: body.password,
+    });
+    return new AuthTokenResponseDto(tokens);
   }
 
   @Post('oauth/signin')
@@ -51,7 +60,13 @@ export class AppAuthController {
   @ApiResponse({ status: 200, description: 'Successfully signed in', type: AuthTokenResponseDto })
   @ApiResponse({ status: 400, description: 'Bad request' })
   public async signInWithOAuth(@Body() body: OAuthSignInInputDto): Promise<AuthTokenResponseDto> {
-    return this.authFacade.signInWithOAuth(body);
+    const tokens = await this.authCommand.signInWithOAuth({
+      provider: body.provider,
+      providerId: body.providerId,
+      email: body.email,
+      name: body.name,
+    });
+    return new AuthTokenResponseDto(tokens);
   }
 
   @Post('refresh')
@@ -62,7 +77,8 @@ export class AppAuthController {
   @ApiResponse({ status: 200, description: 'Token refreshed successfully', type: AuthTokenResponseDto })
   @ApiResponse({ status: 401, description: 'Invalid refresh token' })
   public async refreshToken(@Body() body: RefreshTokenInputDto): Promise<AuthTokenResponseDto> {
-    return this.authFacade.refreshToken(body);
+    const tokens = await this.authCommand.refreshTokens(body.refreshToken);
+    return new AuthTokenResponseDto(tokens);
   }
 
   @Post('signout')
@@ -72,7 +88,7 @@ export class AppAuthController {
   @ApiBody({ schema: { type: 'object', properties: { refreshToken: { type: 'string' } } } })
   @ApiResponse({ status: 204, description: 'Successfully signed out' })
   public async signOut(@Body('refreshToken') refreshToken: string): Promise<void> {
-    await this.authFacade.signOut(refreshToken);
+    await this.authCommand.signOut(refreshToken);
   }
 
   @Post('change-password')
@@ -87,7 +103,8 @@ export class AppAuthController {
     @CurrentUser() user: CurrentUserData,
     @Body() body: ChangePasswordInputDto,
   ): Promise<AuthTokenResponseDto> {
-    return this.authFacade.changePassword(user.publicId, body);
+    const tokens = await this.authCommand.changePassword(user.publicId, body.currentPassword, body.newPassword);
+    return new AuthTokenResponseDto(tokens);
   }
 
   @Get('me')

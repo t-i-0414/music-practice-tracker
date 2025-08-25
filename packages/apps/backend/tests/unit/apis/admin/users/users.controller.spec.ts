@@ -1,46 +1,50 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { UserAdminFacadeService } from '@/aggregates/user/user.admin.facade.service';
+import { UserCommandService } from '@/aggregates/user/user.command.service';
+import { UserQueryService } from '@/aggregates/user/user.query.service';
 import { toUserResponseDto, toUsersResponseDto } from '@/aggregates/user/user.response.dto';
 import { AdminUsersController } from '@/apis/admin/users/users.controller';
 import { UserResponseDtoFactory } from '@/tests/factory';
 
 describe('adminUsersController', () => {
   let controller: AdminUsersController;
-  let facadeService: jest.Mocked<UserAdminFacadeService>;
+  let queryService: jest.Mocked<UserQueryService>;
+  let commandService: jest.Mocked<UserCommandService>;
   let userResponseDtoFactory: UserResponseDtoFactory;
 
   beforeEach(async () => {
     userResponseDtoFactory = new UserResponseDtoFactory();
 
-    const mockFacadeService: jest.Mocked<UserAdminFacadeService> = {
-      findUserById: jest.fn(),
-      findDeletedUserById: jest.fn(),
-      findAnyUserById: jest.fn(),
+    const mockQueryService = {
+      findUserByIdOrFail: jest.fn(),
       findManyUsers: jest.fn(),
-      findManyDeletedUsers: jest.fn(),
-      findManyAnyUsers: jest.fn(),
+    };
+
+    const mockCommandService = {
       createUser: jest.fn(),
       createManyAndReturnUsers: jest.fn(),
       updateUserById: jest.fn(),
       deleteUserById: jest.fn(),
       deleteManyUsersById: jest.fn(),
-      restoreUserById: jest.fn(),
-      restoreManyUsersById: jest.fn(),
-    } as any;
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AdminUsersController],
       providers: [
         {
-          provide: UserAdminFacadeService,
-          useValue: mockFacadeService,
+          provide: UserQueryService,
+          useValue: mockQueryService,
+        },
+        {
+          provide: UserCommandService,
+          useValue: mockCommandService,
         },
       ],
     }).compile();
 
     controller = module.get<AdminUsersController>(AdminUsersController);
-    facadeService = module.get(UserAdminFacadeService);
+    queryService = module.get(UserQueryService);
+    commandService = module.get(UserCommandService);
   });
 
   afterEach(() => {
@@ -54,11 +58,11 @@ describe('adminUsersController', () => {
       const mockUser = userResponseDtoFactory.build();
       const publicIds = ['id1', 'id2'];
       const expectedResult = toUsersResponseDto([mockUser]);
-      facadeService.findManyUsers.mockResolvedValue(expectedResult);
+      queryService.findManyUsers.mockResolvedValue(expectedResult);
 
       const result = await controller.findManyUsers(publicIds);
 
-      expect(facadeService.findManyUsers).toHaveBeenCalledWith({ publicIds });
+      expect(queryService.findManyUsers).toHaveBeenCalledWith({ publicIds });
       expect(result).toStrictEqual(expectedResult);
     });
 
@@ -68,11 +72,11 @@ describe('adminUsersController', () => {
       const mockUser = userResponseDtoFactory.build();
       const publicId = 'id1';
       const expectedResult = toUsersResponseDto([mockUser]);
-      facadeService.findManyUsers.mockResolvedValue(expectedResult);
+      queryService.findManyUsers.mockResolvedValue(expectedResult);
 
       const result = await controller.findManyUsers(publicId);
 
-      expect(facadeService.findManyUsers).toHaveBeenCalledWith({ publicIds: [publicId] });
+      expect(queryService.findManyUsers).toHaveBeenCalledWith({ publicIds: [publicId] });
       expect(result).toStrictEqual(expectedResult);
     });
   });
@@ -84,11 +88,11 @@ describe('adminUsersController', () => {
       const mockUser = userResponseDtoFactory.build();
       const { publicId } = mockUser;
       const expectedResult = toUserResponseDto(mockUser);
-      facadeService.findUserById.mockResolvedValue(expectedResult);
+      queryService.findUserByIdOrFail.mockResolvedValue(expectedResult);
 
       const result = await controller.findUserById(publicId);
 
-      expect(facadeService.findUserById).toHaveBeenCalledWith({ publicId });
+      expect(queryService.findUserByIdOrFail).toHaveBeenCalledWith({ publicId });
       expect(result).toStrictEqual(expectedResult);
     });
   });
@@ -100,11 +104,11 @@ describe('adminUsersController', () => {
       const mockUser = userResponseDtoFactory.build();
       const createDto = { email: mockUser.email, name: mockUser.name };
       const expectedResult = toUserResponseDto(mockUser);
-      facadeService.createUser.mockResolvedValue(expectedResult);
+      commandService.createUser.mockResolvedValue(expectedResult);
 
       const result = await controller.createUser(createDto);
 
-      expect(facadeService.createUser).toHaveBeenCalledWith(createDto);
+      expect(commandService.createUser).toHaveBeenCalledWith(createDto);
       expect(result).toStrictEqual(expectedResult);
     });
   });
@@ -116,11 +120,11 @@ describe('adminUsersController', () => {
       const mockUser = userResponseDtoFactory.build();
       const createDto = { users: [{ email: 'user1@example.com', name: 'User 1' }] };
       const expectedResult = toUsersResponseDto([mockUser]);
-      facadeService.createManyAndReturnUsers.mockResolvedValue(expectedResult);
+      commandService.createManyAndReturnUsers.mockResolvedValue(expectedResult);
 
       const result = await controller.createManyUsers(createDto);
 
-      expect(facadeService.createManyAndReturnUsers).toHaveBeenCalledWith(createDto);
+      expect(commandService.createManyAndReturnUsers).toHaveBeenCalledWith(createDto);
       expect(result).toStrictEqual(expectedResult);
     });
   });
@@ -133,11 +137,11 @@ describe('adminUsersController', () => {
       const { publicId } = mockUser;
       const data = { name: 'Updated Name' };
       const expectedResult = toUserResponseDto({ ...mockUser, name: 'Updated Name' });
-      facadeService.updateUserById.mockResolvedValue(expectedResult);
+      commandService.updateUserById.mockResolvedValue(expectedResult);
 
       const result = await controller.updateUser(publicId, data);
 
-      expect(facadeService.updateUserById).toHaveBeenCalledWith({ publicId, data });
+      expect(commandService.updateUserById).toHaveBeenCalledWith({ publicId, data });
       expect(result).toStrictEqual(expectedResult);
     });
   });
@@ -147,11 +151,11 @@ describe('adminUsersController', () => {
       expect.assertions(1);
 
       const dto = { publicIds: ['id1', 'id2'] };
-      facadeService.deleteManyUsersById.mockResolvedValue();
+      commandService.deleteManyUsersById.mockResolvedValue();
 
       await controller.deleteManyUsers(dto);
 
-      expect(facadeService.deleteManyUsersById).toHaveBeenCalledWith(dto);
+      expect(commandService.deleteManyUsersById).toHaveBeenCalledWith(dto);
     });
   });
 
@@ -161,11 +165,11 @@ describe('adminUsersController', () => {
 
       const mockUser = userResponseDtoFactory.build();
       const { publicId } = mockUser;
-      facadeService.deleteUserById.mockResolvedValue();
+      commandService.deleteUserById.mockResolvedValue();
 
       await controller.deleteUser(publicId);
 
-      expect(facadeService.deleteUserById).toHaveBeenCalledWith({ publicId });
+      expect(commandService.deleteUserById).toHaveBeenCalledWith({ publicId });
     });
   });
 });

@@ -1,7 +1,6 @@
 import { plainToInstance } from 'class-transformer';
 import { ValidationError, validate } from 'class-validator';
 
-import { AdminRole, AdminStatus } from '@/generated/prisma';
 import {
   CreateAdminUserInputDto,
   CreateManyAdminUsersInputDto,
@@ -12,6 +11,7 @@ import {
   UpdateAdminUserInputDto,
   UpdateAdminUserDataInputDto,
 } from '@/aggregates/admin-user/admin-user.input.dto';
+import { AdminRole, AdminStatus } from '@/generated/prisma';
 
 describe('adminUser Input DTOs', () => {
   describe('createAdminUserInputDto', () => {
