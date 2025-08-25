@@ -2,7 +2,7 @@ import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
-import { AppApiModule } from './modules/api/app/app.module';
+import { AppApiModule } from './apis/app/app.module';
 import { isDevelopment } from './utils/environment';
 
 const DEFAULT_PORT_NUMBER = 3000;

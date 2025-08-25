@@ -3,9 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
-import { UserStatusRecord } from '@/modules/aggregate/user/user.constants';
-import { UserQueryService } from '@/modules/aggregate/user/user.query.service';
-import { USER_AUTH_TOKEN_CONSTANTS } from '@/modules/aggregate/user-auth-token/user-auth-token.constants';
+import { UserStatusRecord } from '@/aggregates/user/user.constants';
+import { UserQueryService } from '@/aggregates/user/user.query.service';
+import { USER_AUTH_TOKEN_CONSTANTS } from '@/aggregates/user-auth-token/user-auth-token.constants';
 
 export type Payload = {
   sub: string;
