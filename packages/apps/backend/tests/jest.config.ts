@@ -16,8 +16,17 @@ const config: Config = {
   testEnvironment: 'node',
   testMatch: ['<rootDir>/tests/**/*.spec.ts'],
   transform: {
-    '^.+\\.ts$': 'ts-jest',
+    '^.+\\.ts$': ['ts-jest', {
+      tsconfig: {
+        module: 'commonjs',
+        allowSyntheticDefaultImports: true,
+        esModuleInterop: true
+      }
+    }],
   },
+  transformIgnorePatterns: [
+    'node_modules/(?!(@faker-js/faker)/)'
+  ],
   testPathIgnorePatterns: ignorePatterns,
   coverageDirectory: '<rootDir>/coverage',
   coveragePathIgnorePatterns: [...ignorePatterns, 'main.ts', '.*\\.module\\.ts$'],
