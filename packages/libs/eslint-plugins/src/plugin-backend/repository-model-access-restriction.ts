@@ -78,7 +78,7 @@ const rule = createRule({
         if (source.includes('@prisma/client') || source.includes('@/generated/prisma')) {
           // Skip type-only imports
           if (node.importKind === 'type') return;
-          
+
           // Check if all specifiers are type-only
           const hasNonTypeImport = node.specifiers.some((spec) => {
             if (spec.type === AST_NODE_TYPES.ImportSpecifier && spec.importKind === 'type') {
@@ -86,7 +86,7 @@ const rule = createRule({
             }
             return true;
           });
-          
+
           // Only check non-type imports
           if (hasNonTypeImport && isInAggregates) {
             // Only allow Prisma imports in command.service.ts or query.service.ts
