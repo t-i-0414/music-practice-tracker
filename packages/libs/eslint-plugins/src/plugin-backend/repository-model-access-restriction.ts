@@ -40,7 +40,9 @@ const rule = createRule({
       description: 'Enforce Prisma model import and repository access restrictions in aggregates',
     },
     messages: {
-      invalidPrismaImport: 'Prisma models can only be imported in {{allowedFiles}} files within the aggregates folder',
+      invalidPrismaImport: 'Prisma models can only be imported in {{allowedFiles}}',
+      invalidModelImport:
+        'Model "{{modelName}}" cannot be imported in {{aggregate}} aggregate. Only {{expectedModel}} model is allowed',
       invalidRepositoryAccess:
         'Repository "{{modelName}}" can only be accessed from aggregates/{{aggregatePath}} folder',
       invalidQueryMethod:
@@ -88,30 +90,53 @@ const rule = createRule({
           });
 
           // Only check non-type imports
-          if (hasNonTypeImport && isInAggregates) {
-            // Only allow Prisma imports in command.service.ts or query.service.ts
-            if (!isQueryService && !isCommandService) {
+          if (hasNonTypeImport) {
+            // Prisma imports are only allowed in command.service.ts or query.service.ts within aggregates
+            if (!isInAggregates || (!isQueryService && !isCommandService)) {
               context.report({
                 node,
                 messageId: 'invalidPrismaImport',
                 data: {
-                  allowedFiles: 'command.service.ts or query.service.ts',
+                  allowedFiles: 'command.service.ts or query.service.ts within aggregates folder',
                 },
               });
             }
           }
 
-          // Track imported models
-          node.specifiers.forEach((specifier) => {
-            if (specifier.type === AST_NODE_TYPES.ImportSpecifier) {
-              const imported = specifier.imported;
-              const importedName = imported.type === AST_NODE_TYPES.Identifier ? imported.name : imported.value;
-              // Exclude Prisma client itself and common types
-              if (importedName !== 'PrismaClient' && importedName !== 'Prisma') {
-                importedPrismaModels.add(importedName);
+          // Track imported models and validate they match the aggregate
+          if (hasNonTypeImport && isInAggregates && (isQueryService || isCommandService)) {
+            node.specifiers.forEach((specifier) => {
+              if (specifier.type === AST_NODE_TYPES.ImportSpecifier && specifier.importKind !== 'type') {
+                const imported = specifier.imported;
+                const importedName = imported.type === AST_NODE_TYPES.Identifier ? imported.name : imported.value;
+                // Exclude Prisma client itself and common types
+                if (importedName !== 'PrismaClient' && importedName !== 'Prisma') {
+                  importedPrismaModels.add(importedName);
+                  
+                  // Check if the imported model matches the current aggregate
+                  const currentAggregate = pathParts[aggregatesIndex + 1];
+                  // Convert aggregate folder name from kebab-case to camelCase
+                  const camelCaseAggregate = currentAggregate.replace(/-(?<letter>[a-z])/gu, (_, letter: string) => letter.toUpperCase());
+                  // Capitalize first letter to match model naming convention
+                  const expectedModelName = camelCaseAggregate.charAt(0).toUpperCase() + camelCaseAggregate.slice(1);
+                  
+                  // Allow the model that matches the aggregate name and common Prisma types
+                  const commonTypes = ['Prisma', 'TransactionClient'];
+                  if (importedName !== expectedModelName && !commonTypes.includes(importedName)) {
+                    context.report({
+                      node: specifier,
+                      messageId: 'invalidModelImport',
+                      data: {
+                        modelName: importedName,
+                        expectedModel: expectedModelName,
+                        aggregate: currentAggregate,
+                      },
+                    });
+                  }
+                }
               }
-            }
-          });
+            });
+          }
         }
       },
 
@@ -204,35 +229,47 @@ type ValidateRepositoryScopeParams = {
 
 function validateRepositoryScope(params: ValidateRepositoryScopeParams) {
   const { modelName, aggregatesIndex, pathParts, context, node } = params;
-  // Only check files in aggregates folder
-  if (aggregatesIndex === -1) return;
+  
+  // Convert modelName from camelCase to kebab-case for folder comparison
+  const kebabCaseModel = modelName
+    .replace(/(?<upper>[A-Z])/gu, '-$1')
+    .toLowerCase()
+    .replace(/^-/u, '');
+
+  // If outside aggregates folder, no repository access is allowed
+  if (aggregatesIndex === -1) {
+    context.report({
+      node,
+      messageId: 'invalidRepositoryAccess',
+      data: {
+        modelName,
+        aggregatePath: `${kebabCaseModel}/**`,
+      },
+    });
+    return;
+  }
 
   // Get the aggregate path after 'aggregates'
   const aggregatePath = pathParts.slice(aggregatesIndex + 1, -1); // Remove filename
 
   // Repository access rules:
-  // 1. Model can be accessed from aggregates/{modelName} folder
-  // 2. Model can be accessed from aggregates/**/{modelName} parent folders
+  // Model can only be accessed from its own aggregate folder (aggregates/{modelName}/)
+  // This enforces strict aggregate boundaries
 
   let isValidAccess = false;
 
-  // Check if we're in the correct aggregate folder
   if (aggregatePath.length > 0) {
-    // Check if the model matches any folder in the current path
-    // Convert kebab-case folder names to camelCase for comparison with model names
-    isValidAccess = aggregatePath.some((folder) => {
-      const camelCaseFolder = folder.replace(/-(?<letter>[a-z])/gu, (_, letter: string) => letter.toUpperCase());
-      return camelCaseFolder === modelName;
-    });
+    // Check if we're in the model's own aggregate
+    // We only check the first folder after 'aggregates'
+    const firstFolder = aggregatePath[0];
+    const camelCaseFirstFolder = firstFolder.replace(/-(?<letter>[a-z])/gu, (_, letter: string) => letter.toUpperCase());
+    
+    // Only allow access if the first folder matches the model name
+    isValidAccess = camelCaseFirstFolder === modelName;
   }
 
   if (!isValidAccess) {
-    // Convert modelName from camelCase to kebab-case for the error message
-    const kebabCaseModel = modelName
-      .replace(/(?<upper>[A-Z])/gu, '-$1')
-      .toLowerCase()
-      .replace(/^-/u, '');
-    const allowedPath = `${kebabCaseModel} or **/${kebabCaseModel}`;
+    const allowedPath = `${kebabCaseModel}/**`;
 
     context.report({
       node,

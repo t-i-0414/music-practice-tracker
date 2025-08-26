@@ -113,7 +113,7 @@ describe('repository-model-access-restriction', () => {
         `,
         filename: 'src/modules/aggregates/user/user.controller.spec.ts',
       },
-      // Valid: Accessing setting repository from user/setting aggregate
+      // Valid: Accessing setting repository from setting aggregate
       {
         code: `
           class SettingCommandService {
@@ -122,18 +122,18 @@ describe('repository-model-access-restriction', () => {
             }
           }
         `,
-        filename: 'src/modules/aggregates/user/setting/command.service.ts',
+        filename: 'src/modules/aggregates/setting/command.service.ts',
       },
-      // Valid: Accessing user repository from nested user aggregate
+      // Valid: Accessing profile repository from profile aggregate
       {
         code: `
           class ProfileCommandService {
             async updateProfile() {
-              return await this.repository.user.update({ where: {}, data: {} });
+              return await this.repository.profile.update({ where: {}, data: {} });
             }
           }
         `,
-        filename: 'src/modules/aggregates/user/profile/command.service.ts',
+        filename: 'src/modules/aggregates/profile/command.service.ts',
       },
       // Valid: Bracket notation with valid access
       {
@@ -182,66 +182,30 @@ describe('repository-model-access-restriction', () => {
         `,
         filename: 'src/modules/aggregates/user/command.service.ts',
       },
-      // Valid: Non-service files are ignored for method checks
-      {
-        code: `
-          class UserRepository {
-            async mixedMethods() {
-              await this.repository.user.findMany();
-              await this.repository.user.create({ data: {} });
-            }
-          }
-        `,
-        filename: 'src/modules/aggregates/user/repository.service.ts',
-      },
-      // Valid: Files outside aggregates are ignored
+      // Valid: Test importing only the matching Prisma model in command service
       {
         code: `
           import { User } from '@prisma/client';
-          class UserController {
-            async getUser() {
-              return await this.repository.post.findMany();
-            }
-          }
-        `,
-        filename: 'src/controllers/user.controller.ts',
-      },
-      // Valid: Test importing Prisma models (non-PrismaClient/Prisma types) in command service
-      {
-        code: `
-          import { User, Post, Comment } from '@prisma/client';
           class UserCommandService {
-            async createUserWithRelations(user: User, posts: Post[]) {
-              // Using imported models
-              return await this.repository.user.create({ data: {} });
+            async createUser(userData: Partial<User>) {
+              // Using imported model
+              return await this.repository.user.create({ data: userData as any });
             }
           }
         `,
         filename: 'src/modules/aggregates/user/command.service.ts',
       },
-      // Valid: Test importing from @/generated/prisma with models in query service
+      // Valid: Importing matching model in admin-user aggregate
       {
         code: `
-          import { User, Post, Comment, Prisma } from '@/generated/prisma';
-          class UserQueryService {
-            async findUsersWithPosts() {
-              // Using imported models
-              return await this.repository.user.findMany();
+          import { AdminUser } from '@/generated/prisma';
+          class AdminUserQueryService {
+            async findAdmin(id: string): Promise<AdminUser | null> {
+              return await this.repository.adminUser.findUnique({ where: { id } });
             }
           }
         `,
-        filename: 'src/modules/aggregates/user/query.service.ts',
-      },
-      // Valid: Repository access from aggregate path that includes model name
-      {
-        code: `
-          class UserSettingQueryService {
-            async findUserSettings() {
-              return await this.repository.user.findMany();
-            }
-          }
-        `,
-        filename: 'src/modules/aggregates/user/settings/query.service.ts',
+        filename: 'src/modules/aggregates/admin-user/query.service.ts',
       },
     ],
     invalid: [
@@ -259,7 +223,7 @@ describe('repository-model-access-restriction', () => {
           {
             messageId: 'invalidPrismaImport',
             data: {
-              allowedFiles: 'command.service.ts or query.service.ts',
+              allowedFiles: 'command.service.ts or query.service.ts within aggregates folder',
             },
           },
         ],
@@ -277,7 +241,7 @@ describe('repository-model-access-restriction', () => {
           {
             messageId: 'invalidPrismaImport',
             data: {
-              allowedFiles: 'command.service.ts or query.service.ts',
+              allowedFiles: 'command.service.ts or query.service.ts within aggregates folder',
             },
           },
         ],
@@ -293,7 +257,7 @@ describe('repository-model-access-restriction', () => {
           {
             messageId: 'invalidPrismaImport',
             data: {
-              allowedFiles: 'command.service.ts or query.service.ts',
+              allowedFiles: 'command.service.ts or query.service.ts within aggregates folder',
             },
           },
         ],
@@ -313,7 +277,7 @@ describe('repository-model-access-restriction', () => {
             messageId: 'invalidRepositoryAccess',
             data: {
               modelName: 'adminUser',
-              aggregatePath: 'admin-user or **/admin-user',
+              aggregatePath: 'admin-user/**',
             },
           },
         ],
@@ -333,7 +297,7 @@ describe('repository-model-access-restriction', () => {
             messageId: 'invalidRepositoryAccess',
             data: {
               modelName: 'userAuthToken',
-              aggregatePath: 'user-auth-token or **/user-auth-token',
+              aggregatePath: 'user-auth-token/**',
             },
           },
         ],
@@ -355,7 +319,7 @@ describe('repository-model-access-restriction', () => {
             messageId: 'invalidRepositoryAccess',
             data: {
               modelName: 'post',
-              aggregatePath: 'post or **/post',
+              aggregatePath: 'post/**',
             },
           },
         ],
@@ -375,7 +339,99 @@ describe('repository-model-access-restriction', () => {
             messageId: 'invalidRepositoryAccess',
             data: {
               modelName: 'comment',
-              aggregatePath: 'comment or **/comment',
+              aggregatePath: 'comment/**',
+            },
+          },
+        ],
+      },
+      // Invalid: Prisma import outside aggregates (controller)
+      {
+        code: `
+          import { User } from '@prisma/client';
+          class UserController {
+            async getUser() {
+              return await this.service.findUser();
+            }
+          }
+        `,
+        filename: 'src/controllers/user.controller.ts',
+        errors: [
+          {
+            messageId: 'invalidPrismaImport',
+            data: {
+              allowedFiles: 'command.service.ts or query.service.ts within aggregates folder',
+            },
+          },
+        ],
+      },
+      // Invalid: Repository access mismatch in controller
+      {
+        code: `
+          class UserController {
+            async getUser() {
+              return await this.repository.post.findMany();
+            }
+          }
+        `,
+        filename: 'src/controllers/user.controller.ts',
+        errors: [
+          {
+            messageId: 'invalidRepositoryAccess',
+            data: {
+              modelName: 'post',
+              aggregatePath: 'post/**',
+            },
+          },
+        ],
+      },
+      // Invalid: Importing wrong models in user aggregate
+      {
+        code: `
+          import { User, Post, Comment } from '@prisma/client';
+          class UserCommandService {
+            async createUserWithRelations(user: User, posts: Post[]) {
+              return await this.repository.user.create({ data: {} });
+            }
+          }
+        `,
+        filename: 'src/modules/aggregates/user/command.service.ts',
+        errors: [
+          {
+            messageId: 'invalidModelImport',
+            data: {
+              modelName: 'Post',
+              expectedModel: 'User',
+              aggregate: 'user',
+            },
+          },
+          {
+            messageId: 'invalidModelImport',
+            data: {
+              modelName: 'Comment',
+              expectedModel: 'User',
+              aggregate: 'user',
+            },
+          },
+        ],
+      },
+      // Invalid: Importing wrong model in admin-user aggregate
+      {
+        code: `
+          import { User, AdminUser } from '@/generated/prisma';
+          class AdminUserQueryService {
+            async findAdmin() {
+              return await this.repository.adminUser.findUnique({ where: {} });
+            }
+          }
+        `,
+        filename: 'src/modules/aggregates/admin-user/query.service.ts',
+        errors: [
+          {
+            messageId: 'invalidModelImport',
+            data: {
+              modelName: 'User',
+              expectedModel: 'AdminUser',
+              aggregate: 'admin-user',
             },
           },
         ],
@@ -395,7 +451,7 @@ describe('repository-model-access-restriction', () => {
             messageId: 'invalidRepositoryAccess',
             data: {
               modelName: 'post',
-              aggregatePath: 'post or **/post',
+              aggregatePath: 'post/**',
             },
           },
         ],
@@ -415,7 +471,7 @@ describe('repository-model-access-restriction', () => {
             messageId: 'invalidRepositoryAccess',
             data: {
               modelName: 'user',
-              aggregatePath: 'user or **/user',
+              aggregatePath: 'user/**',
             },
           },
         ],
@@ -523,7 +579,7 @@ describe('repository-model-access-restriction', () => {
           },
         ],
       },
-      // Invalid: Combined violations - wrong repository and wrong method
+      // Invalid: Combined violations - wrong model import, wrong repository and wrong method
       {
         code: `
           import { Post } from '@prisma/client';
@@ -536,6 +592,14 @@ describe('repository-model-access-restriction', () => {
         filename: 'src/modules/aggregates/user/query.service.ts',
         errors: [
           {
+            messageId: 'invalidModelImport',
+            data: {
+              modelName: 'Post',
+              expectedModel: 'User',
+              aggregate: 'user',
+            },
+          },
+          {
             messageId: 'invalidQueryMethod',
             data: {
               method: 'create',
@@ -547,7 +611,7 @@ describe('repository-model-access-restriction', () => {
             messageId: 'invalidRepositoryAccess',
             data: {
               modelName: 'post',
-              aggregatePath: 'post or **/post',
+              aggregatePath: 'post/**',
             },
           },
         ],
