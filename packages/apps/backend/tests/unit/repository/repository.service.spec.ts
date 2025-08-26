@@ -1,10 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { RepositoryService } from '@/repository/repository.service';
+import { RepositoryService } from '@/repository/service';
 
 describe('repositoryService', () => {
   let service: RepositoryService;
-  let mockConnect: jest.SpyInstance;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -12,7 +11,8 @@ describe('repositoryService', () => {
     }).compile();
 
     service = module.get<RepositoryService>(RepositoryService);
-    mockConnect = jest.spyOn(service, '$connect').mockResolvedValue();
+    // Mock the $connect method on the service instance
+    service.$connect = jest.fn();
   });
 
   afterEach(() => {
@@ -31,7 +31,7 @@ describe('repositoryService', () => {
 
       await service.onModuleInit();
 
-      expect(mockConnect).toHaveBeenCalledTimes(1);
+      expect(service.$connect).toHaveBeenCalledTimes(1);
     });
   });
 

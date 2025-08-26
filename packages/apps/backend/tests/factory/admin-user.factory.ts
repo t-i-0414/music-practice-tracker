@@ -2,8 +2,8 @@ import { faker } from '@faker-js/faker';
 
 import { BaseFactory } from './base-factory';
 
-import type { AdminUser } from '@/aggregates/admin-user/admin-user.repository.service';
-import type { AdminUserResponseDto } from '@/aggregates/admin-user/admin-user.response.dto';
+import type { AdminUserResponseDto } from '@/aggregates/admin-user/dto';
+import type { AdminUser } from '@/generated/prisma';
 import { AdminRole, AdminStatus } from '@/generated/prisma';
 
 const DEFAULT_ADMIN_USER = {

@@ -1,4 +1,4 @@
-import { type UserAuthTokenEnumType } from './user-auth-token.repository.service';
+import { type UserAuthTokenEnumType } from './query.service';
 
 export const USER_AUTH_TOKEN_CONSTANTS = {
   JWT: {

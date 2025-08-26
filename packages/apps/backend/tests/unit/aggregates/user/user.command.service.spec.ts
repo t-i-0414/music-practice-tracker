@@ -1,37 +1,47 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { UserCommandService } from '@/aggregates/user/user.command.service';
-import { UserQueryService } from '@/aggregates/user/user.query.service';
-import { UserRepositoryService } from '@/aggregates/user/user.repository.service';
-import { toUserResponseDto, toUsersResponseDto } from '@/aggregates/user/user.response.dto';
+import { UserCommandService } from '@/aggregates/user/command.service';
+import { toUserResponseDto, toUsersResponseDto } from '@/aggregates/user/dto';
+import { UserQueryService } from '@/aggregates/user/query.service';
+import { RepositoryService } from '@/repository/service';
 import { UserFactory } from '@/tests/factory';
 
 describe('userCommandService', () => {
   let service: UserCommandService;
-  let repository: jest.Mocked<UserRepositoryService>;
-  let queryService: jest.Mocked<UserQueryService>;
+  let repository: {
+    user: {
+      create: jest.Mock;
+      createManyAndReturn: jest.Mock;
+      update: jest.Mock;
+      delete: jest.Mock;
+      deleteMany: jest.Mock;
+    };
+  };
+  let queryService: { findUserByIdOrFail: jest.Mock };
   let userFactory: UserFactory;
 
   beforeEach(async () => {
     userFactory = new UserFactory();
 
-    const mockRepository: jest.Mocked<UserRepositoryService> = {
-      createUser: jest.fn(),
-      createManyAndReturnUsers: jest.fn(),
-      updateUser: jest.fn(),
-      deleteUser: jest.fn(),
-      deleteManyUsers: jest.fn(),
-    } as any;
+    const mockRepository = {
+      user: {
+        create: jest.fn(),
+        createManyAndReturn: jest.fn(),
+        update: jest.fn(),
+        delete: jest.fn(),
+        deleteMany: jest.fn(),
+      },
+    };
 
-    const mockQueryService: jest.Mocked<UserQueryService> = {
+    const mockQueryService = {
       findUserByIdOrFail: jest.fn(),
-    } as any;
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UserCommandService,
         {
-          provide: UserRepositoryService,
+          provide: RepositoryService,
           useValue: mockRepository,
         },
         {
@@ -42,7 +52,7 @@ describe('userCommandService', () => {
     }).compile();
 
     service = module.get<UserCommandService>(UserCommandService);
-    repository = module.get(UserRepositoryService);
+    repository = module.get(RepositoryService);
     queryService = module.get(UserQueryService);
   });
 
@@ -56,11 +66,13 @@ describe('userCommandService', () => {
 
       const mockUser = userFactory.build();
       const createDto = { email: mockUser.email, name: mockUser.name };
-      repository.createUser.mockResolvedValue({ ...mockUser, id: 1 });
+      repository.user.create.mockResolvedValue({ ...mockUser, id: 1 });
 
       const result = await service.createUser(createDto);
 
-      expect(repository.createUser).toHaveBeenCalledWith(createDto);
+      expect(repository.user.create).toHaveBeenCalledWith({
+        data: createDto,
+      });
       expect(result).toStrictEqual(toUserResponseDto(mockUser));
     });
   });
@@ -72,14 +84,16 @@ describe('userCommandService', () => {
       const mockUser = userFactory.build();
       const mockUser2 = userFactory.build();
       const mockUsers = [mockUser, mockUser2];
-      repository.createManyAndReturnUsers.mockResolvedValue([
+      repository.user.createManyAndReturn.mockResolvedValue([
         { ...mockUser, id: 1 },
         { ...mockUser2, id: 2 },
       ]);
 
       const result = await service.createManyAndReturnUsers({ users: [mockUser, mockUser2] });
 
-      expect(repository.createManyAndReturnUsers).toHaveBeenCalledWith([mockUser, mockUser2]);
+      expect(repository.user.createManyAndReturn).toHaveBeenCalledWith({
+        data: [mockUser, mockUser2],
+      });
       expect(result).toStrictEqual(toUsersResponseDto(mockUsers));
     });
   });
@@ -92,12 +106,12 @@ describe('userCommandService', () => {
       const updateDto = { publicId: mockUser.publicId, data: { name: 'Updated Name' } };
       const updatedUser = { ...mockUser, name: 'Updated Name' };
       queryService.findUserByIdOrFail.mockResolvedValue(toUserResponseDto(mockUser));
-      repository.updateUser.mockResolvedValue({ ...updatedUser, id: 1 });
+      repository.user.update.mockResolvedValue({ ...updatedUser, id: 1 });
 
       const result = await service.updateUserById(updateDto);
 
       expect(queryService.findUserByIdOrFail).toHaveBeenCalledWith({ publicId: mockUser.publicId });
-      expect(repository.updateUser).toHaveBeenCalledWith({
+      expect(repository.user.update).toHaveBeenCalledWith({
         where: { publicId: mockUser.publicId },
         data: { name: 'Updated Name' },
       });
@@ -112,7 +126,7 @@ describe('userCommandService', () => {
       queryService.findUserByIdOrFail.mockRejectedValue(new Error('User not found'));
 
       await expect(service.updateUserById(updateDto)).rejects.toThrow('User not found');
-      expect(repository.updateUser).not.toHaveBeenCalled();
+      expect(repository.user.update).not.toHaveBeenCalled();
     });
   });
 
@@ -123,12 +137,14 @@ describe('userCommandService', () => {
       const mockUser = userFactory.build();
       const deleteDto = { publicId: mockUser.publicId };
       queryService.findUserByIdOrFail.mockResolvedValue(toUserResponseDto(mockUser));
-      repository.deleteUser.mockResolvedValue();
+      repository.user.delete.mockResolvedValue(undefined);
 
       await service.deleteUserById(deleteDto);
 
       expect(queryService.findUserByIdOrFail).toHaveBeenCalledWith({ publicId: mockUser.publicId });
-      expect(repository.deleteUser).toHaveBeenCalledWith({ publicId: mockUser.publicId });
+      expect(repository.user.delete).toHaveBeenCalledWith({
+        where: { publicId: mockUser.publicId },
+      });
     });
 
     it('should throw when user not found', async () => {
@@ -139,7 +155,7 @@ describe('userCommandService', () => {
       queryService.findUserByIdOrFail.mockRejectedValue(new Error('User not found'));
 
       await expect(service.deleteUserById(deleteDto)).rejects.toThrow('User not found');
-      expect(repository.deleteUser).not.toHaveBeenCalled();
+      expect(repository.user.delete).not.toHaveBeenCalled();
     });
   });
 
@@ -148,12 +164,14 @@ describe('userCommandService', () => {
       expect.assertions(1);
 
       const publicIds = ['id1', 'id2'];
-      repository.deleteManyUsers.mockResolvedValue();
+      repository.user.deleteMany.mockResolvedValue(undefined);
 
       await service.deleteManyUsersById({ publicIds });
 
-      expect(repository.deleteManyUsers).toHaveBeenCalledWith({
-        publicId: { in: publicIds },
+      expect(repository.user.deleteMany).toHaveBeenCalledWith({
+        where: {
+          publicId: { in: publicIds },
+        },
       });
     });
   });

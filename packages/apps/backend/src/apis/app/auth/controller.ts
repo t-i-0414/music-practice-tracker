@@ -1,18 +1,18 @@
 import { Body, Post, HttpCode, HttpStatus, UseGuards, Get } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
-import { UserAuthTokenCommandService } from '@/aggregates/user-auth-token/user-auth-token.command.service';
+import { UserAuthTokenCommandService } from '@/aggregates/user-auth-token/command.service';
 import {
   SignUpInputDto,
   SignInInputDto,
   RefreshTokenInputDto,
   ChangePasswordInputDto,
   OAuthSignInInputDto,
-} from '@/aggregates/user-auth-token/user-auth-token.input.dto';
-import { AuthTokenResponseDto } from '@/aggregates/user-auth-token/user-auth-token.response.dto';
-import { ApiController } from '@/decorators/api-controller.decorator';
-import { CurrentUser, CurrentUserData } from '@/decorators/current-user.decorator';
-import { Public } from '@/decorators/public.decorator';
+} from '@/aggregates/user-auth-token/dto';
+import { AuthTokenResponseDto } from '@/aggregates/user-auth-token/dto';
+import { ApiController } from '@/decorators/api-controller/decorator';
+import { CurrentUser, CurrentUserData } from '@/decorators/current-user/decorator';
+import { Public } from '@/decorators/public/decorator';
 import { AppAuthGuard } from '@/guards/app-auth-guard/guard';
 
 @ApiTags('auth')

@@ -3,20 +3,23 @@ import { randomBytes } from 'crypto';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
-import { UserStatusRecord } from '../user/user.constants';
+import { UserStatusRecord } from '../user/constants';
 
-import { USER_AUTH_TOKEN_CONSTANTS, UserAuthTokenRecord } from './user-auth-token.constants';
-import { UserAuthTokenQueryService } from './user-auth-token.query.service';
-import { UserAuthTokenRepositoryService } from './user-auth-token.repository.service';
+import { USER_AUTH_TOKEN_CONSTANTS, UserAuthTokenRecord } from './constants';
+import { UserAuthTokenQueryService } from './query.service';
 
-import { UserRepositoryService } from '@/aggregates/user/user.repository.service';
+import { UserCommandService } from '@/aggregates/user/command.service';
+import { UserQueryService } from '@/aggregates/user/query.service';
+import { Prisma, UserAuthToken } from '@/generated/prisma';
+import { RepositoryService } from '@/repository/service';
 
 @Injectable()
 export class UserAuthTokenCommandService {
   public constructor(
-    private readonly authRepository: UserAuthTokenRepositoryService,
+    private readonly repository: RepositoryService,
     private readonly authQuery: UserAuthTokenQueryService,
-    private readonly userRepository: UserRepositoryService,
+    private readonly userCommand: UserCommandService,
+    private readonly userQuery: UserQueryService,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -34,7 +37,7 @@ export class UserAuthTokenCommandService {
     const bcrypt = await import('bcrypt');
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const user = await this.userRepository.createUserWithOAuth({
+    const user = await this.userCommand.createUserWithOAuth({
       email,
       name,
       passwordHash,
@@ -73,10 +76,10 @@ export class UserAuthTokenCommandService {
     let user = await this.authQuery.findUserByOAuthProvider(provider, providerId);
 
     if (!user) {
-      const existingUser = await this.userRepository.findUniqueUserByEmail(email);
+      const existingUser = await this.userQuery.findUniqueUserByEmail(email);
 
       if (existingUser) {
-        await this.userRepository.updateOAuthProvider(existingUser.publicId, provider, providerId);
+        await this.userCommand.updateOAuthProvider(existingUser.publicId, provider, providerId);
         user = existingUser;
       } else {
         const createData = {
@@ -87,7 +90,7 @@ export class UserAuthTokenCommandService {
           appleId: provider === 'apple' ? providerId : null,
         };
 
-        user = await this.userRepository.createUserWithOAuth(createData);
+        user = await this.userCommand.createUserWithOAuth(createData);
       }
     }
 
@@ -103,7 +106,7 @@ export class UserAuthTokenCommandService {
   ): Promise<{ accessToken: string; refreshToken: string; expiresIn: number }> {
     const authToken = await this.authQuery.findRefreshTokenByTokenOrFail(refreshToken);
 
-    await this.authRepository.deleteAuthToken(authToken.publicId);
+    await this.deleteAuthToken(authToken.publicId);
 
     return this.generateTokens(authToken.user.publicId);
   }
@@ -111,7 +114,7 @@ export class UserAuthTokenCommandService {
   public async signOut(refreshToken: string): Promise<void> {
     try {
       const authToken = await this.authQuery.findRefreshTokenByTokenOrFail(refreshToken);
-      await this.authRepository.deleteManyUserTokens(authToken.userPublicId, { equals: UserAuthTokenRecord.REFRESH });
+      await this.deleteManyUserTokens(authToken.userPublicId, { equals: UserAuthTokenRecord.REFRESH });
     } catch {
       // Silently fail if token is invalid
     }
@@ -122,7 +125,7 @@ export class UserAuthTokenCommandService {
     currentPassword: string,
     newPassword: string,
   ): Promise<{ accessToken: string; refreshToken: string; expiresIn: number }> {
-    const user = await this.userRepository.findUniqueUser({ publicId: userPublicId });
+    const user = await this.userQuery.findUniqueUser({ publicId: userPublicId });
 
     if (!user) {
       throw new BadRequestException('User not found');
@@ -136,14 +139,14 @@ export class UserAuthTokenCommandService {
     const bcrypt = await import('bcrypt');
     const passwordHash = await bcrypt.hash(newPassword, 10);
 
-    await this.userRepository.updateUserPassword(userPublicId, passwordHash);
-    await this.authRepository.deleteManyUserTokens(userPublicId, { equals: UserAuthTokenRecord.REFRESH });
+    await this.userCommand.updateUserPassword(userPublicId, passwordHash);
+    await this.deleteManyUserTokens(userPublicId, { equals: UserAuthTokenRecord.REFRESH });
 
     return this.generateTokens(user.publicId);
   }
 
   public async cleanupExpiredTokens(): Promise<{ count: number }> {
-    await this.authRepository.deleteManyExpiredTokens();
+    await this.deleteManyExpiredTokens();
     return { count: 0 }; // Prisma deleteMany doesn't return count in this version
   }
 
@@ -158,7 +161,7 @@ export class UserAuthTokenCommandService {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + USER_AUTH_TOKEN_CONSTANTS.JWT.REFRESH_TOKEN_EXPIRY_DAYS);
 
-    await this.authRepository.createAuthToken({
+    await this.createAuthToken({
       token: refreshToken,
       type: UserAuthTokenRecord.REFRESH,
       expiresAt,
@@ -172,5 +175,64 @@ export class UserAuthTokenCommandService {
       refreshToken,
       expiresIn: 900, // 15 minutes in seconds
     };
+  }
+
+  // Repository methods
+  public async createUserAuthToken(params: Prisma.UserAuthTokenCreateInput): Promise<UserAuthToken> {
+    return this.repository.userAuthToken.create({
+      data: params,
+    });
+  }
+
+  public async createAuthToken(params: Prisma.UserAuthTokenCreateInput): Promise<UserAuthToken> {
+    return this.repository.userAuthToken.create({
+      data: params,
+    });
+  }
+
+  public async updateUserAuthToken(params: {
+    where: Prisma.UserAuthTokenWhereUniqueInput;
+    data: Prisma.UserAuthTokenUpdateInput;
+  }): Promise<UserAuthToken> {
+    const { where, data } = params;
+    return this.repository.userAuthToken.update({
+      data: {
+        ...data,
+      },
+      where: {
+        ...where,
+      },
+    });
+  }
+
+  public async deleteUserAuthToken(params: Prisma.UserAuthTokenWhereUniqueInput): Promise<void> {
+    await this.repository.userAuthToken.delete({
+      where: params,
+    });
+  }
+
+  public async deleteAuthToken(publicId: string): Promise<void> {
+    await this.repository.userAuthToken.delete({
+      where: { publicId },
+    });
+  }
+
+  public async deleteManyUserTokens(userPublicId: string, type?: Prisma.EnumTokenTypeFilter): Promise<void> {
+    await this.repository.userAuthToken.deleteMany({
+      where: {
+        userPublicId,
+        type,
+      },
+    });
+  }
+
+  public async deleteManyExpiredTokens(): Promise<void> {
+    await this.repository.userAuthToken.deleteMany({
+      where: {
+        expiresAt: {
+          lt: new Date(),
+        },
+      },
+    });
   }
 }

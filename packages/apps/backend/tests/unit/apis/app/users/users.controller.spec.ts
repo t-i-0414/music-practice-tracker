@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { UserCommandService } from '@/aggregates/user/user.command.service';
-import { UserQueryService } from '@/aggregates/user/user.query.service';
-import { toUserResponseDto } from '@/aggregates/user/user.response.dto';
-import { AppUsersController } from '@/apis/app/users/users.controller';
+import { UserCommandService } from '@/aggregates/user/command.service';
+import { toUserResponseDto } from '@/aggregates/user/dto';
+import { UserQueryService } from '@/aggregates/user/query.service';
+import { AppUsersController } from '@/apis/app/users/controller';
 import { UserResponseDtoFactory } from '@/tests/factory';
 
 describe('appUsersController', () => {

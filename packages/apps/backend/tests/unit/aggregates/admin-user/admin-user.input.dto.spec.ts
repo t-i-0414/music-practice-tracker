@@ -10,7 +10,7 @@ import {
   DeleteManyAdminUsersInputDto,
   UpdateAdminUserInputDto,
   UpdateAdminUserDataInputDto,
-} from '@/aggregates/admin-user/admin-user.input.dto';
+} from '@/aggregates/admin-user/dto';
 import { AdminRole, AdminStatus } from '@/generated/prisma';
 
 describe('adminUser Input DTOs', () => {
@@ -224,7 +224,7 @@ describe('adminUser Input DTOs', () => {
       const errors = await validate(dto);
 
       expect(errors).toHaveLength(1);
-      expect(errors[0].constraints).toHaveProperty('isNotEmpty');
+      expect(errors[0].constraints).toHaveProperty('isUuid');
     });
 
     it('should fail validation without data', async () => {

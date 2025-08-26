@@ -13,15 +13,21 @@ import {
   MaxLength,
   ValidateNested,
 } from 'class-validator';
+import { Exclude, Expose, plainToInstance } from 'class-transformer';
 
 import {
   MAX_EMAIL_LENGTH,
   MAX_NAME_LENGTH,
   AdminRoleRecord,
-  AdminRoleType,
   AdminStatusRecord,
-  AdminStatusType,
-} from './admin-user.constants';
+} from './constants';
+import { AdminUser } from './query.service';
+
+import { Publicize } from '@/utils/publicize';
+
+// ============================================
+// Command DTOs (Input)
+// ============================================
 
 export class FindAdminUserByIdInputDto {
   @ApiProperty({
@@ -78,7 +84,7 @@ export class CreateAdminUserInputDto {
   })
   @IsEnum(AdminRoleRecord)
   @IsOptional()
-  public role?: AdminRoleType;
+  public role?: keyof typeof AdminRoleRecord;
 
   @ApiProperty({
     description: 'The admin user status',
@@ -88,7 +94,7 @@ export class CreateAdminUserInputDto {
   })
   @IsEnum(AdminStatusRecord)
   @IsOptional()
-  public status?: AdminStatusType;
+  public status?: keyof typeof AdminStatusRecord;
 }
 
 export class CreateManyAdminUsersInputDto {
@@ -135,7 +141,7 @@ export class UpdateAdminUserDataInputDto {
   })
   @IsEnum(AdminRoleRecord)
   @IsOptional()
-  public role?: AdminRoleType;
+  public role?: keyof typeof AdminRoleRecord;
 
   @ApiProperty({
     description: 'The admin user status',
@@ -145,7 +151,7 @@ export class UpdateAdminUserDataInputDto {
   })
   @IsEnum(AdminStatusRecord)
   @IsOptional()
-  public status?: AdminStatusType;
+  public status?: keyof typeof AdminStatusRecord;
 }
 
 export class UpdateAdminUserInputDto {
@@ -191,4 +197,93 @@ export class DeleteManyAdminUsersInputDto {
   @IsUUID('all', { each: true })
   @ArrayNotEmpty()
   public publicIds: string[];
+}
+
+// ============================================
+// Query DTOs (Response)
+// ============================================
+
+@Exclude()
+export class AdminUserResponseDto implements Publicize<AdminUser> {
+  @ApiProperty({
+    description: 'The admin user public ID',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    format: 'uuid',
+  })
+  @Expose()
+  public publicId: string;
+
+  @ApiProperty({
+    description: 'The admin user email address',
+    example: 'admin@example.com',
+    format: 'email',
+    maxLength: MAX_EMAIL_LENGTH,
+  })
+  @Expose()
+  public email: string;
+
+  @ApiProperty({
+    description: 'The admin user name',
+    example: 'Admin User',
+    maxLength: MAX_NAME_LENGTH,
+  })
+  @Expose()
+  public name: string;
+
+  @ApiProperty({
+    description: 'The admin user role',
+    example: AdminRoleRecord.ADMIN,
+    enum: Object.values(AdminRoleRecord),
+  })
+  @Expose()
+  public role: keyof typeof AdminRoleRecord;
+
+  @ApiProperty({
+    description: 'The admin user status',
+    example: AdminStatusRecord.ACTIVE,
+    enum: Object.values(AdminStatusRecord),
+  })
+  @Expose()
+  public status: keyof typeof AdminStatusRecord;
+
+  @ApiProperty({
+    description: 'The admin user created at timestamp',
+    example: '2024-01-15T09:30:00.000Z',
+    type: String,
+    format: 'date-time',
+  })
+  @Type(() => Date)
+  @Expose()
+  public createdAt: Date;
+
+  @ApiProperty({
+    description: 'The admin user updated at timestamp',
+    example: '2024-06-16T14:45:30.123Z',
+    type: String,
+    format: 'date-time',
+  })
+  @Type(() => Date)
+  @Expose()
+  public updatedAt: Date;
+}
+
+export class AdminUsersResponseDto {
+  @ApiProperty({
+    description: 'The list of admin users',
+    type: [AdminUserResponseDto],
+  })
+  @Type(() => AdminUserResponseDto)
+  public adminUsers: AdminUserResponseDto[];
+}
+
+export function toAdminUserResponseDto(adminUser: AdminUser): AdminUserResponseDto {
+  return plainToInstance(AdminUserResponseDto, adminUser, {
+    excludeExtraneousValues: true,
+  });
+}
+
+export function toAdminUsersResponseDto(adminUsers: AdminUser[]): AdminUsersResponseDto {
+  return {
+    adminUsers: adminUsers.map((adminUser) => toAdminUserResponseDto(adminUser)),
+  };
 }

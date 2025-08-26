@@ -2,20 +2,20 @@ import { NotFoundException } from '@nestjs/common';
 
 import { createIntegrationTestHelper, type IntegrationTestHelper } from '../../helpers';
 
-import { UserCommandService } from '@/aggregates/user/user.command.service';
-import { UserModule } from '@/aggregates/user/user.module';
-import { UserRepositoryService } from '@/aggregates/user/user.repository.service';
+import { UserCommandService } from '@/aggregates/user/command.service';
+import { UserModule } from '@/aggregates/user/module';
+import { RepositoryService } from '@/repository/service';
 
 describe('userCommandService Integration', () => {
   let helper: IntegrationTestHelper;
   let commandService: UserCommandService;
-  let repositoryService: UserRepositoryService;
+  let repositoryService: RepositoryService;
 
   beforeAll(async () => {
     helper = createIntegrationTestHelper();
     const { module } = await helper.setup([UserModule], []);
     commandService = module.get<UserCommandService>(UserCommandService);
-    repositoryService = module.get<UserRepositoryService>(UserRepositoryService);
+    repositoryService = module.get<RepositoryService>(RepositoryService);
   });
 
   beforeEach(async () => {
@@ -45,7 +45,9 @@ describe('userCommandService Integration', () => {
         updatedAt: expect.any(Date),
       });
 
-      const foundUser = await repositoryService.findUniqueUser({ publicId: createdUser.publicId });
+      const foundUser = await repositoryService.user.findUnique({
+        where: { publicId: createdUser.publicId },
+      });
 
       const { appleId, googleId, passwordHash, ...rest } = createdUser;
 
@@ -85,7 +87,9 @@ describe('userCommandService Integration', () => {
         updatedAt: expect.any(Date),
       });
 
-      const foundUser = await repositoryService.findUniqueUser({ publicId: createdUser.publicId });
+      const foundUser = await repositoryService.user.findUnique({
+        where: { publicId: createdUser.publicId },
+      });
 
       expect(foundUser?.name).toBe(updateDto.data.name);
     });
@@ -116,7 +120,9 @@ describe('userCommandService Integration', () => {
 
       await commandService.deleteUserById({ publicId: createdUser.publicId });
 
-      const user = await repositoryService.findUniqueUser({ publicId: createdUser.publicId });
+      const user = await repositoryService.user.findUnique({
+        where: { publicId: createdUser.publicId },
+      });
 
       expect(user).toBeNull();
     });
@@ -146,7 +152,7 @@ describe('userCommandService Integration', () => {
 
       expect(createdUsers.users).toHaveLength(3);
 
-      const users = await repositoryService.findManyUsers({});
+      const users = await repositoryService.user.findMany({});
 
       expect(users).toHaveLength(3);
 
@@ -166,7 +172,7 @@ describe('userCommandService Integration', () => {
       await commandService.updateUserById({ publicId: user1.publicId, data: { name: 'Updated Name' } });
       await commandService.updateUserById({ publicId: user2.publicId, data: { name: 'Updated Name' } });
 
-      const users = await repositoryService.findManyUsers({
+      const users = await repositoryService.user.findMany({
         where: { publicId: { in: [user1.publicId, user2.publicId] } },
       });
 
@@ -186,7 +192,7 @@ describe('userCommandService Integration', () => {
       const dto = { publicIds: [user1.publicId, user2.publicId] };
       await commandService.deleteManyUsersById(dto);
 
-      const users = await repositoryService.findManyUsers({});
+      const users = await repositoryService.user.findMany({});
 
       expect(users).toHaveLength(0);
     });

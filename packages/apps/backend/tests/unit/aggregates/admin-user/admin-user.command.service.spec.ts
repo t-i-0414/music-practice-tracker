@@ -1,15 +1,23 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { AdminUserCommandService } from '@/aggregates/admin-user/admin-user.command.service';
-import { AdminUserQueryService } from '@/aggregates/admin-user/admin-user.query.service';
-import { AdminUserRepositoryService } from '@/aggregates/admin-user/admin-user.repository.service';
-import { toAdminUserResponseDto, toAdminUsersResponseDto } from '@/aggregates/admin-user/admin-user.response.dto';
+import { AdminUserCommandService } from '@/aggregates/admin-user/command.service';
+import { toAdminUserResponseDto, toAdminUsersResponseDto } from '@/aggregates/admin-user/dto';
+import { AdminUserQueryService } from '@/aggregates/admin-user/query.service';
 import { AdminRole } from '@/generated/prisma';
+import { RepositoryService } from '@/repository/service';
 import { AdminUserFactory } from '@/tests/factory';
 
 describe('adminUserCommandService', () => {
   let service: AdminUserCommandService;
-  let repository: jest.Mocked<AdminUserRepositoryService>;
+  let repository: {
+    adminUser: {
+      create: jest.Mock;
+      createManyAndReturn: jest.Mock;
+      update: jest.Mock;
+      delete: jest.Mock;
+      deleteMany: jest.Mock;
+    };
+  };
   let queryService: jest.Mocked<AdminUserQueryService>;
   let adminUserFactory: AdminUserFactory;
 
@@ -17,11 +25,13 @@ describe('adminUserCommandService', () => {
     adminUserFactory = new AdminUserFactory();
 
     const mockRepository = {
-      createAdminUser: jest.fn(),
-      createManyAndReturnAdminUsers: jest.fn(),
-      updateAdminUser: jest.fn(),
-      deleteAdminUser: jest.fn(),
-      deleteManyAdminUsers: jest.fn(),
+      adminUser: {
+        create: jest.fn(),
+        createManyAndReturn: jest.fn(),
+        update: jest.fn(),
+        delete: jest.fn(),
+        deleteMany: jest.fn(),
+      },
     };
 
     const mockQueryService = {
@@ -32,7 +42,7 @@ describe('adminUserCommandService', () => {
       providers: [
         AdminUserCommandService,
         {
-          provide: AdminUserRepositoryService,
+          provide: RepositoryService,
           useValue: mockRepository,
         },
         {
@@ -43,7 +53,7 @@ describe('adminUserCommandService', () => {
     }).compile();
 
     service = module.get<AdminUserCommandService>(AdminUserCommandService);
-    repository = module.get(AdminUserRepositoryService);
+    repository = module.get(RepositoryService);
     queryService = module.get(AdminUserQueryService);
   });
 
@@ -56,7 +66,7 @@ describe('adminUserCommandService', () => {
       expect.assertions(2);
 
       const mockAdminUser = adminUserFactory.build();
-      repository.createAdminUser.mockResolvedValue(mockAdminUser);
+      repository.adminUser.create.mockResolvedValue(mockAdminUser);
       const params = {
         email: mockAdminUser.email,
         name: mockAdminUser.name,
@@ -65,7 +75,9 @@ describe('adminUserCommandService', () => {
 
       const result = await service.createAdminUser(params);
 
-      expect(repository.createAdminUser).toHaveBeenCalledWith(params);
+      expect(repository.adminUser.create).toHaveBeenCalledWith({
+        data: params,
+      });
       expect(result).toStrictEqual(toAdminUserResponseDto(mockAdminUser));
     });
   });
@@ -75,7 +87,7 @@ describe('adminUserCommandService', () => {
       expect.assertions(2);
 
       const mockAdminUsers = [adminUserFactory.build(), adminUserFactory.build()];
-      repository.createManyAndReturnAdminUsers.mockResolvedValue(mockAdminUsers);
+      repository.adminUser.createManyAndReturn.mockResolvedValue(mockAdminUsers);
       const params = {
         adminUsers: mockAdminUsers.map((user) => ({
           email: user.email,
@@ -86,7 +98,9 @@ describe('adminUserCommandService', () => {
 
       const result = await service.createManyAndReturnAdminUsers(params);
 
-      expect(repository.createManyAndReturnAdminUsers).toHaveBeenCalledWith(params.adminUsers);
+      expect(repository.adminUser.createManyAndReturn).toHaveBeenCalledWith({
+        data: params.adminUsers,
+      });
       expect(result).toStrictEqual(toAdminUsersResponseDto(mockAdminUsers));
     });
   });
@@ -103,7 +117,7 @@ describe('adminUserCommandService', () => {
       };
       const mockResponseDto = toAdminUserResponseDto(mockAdminUser);
       queryService.findAdminUserByIdOrFail.mockResolvedValue(mockResponseDto);
-      repository.updateAdminUser.mockResolvedValue(updatedAdminUser);
+      repository.adminUser.update.mockResolvedValue(updatedAdminUser);
 
       const params = {
         publicId: mockAdminUser.publicId,
@@ -116,7 +130,7 @@ describe('adminUserCommandService', () => {
       const result = await service.updateAdminUserById(params);
 
       expect(queryService.findAdminUserByIdOrFail).toHaveBeenCalledWith({ publicId: params.publicId });
-      expect(repository.updateAdminUser).toHaveBeenCalledWith({
+      expect(repository.adminUser.update).toHaveBeenCalledWith({
         where: { publicId: params.publicId },
         data: params.data,
       });
@@ -136,7 +150,7 @@ describe('adminUserCommandService', () => {
       };
 
       await expect(service.updateAdminUserById(params)).rejects.toThrow(error);
-      expect(repository.updateAdminUser).not.toHaveBeenCalled();
+      expect(repository.adminUser.update).not.toHaveBeenCalled();
     });
   });
 
@@ -147,15 +161,17 @@ describe('adminUserCommandService', () => {
       const mockAdminUser = adminUserFactory.build();
       const mockResponseDto = toAdminUserResponseDto(mockAdminUser);
       queryService.findAdminUserByIdOrFail.mockResolvedValue(mockResponseDto);
-      repository.deleteAdminUser.mockResolvedValue(undefined);
+      repository.adminUser.delete.mockResolvedValue(undefined);
 
       const params = { publicId: mockAdminUser.publicId };
 
       await service.deleteAdminUserById(params);
 
       expect(queryService.findAdminUserByIdOrFail).toHaveBeenCalledWith(params);
-      expect(repository.deleteAdminUser).toHaveBeenCalledWith(params);
-      expect(repository.deleteAdminUser).toHaveBeenCalledTimes(1);
+      expect(repository.adminUser.delete).toHaveBeenCalledWith({
+        where: params,
+      });
+      expect(repository.adminUser.delete).toHaveBeenCalledTimes(1);
     });
 
     it('should throw error if admin user does not exist', async () => {
@@ -166,7 +182,7 @@ describe('adminUserCommandService', () => {
       queryService.findAdminUserByIdOrFail.mockRejectedValue(error);
 
       await expect(service.deleteAdminUserById({ publicId })).rejects.toThrow(error);
-      expect(repository.deleteAdminUser).not.toHaveBeenCalled();
+      expect(repository.adminUser.delete).not.toHaveBeenCalled();
     });
   });
 
@@ -175,13 +191,15 @@ describe('adminUserCommandService', () => {
       expect.assertions(2);
 
       const publicIds = ['id1', 'id2', 'id3'];
-      repository.deleteManyAdminUsers.mockResolvedValue(undefined);
+      repository.adminUser.deleteMany.mockResolvedValue(undefined);
       const params = { publicIds };
 
       await service.deleteManyAdminUsersById(params);
 
-      expect(repository.deleteManyAdminUsers).toHaveBeenCalledWith({
-        publicId: { in: publicIds },
+      expect(repository.adminUser.deleteMany).toHaveBeenCalledWith({
+        where: {
+          publicId: { in: publicIds },
+        },
       });
       expect(queryService.findAdminUserByIdOrFail).not.toHaveBeenCalled();
     });
@@ -190,12 +208,14 @@ describe('adminUserCommandService', () => {
       expect.assertions(1);
 
       const publicIds: string[] = [];
-      repository.deleteManyAdminUsers.mockResolvedValue(undefined);
+      repository.adminUser.deleteMany.mockResolvedValue(undefined);
 
       await service.deleteManyAdminUsersById({ publicIds });
 
-      expect(repository.deleteManyAdminUsers).toHaveBeenCalledWith({
-        publicId: { in: [] },
+      expect(repository.adminUser.deleteMany).toHaveBeenCalledWith({
+        where: {
+          publicId: { in: [] },
+        },
       });
     });
   });

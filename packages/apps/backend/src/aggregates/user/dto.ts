@@ -13,8 +13,16 @@ import {
   MaxLength,
   ValidateNested,
 } from 'class-validator';
+import { Exclude, Expose, plainToInstance } from 'class-transformer';
 
-import { MAX_EMAIL_LENGTH, MAX_NAME_LENGTH, UserStatusRecord, UserStatusType } from './user.constants';
+import { MAX_EMAIL_LENGTH, MAX_NAME_LENGTH, UserStatusRecord } from './constants';
+import { User } from './query.service';
+
+import { Publicize } from '@/utils/publicize';
+
+// ============================================
+// Command DTOs (Input)
+// ============================================
 
 export class FindUserByIdInputDto {
   @ApiProperty({
@@ -86,7 +94,7 @@ export class UpdateUserDataDto extends PartialType(CreateUserInputDto) {
   })
   @IsOptional()
   @IsEnum(Object.values(UserStatusRecord))
-  public status?: UserStatusType;
+  public status?: keyof typeof UserStatusRecord;
 }
 
 export class UpdateUserInputDto {
@@ -113,3 +121,86 @@ export class UpdateUserInputDto {
 export class DeleteUserByIdInputDto extends FindUserByIdInputDto {}
 
 export class DeleteManyUsersInputDto extends FindManyUsersByIdInputDto {}
+
+// ============================================
+// Query DTOs (Response)
+// ============================================
+
+@Exclude()
+export class UserResponseDto implements Publicize<User> {
+  @ApiProperty({
+    description: 'The user public ID',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    format: 'uuid',
+  })
+  @Expose()
+  public publicId: string;
+
+  @ApiProperty({
+    description: 'The user email address',
+    example: 'takuya.iwashiro@takudev.net',
+    format: 'email',
+    maxLength: MAX_EMAIL_LENGTH,
+  })
+  @Expose()
+  public email: string;
+
+  @ApiProperty({
+    description: 'The user name',
+    example: 'Takuya Iwashiro',
+    maxLength: MAX_NAME_LENGTH,
+  })
+  @Expose()
+  public name: string;
+
+  @ApiProperty({
+    description: 'The user status',
+    example: UserStatusRecord.ACTIVE,
+    enum: Object.values(UserStatusRecord),
+  })
+  @Expose()
+  public status: keyof typeof UserStatusRecord;
+
+  @ApiProperty({
+    description: 'The user created at timestamp',
+    example: '2024-01-15T09:30:00.000Z',
+    type: String,
+    format: 'date-time',
+  })
+  @Type(() => Date)
+  @Expose()
+  public createdAt: Date;
+
+  @ApiProperty({
+    description: 'The user updated at timestamp',
+    example: '2024-06-16T14:45:30.123Z',
+    type: String,
+    format: 'date-time',
+  })
+  @Type(() => Date)
+  @Expose()
+  public updatedAt: Date;
+
+  @Exclude()
+  public googleId: string | null;
+
+  @Exclude()
+  public appleId: string | null;
+
+  @Exclude()
+  public passwordHash: string | null;
+}
+
+export function toUserResponseDto(user: unknown): UserResponseDto {
+  return plainToInstance(UserResponseDto, user);
+}
+
+export class UsersResponseDto {
+  @ApiProperty({ type: [UserResponseDto] })
+  public users: UserResponseDto[];
+}
+export function toUsersResponseDto(users: unknown[]): UsersResponseDto {
+  return {
+    users: plainToInstance(UserResponseDto, users),
+  };
+}

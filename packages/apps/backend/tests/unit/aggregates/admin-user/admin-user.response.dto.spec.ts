@@ -5,7 +5,7 @@ import {
   AdminUsersResponseDto,
   toAdminUserResponseDto,
   toAdminUsersResponseDto,
-} from '@/aggregates/admin-user/admin-user.response.dto';
+} from '@/aggregates/admin-user/dto';
 import { AdminRole, AdminStatus } from '@/generated/prisma';
 import { AdminUserFactory } from '@/tests/factory';
 

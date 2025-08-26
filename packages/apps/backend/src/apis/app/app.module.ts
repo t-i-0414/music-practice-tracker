@@ -2,8 +2,8 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 
-import { AppAuthModule } from './auth/auth.module';
-import { AppUsersModule } from './users/users.module';
+import { AppAuthModule } from './auth/module';
+import { AppUsersModule } from './users/module';
 
 import { AppAuthGuard } from '@/guards/app-auth-guard/guard';
 

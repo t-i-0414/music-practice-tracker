@@ -1,6 +1,6 @@
 import { Controller } from '@nestjs/common';
 
-import { ApiController } from '@/decorators/api-controller.decorator';
+import { ApiController } from '@/decorators/api-controller/decorator';
 
 describe('apiController decorator', () => {
   it('should return a function decorator', () => {

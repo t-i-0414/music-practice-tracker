@@ -1,12 +1,12 @@
 import { Body, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Put } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-import { UserCommandService } from '@/aggregates/user/user.command.service';
-import { CreateUserInputDto, UpdateUserDataDto } from '@/aggregates/user/user.input.dto';
-import { UserQueryService } from '@/aggregates/user/user.query.service';
-import { UserResponseDto } from '@/aggregates/user/user.response.dto';
-import { ApiController } from '@/decorators/api-controller.decorator';
-import { Public } from '@/decorators/public.decorator';
+import { UserCommandService } from '@/aggregates/user/command.service';
+import { CreateUserInputDto, UpdateUserDataDto } from '@/aggregates/user/dto';
+import { UserQueryService } from '@/aggregates/user/query.service';
+import { UserResponseDto } from '@/aggregates/user/dto';
+import { ApiController } from '@/decorators/api-controller/decorator';
+import { Public } from '@/decorators/public/decorator';
 
 @ApiTags('users')
 @ApiController('users')

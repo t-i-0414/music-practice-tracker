@@ -1,16 +1,16 @@
 import { Body, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Put, Query } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-import { UserCommandService } from '@/aggregates/user/user.command.service';
+import { UserCommandService } from '@/aggregates/user/command.service';
 import {
   CreateManyUsersInputDto,
   CreateUserInputDto,
   DeleteManyUsersInputDto,
   UpdateUserDataDto,
-} from '@/aggregates/user/user.input.dto';
-import { UserQueryService } from '@/aggregates/user/user.query.service';
-import { UserResponseDto, UsersResponseDto } from '@/aggregates/user/user.response.dto';
-import { ApiController } from '@/decorators/api-controller.decorator';
+} from '@/aggregates/user/dto';
+import { UserQueryService } from '@/aggregates/user/query.service';
+import { UserResponseDto, UsersResponseDto } from '@/aggregates/user/dto';
+import { ApiController } from '@/decorators/api-controller/decorator';
 import { ensurePublicIdsToArray } from '@/utils/ensure-public-ids-to-array';
 
 @ApiTags('users')

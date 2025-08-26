@@ -1,4 +1,4 @@
-import { UserResponseDto, toUserResponseDto, toUsersResponseDto } from '@/aggregates/user/user.response.dto';
+import { UserResponseDto, toUserResponseDto, toUsersResponseDto } from '@/aggregates/user/dto';
 import { UserResponseDtoFactory } from '@/tests/factory';
 
 describe('user response DTOs', () => {

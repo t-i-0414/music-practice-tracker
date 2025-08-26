@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 
-import { AdminAdminUsersModule } from './admin-users/admin-users.module';
-import { AdminUsersModule } from './users/users.module';
+import { AdminAdminUsersModule } from './admin-users/module';
+import { AdminUsersModule } from './users/module';
 
 @Module({
   imports: [AdminUsersModule, AdminAdminUsersModule],
