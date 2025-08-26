@@ -5,7 +5,7 @@ import * as request from 'supertest';
 
 import { createE2ETestHelper, type E2ETestHelper } from '../../helpers';
 
-import { AdminApiModule } from '@/apis/admin/admin.module';
+import { AdminApiModule } from '@/apis/admin/module';
 
 describe('admin API - /api/users', () => {
   let helper: E2ETestHelper;
