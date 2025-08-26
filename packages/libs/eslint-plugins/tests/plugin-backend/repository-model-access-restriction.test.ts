@@ -195,6 +195,18 @@ describe('repository-model-access-restriction', () => {
         `,
         filename: 'src/modules/aggregates/user/command.service.ts',
       },
+      // Valid: Importing Prisma namespace (common type) in command service
+      {
+        code: `
+          import { User, Prisma } from '@prisma/client';
+          class UserCommandService {
+            async createUser(data: Prisma.UserCreateInput) {
+              return await this.repository.user.create({ data });
+            }
+          }
+        `,
+        filename: 'src/modules/aggregates/user/command.service.ts',
+      },
       // Valid: Importing matching model in admin-user aggregate
       {
         code: `
@@ -207,67 +219,7 @@ describe('repository-model-access-restriction', () => {
         `,
         filename: 'src/modules/aggregates/admin-user/query.service.ts',
       },
-      // Valid: Parent aggregate (user) accessing child aggregate (profile) model
-      {
-        code: `
-          class UserCommandService {
-            async updateUserWithProfile() {
-              await this.repository.user.update({ where: {}, data: {} });
-              await this.repository.profile.update({ where: {}, data: {} });
-            }
-          }
-        `,
-        filename: 'src/modules/aggregates/user/command.service.ts',
-      },
-      // Valid: Parent aggregate (user) accessing child aggregate (setting) model
-      {
-        code: `
-          class UserQueryService {
-            async getUserWithSettings() {
-              const user = await this.repository.user.findUnique({ where: {} });
-              const setting = await this.repository.setting.findFirst({ where: {} });
-              return { user, setting };
-            }
-          }
-        `,
-        filename: 'src/modules/aggregates/user/query.service.ts',
-      },
-      // Valid: Parent aggregate (user) can import child model (Profile)
-      {
-        code: `
-          import { User, Profile } from '@prisma/client';
-          class UserCommandService {
-            async createUserWithProfile(userData: User, profileData: Profile) {
-              return await this.repository.user.create({ data: userData });
-            }
-          }
-        `,
-        filename: 'src/modules/aggregates/user/command.service.ts',
-      },
-      // Valid: Parent aggregate (user) can import child model (Setting)
-      {
-        code: `
-          import { User, Setting } from '@/generated/prisma';
-          class UserQueryService {
-            async getUserSettings(userId: string): Promise<Setting | null> {
-              return await this.repository.setting.findFirst({ where: { userId } });
-            }
-          }
-        `,
-        filename: 'src/modules/aggregates/user/query.service.ts',
-      },
-      // Valid: User auth token aggregate can import User model
-      {
-        code: `
-          import { User, UserAuthToken } from '@/generated/prisma';
-          class UserAuthTokenQueryService {
-            async validateToken(token: string, user: User): Promise<boolean> {
-              return await this.repository.userAuthToken.findFirst({ where: { token } });
-            }
-          }
-        `,
-        filename: 'src/modules/aggregates/user-auth-token/query.service.ts',
-      },
+
       // Valid: User auth token aggregate can access userAuthToken repository for writes
       {
         code: `
@@ -279,23 +231,23 @@ describe('repository-model-access-restriction', () => {
         `,
         filename: 'src/modules/aggregates/user-auth-token/command.service.ts',
       },
-      // Valid: User auth token aggregate can access user repository for reads in query service
-      {
-        code: `
-          class UserAuthTokenQueryService {
-            async findTokenWithUser(tokenId: string) {
-              const token = await this.repository.userAuthToken.findUnique({ where: { publicId: tokenId } });
-              const user = await this.repository.user.findUnique({ where: { publicId: token.userId } });
-              return { token, user };
-            }
-          }
-        `,
-        filename: 'src/modules/aggregates/user-auth-token/query.service.ts',
-      },
+
       // Valid: PrismaClient import in repository/service.ts
       {
         code: `
           import { PrismaClient } from '@/generated/prisma';
+          export class RepositoryService extends PrismaClient {
+            constructor() {
+              super();
+            }
+          }
+        `,
+        filename: 'src/repository/service.ts',
+      },
+      // Valid: Default import from Prisma in repository/service.ts (covers non-ImportSpecifier case)
+      {
+        code: `
+          import PrismaClient from '@/generated/prisma';
           export class RepositoryService extends PrismaClient {
             constructor() {
               super();
@@ -719,6 +671,24 @@ describe('repository-model-access-restriction', () => {
           import { PrismaClient, User } from '@/generated/prisma';
           export class RepositoryService extends PrismaClient {
             someMethod(user: User) {}
+          }
+        `,
+        filename: 'src/repository/service.ts',
+        errors: [
+          {
+            messageId: 'invalidPrismaImport',
+            data: {
+              allowedFiles: 'command.service.ts or query.service.ts within aggregates folder',
+            },
+          },
+        ],
+      },
+      // Invalid: repository/service.ts with namespace import (not allowed)
+      {
+        code: `
+          import * as Prisma from '@/generated/prisma';
+          export class RepositoryService extends Prisma.PrismaClient {
+            someMethod() {}
           }
         `,
         filename: 'src/repository/service.ts',

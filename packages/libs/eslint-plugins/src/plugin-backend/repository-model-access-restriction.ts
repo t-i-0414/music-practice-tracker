@@ -99,6 +99,10 @@ const rule = createRule({
             if (isRepositoryService) {
               // Only allow PrismaClient import, not model imports
               const importsOnlyPrismaClient = node.specifiers.every((spec) => {
+                if (spec.type === AST_NODE_TYPES.ImportDefaultSpecifier) {
+                  // Allow default import of PrismaClient
+                  return true;
+                }
                 if (spec.type === AST_NODE_TYPES.ImportSpecifier) {
                   const imported = spec.imported;
                   const importedName = imported.type === AST_NODE_TYPES.Identifier ? imported.name : imported.value;
@@ -148,20 +152,6 @@ const rule = createRule({
 
                   // Allow the model that matches the aggregate name
                   if (importedName === expectedModelName) {
-                    return;
-                  }
-
-                  // For parent aggregates, we allow importing specific child models
-                  // Known parent-child relationships (would ideally be configurable)
-                  const parentChildRelations: Record<string, string[]> = {
-                    user: ['Profile', 'Setting'], // User aggregate can import Profile and Setting models
-                    'user-auth-token': ['User'], // User auth token aggregate can import User model
-                    // Add more parent-child relationships as needed
-                  };
-
-                  // Check if this aggregate has known child models it can import
-                  const allowedChildModels = parentChildRelations[currentAggregate] || [];
-                  if (allowedChildModels.includes(importedName)) {
                     return;
                   }
 
@@ -291,53 +281,14 @@ function validateRepositoryScope(params: ValidateRepositoryScopeParams) {
     return;
   }
 
-  // Get the aggregate path after 'aggregates'
-  const aggregatePath = pathParts.slice(aggregatesIndex + 1, -1); // Remove filename
+  // Get the current aggregate (first folder after 'aggregates')
+  const currentAggregate = pathParts[aggregatesIndex + 1];
+  const camelCaseAggregate = currentAggregate.replace(/-(?<letter>[a-z])/gu, (_, letter: string) =>
+    letter.toUpperCase(),
+  );
 
-  // Repository access rules:
-  // 1. Model can be accessed from its own aggregate folder (aggregates/{modelName}/)
-  // 2. Parent aggregates can access child aggregate models (aggregates/user/ can access profile model)
-  // This allows hierarchical aggregate management
-
-  // Known parent-child relationships (would ideally be configurable)
-  const parentChildRelations: Record<string, string[]> = {
-    user: ['profile', 'setting'], // User aggregate can access profile and setting repositories
-    'user-auth-token': ['user'], // User auth token aggregate can access user repository
-    // Add more parent-child relationships as needed
-  };
-
-  let isValidAccess = false;
-
-  if (aggregatePath.length > 0) {
-    // Get the parent aggregate (first folder after 'aggregates')
-    const parentAggregate = aggregatePath[0];
-    const camelCaseParent = parentAggregate.replace(/-(?<letter>[a-z])/gu, (_, letter: string) => letter.toUpperCase());
-
-    // Check if we're accessing the parent aggregate's model
-    if (camelCaseParent === modelName) {
-      isValidAccess = true;
-    }
-    // Check if this is a parent aggregate accessing a known child model
-    else if (aggregatePath.length === 1) {
-      const allowedChildModels = parentChildRelations[parentAggregate] || [];
-      if (allowedChildModels.includes(modelName)) {
-        isValidAccess = true;
-      }
-    }
-    // For child aggregates in nested paths (e.g., aggregates/user/profile/)
-    else if (aggregatePath.length > 1) {
-      // Check if the model matches any folder in the path
-      for (const folder of aggregatePath) {
-        const camelCaseFolder = folder.replace(/-(?<letter>[a-z])/gu, (_, letter: string) => letter.toUpperCase());
-        if (camelCaseFolder === modelName) {
-          isValidAccess = true;
-          break;
-        }
-      }
-    }
-  }
-
-  if (!isValidAccess) {
+  // Repository access rule: Model can only be accessed from its own aggregate folder
+  if (camelCaseAggregate !== modelName) {
     const allowedPath = `${kebabCaseModel}/**`;
 
     context.report({
