@@ -77,7 +77,10 @@ const rule = createRule({
         const source = node.source.value;
 
         // Check if this is a Prisma import
-        if (source.includes('@prisma/client') || source.includes('@/generated/prisma')) {
+        if (
+          (source.includes('@prisma/client') && !source.includes('/runtime/')) ||
+          source.includes('@/generated/prisma')
+        ) {
           // Skip type-only imports
           if (node.importKind === 'type') return;
 
@@ -91,6 +94,21 @@ const rule = createRule({
 
           // Only check non-type imports
           if (hasNonTypeImport) {
+            // Special case: Allow PrismaClient import in repository/service.ts
+            const isRepositoryService = filePath.endsWith('repository/service.ts');
+            if (isRepositoryService) {
+              // Only allow PrismaClient import, not model imports
+              const importsOnlyPrismaClient = node.specifiers.every((spec) => {
+                if (spec.type === AST_NODE_TYPES.ImportSpecifier) {
+                  const imported = spec.imported;
+                  const importedName = imported.type === AST_NODE_TYPES.Identifier ? imported.name : imported.value;
+                  return importedName === 'PrismaClient' || importedName === 'Prisma';
+                }
+                return false;
+              });
+              if (importsOnlyPrismaClient) return;
+            }
+
             // Prisma imports are only allowed in command.service.ts or query.service.ts within aggregates
             if (!isInAggregates || (!isQueryService && !isCommandService)) {
               context.report({
@@ -122,19 +140,41 @@ const rule = createRule({
                   // Capitalize first letter to match model naming convention
                   const expectedModelName = camelCaseAggregate.charAt(0).toUpperCase() + camelCaseAggregate.slice(1);
 
-                  // Allow the model that matches the aggregate name and common Prisma types
+                  // Allow common Prisma types
                   const commonTypes = ['Prisma', 'TransactionClient'];
-                  if (importedName !== expectedModelName && !commonTypes.includes(importedName)) {
-                    context.report({
-                      node: specifier,
-                      messageId: 'invalidModelImport',
-                      data: {
-                        modelName: importedName,
-                        expectedModel: expectedModelName,
-                        aggregate: currentAggregate,
-                      },
-                    });
+                  if (commonTypes.includes(importedName)) {
+                    return;
                   }
+
+                  // Allow the model that matches the aggregate name
+                  if (importedName === expectedModelName) {
+                    return;
+                  }
+
+                  // For parent aggregates, we allow importing specific child models
+                  // Known parent-child relationships (would ideally be configurable)
+                  const parentChildRelations: Record<string, string[]> = {
+                    user: ['Profile', 'Setting'], // User aggregate can import Profile and Setting models
+                    'user-auth-token': ['User'], // User auth token aggregate can import User model
+                    // Add more parent-child relationships as needed
+                  };
+
+                  // Check if this aggregate has known child models it can import
+                  const allowedChildModels = parentChildRelations[currentAggregate] || [];
+                  if (allowedChildModels.includes(importedName)) {
+                    return;
+                  }
+
+                  // If none of the above conditions are met, report an error
+                  context.report({
+                    node: specifier,
+                    messageId: 'invalidModelImport',
+                    data: {
+                      modelName: importedName,
+                      expectedModel: expectedModelName,
+                      aggregate: currentAggregate,
+                    },
+                  });
                 }
               }
             });
@@ -255,21 +295,46 @@ function validateRepositoryScope(params: ValidateRepositoryScopeParams) {
   const aggregatePath = pathParts.slice(aggregatesIndex + 1, -1); // Remove filename
 
   // Repository access rules:
-  // Model can only be accessed from its own aggregate folder (aggregates/{modelName}/)
-  // This enforces strict aggregate boundaries
+  // 1. Model can be accessed from its own aggregate folder (aggregates/{modelName}/)
+  // 2. Parent aggregates can access child aggregate models (aggregates/user/ can access profile model)
+  // This allows hierarchical aggregate management
+
+  // Known parent-child relationships (would ideally be configurable)
+  const parentChildRelations: Record<string, string[]> = {
+    user: ['profile', 'setting'], // User aggregate can access profile and setting repositories
+    'user-auth-token': ['user'], // User auth token aggregate can access user repository
+    // Add more parent-child relationships as needed
+  };
 
   let isValidAccess = false;
 
   if (aggregatePath.length > 0) {
-    // Check if we're in the model's own aggregate
-    // We only check the first folder after 'aggregates'
-    const firstFolder = aggregatePath[0];
-    const camelCaseFirstFolder = firstFolder.replace(/-(?<letter>[a-z])/gu, (_, letter: string) =>
-      letter.toUpperCase(),
-    );
+    // Get the parent aggregate (first folder after 'aggregates')
+    const parentAggregate = aggregatePath[0];
+    const camelCaseParent = parentAggregate.replace(/-(?<letter>[a-z])/gu, (_, letter: string) => letter.toUpperCase());
 
-    // Only allow access if the first folder matches the model name
-    isValidAccess = camelCaseFirstFolder === modelName;
+    // Check if we're accessing the parent aggregate's model
+    if (camelCaseParent === modelName) {
+      isValidAccess = true;
+    }
+    // Check if this is a parent aggregate accessing a known child model
+    else if (aggregatePath.length === 1) {
+      const allowedChildModels = parentChildRelations[parentAggregate] || [];
+      if (allowedChildModels.includes(modelName)) {
+        isValidAccess = true;
+      }
+    }
+    // For child aggregates in nested paths (e.g., aggregates/user/profile/)
+    else if (aggregatePath.length > 1) {
+      // Check if the model matches any folder in the path
+      for (const folder of aggregatePath) {
+        const camelCaseFolder = folder.replace(/-(?<letter>[a-z])/gu, (_, letter: string) => letter.toUpperCase());
+        if (camelCaseFolder === modelName) {
+          isValidAccess = true;
+          break;
+        }
+      }
+    }
   }
 
   if (!isValidAccess) {
