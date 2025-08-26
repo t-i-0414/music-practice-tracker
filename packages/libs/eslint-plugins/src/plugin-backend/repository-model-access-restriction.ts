@@ -76,8 +76,19 @@ const rule = createRule({
 
         // Check if this is a Prisma import
         if (source.includes('@prisma/client') || source.includes('@/generated/prisma')) {
-          // Only check if we're in the aggregates folder
-          if (isInAggregates) {
+          // Skip type-only imports
+          if (node.importKind === 'type') return;
+          
+          // Check if all specifiers are type-only
+          const hasNonTypeImport = node.specifiers.some((spec) => {
+            if (spec.type === AST_NODE_TYPES.ImportSpecifier && spec.importKind === 'type') {
+              return false;
+            }
+            return true;
+          });
+          
+          // Only check non-type imports
+          if (hasNonTypeImport && isInAggregates) {
             // Only allow Prisma imports in command.service.ts or query.service.ts
             if (!isQueryService && !isCommandService) {
               context.report({
@@ -208,11 +219,20 @@ function validateRepositoryScope(params: ValidateRepositoryScopeParams) {
   // Check if we're in the correct aggregate folder
   if (aggregatePath.length > 0) {
     // Check if the model matches any folder in the current path
-    isValidAccess = aggregatePath.some((folder) => folder === modelName);
+    // Convert kebab-case folder names to camelCase for comparison with model names
+    isValidAccess = aggregatePath.some((folder) => {
+      const camelCaseFolder = folder.replace(/-(?<letter>[a-z])/gu, (_, letter: string) => letter.toUpperCase());
+      return camelCaseFolder === modelName;
+    });
   }
 
   if (!isValidAccess) {
-    const allowedPath = aggregatePath.includes(modelName) ? aggregatePath.join('/') : `${modelName} or **/${modelName}`;
+    // Convert modelName from camelCase to kebab-case for the error message
+    const kebabCaseModel = modelName
+      .replace(/(?<upper>[A-Z])/gu, '-$1')
+      .toLowerCase()
+      .replace(/^-/u, '');
+    const allowedPath = `${kebabCaseModel} or **/${kebabCaseModel}`;
 
     context.report({
       node,

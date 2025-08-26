@@ -1,4 +1,4 @@
-import { type UserStatus as UserStatusEnumType } from '@/generated/prisma';
+import { type UserStatusEnumType } from './query.service';
 
 export const MAX_NAME_LENGTH = 50;
 export const MAX_EMAIL_LENGTH = 255;

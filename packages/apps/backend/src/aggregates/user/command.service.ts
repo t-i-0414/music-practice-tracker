@@ -29,7 +29,7 @@ export class UserCommandService {
   }
 
   public async createManyAndReturnUsers({ users }: CreateManyUsersInputDto): Promise<UsersResponseDto> {
-    const createdUsers = await this.createManyUserRecords(users);
+    const createdUsers = await this.createManyAndReturnUserRecords(users);
     return toUsersResponseDto(createdUsers);
   }
 
@@ -62,7 +62,7 @@ export class UserCommandService {
     });
   }
 
-  public async createManyUserRecords(params: Prisma.UserCreateInput[]): Promise<User[]> {
+  public async createManyAndReturnUserRecords(params: Prisma.UserCreateInput[]): Promise<User[]> {
     return this.repository.user.createManyAndReturn({
       data: params,
     });

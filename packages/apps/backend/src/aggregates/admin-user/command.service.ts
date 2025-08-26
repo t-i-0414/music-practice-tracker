@@ -31,7 +31,7 @@ export class AdminUserCommandService {
   public async createManyAndReturnAdminUsers({
     adminUsers,
   }: CreateManyAdminUsersInputDto): Promise<AdminUsersResponseDto> {
-    const createdAdminUsers = await this.createManyAdminUserRecords(adminUsers);
+    const createdAdminUsers = await this.createManyAndReturnAdminUserRecords(adminUsers);
     return toAdminUsersResponseDto(createdAdminUsers);
   }
 
@@ -64,7 +64,7 @@ export class AdminUserCommandService {
     });
   }
 
-  public async createManyAdminUserRecords(params: Prisma.AdminUserCreateInput[]): Promise<AdminUser[]> {
+  public async createManyAndReturnAdminUserRecords(params: Prisma.AdminUserCreateInput[]): Promise<AdminUser[]> {
     return this.repository.adminUser.createManyAndReturn({
       data: params,
     });
