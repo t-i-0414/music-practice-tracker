@@ -112,14 +112,16 @@ const rule = createRule({
                 // Exclude Prisma client itself and common types
                 if (importedName !== 'PrismaClient' && importedName !== 'Prisma') {
                   importedPrismaModels.add(importedName);
-                  
+
                   // Check if the imported model matches the current aggregate
                   const currentAggregate = pathParts[aggregatesIndex + 1];
                   // Convert aggregate folder name from kebab-case to camelCase
-                  const camelCaseAggregate = currentAggregate.replace(/-(?<letter>[a-z])/gu, (_, letter: string) => letter.toUpperCase());
+                  const camelCaseAggregate = currentAggregate.replace(/-(?<letter>[a-z])/gu, (_, letter: string) =>
+                    letter.toUpperCase(),
+                  );
                   // Capitalize first letter to match model naming convention
                   const expectedModelName = camelCaseAggregate.charAt(0).toUpperCase() + camelCaseAggregate.slice(1);
-                  
+
                   // Allow the model that matches the aggregate name and common Prisma types
                   const commonTypes = ['Prisma', 'TransactionClient'];
                   if (importedName !== expectedModelName && !commonTypes.includes(importedName)) {
@@ -229,7 +231,7 @@ type ValidateRepositoryScopeParams = {
 
 function validateRepositoryScope(params: ValidateRepositoryScopeParams) {
   const { modelName, aggregatesIndex, pathParts, context, node } = params;
-  
+
   // Convert modelName from camelCase to kebab-case for folder comparison
   const kebabCaseModel = modelName
     .replace(/(?<upper>[A-Z])/gu, '-$1')
@@ -262,8 +264,10 @@ function validateRepositoryScope(params: ValidateRepositoryScopeParams) {
     // Check if we're in the model's own aggregate
     // We only check the first folder after 'aggregates'
     const firstFolder = aggregatePath[0];
-    const camelCaseFirstFolder = firstFolder.replace(/-(?<letter>[a-z])/gu, (_, letter: string) => letter.toUpperCase());
-    
+    const camelCaseFirstFolder = firstFolder.replace(/-(?<letter>[a-z])/gu, (_, letter: string) =>
+      letter.toUpperCase(),
+    );
+
     // Only allow access if the first folder matches the model name
     isValidAccess = camelCaseFirstFolder === modelName;
   }
