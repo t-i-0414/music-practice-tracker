@@ -2,7 +2,7 @@ import { Body, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Put } from
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { UserCommandService } from '@/aggregates/user/command.service';
-import { CreateUserInputDto, UpdateUserDataDto , UserResponseDto } from '@/aggregates/user/dto';
+import { CreateUserInputDto, UpdateUserDataDto, UserResponseDto } from '@/aggregates/user/dto';
 import { UserQueryService } from '@/aggregates/user/query.service';
 import { ApiController } from '@/decorators/api-controller/decorator';
 import { Public } from '@/decorators/public/decorator';

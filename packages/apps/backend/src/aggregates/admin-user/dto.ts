@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Type , Exclude, Expose, plainToInstance } from 'class-transformer';
+import { Type, Exclude, Expose, plainToInstance } from 'class-transformer';
 import {
   ArrayNotEmpty,
   IsArray,
@@ -14,12 +14,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-import {
-  MAX_EMAIL_LENGTH,
-  MAX_NAME_LENGTH,
-  AdminRoleRecord,
-  AdminStatusRecord,
-} from './constants';
+import { MAX_EMAIL_LENGTH, MAX_NAME_LENGTH, AdminRoleRecord, AdminStatusRecord } from './constants';
 import { AdminUser } from './query.service';
 
 import { Publicize } from '@/utils/publicize';

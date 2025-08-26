@@ -7,7 +7,9 @@ import {
   CreateUserInputDto,
   DeleteManyUsersInputDto,
   UpdateUserDataDto,
- UserResponseDto, UsersResponseDto } from '@/aggregates/user/dto';
+  UserResponseDto,
+  UsersResponseDto,
+} from '@/aggregates/user/dto';
 import { UserQueryService } from '@/aggregates/user/query.service';
 import { ApiController } from '@/decorators/api-controller/decorator';
 import { ensurePublicIdsToArray } from '@/utils/ensure-public-ids-to-array';
