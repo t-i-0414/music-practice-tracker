@@ -8,8 +8,7 @@ import {
   RefreshTokenInputDto,
   ChangePasswordInputDto,
   OAuthSignInInputDto,
-} from '@/aggregates/user-auth-token/dto';
-import { AuthTokenResponseDto } from '@/aggregates/user-auth-token/dto';
+ AuthTokenResponseDto } from '@/aggregates/user-auth-token/dto';
 import { ApiController } from '@/decorators/api-controller/decorator';
 import { CurrentUser, CurrentUserData } from '@/decorators/current-user/decorator';
 import { Public } from '@/decorators/public/decorator';

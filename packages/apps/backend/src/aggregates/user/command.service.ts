@@ -6,9 +6,8 @@ import {
   DeleteManyUsersInputDto,
   DeleteUserByIdInputDto,
   UpdateUserInputDto,
-} from './dto';
+ toUserResponseDto, toUsersResponseDto, UserResponseDto, UsersResponseDto } from './dto';
 import { UserQueryService } from './query.service';
-import { toUserResponseDto, toUsersResponseDto, UserResponseDto, UsersResponseDto } from './dto';
 
 import { Prisma, User } from '@/generated/prisma';
 import { RepositoryService } from '@/repository/service';

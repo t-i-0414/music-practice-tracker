@@ -3,12 +3,11 @@ import { randomBytes } from 'crypto';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
-import { UserStatusRecord } from '../user/constants';
-
 import { USER_AUTH_TOKEN_CONSTANTS, UserAuthTokenRecord } from './constants';
 import { UserAuthTokenQueryService } from './query.service';
 
 import { UserCommandService } from '@/aggregates/user/command.service';
+import { UserStatusRecord } from '@/aggregates/user/constants';
 import { UserQueryService } from '@/aggregates/user/query.service';
 import { Prisma, UserAuthToken } from '@/generated/prisma';
 import { RepositoryService } from '@/repository/service';

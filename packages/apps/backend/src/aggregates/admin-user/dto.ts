@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Type , Exclude, Expose, plainToInstance } from 'class-transformer';
 import {
   ArrayNotEmpty,
   IsArray,
@@ -13,7 +13,6 @@ import {
   MaxLength,
   ValidateNested,
 } from 'class-validator';
-import { Exclude, Expose, plainToInstance } from 'class-transformer';
 
 import {
   MAX_EMAIL_LENGTH,

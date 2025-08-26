@@ -1,7 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
-import { FindManyUsersByIdInputDto, FindUserByIdInputDto } from './dto';
-import { toUserResponseDto, toUsersResponseDto, UserResponseDto, UsersResponseDto } from './dto';
+import {
+  FindManyUsersByIdInputDto,
+  FindUserByIdInputDto,
+  toUserResponseDto,
+  toUsersResponseDto,
+  UserResponseDto,
+  UsersResponseDto,
+} from './dto';
 
 import { Prisma, User } from '@/generated/prisma';
 import { RepositoryService } from '@/repository/service';

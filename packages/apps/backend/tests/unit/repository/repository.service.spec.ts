@@ -12,7 +12,7 @@ describe('repositoryService', () => {
 
     service = module.get<RepositoryService>(RepositoryService);
     // Mock the $connect method on the service instance
-    service.$connect = jest.fn();
+    jest.spyOn(service, '$connect').mockImplementation();
   });
 
   afterEach(() => {
