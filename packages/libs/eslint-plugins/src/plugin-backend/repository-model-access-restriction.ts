@@ -53,6 +53,12 @@ const rule = createRule({
   defaultOptions: [],
   create(context) {
     const filePath = context.filename || context.getFilename();
+
+    // Skip test files
+    if (filePath.includes('/tests/') || filePath.includes('.test.') || filePath.includes('.spec.')) {
+      return {};
+    }
+
     const pathParts = filePath.split(path.sep);
     const aggregatesIndex = pathParts.indexOf('aggregates');
     const isInAggregates = aggregatesIndex !== -1;

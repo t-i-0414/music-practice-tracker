@@ -23,6 +23,12 @@ const rule = createRule({
   defaultOptions: [],
   create(context) {
     const filename = context.filename || context.getFilename();
+
+    // Skip test files
+    if (filename.includes('/tests/') || filename.includes('.test.') || filename.includes('.spec.')) {
+      return {};
+    }
+
     const isRepositoryFile =
       filename.endsWith('.repository.ts') ||
       filename.endsWith('.repository.service.ts') ||
