@@ -14,8 +14,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-import { MAX_EMAIL_LENGTH, MAX_NAME_LENGTH, AdminRoleRecord, AdminStatusRecord } from './constants';
-import { AdminUser } from './query.service';
+import { MAX_EMAIL_LENGTH, MAX_NAME_LENGTH, AdminRoleRecord, AdminStatusRecord, AdminUser } from './constants';
 
 import { Publicize } from '@/utils/publicize';
 

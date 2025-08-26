@@ -2,8 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose, plainToInstance, Type } from 'class-transformer';
 import { IsEmail, IsString, MinLength, MaxLength, Matches, IsEnum } from 'class-validator';
 
-import { UserAuthTokenType, UserAuthTokenRecord } from './constants';
-import { type UserAuthToken } from './query.service';
+import { UserAuthTokenType, UserAuthTokenRecord, UserAuthToken } from './constants';
 
 import { type Publicize } from '@/utils/publicize';
 

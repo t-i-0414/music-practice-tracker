@@ -1,10 +1,8 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 
-import { UserQueryService, type User } from '@/aggregates/user/query.service';
-import { Prisma, UserAuthToken } from '@/generated/prisma';
+import { UserQueryService } from '@/aggregates/user/query.service';
+import { Prisma, User, UserAuthToken } from '@/generated/prisma';
 import { RepositoryService } from '@/repository/service';
-
-export type { UserAuthToken, TokenType as UserAuthTokenEnumType } from '@/generated/prisma';
 
 @Injectable()
 export class UserAuthTokenQueryService {

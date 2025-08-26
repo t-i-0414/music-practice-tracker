@@ -1,5 +1,7 @@
 import { type AdminRole as AdminRoleEnumType, type AdminStatus as AdminStatusEnumType } from '@/generated/prisma';
 
+export type { AdminUser, AdminRole as AdminRoleEnumType, AdminStatus as AdminStatusEnumType } from '@/generated/prisma';
+
 export const MAX_NAME_LENGTH = 50;
 export const MAX_EMAIL_LENGTH = 255;
 

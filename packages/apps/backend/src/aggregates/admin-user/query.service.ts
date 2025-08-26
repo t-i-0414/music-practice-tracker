@@ -12,8 +12,6 @@ import {
 import { AdminUser, Prisma } from '@/generated/prisma';
 import { RepositoryService } from '@/repository/service';
 
-export type { AdminUser, AdminRole as AdminRoleEnumType, AdminStatus as AdminStatusEnumType } from '@/generated/prisma';
-
 @Injectable()
 export class AdminUserQueryService {
   public constructor(private readonly repository: RepositoryService) {}

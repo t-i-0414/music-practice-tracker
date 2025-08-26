@@ -1,4 +1,6 @@
-import { type UserAuthTokenEnumType } from './query.service';
+import { type TokenType } from '@/generated/prisma';
+
+export type { UserAuthToken, TokenType as UserAuthTokenEnumType } from '@/generated/prisma';
 
 export const USER_AUTH_TOKEN_CONSTANTS = {
   JWT: {
@@ -17,7 +19,7 @@ export const USER_AUTH_TOKEN_CONSTANTS = {
 } as const;
 
 export type UserAuthTokenRecord = {
-  [key in UserAuthTokenEnumType]: key;
+  [key in TokenType]: key;
 };
 export const UserAuthTokenRecord: UserAuthTokenRecord = {
   EMAIL_VERIFICATION: 'EMAIL_VERIFICATION',

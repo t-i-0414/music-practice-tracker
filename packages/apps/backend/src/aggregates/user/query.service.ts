@@ -12,8 +12,6 @@ import {
 import { Prisma, User } from '@/generated/prisma';
 import { RepositoryService } from '@/repository/service';
 
-export type { User, UserStatus as UserStatusEnumType } from '@/generated/prisma';
-
 @Injectable()
 export class UserQueryService {
   public constructor(private readonly repository: RepositoryService) {}
