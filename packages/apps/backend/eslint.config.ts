@@ -36,12 +36,6 @@ const config = tseslint.config(
     rules: enabledBackendPluginRules,
   },
   {
-    files: ['src/repository/service.ts'],
-    rules: {
-      'custom-backend-eslint/repository-model-access-restriction': 'off',
-    },
-  },
-  {
     files: [...testFilePatterns({ prefix: 'tests' }), '**/tests/**/helpers/**/*.ts'],
     extends: [jestConfig],
     rules: {

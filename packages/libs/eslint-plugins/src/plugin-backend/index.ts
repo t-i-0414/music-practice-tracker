@@ -1,6 +1,5 @@
 import noInternalId from './no-internal-id';
 import prismaNamingConvention from './prisma-naming-convention';
-import prismaRepositoryOnlyAccess from './prisma-repository-only-access';
 import repositoryModelAccessRestriction from './repository-model-access-restriction';
 
 const plugin = {
@@ -11,7 +10,6 @@ const plugin = {
   rules: {
     'no-internal-id': noInternalId,
     'prisma-naming-convention': prismaNamingConvention,
-    'prisma-repository-only-access': prismaRepositoryOnlyAccess,
     'repository-model-access-restriction': repositoryModelAccessRestriction,
   },
 };
