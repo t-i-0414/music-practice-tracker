@@ -51,6 +51,68 @@ describe('repository-model-access-restriction', () => {
         `,
         filename: 'src/modules/aggregates/user/command.service.ts',
       },
+      // Valid: Type-only imports in constants.ts
+      {
+        code: `
+          import { type User, type UserStatus } from '@prisma/client';
+          export type UserType = User;
+        `,
+        filename: 'src/modules/aggregates/user/constants.ts',
+      },
+      // Valid: Type-only import statement in constants.ts
+      {
+        code: `
+          import type { AdminRole, AdminStatus } from '@/generated/prisma';
+          export type AdminRoleType = AdminRole;
+        `,
+        filename: 'src/modules/aggregates/admin-user/constants.ts',
+      },
+      // Valid: Accessing adminUser repository from admin-user folder (kebab-case)
+      {
+        code: `
+          class AdminUserCommandService {
+            async createAdmin() {
+              return await this.repository.adminUser.create({ data: {} });
+            }
+          }
+        `,
+        filename: 'src/modules/aggregates/admin-user/command.service.ts',
+      },
+      // Valid: Accessing userAuthToken repository from user-auth-token folder (kebab-case)
+      {
+        code: `
+          class UserAuthTokenQueryService {
+            async findToken() {
+              return await this.repository.userAuthToken.findUnique({ where: {} });
+            }
+          }
+        `,
+        filename: 'src/modules/aggregates/user-auth-token/query.service.ts',
+      },
+      // Valid: Test files are excluded
+      {
+        code: `
+          import { User, Prisma } from '@prisma/client';
+          describe('UserService', () => {
+            it('should work', () => {
+              this.repository.user.create({ data: {} });
+            });
+          });
+        `,
+        filename: 'src/modules/aggregates/user/tests/user.service.test.ts',
+      },
+      // Valid: Spec files are excluded
+      {
+        code: `
+          import { User } from '@/generated/prisma';
+          describe('UserController', () => {
+            it('should work', () => {
+              this.repository.post.findMany();
+            });
+          });
+        `,
+        filename: 'src/modules/aggregates/user/user.controller.spec.ts',
+      },
       // Valid: Accessing setting repository from user/setting aggregate
       {
         code: `
@@ -216,6 +278,62 @@ describe('repository-model-access-restriction', () => {
             messageId: 'invalidPrismaImport',
             data: {
               allowedFiles: 'command.service.ts or query.service.ts',
+            },
+          },
+        ],
+      },
+      // Invalid: Non-type import in constants.ts
+      {
+        code: `
+          import { User, UserStatus } from '@prisma/client';
+          export const UserModel = User;
+        `,
+        filename: 'src/modules/aggregates/user/constants.ts',
+        errors: [
+          {
+            messageId: 'invalidPrismaImport',
+            data: {
+              allowedFiles: 'command.service.ts or query.service.ts',
+            },
+          },
+        ],
+      },
+      // Invalid: adminUser repository access from user aggregate (kebab-case mismatch)
+      {
+        code: `
+          class UserCommandService {
+            async createAdmin() {
+              return await this.repository.adminUser.create({ data: {} });
+            }
+          }
+        `,
+        filename: 'src/modules/aggregates/user/command.service.ts',
+        errors: [
+          {
+            messageId: 'invalidRepositoryAccess',
+            data: {
+              modelName: 'adminUser',
+              aggregatePath: 'admin-user or **/admin-user',
+            },
+          },
+        ],
+      },
+      // Invalid: userAuthToken repository access from user aggregate
+      {
+        code: `
+          class UserQueryService {
+            async findToken() {
+              return await this.repository.userAuthToken.findUnique({ where: {} });
+            }
+          }
+        `,
+        filename: 'src/modules/aggregates/user/query.service.ts',
+        errors: [
+          {
+            messageId: 'invalidRepositoryAccess',
+            data: {
+              modelName: 'userAuthToken',
+              aggregatePath: 'user-auth-token or **/user-auth-token',
             },
           },
         ],
