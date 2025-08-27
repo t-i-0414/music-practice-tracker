@@ -359,6 +359,24 @@ describe('no-internal-id', () => {
           },
         ],
       },
+
+      // Type alias with id property in response DTO should be invalid
+      {
+        code: `
+          type UserResponse = {
+            id: string;
+            publicId: string;
+            name: string;
+          };
+        `,
+        filename: 'user.response.dto.ts',
+        errors: [
+          {
+            messageId: 'noIdInResponse',
+            data: {},
+          },
+        ],
+      },
       // Type assertions should still be invalid
       {
         code: `

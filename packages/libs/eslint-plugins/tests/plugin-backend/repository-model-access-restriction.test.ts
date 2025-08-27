@@ -207,6 +207,18 @@ describe('repository-model-access-restriction', () => {
         `,
         filename: 'src/modules/aggregates/user/command.service.ts',
       },
+      // Valid: Importing TransactionClient (common type) in command service
+      {
+        code: `
+          import { User, TransactionClient } from '@prisma/client';
+          class UserCommandService {
+            async createUserInTransaction(tx: TransactionClient) {
+              return await tx.user.create({ data: {} });
+            }
+          }
+        `,
+        filename: 'src/modules/aggregates/user/command.service.ts',
+      },
       // Valid: Importing matching model in admin-user aggregate
       {
         code: `
