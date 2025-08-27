@@ -1,7 +1,6 @@
 import { Body, Post, HttpCode, HttpStatus, UseGuards, Get } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
-import { UserAuthTokenCommandService } from '@/aggregates/user-auth-token/command.service';
 import {
   SignUpInputDto,
   SignInInputDto,
@@ -14,12 +13,13 @@ import { ApiController } from '@/decorators/api-controller/decorator';
 import { CurrentUser, CurrentUserData } from '@/decorators/current-user/decorator';
 import { Public } from '@/decorators/public/decorator';
 import { AppAuthGuard } from '@/guards/app-auth-guard/guard';
+import { AppAuthUseCaseService } from '@/usecases/app/auth/usecase.service';
 
 @ApiTags('auth')
 @ApiController('auth')
 @UseGuards(AppAuthGuard)
 export class AppAuthController {
-  public constructor(private readonly authCommand: UserAuthTokenCommandService) {}
+  public constructor(private readonly authUseCase: AppAuthUseCaseService) {}
 
   @Post('signup')
   @Public()
@@ -29,7 +29,7 @@ export class AppAuthController {
   @ApiResponse({ status: 201, description: 'User successfully registered', type: AuthTokenResponseDto })
   @ApiResponse({ status: 400, description: 'Bad request' })
   public async signUp(@Body() body: SignUpInputDto): Promise<AuthTokenResponseDto> {
-    const tokens = await this.authCommand.signUp({
+    const tokens = await this.authUseCase.signUp({
       email: body.email,
       password: body.password,
       name: body.name,
@@ -45,7 +45,7 @@ export class AppAuthController {
   @ApiResponse({ status: 200, description: 'Successfully signed in', type: AuthTokenResponseDto })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   public async signIn(@Body() body: SignInInputDto): Promise<AuthTokenResponseDto> {
-    const tokens = await this.authCommand.signIn({
+    const tokens = await this.authUseCase.signIn({
       email: body.email,
       password: body.password,
     });
@@ -60,7 +60,7 @@ export class AppAuthController {
   @ApiResponse({ status: 200, description: 'Successfully signed in', type: AuthTokenResponseDto })
   @ApiResponse({ status: 400, description: 'Bad request' })
   public async signInWithOAuth(@Body() body: OAuthSignInInputDto): Promise<AuthTokenResponseDto> {
-    const tokens = await this.authCommand.signInWithOAuth({
+    const tokens = await this.authUseCase.signInWithOAuth({
       provider: body.provider,
       providerId: body.providerId,
       email: body.email,
@@ -77,7 +77,7 @@ export class AppAuthController {
   @ApiResponse({ status: 200, description: 'Token refreshed successfully', type: AuthTokenResponseDto })
   @ApiResponse({ status: 401, description: 'Invalid refresh token' })
   public async refreshToken(@Body() body: RefreshTokenInputDto): Promise<AuthTokenResponseDto> {
-    const tokens = await this.authCommand.refreshTokens(body.refreshToken);
+    const tokens = await this.authUseCase.refreshTokens(body.refreshToken);
     return new AuthTokenResponseDto(tokens);
   }
 
@@ -88,7 +88,7 @@ export class AppAuthController {
   @ApiBody({ schema: { type: 'object', properties: { refreshToken: { type: 'string' } } } })
   @ApiResponse({ status: 204, description: 'Successfully signed out' })
   public async signOut(@Body('refreshToken') refreshToken: string): Promise<void> {
-    await this.authCommand.signOut(refreshToken);
+    await this.authUseCase.signOut(refreshToken);
   }
 
   @Post('change-password')
@@ -103,7 +103,7 @@ export class AppAuthController {
     @CurrentUser() user: CurrentUserData,
     @Body() body: ChangePasswordInputDto,
   ): Promise<AuthTokenResponseDto> {
-    const tokens = await this.authCommand.changePassword(user.publicId, body.currentPassword, body.newPassword);
+    const tokens = await this.authUseCase.changePassword(user.publicId, body.currentPassword, body.newPassword);
     return new AuthTokenResponseDto(tokens);
   }
 

@@ -107,6 +107,8 @@ export default defineConfig({
     'unimodules',
     'updatemany',
     'updatemanyandreturn',
+    'usecase',
+    'usecases',
     'vitest',
     'Wada',
     'WCAG',

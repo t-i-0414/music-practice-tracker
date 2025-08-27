@@ -1,15 +1,11 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 
-import { UserQueryService } from '@/aggregates/user/query.service';
-import { Prisma, User, UserAuthToken } from '@/generated/prisma';
+import { Prisma, UserAuthToken } from '@/generated/prisma';
 import { RepositoryService } from '@/repository/service';
 
 @Injectable()
 export class UserAuthTokenQueryService {
-  public constructor(
-    private readonly repository: RepositoryService,
-    private readonly userQueryService: UserQueryService,
-  ) {}
+  public constructor(private readonly repository: RepositoryService) {}
 
   // Query service methods
   public async findAuthTokenByTokenOrFail(token: string): Promise<UserAuthToken> {
@@ -26,7 +22,7 @@ export class UserAuthTokenQueryService {
     return authToken;
   }
 
-  public async findRefreshTokenByTokenOrFail(token: string): Promise<UserAuthToken & { user: User }> {
+  public async findRefreshTokenByTokenOrFail(token: string): Promise<UserAuthToken & { user: { publicId: string } }> {
     const authToken = await this.findUniqueAuthTokenByTokenWithUser(token);
 
     if (!authToken) {
@@ -42,34 +38,6 @@ export class UserAuthTokenQueryService {
     }
 
     return authToken;
-  }
-
-  public async findUserByEmailOrFail(email: string): Promise<User> {
-    const user = await this.userQueryService.findUniqueUserByEmail(email);
-
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    return user;
-  }
-
-  public async findUserByOAuthProvider(provider: 'google' | 'apple', providerId: string): Promise<User | null> {
-    return this.userQueryService.findFirstUserByOAuthProvider(provider, providerId);
-  }
-
-  public async validateUserPassword(user: { passwordHash: string | null }, password: string): Promise<boolean> {
-    if (user.passwordHash === null || user.passwordHash === '') {
-      return false;
-    }
-
-    const bcrypt = await import('bcrypt');
-    return bcrypt.compare(password, user.passwordHash);
-  }
-
-  public async isEmailTaken(email: string): Promise<boolean> {
-    const user = await this.userQueryService.findUniqueUserByEmail(email);
-    return !!user;
   }
 
   public async getUserActiveRefreshTokens(userPublicId: string): Promise<UserAuthToken[]> {
@@ -93,12 +61,13 @@ export class UserAuthTokenQueryService {
     });
   }
 
-  public async findUniqueAuthTokenByTokenWithUser(token: string): Promise<(UserAuthToken & { user: User }) | null> {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  public async findUniqueAuthTokenByTokenWithUser(
+    token: string,
+  ): Promise<(UserAuthToken & { user: { publicId: string } }) | null> {
     return this.repository.userAuthToken.findUnique({
       where: { token },
       include: { user: true },
-    }) as Promise<(UserAuthToken & { user: User }) | null>;
+    });
   }
 
   public async findManyAuthTokensByUserId(userPublicId: string): Promise<UserAuthToken[]> {
