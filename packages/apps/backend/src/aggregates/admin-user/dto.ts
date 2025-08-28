@@ -102,7 +102,7 @@ export class CreateManyAdminUsersInputDto {
   public adminUsers: CreateAdminUserInputDto[];
 }
 
-export class UpdateAdminUserDataInputDto {
+export class UpdateAdminUserInputData {
   @ApiProperty({
     description: 'The admin user email address',
     example: 'admin@example.com',
@@ -159,12 +159,12 @@ export class UpdateAdminUserInputDto {
 
   @ApiProperty({
     description: 'The admin user data to update',
-    type: UpdateAdminUserDataInputDto,
+    type: UpdateAdminUserInputData,
   })
   @ValidateNested()
-  @Type(() => UpdateAdminUserDataInputDto)
+  @Type(() => UpdateAdminUserInputData)
   @IsNotEmptyObject()
-  public data: UpdateAdminUserDataInputDto;
+  public data: UpdateAdminUserInputData;
 }
 
 export class DeleteAdminUserByIdInputDto {
@@ -259,6 +259,11 @@ export class AdminUserResponseDto implements Publicize<AdminUser> {
   @Expose()
   public updatedAt: Date;
 }
+export function toAdminUserResponseDto(adminUser: AdminUser): AdminUserResponseDto {
+  return plainToInstance(AdminUserResponseDto, adminUser, {
+    excludeExtraneousValues: true,
+  });
+}
 
 export class AdminUsersResponseDto {
   @ApiProperty({
@@ -268,13 +273,6 @@ export class AdminUsersResponseDto {
   @Type(() => AdminUserResponseDto)
   public adminUsers: AdminUserResponseDto[];
 }
-
-export function toAdminUserResponseDto(adminUser: AdminUser): AdminUserResponseDto {
-  return plainToInstance(AdminUserResponseDto, adminUser, {
-    excludeExtraneousValues: true,
-  });
-}
-
 export function toAdminUsersResponseDto(adminUsers: AdminUser[]): AdminUsersResponseDto {
   return {
     adminUsers: adminUsers.map((adminUser) => toAdminUserResponseDto(adminUser)),

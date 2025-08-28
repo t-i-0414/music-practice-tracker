@@ -9,7 +9,7 @@ import {
   DeleteAdminUserByIdInputDto,
   DeleteManyAdminUsersInputDto,
   UpdateAdminUserInputDto,
-  UpdateAdminUserDataInputDto,
+  UpdateAdminUserInputData,
 } from '@/aggregates/admin-user/dto';
 import { AdminRole, AdminStatus } from '@/generated/prisma';
 
@@ -116,7 +116,7 @@ describe('adminUser Input DTOs', () => {
     it('should pass validation with all optional fields', async () => {
       expect.assertions(1);
 
-      const dto = new UpdateAdminUserDataInputDto();
+      const dto = new UpdateAdminUserInputData();
       dto.email = 'newemail@example.com';
       dto.name = 'Updated Name';
       dto.role = AdminRole.ADMIN;
@@ -130,7 +130,7 @@ describe('adminUser Input DTOs', () => {
     it('should pass validation with partial fields', async () => {
       expect.assertions(1);
 
-      const dto = new UpdateAdminUserDataInputDto();
+      const dto = new UpdateAdminUserInputData();
       dto.name = 'Updated Name Only';
 
       const errors = await validate(dto);
@@ -141,7 +141,7 @@ describe('adminUser Input DTOs', () => {
     it('should pass validation with no fields', async () => {
       expect.assertions(1);
 
-      const dto = new UpdateAdminUserDataInputDto();
+      const dto = new UpdateAdminUserInputData();
 
       const errors = await validate(dto);
 
@@ -151,7 +151,7 @@ describe('adminUser Input DTOs', () => {
     it('should fail validation with invalid email', async () => {
       expect.assertions(2);
 
-      const dto = new UpdateAdminUserDataInputDto();
+      const dto = new UpdateAdminUserInputData();
       dto.email = 'invalid-email';
 
       const errors = await validate(dto);
@@ -163,7 +163,7 @@ describe('adminUser Input DTOs', () => {
     it('should fail validation with invalid role', async () => {
       expect.assertions(2);
 
-      const dto = new UpdateAdminUserDataInputDto();
+      const dto = new UpdateAdminUserInputData();
       dto.role = 'INVALID_ROLE' as AdminRole;
 
       const errors = await validate(dto);
@@ -175,7 +175,7 @@ describe('adminUser Input DTOs', () => {
     it('should fail validation with invalid status', async () => {
       expect.assertions(2);
 
-      const dto = new UpdateAdminUserDataInputDto();
+      const dto = new UpdateAdminUserInputData();
       dto.status = 'INVALID_STATUS' as AdminStatus;
 
       const errors = await validate(dto);
@@ -191,7 +191,7 @@ describe('adminUser Input DTOs', () => {
 
       const dto = new UpdateAdminUserInputDto();
       dto.publicId = '123e4567-e89b-12d3-a456-426614174000';
-      dto.data = new UpdateAdminUserDataInputDto();
+      dto.data = new UpdateAdminUserInputData();
       dto.data.name = 'Updated Name';
       dto.data.role = AdminRole.ADMIN;
 
@@ -205,7 +205,7 @@ describe('adminUser Input DTOs', () => {
 
       const dto = new UpdateAdminUserInputDto();
       dto.publicId = 'invalid-uuid';
-      dto.data = new UpdateAdminUserDataInputDto();
+      dto.data = new UpdateAdminUserInputData();
       dto.data.name = 'Updated Name';
 
       const errors = await validate(dto);
@@ -219,7 +219,7 @@ describe('adminUser Input DTOs', () => {
 
       const dto = new UpdateAdminUserInputDto();
       dto.publicId = '';
-      dto.data = new UpdateAdminUserDataInputDto();
+      dto.data = new UpdateAdminUserInputData();
 
       const errors = await validate(dto);
 
@@ -243,7 +243,7 @@ describe('adminUser Input DTOs', () => {
 
       const dto = new UpdateAdminUserInputDto();
       dto.publicId = '123e4567-e89b-12d3-a456-426614174000';
-      dto.data = new UpdateAdminUserDataInputDto();
+      dto.data = new UpdateAdminUserInputData();
       dto.data.email = 'valid@email.com';
       dto.data.name = 'Valid Name';
       dto.data.role = AdminRole.EDITOR;
@@ -540,7 +540,7 @@ describe('adminUser Input DTOs', () => {
       const dto = plainToInstance(UpdateAdminUserInputDto, plainData);
 
       expect(dto.publicId).toBe(plainData.publicId);
-      expect(dto.data).toBeInstanceOf(UpdateAdminUserDataInputDto);
+      expect(dto.data).toBeInstanceOf(UpdateAdminUserInputData);
       expect(dto.data.email).toBe(plainData.data.email);
     });
 

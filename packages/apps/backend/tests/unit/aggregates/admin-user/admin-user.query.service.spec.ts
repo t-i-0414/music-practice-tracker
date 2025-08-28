@@ -10,7 +10,7 @@ describe('adminUserQueryService', () => {
   let service: AdminUserQueryService;
   let repository: {
     adminUser: {
-      findUnique: jest.Mock;
+      findUniqueOrThrow: jest.Mock;
       findMany: jest.Mock;
     };
   };
@@ -21,7 +21,7 @@ describe('adminUserQueryService', () => {
 
     const mockRepository = {
       adminUser: {
-        findUnique: jest.fn(),
+        findUniqueOrThrow: jest.fn(),
         findMany: jest.fn(),
       },
     };
@@ -44,39 +44,39 @@ describe('adminUserQueryService', () => {
     jest.clearAllMocks();
   });
 
-  describe('findAdminUserByIdOrFail', () => {
+  describe('findUniqueAdminUserByIdOrFail', () => {
     it('should return admin user response DTO when found', async () => {
       expect.assertions(2);
 
       const mockAdminUser = adminUserFactory.build();
-      repository.adminUser.findUnique.mockResolvedValue(mockAdminUser);
+      repository.adminUser.findUniqueOrThrow.mockResolvedValue(mockAdminUser);
       const params = { publicId: mockAdminUser.publicId };
 
-      const result = await service.findAdminUserByIdOrFail(params);
+      const result = await service.findUniqueOrThrowAdminUser(params);
 
-      expect(repository.adminUser.findUnique).toHaveBeenCalledWith({ where: params });
+      expect(repository.adminUser.findUniqueOrThrow).toHaveBeenCalledWith({ where: params });
       expect(result).toStrictEqual(toAdminUserResponseDto(mockAdminUser));
     });
 
     it('should throw NotFoundException when admin user not found', async () => {
       expect.assertions(2);
 
-      repository.adminUser.findUnique.mockResolvedValue(null);
       const params = { publicId: 'non-existent-id' };
+      repository.adminUser.findUniqueOrThrow.mockRejectedValue(new Error('No AdminUser found'));
 
-      await expect(service.findAdminUserByIdOrFail(params)).rejects.toThrow(NotFoundException);
-      expect(repository.adminUser.findUnique).toHaveBeenCalledWith({ where: params });
+      await expect(service.findUniqueOrThrowAdminUser(params)).rejects.toThrow(NotFoundException);
+      expect(repository.adminUser.findUniqueOrThrow).toHaveBeenCalledWith({ where: params });
     });
 
     it('should throw NotFoundException with proper message', async () => {
       expect.assertions(2);
 
       const publicId = 'non-existent-id';
-      repository.adminUser.findUnique.mockResolvedValue(null);
       const params = { publicId };
+      repository.adminUser.findUniqueOrThrow.mockRejectedValue(new Error('No AdminUser found'));
 
-      await expect(service.findAdminUserByIdOrFail(params)).rejects.toThrow(`AdminUser ${publicId} not found`);
-      expect(repository.adminUser.findUnique).toHaveBeenCalledWith({ where: params });
+      await expect(service.findUniqueOrThrowAdminUser(params)).rejects.toThrow(`AdminUser ${publicId} not found`);
+      expect(repository.adminUser.findUniqueOrThrow).toHaveBeenCalledWith({ where: params });
     });
   });
 
@@ -124,7 +124,11 @@ describe('adminUserQueryService', () => {
 
       const result = await service.findAllAdminUsers();
 
-      expect(repository.adminUser.findMany).toHaveBeenCalledWith({ where: {} });
+      expect(repository.adminUser.findMany).toHaveBeenCalledWith({
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
       expect(result).toStrictEqual(toAdminUsersResponseDto(mockAdminUsers));
     });
 
@@ -135,7 +139,11 @@ describe('adminUserQueryService', () => {
 
       const result = await service.findAllAdminUsers();
 
-      expect(repository.adminUser.findMany).toHaveBeenCalledWith({ where: {} });
+      expect(repository.adminUser.findMany).toHaveBeenCalledWith({
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
       expect(result).toStrictEqual(toAdminUsersResponseDto([]));
     });
   });

@@ -1,12 +1,16 @@
-import { type AdminRole as AdminRoleEnumType, type AdminStatus as AdminStatusEnumType } from '@/generated/prisma';
+import {
+  type AdminUser,
+  type AdminRole as AdminRoleEnum,
+  type AdminStatus as AdminStatusEnum,
+} from '@/generated/prisma';
 
-export type { AdminUser, AdminRole as AdminRoleEnumType, AdminStatus as AdminStatusEnumType } from '@/generated/prisma';
+export type { AdminUser, AdminRoleEnum, AdminStatusEnum };
 
 export const MAX_NAME_LENGTH = 50;
 export const MAX_EMAIL_LENGTH = 255;
 
 type AdminRoleRecord = {
-  [key in AdminRoleEnumType]: key;
+  [key in AdminRoleEnum]: key;
 };
 export const AdminRoleRecord: AdminRoleRecord = {
   SUPER_ADMIN: 'SUPER_ADMIN',
@@ -16,10 +20,10 @@ export const AdminRoleRecord: AdminRoleRecord = {
   ANALYST: 'ANALYST',
   VIEWER: 'VIEWER',
 };
-export type AdminRoleType = keyof typeof AdminRoleRecord;
+export type AdminRole = keyof typeof AdminRoleRecord;
 
 type AdminStatusRecord = {
-  [key in AdminStatusEnumType]: key;
+  [key in AdminStatusEnum]: key;
 };
 export const AdminStatusRecord: AdminStatusRecord = {
   ACTIVE: 'ACTIVE',
@@ -27,4 +31,4 @@ export const AdminStatusRecord: AdminStatusRecord = {
   SUSPENDED: 'SUSPENDED',
   PENDING: 'PENDING',
 };
-export type AdminStatusType = keyof typeof AdminStatusRecord;
+export type AdminStatus = keyof typeof AdminStatusRecord;

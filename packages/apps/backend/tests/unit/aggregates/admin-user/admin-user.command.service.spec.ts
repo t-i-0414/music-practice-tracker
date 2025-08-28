@@ -35,7 +35,7 @@ describe('adminUserCommandService', () => {
     };
 
     const mockQueryService = {
-      findAdminUserByIdOrFail: jest.fn(),
+      findUniqueOrThrowAdminUser: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -116,7 +116,7 @@ describe('adminUserCommandService', () => {
         role: AdminRole.ADMIN,
       };
       const mockResponseDto = toAdminUserResponseDto(mockAdminUser);
-      queryService.findAdminUserByIdOrFail.mockResolvedValue(mockResponseDto);
+      queryService.findUniqueOrThrowAdminUser.mockResolvedValue(mockResponseDto);
       repository.adminUser.update.mockResolvedValue(updatedAdminUser);
 
       const params = {
@@ -129,7 +129,7 @@ describe('adminUserCommandService', () => {
 
       const result = await service.updateAdminUserById(params);
 
-      expect(queryService.findAdminUserByIdOrFail).toHaveBeenCalledWith({ publicId: params.publicId });
+      expect(queryService.findUniqueOrThrowAdminUser).toHaveBeenCalledWith({ publicId: params.publicId });
       expect(repository.adminUser.update).toHaveBeenCalledWith({
         where: { publicId: params.publicId },
         data: params.data,
@@ -142,7 +142,7 @@ describe('adminUserCommandService', () => {
 
       const publicId = 'non-existent-id';
       const error = new Error('AdminUser not found');
-      queryService.findAdminUserByIdOrFail.mockRejectedValue(error);
+      queryService.findUniqueOrThrowAdminUser.mockRejectedValue(error);
 
       const params = {
         publicId,
@@ -160,14 +160,14 @@ describe('adminUserCommandService', () => {
 
       const mockAdminUser = adminUserFactory.build();
       const mockResponseDto = toAdminUserResponseDto(mockAdminUser);
-      queryService.findAdminUserByIdOrFail.mockResolvedValue(mockResponseDto);
+      queryService.findUniqueOrThrowAdminUser.mockResolvedValue(mockResponseDto);
       repository.adminUser.delete.mockResolvedValue(undefined);
 
       const params = { publicId: mockAdminUser.publicId };
 
       await service.deleteAdminUserById(params);
 
-      expect(queryService.findAdminUserByIdOrFail).toHaveBeenCalledWith(params);
+      expect(queryService.findUniqueOrThrowAdminUser).toHaveBeenCalledWith(params);
       expect(repository.adminUser.delete).toHaveBeenCalledWith({
         where: params,
       });
@@ -179,14 +179,14 @@ describe('adminUserCommandService', () => {
 
       const publicId = 'non-existent-id';
       const error = new Error('AdminUser not found');
-      queryService.findAdminUserByIdOrFail.mockRejectedValue(error);
+      queryService.findUniqueOrThrowAdminUser.mockRejectedValue(error);
 
       await expect(service.deleteAdminUserById({ publicId })).rejects.toThrow(error);
       expect(repository.adminUser.delete).not.toHaveBeenCalled();
     });
   });
 
-  describe('deleteManyAdminUsersById', () => {
+  describe('deleteManyAdminUsersByIds', () => {
     it('should delete multiple admin users without verification', async () => {
       expect.assertions(2);
 
@@ -194,14 +194,14 @@ describe('adminUserCommandService', () => {
       repository.adminUser.deleteMany.mockResolvedValue(undefined);
       const params = { publicIds };
 
-      await service.deleteManyAdminUsersById(params);
+      await service.deleteManyAdminUsersByIds(params);
 
       expect(repository.adminUser.deleteMany).toHaveBeenCalledWith({
         where: {
           publicId: { in: publicIds },
         },
       });
-      expect(queryService.findAdminUserByIdOrFail).not.toHaveBeenCalled();
+      expect(queryService.findUniqueOrThrowAdminUser).not.toHaveBeenCalled();
     });
 
     it('should handle empty array of IDs', async () => {
@@ -210,7 +210,7 @@ describe('adminUserCommandService', () => {
       const publicIds: string[] = [];
       repository.adminUser.deleteMany.mockResolvedValue(undefined);
 
-      await service.deleteManyAdminUsersById({ publicIds });
+      await service.deleteManyAdminUsersByIds({ publicIds });
 
       expect(repository.adminUser.deleteMany).toHaveBeenCalledWith({
         where: {

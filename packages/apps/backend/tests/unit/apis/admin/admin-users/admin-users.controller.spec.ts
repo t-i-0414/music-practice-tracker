@@ -23,7 +23,7 @@ describe('admin admin users controller', () => {
     adminUserFactory = new AdminUserFactory();
 
     const mockQueryService = {
-      findAdminUserByIdOrFail: jest.fn(),
+      findUniqueOrThrowAdminUser: jest.fn(),
       findManyAdminUsers: jest.fn(),
       findAllAdminUsers: jest.fn(),
     };
@@ -33,7 +33,7 @@ describe('admin admin users controller', () => {
       createManyAndReturnAdminUsers: jest.fn(),
       updateAdminUserById: jest.fn(),
       deleteAdminUserById: jest.fn(),
-      deleteManyAdminUsersById: jest.fn(),
+      deleteManyAdminUsersByIds: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -108,11 +108,13 @@ describe('admin admin users controller', () => {
 
       const mockAdminUser = adminUserFactory.build();
       const mockResponseDto = toAdminUserResponseDto(mockAdminUser);
-      queryService.findAdminUserByIdOrFail.mockResolvedValue(mockResponseDto);
+      queryService.findUniqueOrThrowAdminUser.mockResolvedValue(mockResponseDto);
 
       const result = await controller.findAdminUserById(mockAdminUser.publicId);
 
-      expect(queryService.findAdminUserByIdOrFail).toHaveBeenCalledWith({ publicId: mockAdminUser.publicId });
+      expect(queryService.findUniqueOrThrowAdminUser).toHaveBeenCalledWith({
+        publicId: mockAdminUser.publicId,
+      });
       expect(result).toStrictEqual(mockResponseDto);
     });
 
@@ -120,10 +122,10 @@ describe('admin admin users controller', () => {
       expect.assertions(2);
 
       const publicId = 'non-existent-id';
-      queryService.findAdminUserByIdOrFail.mockRejectedValue(new NotFoundException('AdminUser not found'));
+      queryService.findUniqueOrThrowAdminUser.mockRejectedValue(new NotFoundException('AdminUser not found'));
 
       await expect(controller.findAdminUserById(publicId)).rejects.toThrow(NotFoundException);
-      expect(queryService.findAdminUserByIdOrFail).toHaveBeenCalledWith({ publicId });
+      expect(queryService.findUniqueOrThrowAdminUser).toHaveBeenCalledWith({ publicId });
     });
   });
 
@@ -225,12 +227,12 @@ describe('admin admin users controller', () => {
 
       const publicIds = ['id1', 'id2', 'id3'];
       const deleteDto = { publicIds };
-      commandService.deleteManyAdminUsersById.mockResolvedValue(undefined);
+      commandService.deleteManyAdminUsersByIds.mockResolvedValue(undefined);
 
       await controller.deleteManyAdminUsers(deleteDto);
 
-      expect(commandService.deleteManyAdminUsersById).toHaveBeenCalledWith(deleteDto);
-      expect(commandService.deleteManyAdminUsersById).toHaveBeenCalledTimes(1);
+      expect(commandService.deleteManyAdminUsersByIds).toHaveBeenCalledWith(deleteDto);
+      expect(commandService.deleteManyAdminUsersByIds).toHaveBeenCalledTimes(1);
     });
   });
 });

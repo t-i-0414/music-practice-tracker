@@ -16,18 +16,24 @@ import { RepositoryService } from '@/repository/service';
 export class AdminUserQueryService {
   public constructor(private readonly repository: RepositoryService) {}
 
-  // Query service methods
-  public async findAdminUserByIdOrFail(dto: FindAdminUserByIdInputDto): Promise<AdminUserResponseDto> {
-    const adminUser = await this.findUniqueAdminUser(dto);
-    if (!adminUser) throw new NotFoundException(`AdminUser ${dto.publicId} not found`);
+  public async findUniqueOrThrowAdminUser({ publicId }: FindAdminUserByIdInputDto): Promise<AdminUserResponseDto> {
+    try {
+      const adminUser = await this.repository.adminUser.findUniqueOrThrow({
+        where: {
+          publicId,
+        },
+      });
 
-    return toAdminUserResponseDto(adminUser);
+      return toAdminUserResponseDto(adminUser);
+    } catch (_error) {
+      throw new NotFoundException(`AdminUser ${publicId} not found`);
+    }
   }
 
-  public async findManyAdminUsers(dto: FindManyAdminUsersByIdInputDto): Promise<AdminUsersResponseDto> {
-    const adminUsers = await this.findManyAdminUsersByFilter({
+  public async findManyAdminUsers({ publicIds }: FindManyAdminUsersByIdInputDto): Promise<AdminUsersResponseDto> {
+    const adminUsers = await this.repository.adminUser.findMany({
       where: {
-        publicId: { in: dto.publicIds },
+        publicId: { in: publicIds },
       },
     });
 
@@ -35,17 +41,13 @@ export class AdminUserQueryService {
   }
 
   public async findAllAdminUsers(): Promise<AdminUsersResponseDto> {
-    const adminUsers = await this.findManyAdminUsersByFilter({});
-    return toAdminUsersResponseDto(adminUsers);
-  }
-
-  // Repository methods
-  public async findUniqueAdminUser(params: Prisma.AdminUserWhereUniqueInput): Promise<AdminUser | null> {
-    return this.repository.adminUser.findUnique({
-      where: {
-        ...params,
+    const adminUsers = await this.findManyAdminUsersByFilter({
+      orderBy: {
+        createdAt: 'desc',
       },
     });
+
+    return toAdminUsersResponseDto(adminUsers);
   }
 
   public async findManyAdminUsersByFilter(params: {
@@ -57,9 +59,6 @@ export class AdminUserQueryService {
   }): Promise<AdminUser[]> {
     return this.repository.adminUser.findMany({
       ...params,
-      where: {
-        ...params.where,
-      },
     });
   }
 }

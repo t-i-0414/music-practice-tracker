@@ -6,7 +6,7 @@ import {
   CreateManyAdminUsersInputDto,
   CreateAdminUserInputDto,
   DeleteManyAdminUsersInputDto,
-  UpdateAdminUserDataInputDto,
+  UpdateAdminUserInputData,
   AdminUserResponseDto,
   AdminUsersResponseDto,
 } from '@/aggregates/admin-user/dto';
@@ -55,7 +55,7 @@ export class AdminAdminUsersController {
   public async findAdminUserById(
     @Param('publicId', new ParseUUIDPipe()) publicId: string,
   ): Promise<AdminUserResponseDto> {
-    return this.adminUserQuery.findAdminUserByIdOrFail({ publicId });
+    return this.adminUserQuery.findUniqueOrThrowAdminUser({ publicId });
   }
 
   @Post()
@@ -89,7 +89,7 @@ export class AdminAdminUsersController {
   @Put(':publicId')
   @ApiOperation({ summary: 'Update an admin user by public ID' })
   @ApiParam({ name: 'publicId', description: 'Admin user public ID', example: '123e4567-e89b-12d3-a456-426614174000' })
-  @ApiBody({ type: UpdateAdminUserDataInputDto })
+  @ApiBody({ type: UpdateAdminUserInputData })
   @ApiResponse({ status: 200, description: 'Admin user updated successfully', type: AdminUserResponseDto })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -97,7 +97,7 @@ export class AdminAdminUsersController {
   @ApiResponse({ status: 404, description: 'Admin user not found' })
   public async updateAdminUser(
     @Param('publicId', new ParseUUIDPipe()) publicId: string,
-    @Body() data: UpdateAdminUserDataInputDto,
+    @Body() data: UpdateAdminUserInputData,
   ): Promise<AdminUserResponseDto> {
     return this.adminUserCommand.updateAdminUserById({ publicId, data });
   }
@@ -111,7 +111,7 @@ export class AdminAdminUsersController {
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @HttpCode(HttpStatus.NO_CONTENT)
   public async deleteManyAdminUsers(@Body() body: DeleteManyAdminUsersInputDto): Promise<void> {
-    await this.adminUserCommand.deleteManyAdminUsersById(body);
+    await this.adminUserCommand.deleteManyAdminUsersByIds(body);
   }
 
   @Delete(':publicId')
