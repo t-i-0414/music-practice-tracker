@@ -17,33 +17,33 @@ export class AdminUserQueryService {
   public constructor(private readonly repository: RepositoryService) {}
 
   public async findUniqueOrThrowAdminUser({ publicId }: FindAdminUserByIdInputDto): Promise<AdminUserResponseDto> {
-    const adminUser = await this.repository.adminUser.findUniqueOrThrow({
-      where: {
-        publicId,
-      },
-    });
-
-    return toAdminUserResponseDto(adminUser);
+    return toAdminUserResponseDto(
+      await this.repository.adminUser.findUniqueOrThrow({
+        where: {
+          publicId,
+        },
+      }),
+    );
   }
 
-  public async findManyAdminUsers({ publicIds }: FindManyAdminUsersByIdInputDto): Promise<AdminUsersResponseDto> {
-    const adminUsers = await this.repository.adminUser.findMany({
-      where: {
-        publicId: { in: publicIds },
-      },
-    });
-
-    return toAdminUsersResponseDto(adminUsers);
+  public async findManyAdminUsersById({ publicIds }: FindManyAdminUsersByIdInputDto): Promise<AdminUsersResponseDto> {
+    return toAdminUsersResponseDto(
+      await this.repository.adminUser.findMany({
+        where: {
+          publicId: { in: publicIds },
+        },
+      }),
+    );
   }
 
   public async findAllAdminUsers(): Promise<AdminUsersResponseDto> {
-    const adminUsers = await this.findManyAdminUsersByFilter({
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
-
-    return toAdminUsersResponseDto(adminUsers);
+    return toAdminUsersResponseDto(
+      await this.findManyAdminUsersByFilter({
+        orderBy: {
+          createdAt: 'desc',
+        },
+      }),
+    );
   }
 
   public async findManyAdminUsersByFilter(params: {
