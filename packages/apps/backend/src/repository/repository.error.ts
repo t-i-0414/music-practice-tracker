@@ -8,7 +8,7 @@ import {
 
 import { isPrismaError, isPrismaErrorCode, PRISMA_ERROR_CODE_MAP, type PrismaError } from './prisma.error';
 
-import { CommonError } from '@/utils/common-error';
+import { CommonError } from '@/utils/common.error';
 import { type PreservedRepositoryErrorCode, type ErrorCode } from '@/utils/error-code';
 
 export type RepositoryErrorCode = Extract<ErrorCode, PreservedRepositoryErrorCode>;
