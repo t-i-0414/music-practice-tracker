@@ -8,9 +8,8 @@ import {
 
 import { isPrismaError, isPrismaErrorCode, PRISMA_ERROR_CODE_MAP, type PrismaError } from './prisma.error';
 
-import { CommonError } from '@/utils/common-error/common-error';
-import { type PreservedRepositoryErrorCode, type ErrorCode } from '@/utils/common-error/error-code';
-import { ErrorFactory } from '@/utils/common-error/factory';
+import { CommonError } from '@/utils/common-error';
+import { type PreservedRepositoryErrorCode, type ErrorCode } from '@/utils/error-code';
 
 export type RepositoryErrorCode = Extract<ErrorCode, PreservedRepositoryErrorCode>;
 
@@ -35,19 +34,19 @@ export const buildRepositoryError = (error: PrismaError): RepositoryError => {
       : REPOSITORY_ERROR_CODE_RECORD.UNKNOWN;
     const detail = error.meta ? `${error.message}: meta: ${JSON.stringify(error.meta)}` : error.message;
 
-    return ErrorFactory.create(errorCode, detail, error);
+    return new RepositoryError(errorCode, detail, error);
   }
 
   if (error instanceof PrismaClientValidationError) {
-    return ErrorFactory.create(REPOSITORY_ERROR_CODE_RECORD.VALIDATION, error.message, error);
+    return new RepositoryError(REPOSITORY_ERROR_CODE_RECORD.VALIDATION, error.message, error);
   }
 
   if (error instanceof PrismaClientUnknownRequestError) {
-    return ErrorFactory.create(REPOSITORY_ERROR_CODE_RECORD.UNKNOWN_REQUEST, error.message, error);
+    return new RepositoryError(REPOSITORY_ERROR_CODE_RECORD.UNKNOWN_REQUEST, error.message, error);
   }
 
   if (error instanceof PrismaClientRustPanicError) {
-    return ErrorFactory.create(REPOSITORY_ERROR_CODE_RECORD.RUST_PANIC, error.message, error);
+    return new RepositoryError(REPOSITORY_ERROR_CODE_RECORD.RUST_PANIC, error.message, error);
   }
 
   if (error instanceof PrismaClientInitializationError) {
@@ -55,12 +54,12 @@ export const buildRepositoryError = (error: PrismaError): RepositoryError => {
 
     if (originalErrorCode === undefined || !isPrismaErrorCode(originalErrorCode)) {
       const errorCode = REPOSITORY_ERROR_CODE_RECORD.UNKNOWN;
-      return ErrorFactory.create(errorCode, error.message, error);
+      return new RepositoryError(errorCode, error.message, error);
     }
 
-    return ErrorFactory.create(PRISMA_ERROR_CODE_MAP[originalErrorCode], error.message, error);
+    return new RepositoryError(PRISMA_ERROR_CODE_MAP[originalErrorCode], error.message, error);
   }
 
   // NOTE: Unreachable
-  return ErrorFactory.create(REPOSITORY_ERROR_CODE_RECORD.UNKNOWN, 'An unknown Prisma error occurred', error);
+  return new RepositoryError(REPOSITORY_ERROR_CODE_RECORD.UNKNOWN, 'An unknown Prisma error occurred', error);
 };

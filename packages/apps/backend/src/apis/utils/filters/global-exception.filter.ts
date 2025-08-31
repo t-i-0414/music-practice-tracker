@@ -4,7 +4,7 @@ import { Response } from 'express';
 import { ErrorResponse } from '../response';
 
 import { buildRepositoryError, canConvertToRepositoryError } from '@/repository/repository.error';
-import { ERROR_CODE_RECORDS } from '@/utils/common-error/error-code';
+import { ERROR_CODE_RECORDS } from '@/utils/error-code';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {

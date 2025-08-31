@@ -1,6 +1,6 @@
 import { type HttpStatus } from '@nestjs/common';
 
-import { type CommonErrorBody } from '@/utils/common-error/common-error';
+import { type CommonErrorBody } from '@/utils/common-error';
 
 export type SuccessResponse<T> = {
   statusCode: HttpStatus;
