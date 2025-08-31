@@ -9,16 +9,13 @@ enum UserStatus {
 }
 
 model User {
-  id           Int        @id @default(autoincrement())
-  publicId     String     @unique @default(uuid()) @map("public_id") @db.Uuid
-  email        String     @unique
-  name         String
-  status       UserStatus @default(PENDING) @map("status")
-  createdAt    DateTime   @default(now()) @map("created_at")
-  updatedAt    DateTime   @updatedAt @map("updated_at")
-  appleId      String?    @unique @map("apple_id")
-  googleId     String?    @unique @map("google_id")
-  passwordHash String?    @map("password_hash")
+  id        Int        @id @default(autoincrement())
+  publicId  String     @unique @default(uuid()) @map("public_id") @db.Uuid
+  email     String     @unique
+  name      String
+  status    UserStatus @default(PENDING) @map("status")
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
 
   @@index([email])
   @@index([name])
