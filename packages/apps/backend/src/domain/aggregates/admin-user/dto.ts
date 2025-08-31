@@ -16,7 +16,7 @@ import {
 
 import { MAX_EMAIL_LENGTH, MAX_NAME_LENGTH, AdminRoleRecord, AdminStatusRecord, AdminUser } from './constants';
 
-import { Publicize } from '@/utils/publicize';
+import { Publicize } from '@/domain/utils/publicize';
 
 // ============================================
 // Command DTOs (Input)

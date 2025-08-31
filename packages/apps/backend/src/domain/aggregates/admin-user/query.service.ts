@@ -1,12 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 import {
   FindManyAdminUsersByIdInputDto,
   FindAdminUserByIdInputDto,
-  toAdminUserResponseDto,
   toAdminUsersResponseDto,
   AdminUserResponseDto,
   AdminUsersResponseDto,
+  toAdminUserResponseDto,
 } from './dto';
 
 import { AdminUser, Prisma } from '@/generated/prisma';
@@ -17,17 +17,13 @@ export class AdminUserQueryService {
   public constructor(private readonly repository: RepositoryService) {}
 
   public async findUniqueOrThrowAdminUser({ publicId }: FindAdminUserByIdInputDto): Promise<AdminUserResponseDto> {
-    try {
-      const adminUser = await this.repository.adminUser.findUniqueOrThrow({
-        where: {
-          publicId,
-        },
-      });
+    const adminUser = await this.repository.adminUser.findUniqueOrThrow({
+      where: {
+        publicId,
+      },
+    });
 
-      return toAdminUserResponseDto(adminUser);
-    } catch (_error) {
-      throw new NotFoundException(`AdminUser ${publicId} not found`);
-    }
+    return toAdminUserResponseDto(adminUser);
   }
 
   public async findManyAdminUsers({ publicIds }: FindManyAdminUsersByIdInputDto): Promise<AdminUsersResponseDto> {

@@ -41,8 +41,6 @@ export class AdminUserCommandService {
   }
 
   public async updateAdminUserById({ publicId, data }: UpdateAdminUserInputDto): Promise<AdminUserResponseDto> {
-    await this.queryService.findUniqueOrThrowAdminUser({ publicId });
-
     return toAdminUserResponseDto(
       await this.repository.adminUser.update({
         where: { publicId },
@@ -52,7 +50,6 @@ export class AdminUserCommandService {
   }
 
   public async deleteAdminUserById({ publicId }: DeleteAdminUserByIdInputDto): Promise<void> {
-    await this.queryService.findUniqueOrThrowAdminUser({ publicId });
     await this.repository.adminUser.delete({ where: { publicId } });
   }
 
