@@ -1,4 +1,4 @@
-import { ensurePublicIdsToArray } from '@/utils/ensure-public-ids-to-array';
+import { ensurePublicIdsToArray } from '@/apis/utils/ensure-public-ids-to-array';
 
 describe('ensureIdsToArray', () => {
   describe('with null or undefined input', () => {

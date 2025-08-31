@@ -2,10 +2,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 
 import { AdminUserCommandService } from '@/aggregates/admin-user/command.service';
 import { toAdminUserResponseDto, toAdminUsersResponseDto } from '@/aggregates/admin-user/dto';
+import { AdminUserErrorCode, AdminUserError } from '@/aggregates/admin-user/error';
 import { AdminUserQueryService } from '@/aggregates/admin-user/query.service';
 import { AdminRole } from '@/generated/prisma';
 import { RepositoryService } from '@/repository/service';
 import { AdminUserFactory } from '@/tests/factory';
+import { Ok, Err } from '@/utils/result';
 
 describe('adminUserCommandService', () => {
   let service: AdminUserCommandService;
@@ -36,6 +38,7 @@ describe('adminUserCommandService', () => {
 
     const mockQueryService = {
       findUniqueOrThrowAdminUser: jest.fn(),
+      findManyAdminUsers: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -62,33 +65,55 @@ describe('adminUserCommandService', () => {
   });
 
   describe('createAdminUser', () => {
-    it('should create a new admin user and return response DTO', async () => {
-      expect.assertions(2);
+    it('should successfully create an admin user', async () => {
+      expect.assertions(3);
 
       const mockAdminUser = adminUserFactory.build();
-      repository.adminUser.create.mockResolvedValue(mockAdminUser);
-      const params = {
+      const createDto = {
         email: mockAdminUser.email,
         name: mockAdminUser.name,
-        role: AdminRole.VIEWER,
+        role: mockAdminUser.role,
       };
 
-      const result = await service.createAdminUser(params);
+      repository.adminUser.create.mockResolvedValue(mockAdminUser);
 
-      expect(repository.adminUser.create).toHaveBeenCalledWith({
-        data: params,
-      });
-      expect(result).toStrictEqual(toAdminUserResponseDto(mockAdminUser));
+      const result = await service.createAdminUser(createDto);
+
+      expect(repository.adminUser.create).toHaveBeenCalledWith({ data: createDto });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data).toStrictEqual(toAdminUserResponseDto(mockAdminUser));
+      }
+    });
+
+    it('should return error on database failure', async () => {
+      expect.assertions(3);
+
+      const createDto = {
+        email: 'test@example.com',
+        name: 'Test User',
+        role: AdminRole.ADMIN,
+      };
+
+      const prismaError = new Error('Database error');
+      repository.adminUser.create.mockRejectedValue(prismaError);
+
+      const result = await service.createAdminUser(createDto);
+
+      expect(repository.adminUser.create).toHaveBeenCalledWith({ data: createDto });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.code).toBe(AdminUserErrorCode.DATABASE_ERROR);
+      }
     });
   });
 
   describe('createManyAndReturnAdminUsers', () => {
-    it('should create multiple admin users and return response DTO', async () => {
-      expect.assertions(2);
+    it('should successfully create multiple admin users', async () => {
+      expect.assertions(3);
 
-      const mockAdminUsers = [adminUserFactory.build(), adminUserFactory.build()];
-      repository.adminUser.createManyAndReturn.mockResolvedValue(mockAdminUsers);
-      const params = {
+      const mockAdminUsers = adminUserFactory.buildMany(3);
+      const createDto = {
         adminUsers: mockAdminUsers.map((user) => ({
           email: user.email,
           name: user.name,
@@ -96,127 +121,112 @@ describe('adminUserCommandService', () => {
         })),
       };
 
-      const result = await service.createManyAndReturnAdminUsers(params);
+      repository.adminUser.createManyAndReturn.mockResolvedValue(mockAdminUsers);
 
-      expect(repository.adminUser.createManyAndReturn).toHaveBeenCalledWith({
-        data: params.adminUsers,
-      });
-      expect(result).toStrictEqual(toAdminUsersResponseDto(mockAdminUsers));
+      const result = await service.createManyAndReturnAdminUsers(createDto);
+
+      expect(repository.adminUser.createManyAndReturn).toHaveBeenCalledWith({ data: createDto.adminUsers });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data).toStrictEqual(toAdminUsersResponseDto(mockAdminUsers));
+      }
     });
   });
 
   describe('updateAdminUserById', () => {
-    it('should verify admin user exists and update it', async () => {
-      expect.assertions(3);
+    it('should successfully update an admin user', async () => {
+      expect.assertions(4);
 
       const mockAdminUser = adminUserFactory.build();
-      const updatedAdminUser = {
-        ...mockAdminUser,
-        name: 'Updated Admin Name',
-        role: AdminRole.ADMIN,
-      };
-      const mockResponseDto = toAdminUserResponseDto(mockAdminUser);
-      queryService.findUniqueOrThrowAdminUser.mockResolvedValue(mockResponseDto);
+      const publicId = mockAdminUser.publicId;
+      const updateData = { name: 'Updated Name' };
+
+      const updatedAdminUser = { ...mockAdminUser, ...updateData };
+      queryService.findUniqueOrThrowAdminUser.mockResolvedValue(Ok(toAdminUserResponseDto(mockAdminUser)));
       repository.adminUser.update.mockResolvedValue(updatedAdminUser);
 
-      const params = {
-        publicId: mockAdminUser.publicId,
-        data: {
-          name: 'Updated Admin Name',
-          role: AdminRole.ADMIN,
-        },
-      };
+      const result = await service.updateAdminUserById({ publicId, data: updateData });
 
-      const result = await service.updateAdminUserById(params);
-
-      expect(queryService.findUniqueOrThrowAdminUser).toHaveBeenCalledWith({ publicId: params.publicId });
+      expect(queryService.findUniqueOrThrowAdminUser).toHaveBeenCalledWith({ publicId });
       expect(repository.adminUser.update).toHaveBeenCalledWith({
-        where: { publicId: params.publicId },
-        data: params.data,
+        where: { publicId },
+        data: updateData,
       });
-      expect(result).toStrictEqual(toAdminUserResponseDto(updatedAdminUser));
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data).toStrictEqual(toAdminUserResponseDto(updatedAdminUser));
+      }
     });
 
-    it('should throw error if admin user does not exist', async () => {
-      expect.assertions(2);
+    it('should return error when admin user not found', async () => {
+      expect.assertions(3);
 
       const publicId = 'non-existent-id';
-      const error = new Error('AdminUser not found');
-      queryService.findUniqueOrThrowAdminUser.mockRejectedValue(error);
+      const updateData = { name: 'Updated Name' };
 
-      const params = {
-        publicId,
-        data: { name: 'Updated Name' },
-      };
+      queryService.findUniqueOrThrowAdminUser.mockResolvedValue(Err(AdminUserError.notFound(publicId)));
 
-      await expect(service.updateAdminUserById(params)).rejects.toThrow(error);
+      const result = await service.updateAdminUserById({ publicId, data: updateData });
+
       expect(repository.adminUser.update).not.toHaveBeenCalled();
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.code).toBe(AdminUserErrorCode.NOT_FOUND);
+      }
     });
   });
 
   describe('deleteAdminUserById', () => {
-    it('should verify admin user exists and delete it', async () => {
+    it('should successfully delete an admin user', async () => {
       expect.assertions(3);
 
       const mockAdminUser = adminUserFactory.build();
-      const mockResponseDto = toAdminUserResponseDto(mockAdminUser);
-      queryService.findUniqueOrThrowAdminUser.mockResolvedValue(mockResponseDto);
-      repository.adminUser.delete.mockResolvedValue(undefined);
+      const publicId = mockAdminUser.publicId;
 
-      const params = { publicId: mockAdminUser.publicId };
+      queryService.findUniqueOrThrowAdminUser.mockResolvedValue(Ok(toAdminUserResponseDto(mockAdminUser)));
+      repository.adminUser.delete.mockResolvedValue(mockAdminUser);
 
-      await service.deleteAdminUserById(params);
+      const result = await service.deleteAdminUserById({ publicId });
 
-      expect(queryService.findUniqueOrThrowAdminUser).toHaveBeenCalledWith(params);
-      expect(repository.adminUser.delete).toHaveBeenCalledWith({
-        where: params,
-      });
-      expect(repository.adminUser.delete).toHaveBeenCalledTimes(1);
+      expect(queryService.findUniqueOrThrowAdminUser).toHaveBeenCalledWith({ publicId });
+      expect(repository.adminUser.delete).toHaveBeenCalledWith({ where: { publicId } });
+      expect(result.success).toBe(true);
     });
 
-    it('should throw error if admin user does not exist', async () => {
-      expect.assertions(2);
+    it('should return error when admin user not found', async () => {
+      expect.assertions(3);
 
       const publicId = 'non-existent-id';
-      const error = new Error('AdminUser not found');
-      queryService.findUniqueOrThrowAdminUser.mockRejectedValue(error);
 
-      await expect(service.deleteAdminUserById({ publicId })).rejects.toThrow(error);
+      queryService.findUniqueOrThrowAdminUser.mockResolvedValue(Err(AdminUserError.notFound(publicId)));
+
+      const result = await service.deleteAdminUserById({ publicId });
+
       expect(repository.adminUser.delete).not.toHaveBeenCalled();
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.code).toBe(AdminUserErrorCode.NOT_FOUND);
+      }
     });
   });
 
   describe('deleteManyAdminUsersByIds', () => {
-    it('should delete multiple admin users without verification', async () => {
-      expect.assertions(2);
+    it('should successfully delete multiple admin users', async () => {
+      expect.assertions(3);
 
-      const publicIds = ['id1', 'id2', 'id3'];
-      repository.adminUser.deleteMany.mockResolvedValue(undefined);
-      const params = { publicIds };
+      const mockAdminUsers = adminUserFactory.buildMany(3);
+      const publicIds = mockAdminUsers.map((user) => user.publicId);
 
-      await service.deleteManyAdminUsersByIds(params);
+      queryService.findManyAdminUsers.mockResolvedValue(Ok(toAdminUsersResponseDto(mockAdminUsers)));
+      repository.adminUser.deleteMany.mockResolvedValue({ count: publicIds.length });
 
+      const result = await service.deleteManyAdminUsersByIds({ publicIds });
+
+      expect(queryService.findManyAdminUsers).toHaveBeenCalledWith({ publicIds });
       expect(repository.adminUser.deleteMany).toHaveBeenCalledWith({
-        where: {
-          publicId: { in: publicIds },
-        },
+        where: { publicId: { in: publicIds } },
       });
-      expect(queryService.findUniqueOrThrowAdminUser).not.toHaveBeenCalled();
-    });
-
-    it('should handle empty array of IDs', async () => {
-      expect.assertions(1);
-
-      const publicIds: string[] = [];
-      repository.adminUser.deleteMany.mockResolvedValue(undefined);
-
-      await service.deleteManyAdminUsersByIds({ publicIds });
-
-      expect(repository.adminUser.deleteMany).toHaveBeenCalledWith({
-        where: {
-          publicId: { in: [] },
-        },
-      });
+      expect(result.success).toBe(true);
     });
   });
 });

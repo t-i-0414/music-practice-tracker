@@ -1,4 +1,3 @@
-import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { AdminUserCommandService } from '@/aggregates/admin-user/command.service';
@@ -8,10 +7,13 @@ import {
   toAdminUserResponseDto,
   toAdminUsersResponseDto,
 } from '@/aggregates/admin-user/dto';
+import { AdminUserError } from '@/aggregates/admin-user/error';
 import { AdminUserQueryService } from '@/aggregates/admin-user/query.service';
 import { AdminAdminUsersController } from '@/apis/admin/admin-users/controller';
+import { BusinessException } from '@/common/exceptions/business.exception';
 import { AdminRole } from '@/generated/prisma';
 import { AdminUserFactory } from '@/tests/factory';
+import { Ok, Err } from '@/utils/result';
 
 describe('admin admin users controller', () => {
   let controller: AdminAdminUsersController;
@@ -65,7 +67,7 @@ describe('admin admin users controller', () => {
 
       const mockAdminUsers = [adminUserFactory.build(), adminUserFactory.build()];
       const mockResponse = toAdminUsersResponseDto(mockAdminUsers);
-      queryService.findAllAdminUsers.mockResolvedValue(mockResponse);
+      queryService.findAllAdminUsers.mockResolvedValue(Ok(mockResponse));
 
       const result = await controller.findManyAdminUsers(undefined);
 
@@ -79,7 +81,7 @@ describe('admin admin users controller', () => {
       const mockAdminUsers = [adminUserFactory.build(), adminUserFactory.build()];
       const publicIds = mockAdminUsers.map((user) => user.publicId);
       const mockResponse = toAdminUsersResponseDto(mockAdminUsers);
-      queryService.findManyAdminUsers.mockResolvedValue(mockResponse);
+      queryService.findManyAdminUsers.mockResolvedValue(Ok(mockResponse));
 
       const result = await controller.findManyAdminUsers(publicIds);
 
@@ -93,7 +95,7 @@ describe('admin admin users controller', () => {
       const mockAdminUser = adminUserFactory.build();
       const { publicId } = mockAdminUser;
       const mockResponse = toAdminUsersResponseDto([mockAdminUser]);
-      queryService.findManyAdminUsers.mockResolvedValue(mockResponse);
+      queryService.findManyAdminUsers.mockResolvedValue(Ok(mockResponse));
 
       const result = await controller.findManyAdminUsers(publicId);
 
@@ -108,7 +110,7 @@ describe('admin admin users controller', () => {
 
       const mockAdminUser = adminUserFactory.build();
       const mockResponseDto = toAdminUserResponseDto(mockAdminUser);
-      queryService.findUniqueOrThrowAdminUser.mockResolvedValue(mockResponseDto);
+      queryService.findUniqueOrThrowAdminUser.mockResolvedValue(Ok(mockResponseDto));
 
       const result = await controller.findAdminUserById(mockAdminUser.publicId);
 
@@ -122,9 +124,9 @@ describe('admin admin users controller', () => {
       expect.assertions(2);
 
       const publicId = 'non-existent-id';
-      queryService.findUniqueOrThrowAdminUser.mockRejectedValue(new NotFoundException('AdminUser not found'));
+      queryService.findUniqueOrThrowAdminUser.mockResolvedValue(Err(AdminUserError.notFound(publicId)));
 
-      await expect(controller.findAdminUserById(publicId)).rejects.toThrow(NotFoundException);
+      await expect(controller.findAdminUserById(publicId)).rejects.toThrow(BusinessException);
       expect(queryService.findUniqueOrThrowAdminUser).toHaveBeenCalledWith({ publicId });
     });
   });
@@ -140,7 +142,7 @@ describe('admin admin users controller', () => {
       };
       const mockAdminUser = adminUserFactory.build(createDto);
       const mockResponseDto = toAdminUserResponseDto(mockAdminUser);
-      commandService.createAdminUser.mockResolvedValue(mockResponseDto);
+      commandService.createAdminUser.mockResolvedValue(Ok(mockResponseDto));
 
       const result = await controller.createAdminUser(createDto);
 
@@ -172,7 +174,7 @@ describe('admin admin users controller', () => {
         adminUserFactory.build(createDto.adminUsers[1]),
       ];
       const mockResponse = toAdminUsersResponseDto(mockAdminUsers);
-      commandService.createManyAndReturnAdminUsers.mockResolvedValue(mockResponse);
+      commandService.createManyAndReturnAdminUsers.mockResolvedValue(Ok(mockResponse));
 
       const result = await controller.createManyAdminUsers(createDto);
 
@@ -198,7 +200,7 @@ describe('admin admin users controller', () => {
         ...updateDto.data,
       });
       const mockResponseDto = toAdminUserResponseDto(mockUpdatedAdminUser);
-      commandService.updateAdminUserById.mockResolvedValue(mockResponseDto);
+      commandService.updateAdminUserById.mockResolvedValue(Ok(mockResponseDto));
 
       const result = await controller.updateAdminUser(publicId, updateDto.data);
 
@@ -212,7 +214,7 @@ describe('admin admin users controller', () => {
       expect.assertions(2);
 
       const publicId = 'admin-public-id';
-      commandService.deleteAdminUserById.mockResolvedValue(undefined);
+      commandService.deleteAdminUserById.mockResolvedValue(Ok(undefined));
 
       await controller.deleteAdminUser(publicId);
 
@@ -227,7 +229,7 @@ describe('admin admin users controller', () => {
 
       const publicIds = ['id1', 'id2', 'id3'];
       const deleteDto = { publicIds };
-      commandService.deleteManyAdminUsersByIds.mockResolvedValue(undefined);
+      commandService.deleteManyAdminUsersByIds.mockResolvedValue(Ok(undefined));
 
       await controller.deleteManyAdminUsers(deleteDto);
 
