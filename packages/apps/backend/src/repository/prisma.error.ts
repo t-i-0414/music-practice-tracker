@@ -6,7 +6,7 @@ import {
   PrismaClientValidationError,
 } from '@prisma/client/runtime/library';
 
-import { type RepositoryErrorCode } from '@/utils/common-error/error-code';
+import { type RepositoryErrorCode } from './repository.error';
 
 export type PrismaError =
   | PrismaClientKnownRequestError
@@ -77,7 +77,7 @@ export const PRISMA_ERROR_CODE_MAP = {
   P2027: 'RE0212', // Multiple errors during execution
   P2028: 'RE0213', // Transaction API error
   P2029: 'RE0214', // Query parameter limit exceeded
-  P2030: 'RE0215', // Cannot find fulltext index
+  P2030: 'RE0215', // Cannot find full-text index
   P2031: 'RE0216', // MongoDB server connection failure
   P2033: 'RE0217', // Number used in place where not parsable
   P2034: 'RE0205', // Transaction failed due to write conflict
