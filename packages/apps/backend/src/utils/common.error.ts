@@ -1,11 +1,4 @@
-import {
-  type ApiErrorCode,
-  type DomainErrorCode,
-  ERROR_CODE_RECORDS,
-  type UnknownErrorCode,
-  type ErrorCode,
-  type ErrorMessage,
-} from '@/utils/error-code';
+import { ERROR_CODE_RECORDS, type UnknownErrorCode, type ErrorCode, type ErrorMessage } from '@/utils/error-code';
 
 export type CommonErrorBody = {
   errorCode: ErrorCode;
@@ -46,20 +39,9 @@ export abstract class CommonError<TErrorCode extends ErrorCode = ErrorCode> exte
   }
 }
 
-export class ApplicationError extends CommonError<ApiErrorCode> {
-  public constructor(errorCode: ApiErrorCode, detail: string, cause?: unknown) {
-    super(errorCode, detail, cause);
-  }
-}
-
-export class DomainError extends CommonError<DomainErrorCode> {
-  public constructor(errorCode: DomainErrorCode, detail: string, cause?: unknown) {
-    super(errorCode, detail, cause);
-  }
-}
-
 export class UnknownError extends CommonError<UnknownErrorCode> {
   public constructor(errorCode: UnknownErrorCode, detail: string, cause?: unknown) {
     super(errorCode, detail, cause);
   }
 }
+export const isUnknownError = (error: unknown): error is UnknownError => error instanceof UnknownError;

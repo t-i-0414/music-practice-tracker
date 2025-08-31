@@ -3,7 +3,9 @@ import { Response } from 'express';
 
 import { ErrorResponse } from '../response';
 
+import { isDomainError } from '@/domain/utils/domain.error';
 import { buildRepositoryError, canConvertToRepositoryError } from '@/repository/repository.error';
+import { isUnknownError } from '@/utils/common.error';
 import { ERROR_CODE_RECORDS } from '@/utils/error-code';
 
 @Catch()
@@ -28,12 +30,32 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       };
     }
 
+    if (isDomainError(exception)) {
+      return {
+        statusCode: HttpStatus.BAD_REQUEST,
+        errorCode: exception.errorCode,
+        errorMessage: exception.errorMessage,
+        detail: exception.detail,
+        timestamp: exception.timestamp,
+      };
+    }
+
+    if (isUnknownError(exception)) {
+      return {
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        errorCode: exception.errorCode,
+        errorMessage: exception.errorMessage,
+        detail: exception.detail,
+        timestamp: exception.timestamp,
+      };
+    }
+
     const errorCode = 'UN9999';
     return {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
       errorCode,
       errorMessage: ERROR_CODE_RECORDS[errorCode],
-      detail: 'Internal server error',
+      detail: exception instanceof Error ? exception.message : 'Internal server error',
       timestamp: new Date().toISOString(),
     };
   }
