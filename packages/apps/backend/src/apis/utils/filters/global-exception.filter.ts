@@ -1,6 +1,7 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus } from '@nestjs/common';
 import { Response } from 'express';
 
+import { isApiError } from '../api.error';
 import { ErrorResponse } from '../response';
 
 import { isDomainError } from '@/domain/utils/domain.error';
@@ -31,6 +32,16 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     }
 
     if (isDomainError(exception)) {
+      return {
+        statusCode: HttpStatus.BAD_REQUEST,
+        errorCode: exception.errorCode,
+        errorMessage: exception.errorMessage,
+        detail: exception.detail,
+        timestamp: exception.timestamp,
+      };
+    }
+
+    if (isApiError(exception)) {
       return {
         statusCode: HttpStatus.BAD_REQUEST,
         errorCode: exception.errorCode,
