@@ -16,7 +16,8 @@ export interface paths {
         /** Update a user by public ID */
         put: operations["AppApiUsersController_updateUserById"];
         post?: never;
-        delete?: never;
+        /** Delete a user by public ID */
+        delete: operations["AppApiUsersController_deleteUserById"];
         options?: never;
         head?: never;
         patch?: never;
@@ -183,6 +184,36 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["UserResponseDto"];
                 };
+            };
+            /** @description Error Response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    AppApiUsersController_deleteUserById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description User public ID */
+                publicId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description User deleted successfully */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Error Response */
             default: {
