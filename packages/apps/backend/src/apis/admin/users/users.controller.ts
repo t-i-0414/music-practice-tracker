@@ -85,6 +85,7 @@ export class AdminApiUsersController {
   }
 
   @Delete()
+  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete multiple users by public IDs' })
   @ApiBody({ type: DeleteManyUsersInputDto })
   @ApiResponse({ status: 204, description: 'Users deleted' })
@@ -94,6 +95,7 @@ export class AdminApiUsersController {
   }
 
   @Delete(':publicId')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a user by public ID' })
   @ApiParam({ name: 'publicId', description: 'User public ID' })
   @ApiResponse({ status: 204, description: 'User deleted' })
