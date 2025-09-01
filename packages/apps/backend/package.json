@@ -81,5 +81,8 @@
     "args": [
       "--config=./tests/jest.config.ts"
     ]
+  },
+  "prisma": {
+    "schema": "./prisma"
   }
 }
