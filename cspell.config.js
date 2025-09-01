@@ -33,6 +33,7 @@ export default defineConfig({
     'datetimepicker',
     'dbgenerated',
     'DDD',
+    'DDL',
     'deadcode',
     'deletemany',
     'deletemanyandreturn',
