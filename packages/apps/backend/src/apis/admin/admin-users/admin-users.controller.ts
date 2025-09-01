@@ -1,8 +1,8 @@
 import { Body, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Put, Query } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 
+import { ApiStandardResponses } from '@/apis/utils/api-default-response';
 import { ApiController } from '@/apis/utils/controllers/api.controller';
-import { ApiStandardResponses } from '@/apis/utils/decorators/api-default-response';
 import { ensurePublicIdsToArray } from '@/apis/utils/ensure-public-ids-to-array';
 import { AdminUserCommandService } from '@/domain/aggregates/admin-user/admin-user.command.service';
 import { AdminUserQueryService } from '@/domain/aggregates/admin-user/admin-user.query.service';

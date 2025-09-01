@@ -1,8 +1,8 @@
 import { Body, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Put } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 
+import { ApiStandardResponses } from '@/apis/utils/api-default-response';
 import { ApiController } from '@/apis/utils/controllers/api.controller';
-import { ApiStandardResponses } from '@/apis/utils/decorators/api-default-response';
 import { Public } from '@/apis/utils/decorators/public.decorator';
 import { UserCommandService } from '@/domain/aggregates/user/user.command.service';
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
@@ -51,5 +51,16 @@ export class AppApiUsersController {
     @Body() data: UpdateUserDataDto,
   ): Promise<UserResponseDto> {
     return this.userCommand.updateUserById({ publicId, data });
+  }
+
+  @Delete(':publicId')
+  @Public()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete a user by public ID' })
+  @ApiParam({ name: 'publicId', description: 'User public ID', example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiResponse({ status: 204, description: 'User deleted successfully' })
+  @ApiStandardResponses()
+  public async deleteUserById(@Param('publicId', new ParseUUIDPipe()) publicId: string): Promise<void> {
+    await this.userCommand.deleteUserById({ publicId });
   }
 }
