@@ -1,63 +1,109 @@
-import { Controller } from '@nestjs/common';
-
 import { ApiController } from '@/apis/utils/controllers/api.controller';
 
-describe('apiController decorator', () => {
-  it('should return a function decorator', () => {
-    expect.assertions(1);
+describe('apiController Decorator', () => {
+  describe('basic usage', () => {
+    it('should apply Controller decorator with prefix', () => {
+      @ApiController('test')
+      class TestController {}
 
-    const path = 'users';
-    const decorator = ApiController(path);
+      const metadata = Reflect.getMetadata('path', TestController);
 
-    expect(typeof decorator).toBe('function');
+      expect(metadata).toBe('api/test');
+    });
+
+    it('should apply Controller decorator correctly', () => {
+      @ApiController('users')
+      class UsersController {}
+
+      const metadata = Reflect.getMetadata('path', UsersController);
+
+      expect(metadata).toBe('api/users');
+    });
   });
 
-  it('should be applicable to class with path metadata', () => {
-    expect.assertions(1);
+  describe('path variations', () => {
+    it('should handle nested paths', () => {
+      @ApiController('admin/users')
+      class AdminUsersController {}
 
-    @ApiController('test')
-    class TestController {}
+      const metadata = Reflect.getMetadata('path', AdminUsersController);
 
-    const path = Reflect.getMetadata('path', TestController);
+      expect(metadata).toBe('api/admin/users');
+    });
 
-    expect(path).toBe('api/test');
+    it('should handle empty path', () => {
+      @ApiController('')
+      class RootController {}
+
+      const metadata = Reflect.getMetadata('path', RootController);
+
+      expect(metadata).toBe('api/');
+    });
+
+    it('should handle path with parameters', () => {
+      @ApiController('users/:id/posts')
+      class UserPostsController {}
+
+      const metadata = Reflect.getMetadata('path', UserPostsController);
+
+      expect(metadata).toBe('api/users/:id/posts');
+    });
   });
 
-  it('should handle nested paths', () => {
-    expect.assertions(1);
+  describe('decorator composition', () => {
+    it('should work with additional decorators', () => {
+      const customDecorator = (target: any) => {
+        Reflect.defineMetadata('custom', true, target);
+        return target;
+      };
 
-    @ApiController('admin/users')
-    class AdminUsersController {}
+      @customDecorator
+      @ApiController('test')
+      class DecoratedController {}
 
-    const path = Reflect.getMetadata('path', AdminUsersController);
+      const pathMetadata = Reflect.getMetadata('path', DecoratedController);
+      const customMetadata = Reflect.getMetadata('custom', DecoratedController);
 
-    expect(path).toBe('api/admin/users');
+      expect(pathMetadata).toBe('api/test');
+      expect(customMetadata).toBe(true);
+    });
   });
 
-  it('should handle empty path', () => {
-    expect.assertions(1);
+  describe('controller inheritance', () => {
+    it('should work with class inheritance', () => {
+      @ApiController('base')
+      class BaseController {
+        baseMethod() {
+          return 'base';
+        }
+      }
 
-    @ApiController('')
-    class RootController {}
+      class ExtendedController extends BaseController {
+        extendedMethod() {
+          return 'extended';
+        }
+      }
 
-    const path = Reflect.getMetadata('path', RootController);
+      const controller = new ExtendedController();
 
-    expect(path).toBe('api/');
+      expect(controller.baseMethod()).toBe('base');
+      expect(controller.extendedMethod()).toBe('extended');
+    });
   });
 
-  it('should work the same as Controller decorator with prefix', () => {
-    expect.assertions(2);
+  describe('multiple controllers', () => {
+    it('should handle multiple controllers with different paths', () => {
+      @ApiController('users')
+      class UsersController {}
 
-    @ApiController('test')
-    class ApiTestController {}
+      @ApiController('posts')
+      class PostsController {}
 
-    @Controller('api/test')
-    class StandardController {}
+      const usersPath = Reflect.getMetadata('path', UsersController);
+      const postsPath = Reflect.getMetadata('path', PostsController);
 
-    const apiPath = Reflect.getMetadata('path', ApiTestController);
-    const standardPath = Reflect.getMetadata('path', StandardController);
-
-    expect(apiPath).toBe(standardPath);
-    expect(apiPath).toBe('api/test');
+      expect(usersPath).toBe('api/users');
+      expect(postsPath).toBe('api/posts');
+    });
   });
 });

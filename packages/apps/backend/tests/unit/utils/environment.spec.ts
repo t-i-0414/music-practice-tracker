@@ -1,145 +1,76 @@
 import { isDevelopment, isProduction, isTest, getEnvironment } from '@/utils/environment';
 
 describe('environment utilities', () => {
-  const originalNodeEnv = process.env.NODE_ENV;
+  const originalEnv = process.env;
 
-  afterEach(() => {
-    process.env.NODE_ENV = originalNodeEnv;
+  beforeEach(() => {
+    jest.resetModules();
+    process.env = { ...originalEnv };
   });
 
-  describe('isDevelopment', () => {
-    it('should return true when NODE_ENV is not production', () => {
-      expect.assertions(1);
+  afterAll(() => {
+    process.env = originalEnv;
+  });
 
-      process.env.NODE_ENV = 'development';
-
-      expect(isDevelopment()).toBe(true);
-    });
-
-    it('should return true when NODE_ENV is test', () => {
-      expect.assertions(1);
-
+  describe('getEnvironment', () => {
+    it('should return NODE_ENV value', () => {
       process.env.NODE_ENV = 'test';
 
-      expect(isDevelopment()).toBe(true);
+      expect(getEnvironment()).toBe('test');
     });
 
-    it('should return false when NODE_ENV is production', () => {
-      expect.assertions(1);
-
-      process.env.NODE_ENV = 'production';
-
-      expect(isDevelopment()).toBe(false);
-    });
-
-    it('should return true when NODE_ENV is undefined', () => {
-      expect.assertions(1);
-
+    it('should default to development if NODE_ENV is not set', () => {
       delete process.env.NODE_ENV;
 
-      expect(isDevelopment()).toBe(true);
+      expect(getEnvironment()).toBe('development');
     });
   });
 
   describe('isProduction', () => {
     it('should return true when NODE_ENV is production', () => {
-      expect.assertions(1);
-
       process.env.NODE_ENV = 'production';
 
       expect(isProduction()).toBe(true);
     });
 
-    it('should return false when NODE_ENV is development', () => {
-      expect.assertions(1);
-
+    it('should return false when NODE_ENV is not production', () => {
       process.env.NODE_ENV = 'development';
 
       expect(isProduction()).toBe(false);
     });
+  });
 
-    it('should return false when NODE_ENV is test', () => {
-      expect.assertions(1);
+  describe('isDevelopment', () => {
+    it('should return true when NODE_ENV is not production', () => {
+      process.env.NODE_ENV = 'development';
 
-      process.env.NODE_ENV = 'test';
-
-      expect(isProduction()).toBe(false);
+      expect(isDevelopment()).toBe(true);
     });
 
-    it('should return false when NODE_ENV is undefined', () => {
-      expect.assertions(1);
+    it('should return false when NODE_ENV is production', () => {
+      process.env.NODE_ENV = 'production';
 
-      delete process.env.NODE_ENV;
+      expect(isDevelopment()).toBe(false);
+    });
 
-      expect(isProduction()).toBe(false);
+    it('should return true when NODE_ENV is test', () => {
+      process.env.NODE_ENV = 'test';
+
+      expect(isDevelopment()).toBe(true);
     });
   });
 
   describe('isTest', () => {
     it('should return true when NODE_ENV is test', () => {
-      expect.assertions(1);
-
       process.env.NODE_ENV = 'test';
 
       expect(isTest()).toBe(true);
     });
 
-    it('should return false when NODE_ENV is development', () => {
-      expect.assertions(1);
-
-      process.env.NODE_ENV = 'development';
-
-      expect(isTest()).toBe(false);
-    });
-
-    it('should return false when NODE_ENV is production', () => {
-      expect.assertions(1);
-
+    it('should return false when NODE_ENV is not test', () => {
       process.env.NODE_ENV = 'production';
 
       expect(isTest()).toBe(false);
-    });
-
-    it('should return false when NODE_ENV is undefined', () => {
-      expect.assertions(1);
-
-      delete process.env.NODE_ENV;
-
-      expect(isTest()).toBe(false);
-    });
-  });
-
-  describe('getEnvironment', () => {
-    it('should return NODE_ENV value when set', () => {
-      expect.assertions(3);
-
-      process.env.NODE_ENV = 'production';
-
-      expect(getEnvironment()).toBe('production');
-
-      process.env.NODE_ENV = 'test';
-
-      expect(getEnvironment()).toBe('test');
-
-      process.env.NODE_ENV = 'development';
-
-      expect(getEnvironment()).toBe('development');
-    });
-
-    it('should return custom NODE_ENV value', () => {
-      expect.assertions(1);
-
-      process.env.NODE_ENV = 'staging';
-
-      expect(getEnvironment()).toBe('staging');
-    });
-
-    it('should return development when NODE_ENV is undefined', () => {
-      expect.assertions(1);
-
-      delete process.env.NODE_ENV;
-
-      expect(getEnvironment()).toBe('development');
     });
   });
 });

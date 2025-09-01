@@ -1,70 +1,24 @@
 import { faker } from '@faker-js/faker';
 
-import { BaseFactory } from './base-factory';
+import { type User, UserStatus } from '@/generated/prisma';
 
-import type { UserResponseDto } from '@/domain/aggregates/user/utils/dto';
-import type { User } from '@/generated/prisma';
-import { UserStatus } from '@/generated/prisma';
+export class UserFactory {
+  private idCounter = 1;
 
-const DEFAULT_USER = {
-  status: UserStatus.ACTIVE,
-} as const;
-
-export class UserFactory extends BaseFactory<User> {
-  public build(overrides?: Partial<User>): User {
-    const id = this.incrementCounter();
-    const now = new Date();
-
+  public build(overrides: Partial<User> = {}): User {
+    const id = this.idCounter++;
     return {
       id,
-      publicId: faker.string.uuid(),
-      email: faker.internet.email(),
-      name: faker.person.fullName(),
-      ...DEFAULT_USER,
-      createdAt: now,
-      updatedAt: now,
-      ...overrides,
+      publicId: overrides.publicId ?? faker.string.uuid(),
+      email: overrides.email ?? faker.internet.email(),
+      name: overrides.name ?? faker.person.fullName(),
+      status: overrides.status ?? UserStatus.ACTIVE,
+      createdAt: overrides.createdAt ?? new Date(),
+      updatedAt: overrides.updatedAt ?? new Date(),
     };
   }
 
-  public buildWithFixedId(overrides?: Partial<User>): User {
-    const id = this.incrementCounter();
-    return this.build({
-      publicId: `user-public-id-${id}`,
-      email: `user${id}@example.com`,
-      name: `User ${id}`,
-      ...overrides,
-    });
-  }
-}
-
-export class UserResponseDtoFactory extends BaseFactory<UserResponseDto> {
-  public build(overrides?: Partial<UserResponseDto>): UserResponseDto {
-    const now = new Date();
-
-    return {
-      publicId: faker.string.uuid(),
-      email: faker.internet.email(),
-      name: faker.person.fullName(),
-      ...DEFAULT_USER,
-      createdAt: now,
-      updatedAt: now,
-      ...overrides,
-    };
-  }
-
-  public buildFromEntity(user: User): UserResponseDto {
-    const { id: _id, ...rest } = user;
-    return rest;
-  }
-
-  public buildWithFixedId(overrides?: Partial<UserResponseDto>): UserResponseDto {
-    const id = this.incrementCounter();
-    return this.build({
-      publicId: `user-response-public-id-${id}`,
-      email: `user${id}@example.com`,
-      name: `User ${id}`,
-      ...overrides,
-    });
+  public buildMany(count: number, overrides: Partial<User> = {}): User[] {
+    return Array.from({ length: count }, () => this.build(overrides));
   }
 }

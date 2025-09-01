@@ -1,27 +1,32 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { UserCommandService } from '@/aggregates/user/command.service';
-import { toUserResponseDto } from '@/aggregates/user/dto';
-import { UserQueryService } from '@/aggregates/user/query.service';
 import { AppApiUsersController } from '@/apis/app/users/users.controller';
-import { UserResponseDtoFactory } from '@/tests/factory';
+import { UserCommandService } from '@/domain/aggregates/user/user.command.service';
+import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
+import { toUserResponseDto } from '@/domain/aggregates/user/utils/dto';
+import { UserFactory } from '@/tests/factory';
 
-describe('appUsersController', () => {
+describe('appApiUsersController', () => {
   let controller: AppApiUsersController;
   let queryService: jest.Mocked<UserQueryService>;
   let commandService: jest.Mocked<UserCommandService>;
-  let userResponseDtoFactory: UserResponseDtoFactory;
+  let userFactory: UserFactory;
 
   beforeEach(async () => {
-    userResponseDtoFactory = new UserResponseDtoFactory();
+    userFactory = new UserFactory();
 
     const mockQueryService = {
-      findUserByIdOrFail: jest.fn(),
+      findUniqueOrThrowUserById: jest.fn(),
+      findManyUsersById: jest.fn(),
+      findAllUsers: jest.fn(),
     };
 
     const mockCommandService = {
       createUser: jest.fn(),
+      createManyAndReturnUsers: jest.fn(),
       updateUserById: jest.fn(),
+      deleteUserById: jest.fn(),
+      deleteManyUsersById: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -47,52 +52,71 @@ describe('appUsersController', () => {
     jest.clearAllMocks();
   });
 
-  describe('findUserById', () => {
-    it('should find user by publicId', async () => {
+  describe('gET /users/:publicId', () => {
+    it('should return user by public ID', async () => {
       expect.assertions(2);
 
-      const mockUser = userResponseDtoFactory.build();
-      const { publicId } = mockUser;
-      const expectedResult = toUserResponseDto(mockUser);
-      queryService.findUserByIdOrFail.mockResolvedValue(expectedResult);
+      const mockUser = userFactory.build();
+      const mockResponseDto = toUserResponseDto(mockUser);
+      queryService.findUniqueOrThrowUserById.mockResolvedValue(mockResponseDto);
 
-      const result = await controller.findUniqueOrThrowUserById(publicId);
+      const result = await controller.findUniqueOrThrowUserById(mockUser.publicId);
 
-      expect(queryService.findUserByIdOrFail).toHaveBeenCalledWith({ publicId });
-      expect(result).toStrictEqual(expectedResult);
+      expect(queryService.findUniqueOrThrowUserById).toHaveBeenCalledWith({
+        publicId: mockUser.publicId,
+      });
+      expect(result).toStrictEqual(mockResponseDto);
+    });
+
+    it('should throw error when user not found', async () => {
+      expect.assertions(2);
+
+      const publicId = 'non-existent-id';
+      queryService.findUniqueOrThrowUserById.mockRejectedValue(new Error('User not found'));
+
+      await expect(controller.findUniqueOrThrowUserById(publicId)).rejects.toThrow('User not found');
+      expect(queryService.findUniqueOrThrowUserById).toHaveBeenCalledWith({ publicId });
     });
   });
 
-  describe('createUser', () => {
-    it('should create user', async () => {
+  describe('pOST /users', () => {
+    it('should create a new user', async () => {
       expect.assertions(2);
 
-      const mockUser = userResponseDtoFactory.build();
-      const createDto = { email: mockUser.email, name: mockUser.name };
-      const expectedResult = toUserResponseDto(mockUser);
-      commandService.createUser.mockResolvedValue(expectedResult);
+      const createDto = {
+        email: 'user@example.com',
+        name: 'New User',
+      };
+      const mockUser = userFactory.build(createDto);
+      const mockResponseDto = toUserResponseDto(mockUser);
+      commandService.createUser.mockResolvedValue(mockResponseDto);
 
       const result = await controller.createUser(createDto);
 
       expect(commandService.createUser).toHaveBeenCalledWith(createDto);
-      expect(result).toStrictEqual(expectedResult);
+      expect(result).toStrictEqual(mockResponseDto);
     });
   });
 
-  describe('updateUser', () => {
-    it('should update user', async () => {
+  describe('pUT /users/:publicId', () => {
+    it('should update a user', async () => {
       expect.assertions(2);
 
-      const mockUser = userResponseDtoFactory.build();
-      const { publicId } = mockUser;
-      const data = { name: 'Updated Name' };
-      const expectedResult = toUserResponseDto({ ...mockUser, name: 'Updated Name' });
-      commandService.updateUserById.mockResolvedValue(expectedResult);
+      const publicId = 'user-public-id';
+      const updateDto = {
+        name: 'Updated Name',
+      };
+      const mockUpdatedUser = userFactory.build({
+        publicId,
+        ...updateDto,
+      });
+      const mockResponseDto = toUserResponseDto(mockUpdatedUser);
+      commandService.updateUserById.mockResolvedValue(mockResponseDto);
 
-      const result = await controller.updateUserById(publicId, data);
+      const result = await controller.updateUserById(publicId, updateDto);
 
-      expect(commandService.updateUserById).toHaveBeenCalledWith({ publicId, data });
-      expect(result).toStrictEqual(expectedResult);
+      expect(commandService.updateUserById).toHaveBeenCalledWith({ publicId, data: updateDto });
+      expect(result).toStrictEqual(mockResponseDto);
     });
   });
 });

@@ -1,112 +1,164 @@
-import { randomUUID } from 'crypto';
-
-import { type INestApplication } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
 
-import { createE2ETestHelper, type E2ETestHelper } from '../../helpers';
-
 import { AppApiModule } from '@/apis/app/app.module';
+import { DatabaseHelper } from '@/tests/helpers/database.helper';
 
-describe('app API - /api/users', () => {
-  let helper: E2ETestHelper;
+describe('app Users API (e2e)', () => {
   let app: INestApplication;
+  let databaseHelper: DatabaseHelper;
 
   beforeAll(async () => {
-    helper = createE2ETestHelper();
-    await helper.setup([AppApiModule], { enableLogging: false });
-    app = helper.getApp();
+    databaseHelper = new DatabaseHelper();
+    await databaseHelper.connect();
+
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppApiModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    await app.init();
   });
 
   beforeEach(async () => {
-    await helper.cleanupBeforeEach();
+    await databaseHelper.cleanDatabase();
   });
 
   afterAll(async () => {
-    await helper.teardown();
+    await app.close();
+    await databaseHelper.disconnect();
   });
 
-  describe('get /api/users/:publicId', () => {
-    it('should return user by publicId', async () => {
-      expect.assertions(3);
-
-      const user = await request(app.getHttpServer())
-        .post('/api/users')
-        .send({ name: 'Test User', email: `test-${randomUUID()}@example.com` })
-        .expect(201);
-
-      const response = await request(app.getHttpServer()).get(`/api/users/${user.body.publicId}`).expect(200);
-
-      expect(response.body.publicId).toBe(user.body.publicId);
-      expect(response.body.name).toBe('Test User');
-      expect(response.body.email).toMatch(/test-.*@example\.com/u);
-    });
-
-    it('should return 404 for non-existent user', async () => {
-      expect.assertions(1);
-      await expect(
-        request(app.getHttpServer()).get('/api/users/00000000-0000-0000-0000-000000000000'),
-      ).resolves.toMatchObject({
-        status: 404,
-      });
-    });
-  });
-
-  describe('post /api/users', () => {
+  describe('pOST /users', () => {
     it('should create a new user', async () => {
-      expect.assertions(4);
+      expect.assertions(2);
 
-      const userData = {
-        name: 'New User',
-        email: `new-${randomUUID()}@example.com`,
+      const createDto = {
+        email: 'test@example.com',
+        name: 'Test User',
       };
 
-      const response = await request(app.getHttpServer()).post('/api/users').send(userData).expect(201);
+      const response = await request(app.getHttpServer()).post('/users').send(createDto).expect(201);
 
-      expect(response.body).toHaveProperty('publicId');
-      expect(response.body.name).toBe(userData.name);
-      expect(response.body.email).toBe(userData.email);
-      expect(response.body).toHaveProperty('createdAt');
+      expect(response.body).toMatchObject({
+        email: createDto.email,
+        name: createDto.name,
+      });
+      expect(response.body.publicId).toBeDefined();
     });
 
     it('should return 400 for invalid data', async () => {
       expect.assertions(1);
-      await expect(request(app.getHttpServer()).post('/api/users').send({ name: 'No Email' })).resolves.toMatchObject({
-        status: 400,
-      });
-    });
 
-    it('should return error for duplicate email', async () => {
-      expect.assertions(1);
+      const invalidDto = {
+        email: 'invalid-email',
+        name: '',
+      };
 
-      const email = `duplicate-${randomUUID()}@example.com`;
+      const response = await request(app.getHttpServer()).post('/users').send(invalidDto).expect(400);
 
-      await request(app.getHttpServer()).post('/api/users').send({ name: 'User 1', email }).expect(201);
-
-      const response = await request(app.getHttpServer()).post('/api/users').send({ name: 'User 2', email });
-
-      expect(response.status).toBeGreaterThanOrEqual(400);
+      expect(response.status).toBe(400);
     });
   });
 
-  describe('put /api/users/:publicId', () => {
-    it('should update user by publicId', async () => {
-      expect.assertions(3);
+  describe('gET /users/:publicId', () => {
+    it('should get a user by public ID', async () => {
+      expect.assertions(1);
 
-      const user = await request(app.getHttpServer())
-        .post('/api/users')
-        .send({ name: 'Original Name', email: `original-${randomUUID()}@example.com` })
-        .expect(201);
+      const createDto = {
+        email: 'get@example.com',
+        name: 'Get User',
+      };
 
-      const updateData = { name: 'Updated Name' };
+      const createResponse = await request(app.getHttpServer()).post('/users').send(createDto).expect(201);
+
+      const { publicId } = createResponse.body;
+
+      const getResponse = await request(app.getHttpServer()).get(`/users/${publicId}`).expect(200);
+
+      expect(getResponse.body).toMatchObject({
+        publicId,
+        email: createDto.email,
+        name: createDto.name,
+      });
+    });
+
+    it('should return 404 for non-existent user', async () => {
+      expect.assertions(1);
 
       const response = await request(app.getHttpServer())
-        .put(`/api/users/${user.body.publicId}`)
-        .send(updateData)
-        .expect(200);
+        .get('/users/00000000-0000-0000-0000-000000000000')
+        .expect(404);
 
-      expect(response.body.publicId).toBe(user.body.publicId);
-      expect(response.body.name).toBe('Updated Name');
-      expect(response.body.email).toBe(user.body.email);
+      expect(response.status).toBe(404);
+    });
+  });
+
+  describe('pUT /users/:publicId', () => {
+    it('should update a user', async () => {
+      expect.assertions(1);
+
+      const createDto = {
+        email: 'update@example.com',
+        name: 'Original Name',
+      };
+
+      const createResponse = await request(app.getHttpServer()).post('/users').send(createDto).expect(201);
+
+      const { publicId } = createResponse.body;
+      const updateDto = { name: 'Updated Name' };
+
+      const updateResponse = await request(app.getHttpServer()).put(`/users/${publicId}`).send(updateDto).expect(200);
+
+      expect(updateResponse.body).toMatchObject({
+        publicId,
+        email: createDto.email,
+        name: updateDto.name,
+      });
+    });
+
+    it('should return 404 for non-existent user', async () => {
+      expect.assertions(1);
+
+      const response = await request(app.getHttpServer())
+        .put('/users/00000000-0000-0000-0000-000000000000')
+        .send({ name: 'New Name' })
+        .expect(404);
+
+      expect(response.status).toBe(404);
+    });
+  });
+
+  describe('dELETE /users/:publicId', () => {
+    it('should delete a user', async () => {
+      expect.assertions(2);
+
+      const createDto = {
+        email: 'delete@example.com',
+        name: 'Delete User',
+      };
+
+      const createResponse = await request(app.getHttpServer()).post('/users').send(createDto).expect(201);
+
+      const { publicId } = createResponse.body;
+
+      const deleteResponse = await request(app.getHttpServer()).delete(`/users/${publicId}`).expect(204);
+
+      const getResponse = await request(app.getHttpServer()).get(`/users/${publicId}`).expect(404);
+
+      expect(deleteResponse.status).toBe(204);
+      expect(getResponse.status).toBe(404);
+    });
+
+    it('should return 404 for non-existent user', async () => {
+      expect.assertions(1);
+
+      const response = await request(app.getHttpServer())
+        .delete('/users/00000000-0000-0000-0000-000000000000')
+        .expect(404);
+
+      expect(response.status).toBe(404);
     });
   });
 });

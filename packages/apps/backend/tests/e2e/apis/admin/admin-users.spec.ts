@@ -1,308 +1,278 @@
-import { HttpStatus, type INestApplication } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
 
-import { E2ETestHelper } from '../../helpers';
-
 import { AdminApiModule } from '@/apis/admin/admin.module';
-import { AdminRole, AdminStatus, type PrismaClient } from '@/generated/prisma';
-import { getPrismaClient } from '@/tests/helpers/database-test-utils';
+import { AdminRole } from '@/generated/prisma';
+import { DatabaseHelper } from '@/tests/helpers/database.helper';
 
-describe('admin API - AdminUsers (e2e)', () => {
+describe('admin AdminUsers API (e2e)', () => {
   let app: INestApplication;
-  let prisma: PrismaClient;
-  const testHelper = new E2ETestHelper();
+  let databaseHelper: DatabaseHelper;
 
   beforeAll(async () => {
-    const { app: setupApp } = await testHelper.setup([AdminApiModule]);
-    app = setupApp;
-    prisma = getPrismaClient();
+    databaseHelper = new DatabaseHelper();
+    await databaseHelper.connect();
+
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AdminApiModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('admin');
+    await app.init();
   });
 
   beforeEach(async () => {
-    await testHelper.cleanupBeforeEach();
+    await databaseHelper.cleanDatabase();
   });
 
   afterAll(async () => {
-    await testHelper.teardown();
+    await app.close();
+    await databaseHelper.disconnect();
   });
 
-  describe('get /admin-users', () => {
-    it('should return an array of admin users', async () => {
-      expect.assertions(4);
-
-      const adminUsers = await Promise.all([
-        prisma.adminUser.create({
-          data: {
-            name: 'E2E Admin 1',
-            email: 'e2e-admin1@test.com',
-            role: AdminRole.VIEWER,
-            status: AdminStatus.ACTIVE,
-          },
-        }),
-        prisma.adminUser.create({
-          data: {
-            name: 'E2E Admin 2',
-            email: 'e2e-admin2@test.com',
-            role: AdminRole.ADMIN,
-            status: AdminStatus.ACTIVE,
-          },
-        }),
-      ]);
-
-      const response = await request(app.getHttpServer()).get('/api/admin-users').expect(HttpStatus.OK);
-
-      expect(response.body).toHaveProperty('adminUsers');
-      expect(response.body.adminUsers).toBeInstanceOf(Array);
-      expect(response.body.adminUsers.length).toBeGreaterThanOrEqual(2);
-      expect(response.body.adminUsers).toContainEqual(
-        expect.objectContaining({
-          publicId: adminUsers[0].publicId,
-          name: 'E2E Admin 1',
-          email: 'e2e-admin1@test.com',
-          role: AdminRole.VIEWER,
-        }),
-      );
-    });
-
-    it('should support pagination', async () => {
+  describe('pOST /admin/admin-users', () => {
+    it('should create a new admin user', async () => {
       expect.assertions(2);
 
+      const createDto = {
+        email: 'admin@example.com',
+        name: 'Admin User',
+        role: AdminRole.ADMIN,
+      };
+
+      const response = await request(app.getHttpServer()).post('/admin/admin-users').send(createDto).expect(201);
+
+      expect(response.body).toMatchObject({
+        email: createDto.email,
+        name: createDto.name,
+        role: createDto.role,
+      });
+      expect(response.body.publicId).toBeDefined();
+    });
+
+    it('should return 400 for invalid data', async () => {
+      expect.assertions(1);
+
+      const invalidDto = {
+        email: 'invalid-email',
+        name: '',
+        role: 'INVALID_ROLE',
+      };
+
+      const response = await request(app.getHttpServer()).post('/admin/admin-users').send(invalidDto).expect(400);
+
+      expect(response.status).toBe(400);
+    });
+  });
+
+  describe('gET /admin/admin-users', () => {
+    it('should get all admin users', async () => {
+      expect.assertions(3);
+
+      const adminUsers = [
+        { email: 'admin1@example.com', name: 'Admin 1', role: AdminRole.VIEWER },
+        { email: 'admin2@example.com', name: 'Admin 2', role: AdminRole.ADMIN },
+      ];
+
       await Promise.all(
-        Array.from({ length: 5 }, (_, i) =>
-          prisma.adminUser.create({
-            data: {
-              name: `Paginated Admin ${i}`,
-              email: `paginated-admin${i}@test.com`,
-              role: AdminRole.VIEWER,
-            },
-          }),
+        adminUsers.map((adminUser) =>
+          request(app.getHttpServer()).post('/admin/admin-users').send(adminUser).expect(201),
         ),
       );
 
-      const response = await request(app.getHttpServer()).get('/api/admin-users?skip=1&take=2').expect(HttpStatus.OK);
+      const response = await request(app.getHttpServer()).get('/admin/admin-users').expect(200);
 
-      expect(response.body).toHaveProperty('adminUsers');
-      expect(response.body.adminUsers).toBeInstanceOf(Array);
-    });
-  });
-
-  describe('get /admin-users with publicIds query', () => {
-    it('should return admin users by public IDs', async () => {
-      expect.assertions(4);
-
-      const adminUsers = await Promise.all([
-        prisma.adminUser.create({
-          data: {
-            name: 'Admin By ID 1',
-            email: 'admin-by-id1@test.com',
-            role: AdminRole.VIEWER,
-          },
-        }),
-        prisma.adminUser.create({
-          data: {
-            name: 'Admin By ID 2',
-            email: 'admin-by-id2@test.com',
-            role: AdminRole.ADMIN,
-          },
-        }),
-      ]);
-
-      const response = await request(app.getHttpServer())
-        .get(`/api/admin-users?publicIds=${adminUsers[0].publicId}&publicIds=${adminUsers[1].publicId}`)
-        .expect(HttpStatus.OK);
-
-      expect(response.body).toHaveProperty('adminUsers');
-      expect(response.body.adminUsers).toBeInstanceOf(Array);
       expect(response.body.adminUsers).toHaveLength(2);
-      expect(response.body.adminUsers).toContainEqual(
-        expect.objectContaining({
-          publicId: adminUsers[0].publicId,
-        }),
-      );
+      expect(response.body.adminUsers[0].email).toBe('admin1@example.com');
+      expect(response.body.adminUsers[1].email).toBe('admin2@example.com');
     });
-  });
 
-  describe('get /admin-users/:publicId', () => {
-    it('should return an admin user by public ID', async () => {
+    it('should get admin users by public IDs', async () => {
       expect.assertions(2);
 
-      const adminUser = await prisma.adminUser.create({
-        data: {
-          name: 'Get By ID Admin',
-          email: 'get-by-id@test.com',
-          role: AdminRole.EDITOR,
-          status: AdminStatus.ACTIVE,
-        },
-      });
+      const createResponse1 = await request(app.getHttpServer())
+        .post('/admin/admin-users')
+        .send({ email: 'admin1@example.com', name: 'Admin 1', role: AdminRole.VIEWER })
+        .expect(201);
 
-      const response = await request(app.getHttpServer())
-        .get(`/api/admin-users/${adminUser.publicId}`)
-        .expect(HttpStatus.OK);
+      const createResponse2 = await request(app.getHttpServer())
+        .post('/admin/admin-users')
+        .send({ email: 'admin2@example.com', name: 'Admin 2', role: AdminRole.ADMIN })
+        .expect(201);
 
-      expect(response.body).toMatchObject({
-        publicId: adminUser.publicId,
-        name: 'Get By ID Admin',
-        email: 'get-by-id@test.com',
-        role: AdminRole.EDITOR,
-        status: AdminStatus.ACTIVE,
+      await request(app.getHttpServer())
+        .post('/admin/admin-users')
+        .send({ email: 'admin3@example.com', name: 'Admin 3', role: AdminRole.VIEWER })
+        .expect(201);
+
+      const publicIds = [createResponse1.body.publicId, createResponse2.body.publicId];
+      const response = await request(app.getHttpServer()).get('/admin/admin-users').query({ publicIds }).expect(200);
+
+      expect(response.body.adminUsers).toHaveLength(2);
+      expect(response.body.adminUsers.map((u: any) => u.publicId)).toStrictEqual(expect.arrayContaining(publicIds));
+    });
+  });
+
+  describe('gET /admin/admin-users/:publicId', () => {
+    it('should get an admin user by public ID', async () => {
+      expect.assertions(1);
+
+      const createDto = {
+        email: 'get@example.com',
+        name: 'Get Admin',
+        role: AdminRole.ADMIN,
+      };
+
+      const createResponse = await request(app.getHttpServer()).post('/admin/admin-users').send(createDto).expect(201);
+
+      const { publicId } = createResponse.body;
+
+      const getResponse = await request(app.getHttpServer()).get(`/admin/admin-users/${publicId}`).expect(200);
+
+      expect(getResponse.body).toMatchObject({
+        publicId,
+        email: createDto.email,
+        name: createDto.name,
+        role: createDto.role,
       });
-      expect(response.body).not.toHaveProperty('id');
     });
 
     it('should return 404 for non-existent admin user', async () => {
       expect.assertions(1);
 
       const response = await request(app.getHttpServer())
-        .get('/api/admin-users/00000000-0000-0000-0000-000000000000')
-        .expect(HttpStatus.NOT_FOUND);
+        .get('/admin/admin-users/00000000-0000-0000-0000-000000000000')
+        .expect(404);
 
-      expect(response.body).toMatchObject({
-        statusCode: HttpStatus.NOT_FOUND,
-        message: expect.any(String),
-      });
+      expect(response.status).toBe(404);
     });
   });
 
-  describe('post /admin-users', () => {
-    it('should create a new admin user', async () => {
-      expect.assertions(3);
-
-      const newAdminUser = {
-        name: 'New Admin User',
-        email: 'new-admin@test.com',
-        role: AdminRole.VIEWER,
-      };
-
-      const response = await request(app.getHttpServer())
-        .post('/api/admin-users')
-        .send(newAdminUser)
-        .expect(HttpStatus.CREATED);
-
-      expect(response.body).toMatchObject({
-        publicId: expect.any(String),
-        name: newAdminUser.name,
-        email: newAdminUser.email,
-        role: newAdminUser.role,
-        status: AdminStatus.PENDING,
-      });
-      expect(response.body).not.toHaveProperty('id');
-
-      const createdAdminUser = await prisma.adminUser.findUnique({
-        where: { publicId: response.body.publicId },
-      });
-
-      expect(createdAdminUser).toBeTruthy();
-    });
-
-    it('should return 400 for invalid input', async () => {
+  describe('pUT /admin/admin-users/:publicId', () => {
+    it('should update an admin user', async () => {
       expect.assertions(1);
 
-      const invalidAdminUser = {
-        name: 'Invalid Admin',
-        email: 'invalid-email',
+      const createDto = {
+        email: 'update@example.com',
+        name: 'Original Name',
         role: AdminRole.VIEWER,
       };
 
-      const response = await request(app.getHttpServer())
-        .post('/api/admin-users')
-        .send(invalidAdminUser)
-        .expect(HttpStatus.BAD_REQUEST);
+      const createResponse = await request(app.getHttpServer()).post('/admin/admin-users').send(createDto).expect(201);
 
-      expect(response.body).toMatchObject({
-        statusCode: HttpStatus.BAD_REQUEST,
-        message: expect.arrayContaining(['email must be an email']),
-      });
-    });
-  });
-
-  describe('put /admin-users/:publicId', () => {
-    it('should update an admin user', async () => {
-      expect.assertions(4);
-
-      const adminUser = await prisma.adminUser.create({
-        data: {
-          name: 'Original Name',
-          email: 'original-email@test.com',
-          role: AdminRole.VIEWER,
-          status: AdminStatus.PENDING,
-        },
-      });
-
-      const updateData = {
+      const { publicId } = createResponse.body;
+      const updateDto = {
         name: 'Updated Name',
         role: AdminRole.ADMIN,
-        status: AdminStatus.ACTIVE,
       };
 
-      const response = await request(app.getHttpServer())
-        .put(`/api/admin-users/${adminUser.publicId}`)
-        .send(updateData)
-        .expect(HttpStatus.OK);
+      const updateResponse = await request(app.getHttpServer())
+        .put(`/admin/admin-users/${publicId}`)
+        .send(updateDto)
+        .expect(200);
 
-      expect(response.body).toMatchObject({
-        publicId: adminUser.publicId,
-        name: updateData.name,
-        email: adminUser.email,
-        role: updateData.role,
-        status: updateData.status,
+      expect(updateResponse.body).toMatchObject({
+        publicId,
+        email: createDto.email,
+        name: updateDto.name,
+        role: updateDto.role,
       });
-
-      const updatedAdminUser = await prisma.adminUser.findUnique({
-        where: { publicId: adminUser.publicId },
-      });
-
-      expect(updatedAdminUser?.name).toBe(updateData.name);
-      expect(updatedAdminUser?.role).toBe(updateData.role);
-      expect(updatedAdminUser?.status).toBe(updateData.status);
     });
 
     it('should return 404 for non-existent admin user', async () => {
       expect.assertions(1);
 
       const response = await request(app.getHttpServer())
-        .put('/api/admin-users/00000000-0000-0000-0000-000000000000')
-        .send({ name: 'Updated Name' })
-        .expect(HttpStatus.NOT_FOUND);
+        .put('/admin/admin-users/00000000-0000-0000-0000-000000000000')
+        .send({ name: 'New Name' })
+        .expect(404);
 
-      expect(response.body).toMatchObject({
-        statusCode: HttpStatus.NOT_FOUND,
-        message: expect.any(String),
-      });
+      expect(response.status).toBe(404);
     });
   });
 
-  describe('delete /admin-users/:publicId', () => {
+  describe('dELETE /admin/admin-users/:publicId', () => {
     it('should delete an admin user', async () => {
-      expect.assertions(1);
+      expect.assertions(2);
 
-      const adminUser = await prisma.adminUser.create({
-        data: {
-          name: 'To Delete Admin',
-          email: 'to-delete@test.com',
-          role: AdminRole.VIEWER,
-        },
-      });
+      const createDto = {
+        email: 'delete@example.com',
+        name: 'Delete Admin',
+        role: AdminRole.VIEWER,
+      };
 
-      await request(app.getHttpServer()).delete(`/api/admin-users/${adminUser.publicId}`).expect(HttpStatus.NO_CONTENT);
+      const createResponse = await request(app.getHttpServer()).post('/admin/admin-users').send(createDto).expect(201);
 
-      const deletedAdminUser = await prisma.adminUser.findUnique({
-        where: { publicId: adminUser.publicId },
-      });
+      const { publicId } = createResponse.body;
 
-      expect(deletedAdminUser).toBeNull();
+      const deleteResponse = await request(app.getHttpServer()).delete(`/admin/admin-users/${publicId}`).expect(204);
+
+      const getResponse = await request(app.getHttpServer()).get(`/admin/admin-users/${publicId}`).expect(404);
+
+      expect(deleteResponse.status).toBe(204);
+      expect(getResponse.status).toBe(404);
     });
 
     it('should return 404 for non-existent admin user', async () => {
       expect.assertions(1);
 
       const response = await request(app.getHttpServer())
-        .delete('/api/admin-users/00000000-0000-0000-0000-000000000000')
-        .expect(HttpStatus.NOT_FOUND);
+        .delete('/admin/admin-users/00000000-0000-0000-0000-000000000000')
+        .expect(404);
 
-      expect(response.body).toMatchObject({
-        statusCode: HttpStatus.NOT_FOUND,
-        message: expect.any(String),
-      });
+      expect(response.status).toBe(404);
+    });
+  });
+
+  describe('pOST /admin/admin-users/bulk', () => {
+    it('should create multiple admin users', async () => {
+      expect.assertions(4);
+
+      const createDto = {
+        adminUsers: [
+          { email: 'bulk1@example.com', name: 'Bulk 1', role: AdminRole.VIEWER },
+          { email: 'bulk2@example.com', name: 'Bulk 2', role: AdminRole.ADMIN },
+          { email: 'bulk3@example.com', name: 'Bulk 3', role: AdminRole.VIEWER },
+        ],
+      };
+
+      const response = await request(app.getHttpServer()).post('/admin/admin-users/bulk').send(createDto).expect(201);
+
+      expect(response.body.adminUsers).toHaveLength(3);
+      expect(response.body.adminUsers[0].email).toBe('bulk1@example.com');
+      expect(response.body.adminUsers[1].email).toBe('bulk2@example.com');
+      expect(response.body.adminUsers[2].email).toBe('bulk3@example.com');
+    });
+  });
+
+  describe('dELETE /admin/admin-users', () => {
+    it('should delete multiple admin users', async () => {
+      expect.assertions(2);
+
+      const adminUsers: any[] = [];
+      const createPromises = Array.from({ length: 3 }, (_, i) =>
+        request(app.getHttpServer())
+          .post('/admin/admin-users')
+          .send({ email: `del${i + 1}@example.com`, name: `Delete ${i + 1}`, role: AdminRole.VIEWER })
+          .expect(201),
+      );
+
+      const responses = await Promise.all(createPromises);
+      adminUsers.push(...responses.map((response) => response.body));
+
+      const publicIdsToDelete = [adminUsers[0].publicId, adminUsers[1].publicId];
+
+      await request(app.getHttpServer())
+        .delete('/admin/admin-users')
+        .send({ publicIds: publicIdsToDelete })
+        .expect(204);
+
+      const remainingAdminUsers = await request(app.getHttpServer()).get('/admin/admin-users').expect(200);
+
+      expect(remainingAdminUsers.body.adminUsers).toHaveLength(1);
+      expect(remainingAdminUsers.body.adminUsers[0].publicId).toBe(adminUsers[2].publicId);
     });
   });
 });

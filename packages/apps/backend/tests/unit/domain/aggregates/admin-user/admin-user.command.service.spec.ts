@@ -1,13 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { AdminUserCommandService } from '@/aggregates/admin-user/command.service';
-import { toAdminUserResponseDto, toAdminUsersResponseDto } from '@/aggregates/admin-user/dto';
-import { AdminUserErrorCode, AdminUserError } from '@/aggregates/admin-user/error';
-import { AdminUserQueryService } from '@/aggregates/admin-user/query.service';
+import { AdminUserCommandService } from '@/domain/aggregates/admin-user/admin-user.command.service';
+import { AdminUserQueryService } from '@/domain/aggregates/admin-user/admin-user.query.service';
+import { toAdminUserResponseDto, toAdminUsersResponseDto } from '@/domain/aggregates/admin-user/utils/dto';
 import { AdminRole } from '@/generated/prisma';
 import { RepositoryService } from '@/repository/repository.service';
 import { AdminUserFactory } from '@/tests/factory';
-import { Ok, Err } from '@/utils/result';
 
 describe('adminUserCommandService', () => {
   let service: AdminUserCommandService;
@@ -20,7 +18,7 @@ describe('adminUserCommandService', () => {
       deleteMany: jest.Mock;
     };
   };
-  let queryService: jest.Mocked<AdminUserQueryService>;
+  let _queryService: jest.Mocked<AdminUserQueryService>;
   let adminUserFactory: AdminUserFactory;
 
   beforeEach(async () => {
@@ -38,7 +36,8 @@ describe('adminUserCommandService', () => {
 
     const mockQueryService = {
       findUniqueOrThrowAdminUser: jest.fn(),
-      findManyAdminUsers: jest.fn(),
+      findManyAdminUsersById: jest.fn(),
+      findAllAdminUsers: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -57,7 +56,7 @@ describe('adminUserCommandService', () => {
 
     service = module.get<AdminUserCommandService>(AdminUserCommandService);
     repository = module.get(RepositoryService);
-    queryService = module.get(AdminUserQueryService);
+    _queryService = module.get(AdminUserQueryService);
   });
 
   afterEach(() => {
@@ -66,7 +65,7 @@ describe('adminUserCommandService', () => {
 
   describe('createAdminUser', () => {
     it('should successfully create an admin user', async () => {
-      expect.assertions(3);
+      expect.assertions(2);
 
       const mockAdminUser = adminUserFactory.build();
       const createDto = {
@@ -80,15 +79,11 @@ describe('adminUserCommandService', () => {
       const result = await service.createAdminUser(createDto);
 
       expect(repository.adminUser.create).toHaveBeenCalledWith({ data: createDto });
-      expect(result.success).toBe(true);
-
-      if (result.success) {
-        expect(result.data).toStrictEqual(toAdminUserResponseDto(mockAdminUser));
-      }
+      expect(result).toStrictEqual(toAdminUserResponseDto(mockAdminUser));
     });
 
-    it('should return error on database failure', async () => {
-      expect.assertions(3);
+    it('should throw error on database failure', async () => {
+      expect.assertions(2);
 
       const createDto = {
         email: 'test@example.com',
@@ -99,20 +94,14 @@ describe('adminUserCommandService', () => {
       const prismaError = new Error('Database error');
       repository.adminUser.create.mockRejectedValue(prismaError);
 
-      const result = await service.createAdminUser(createDto);
-
+      await expect(service.createAdminUser(createDto)).rejects.toThrow(prismaError);
       expect(repository.adminUser.create).toHaveBeenCalledWith({ data: createDto });
-      expect(result.success).toBe(false);
-
-      if (!result.success) {
-        expect(result.error.code).toBe(AdminUserErrorCode.DATABASE_ERROR);
-      }
     });
   });
 
   describe('createManyAndReturnAdminUsers', () => {
     it('should successfully create multiple admin users', async () => {
-      expect.assertions(3);
+      expect.assertions(2);
 
       const mockAdminUsers = adminUserFactory.buildMany(3);
       const createDto = {
@@ -128,111 +117,86 @@ describe('adminUserCommandService', () => {
       const result = await service.createManyAndReturnAdminUsers(createDto);
 
       expect(repository.adminUser.createManyAndReturn).toHaveBeenCalledWith({ data: createDto.adminUsers });
-      expect(result.success).toBe(true);
-
-      if (result.success) {
-        expect(result.data).toStrictEqual(toAdminUsersResponseDto(mockAdminUsers));
-      }
+      expect(result).toStrictEqual(toAdminUsersResponseDto(mockAdminUsers));
     });
   });
 
   describe('updateAdminUserById', () => {
     it('should successfully update an admin user', async () => {
-      expect.assertions(4);
+      expect.assertions(2);
 
       const mockAdminUser = adminUserFactory.build();
-      const {publicId} = mockAdminUser;
+      const { publicId } = mockAdminUser;
       const updateData = { name: 'Updated Name' };
 
       const updatedAdminUser = { ...mockAdminUser, ...updateData };
-      queryService.findUniqueOrThrowAdminUser.mockResolvedValue(Ok(toAdminUserResponseDto(mockAdminUser)));
       repository.adminUser.update.mockResolvedValue(updatedAdminUser);
 
       const result = await service.updateAdminUserById({ publicId, data: updateData });
 
-      expect(queryService.findUniqueOrThrowAdminUser).toHaveBeenCalledWith({ publicId });
       expect(repository.adminUser.update).toHaveBeenCalledWith({
         where: { publicId },
         data: updateData,
       });
-      expect(result.success).toBe(true);
-
-      if (result.success) {
-        expect(result.data).toStrictEqual(toAdminUserResponseDto(updatedAdminUser));
-      }
+      expect(result).toStrictEqual(toAdminUserResponseDto(updatedAdminUser));
     });
 
-    it('should return error when admin user not found', async () => {
-      expect.assertions(3);
+    it('should throw error on database failure', async () => {
+      expect.assertions(2);
 
-      const publicId = 'non-existent-id';
+      const publicId = 'test-id';
       const updateData = { name: 'Updated Name' };
 
-      queryService.findUniqueOrThrowAdminUser.mockResolvedValue(Err(AdminUserError.notFound(publicId)));
+      const prismaError = new Error('Database error');
+      repository.adminUser.update.mockRejectedValue(prismaError);
 
-      const result = await service.updateAdminUserById({ publicId, data: updateData });
-
-      expect(repository.adminUser.update).not.toHaveBeenCalled();
-      expect(result.success).toBe(false);
-
-      if (!result.success) {
-        expect(result.error.code).toBe(AdminUserErrorCode.NOT_FOUND);
-      }
+      await expect(service.updateAdminUserById({ publicId, data: updateData })).rejects.toThrow(prismaError);
+      expect(repository.adminUser.update).toHaveBeenCalledWith({
+        where: { publicId },
+        data: updateData,
+      });
     });
   });
 
   describe('deleteAdminUserById', () => {
     it('should successfully delete an admin user', async () => {
-      expect.assertions(3);
+      expect.assertions(1);
 
       const mockAdminUser = adminUserFactory.build();
-      const {publicId} = mockAdminUser;
+      const { publicId } = mockAdminUser;
 
-      queryService.findUniqueOrThrowAdminUser.mockResolvedValue(Ok(toAdminUserResponseDto(mockAdminUser)));
       repository.adminUser.delete.mockResolvedValue(mockAdminUser);
 
-      const result = await service.deleteAdminUserById({ publicId });
+      await service.deleteAdminUserById({ publicId });
 
-      expect(queryService.findUniqueOrThrowAdminUser).toHaveBeenCalledWith({ publicId });
       expect(repository.adminUser.delete).toHaveBeenCalledWith({ where: { publicId } });
-      expect(result.success).toBe(true);
     });
 
-    it('should return error when admin user not found', async () => {
-      expect.assertions(3);
+    it('should throw error on database failure', async () => {
+      expect.assertions(2);
 
-      const publicId = 'non-existent-id';
+      const publicId = 'test-id';
 
-      queryService.findUniqueOrThrowAdminUser.mockResolvedValue(Err(AdminUserError.notFound(publicId)));
+      const prismaError = new Error('Database error');
+      repository.adminUser.delete.mockRejectedValue(prismaError);
 
-      const result = await service.deleteAdminUserById({ publicId });
-
-      expect(repository.adminUser.delete).not.toHaveBeenCalled();
-      expect(result.success).toBe(false);
-
-      if (!result.success) {
-        expect(result.error.code).toBe(AdminUserErrorCode.NOT_FOUND);
-      }
+      await expect(service.deleteAdminUserById({ publicId })).rejects.toThrow(prismaError);
+      expect(repository.adminUser.delete).toHaveBeenCalledWith({ where: { publicId } });
     });
   });
 
   describe('deleteManyAdminUsersByIds', () => {
     it('should successfully delete multiple admin users', async () => {
-      expect.assertions(3);
+      expect.assertions(1);
 
-      const mockAdminUsers = adminUserFactory.buildMany(3);
-      const publicIds = mockAdminUsers.map((user) => user.publicId);
-
-      queryService.findManyAdminUsers.mockResolvedValue(Ok(toAdminUsersResponseDto(mockAdminUsers)));
+      const publicIds = ['id1', 'id2', 'id3'];
       repository.adminUser.deleteMany.mockResolvedValue({ count: publicIds.length });
 
-      const result = await service.deleteManyAdminUsersByIds({ publicIds });
+      await service.deleteManyAdminUsersByIds({ publicIds });
 
-      expect(queryService.findManyAdminUsers).toHaveBeenCalledWith({ publicIds });
       expect(repository.adminUser.deleteMany).toHaveBeenCalledWith({
         where: { publicId: { in: publicIds } },
       });
-      expect(result.success).toBe(true);
     });
   });
 });

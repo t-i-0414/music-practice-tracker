@@ -1,3 +1,1 @@
-afterEach(() => {
-  jest.clearAllMocks();
-});
+import 'reflect-metadata';

@@ -1,8 +1,7 @@
-import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { toUserResponseDto, toUsersResponseDto } from '@/aggregates/user/dto';
-import { UserQueryService } from '@/aggregates/user/query.service';
+import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
+import { toUserResponseDto, toUsersResponseDto } from '@/domain/aggregates/user/utils/dto';
 import { RepositoryService } from '@/repository/repository.service';
 import { UserFactory } from '@/tests/factory';
 
@@ -10,7 +9,7 @@ describe('userQueryService', () => {
   let service: UserQueryService;
   let repository: {
     user: {
-      findUnique: jest.Mock;
+      findUniqueOrThrow: jest.Mock;
       findMany: jest.Mock;
     };
   };
@@ -21,7 +20,7 @@ describe('userQueryService', () => {
 
     const mockRepository = {
       user: {
-        findUnique: jest.fn(),
+        findUniqueOrThrow: jest.fn(),
         findMany: jest.fn(),
       },
     };
@@ -44,44 +43,41 @@ describe('userQueryService', () => {
     jest.clearAllMocks();
   });
 
-  describe('findUserByIdOrFail', () => {
+  describe('findUniqueOrThrowUserById', () => {
     it('should return user when found', async () => {
       expect.assertions(2);
 
       const mockUser = userFactory.build();
-      repository.user.findUnique.mockResolvedValue({ ...mockUser, id: 1 });
+      repository.user.findUniqueOrThrow.mockResolvedValue(mockUser);
       const dto = { publicId: mockUser.publicId };
 
-      const result = await service.findUserByIdOrFail(dto);
+      const result = await service.findUniqueOrThrowUserById(dto);
 
-      expect(repository.user.findUnique).toHaveBeenCalledWith({ where: dto });
+      expect(repository.user.findUniqueOrThrow).toHaveBeenCalledWith({ where: { publicId: dto.publicId } });
       expect(result).toStrictEqual(toUserResponseDto(mockUser));
     });
 
-    it('should throw NotFoundException when user not found', async () => {
+    it('should throw error when user not found', async () => {
       expect.assertions(2);
 
-      const mockUser = userFactory.build();
-      repository.user.findUnique.mockResolvedValue(null);
-      const dto = { publicId: mockUser.publicId };
+      const dto = { publicId: 'non-existent-id' };
+      const error = new Error('No User found');
+      repository.user.findUniqueOrThrow.mockRejectedValue(error);
 
-      await expect(service.findUserByIdOrFail(dto)).rejects.toThrow(
-        new NotFoundException(`User ${dto.publicId} not found`),
-      );
-      expect(repository.user.findUnique).toHaveBeenCalledWith({ where: dto });
+      await expect(service.findUniqueOrThrowUserById(dto)).rejects.toThrow(error);
+      expect(repository.user.findUniqueOrThrow).toHaveBeenCalledWith({ where: { publicId: dto.publicId } });
     });
   });
 
-  describe('findManyUsers', () => {
+  describe('findManyUsersById', () => {
     it('should return users when found', async () => {
       expect.assertions(2);
 
-      const mockUser = userFactory.build();
-      const mockUsers = [mockUser];
-      repository.user.findMany.mockResolvedValue([{ ...mockUser, id: 1 }]);
-      const dto = { publicIds: [mockUser.publicId] };
+      const mockUsers = userFactory.buildMany(3);
+      repository.user.findMany.mockResolvedValue(mockUsers);
+      const dto = { publicIds: mockUsers.map((u) => u.publicId) };
 
-      const result = await service.findManyUsers(dto);
+      const result = await service.findManyUsersById(dto);
 
       expect(repository.user.findMany).toHaveBeenCalledWith({
         where: { publicId: { in: dto.publicIds } },
@@ -92,11 +88,10 @@ describe('userQueryService', () => {
     it('should return empty array when no users found', async () => {
       expect.assertions(2);
 
-      const mockUser = userFactory.build();
       repository.user.findMany.mockResolvedValue([]);
-      const dto = { publicIds: [mockUser.publicId] };
+      const dto = { publicIds: ['non-existent-id'] };
 
-      const result = await service.findManyUsers(dto);
+      const result = await service.findManyUsersById(dto);
 
       expect(repository.user.findMany).toHaveBeenCalledWith({
         where: { publicId: { in: dto.publicIds } },
