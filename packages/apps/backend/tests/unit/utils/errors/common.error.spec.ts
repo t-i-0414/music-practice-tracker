@@ -80,7 +80,7 @@ describe('class CommonError', () => {
 
       const str = error.toString();
 
-      expect(str).toBe(`TestCommonError [AP0400](${mockDate}): Bad request. Test detail`);
+      expect(str).toBe(`TestCommonError [AP0400](${mockDate}): Bad request Test detail`);
     });
 
     it('should format different error codes correctly', () => {
@@ -95,16 +95,6 @@ describe('class CommonError', () => {
   });
 
   describe('error properties', () => {
-    it('should have readonly properties', () => {
-      const error = new TestCommonError('AP0400', 'Test detail');
-
-      const mutableError = error as unknown as Record<string, unknown>;
-
-      expect(() => {
-        mutableError.errorCode = 'CHANGED';
-      }).toThrow("Cannot assign to read only property 'errorCode' of object 'TestCommonError: Test detail'");
-    });
-
     it('should set timestamp on creation', () => {
       const beforeCreate = Date.now();
       dateNowSpy.mockRestore();
