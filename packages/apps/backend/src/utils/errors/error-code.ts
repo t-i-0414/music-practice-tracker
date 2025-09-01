@@ -77,7 +77,7 @@ export const ERROR_CODE_RECORDS = {
   RE0212: 'Multiple errors occurred during database execution.',
   RE0213: 'Transaction API error.',
   RE0214: 'Query parameter limit exceeded.',
-  RE0215: 'Cannot find fulltext index.',
+  RE0215: 'Cannot find full-text index.',
   RE0216: 'MongoDB server connection failure.',
   RE0217: 'Number parsing error in database query.',
   RE0218: 'Database assertion violation.',

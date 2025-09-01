@@ -81,6 +81,7 @@ describe('adminUserCommandService', () => {
 
       expect(repository.adminUser.create).toHaveBeenCalledWith({ data: createDto });
       expect(result.success).toBe(true);
+
       if (result.success) {
         expect(result.data).toStrictEqual(toAdminUserResponseDto(mockAdminUser));
       }
@@ -102,6 +103,7 @@ describe('adminUserCommandService', () => {
 
       expect(repository.adminUser.create).toHaveBeenCalledWith({ data: createDto });
       expect(result.success).toBe(false);
+
       if (!result.success) {
         expect(result.error.code).toBe(AdminUserErrorCode.DATABASE_ERROR);
       }
@@ -127,6 +129,7 @@ describe('adminUserCommandService', () => {
 
       expect(repository.adminUser.createManyAndReturn).toHaveBeenCalledWith({ data: createDto.adminUsers });
       expect(result.success).toBe(true);
+
       if (result.success) {
         expect(result.data).toStrictEqual(toAdminUsersResponseDto(mockAdminUsers));
       }
@@ -138,7 +141,7 @@ describe('adminUserCommandService', () => {
       expect.assertions(4);
 
       const mockAdminUser = adminUserFactory.build();
-      const publicId = mockAdminUser.publicId;
+      const {publicId} = mockAdminUser;
       const updateData = { name: 'Updated Name' };
 
       const updatedAdminUser = { ...mockAdminUser, ...updateData };
@@ -153,6 +156,7 @@ describe('adminUserCommandService', () => {
         data: updateData,
       });
       expect(result.success).toBe(true);
+
       if (result.success) {
         expect(result.data).toStrictEqual(toAdminUserResponseDto(updatedAdminUser));
       }
@@ -170,6 +174,7 @@ describe('adminUserCommandService', () => {
 
       expect(repository.adminUser.update).not.toHaveBeenCalled();
       expect(result.success).toBe(false);
+
       if (!result.success) {
         expect(result.error.code).toBe(AdminUserErrorCode.NOT_FOUND);
       }
@@ -181,7 +186,7 @@ describe('adminUserCommandService', () => {
       expect.assertions(3);
 
       const mockAdminUser = adminUserFactory.build();
-      const publicId = mockAdminUser.publicId;
+      const {publicId} = mockAdminUser;
 
       queryService.findUniqueOrThrowAdminUser.mockResolvedValue(Ok(toAdminUserResponseDto(mockAdminUser)));
       repository.adminUser.delete.mockResolvedValue(mockAdminUser);
@@ -204,6 +209,7 @@ describe('adminUserCommandService', () => {
 
       expect(repository.adminUser.delete).not.toHaveBeenCalled();
       expect(result.success).toBe(false);
+
       if (!result.success) {
         expect(result.error.code).toBe(AdminUserErrorCode.NOT_FOUND);
       }

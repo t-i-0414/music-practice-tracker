@@ -56,6 +56,7 @@ describe('adminUserQueryService', () => {
 
       expect(repository.adminUser.findUniqueOrThrow).toHaveBeenCalledWith({ where: params });
       expect(result.success).toBe(true);
+
       if (result.success) {
         expect(result.data).toStrictEqual(toAdminUserResponseDto(mockAdminUser));
       }
@@ -71,6 +72,7 @@ describe('adminUserQueryService', () => {
 
       expect(repository.adminUser.findUniqueOrThrow).toHaveBeenCalledWith({ where: params });
       expect(result.success).toBe(false);
+
       if (!result.success) {
         expect(result.error.code).toBe(AdminUserErrorCode.NOT_FOUND);
       }
@@ -87,6 +89,7 @@ describe('adminUserQueryService', () => {
 
       expect(repository.adminUser.findUniqueOrThrow).toHaveBeenCalledWith({ where: params });
       expect(result.success).toBe(false);
+
       if (!result.success) {
         expect(result.error.code).toBe(AdminUserErrorCode.NOT_FOUND);
       }
@@ -109,6 +112,7 @@ describe('adminUserQueryService', () => {
         where: { publicId: { in: publicIds } },
       });
       expect(result.success).toBe(true);
+
       if (result.success) {
         expect(result.data).toStrictEqual(toAdminUsersResponseDto(mockAdminUsers));
       }
@@ -128,6 +132,7 @@ describe('adminUserQueryService', () => {
         where: { publicId: { in: publicIds } },
       });
       expect(result.success).toBe(true);
+
       if (result.success) {
         expect(result.data).toStrictEqual(toAdminUsersResponseDto([]));
       }
@@ -149,6 +154,7 @@ describe('adminUserQueryService', () => {
         },
       });
       expect(result.success).toBe(true);
+
       if (result.success) {
         expect(result.data).toStrictEqual(toAdminUsersResponseDto(mockAdminUsers));
       }
@@ -167,6 +173,7 @@ describe('adminUserQueryService', () => {
         },
       });
       expect(result.success).toBe(true);
+
       if (result.success) {
         expect(result.data).toStrictEqual(toAdminUsersResponseDto([]));
       }
