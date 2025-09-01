@@ -94,8 +94,8 @@ const rule = createRule({
 
           // Only check non-type imports
           if (hasNonTypeImport) {
-            // Special case: Allow PrismaClient import in repository/service.ts
-            const isRepositoryService = filePath.endsWith('repository/service.ts');
+            // Special case: Allow PrismaClient import in repository/repository.service.ts
+            const isRepositoryService = filePath.endsWith('repository/repository.service.ts');
             if (isRepositoryService) {
               // Only allow PrismaClient import, not model imports
               const importsOnlyPrismaClient = node.specifiers.every((spec) => {
