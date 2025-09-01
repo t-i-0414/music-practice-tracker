@@ -12,12 +12,12 @@ export interface paths {
             cookie?: never;
         };
         /** Get users by public IDs */
-        get: operations["AdminUsersController_findManyUsers"];
+        get: operations["AdminApiUsersController_findManyUsersById"];
         put?: never;
         /** Create a new user */
-        post: operations["AdminUsersController_createUser"];
+        post: operations["AdminApiUsersController_createUser"];
         /** Delete multiple users by public IDs */
-        delete: operations["AdminUsersController_deleteManyUsers"];
+        delete: operations["AdminApiUsersController_deleteManyUsersById"];
         options?: never;
         head?: never;
         patch?: never;
@@ -31,12 +31,12 @@ export interface paths {
             cookie?: never;
         };
         /** Get a user by public ID */
-        get: operations["AdminUsersController_findUserById"];
+        get: operations["AdminApiUsersController_findUniqueOrThrowUserById"];
         /** Update a user by public ID */
-        put: operations["AdminUsersController_updateUser"];
+        put: operations["AdminApiUsersController_updateUserById"];
         post?: never;
         /** Delete a user by public ID */
-        delete: operations["AdminUsersController_deleteUser"];
+        delete: operations["AdminApiUsersController_deleteUserById"];
         options?: never;
         head?: never;
         patch?: never;
@@ -52,7 +52,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Create multiple users */
-        post: operations["AdminUsersController_createManyUsers"];
+        post: operations["AdminApiUsersController_createManyAndReturnUsers"];
         delete?: never;
         options?: never;
         head?: never;
@@ -67,12 +67,12 @@ export interface paths {
             cookie?: never;
         };
         /** Get admin users by public IDs or all admin users */
-        get: operations["AdminAdminUsersController_findManyAdminUsers"];
+        get: operations["AdminApiAdminUsersController_findManyAdminUsers"];
         put?: never;
         /** Create a new admin user */
-        post: operations["AdminAdminUsersController_createAdminUser"];
+        post: operations["AdminApiAdminUsersController_createAdminUser"];
         /** Delete multiple admin users by public IDs */
-        delete: operations["AdminAdminUsersController_deleteManyAdminUsers"];
+        delete: operations["AdminApiAdminUsersController_deleteManyAdminUsers"];
         options?: never;
         head?: never;
         patch?: never;
@@ -86,12 +86,12 @@ export interface paths {
             cookie?: never;
         };
         /** Get an admin user by public ID */
-        get: operations["AdminAdminUsersController_findAdminUserById"];
+        get: operations["AdminApiAdminUsersController_findAdminUserById"];
         /** Update an admin user by public ID */
-        put: operations["AdminAdminUsersController_updateAdminUser"];
+        put: operations["AdminApiAdminUsersController_updateAdminUser"];
         post?: never;
         /** Delete an admin user by public ID */
-        delete: operations["AdminAdminUsersController_deleteAdminUser"];
+        delete: operations["AdminApiAdminUsersController_deleteAdminUser"];
         options?: never;
         head?: never;
         patch?: never;
@@ -107,7 +107,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Create multiple admin users */
-        post: operations["AdminAdminUsersController_createManyAdminUsers"];
+        post: operations["AdminApiAdminUsersController_createManyAdminUsers"];
         delete?: never;
         options?: never;
         head?: never;
@@ -157,6 +157,12 @@ export interface components {
         };
         UsersResponseDto: {
             users: components["schemas"]["UserResponseDto"][];
+        };
+        ErrorResponseDto: {
+            /** @example 400 */
+            statusCode: number;
+            /** @example RE0002 */
+            errorCode: string;
         };
         CreateUserInputDto: {
             /**
@@ -280,7 +286,7 @@ export interface components {
             /** @description Admin users to create */
             adminUsers: components["schemas"]["CreateAdminUserInputDto"][];
         };
-        UpdateAdminUserDataInputDto: {
+        UpdateAdminUserInputData: {
             /**
              * Format: email
              * @description The admin user email address
@@ -324,7 +330,7 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    AdminUsersController_findManyUsers: {
+    AdminApiUsersController_findManyUsersById: {
         parameters: {
             query: {
                 /** @description List of user public IDs */
@@ -345,30 +351,18 @@ export interface operations {
                     "application/json": components["schemas"]["UsersResponseDto"];
                 };
             };
-            /** @description Unauthorized */
-            401: {
+            /** @description Error Response */
+            default: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
                 };
-                content?: never;
-            };
-            /** @description Users not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
-    AdminUsersController_createUser: {
+    AdminApiUsersController_createUser: {
         parameters: {
             query?: never;
             header?: never;
@@ -390,30 +384,18 @@ export interface operations {
                     "application/json": components["schemas"]["UserResponseDto"];
                 };
             };
-            /** @description Bad request */
-            400: {
+            /** @description Error Response */
+            default: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
                 };
-                content?: never;
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
-    AdminUsersController_deleteManyUsers: {
+    AdminApiUsersController_deleteManyUsersById: {
         parameters: {
             query?: never;
             header?: never;
@@ -433,9 +415,18 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description Error Response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
         };
     };
-    AdminUsersController_findUserById: {
+    AdminApiUsersController_findUniqueOrThrowUserById: {
         parameters: {
             query?: never;
             header?: never;
@@ -456,30 +447,18 @@ export interface operations {
                     "application/json": components["schemas"]["UserResponseDto"];
                 };
             };
-            /** @description Unauthorized */
-            401: {
+            /** @description Error Response */
+            default: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
                 };
-                content?: never;
-            };
-            /** @description User not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
-    AdminUsersController_updateUser: {
+    AdminApiUsersController_updateUserById: {
         parameters: {
             query?: never;
             header?: never;
@@ -504,9 +483,18 @@ export interface operations {
                     "application/json": components["schemas"]["UserResponseDto"];
                 };
             };
+            /** @description Error Response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
         };
     };
-    AdminUsersController_deleteUser: {
+    AdminApiUsersController_deleteUserById: {
         parameters: {
             query?: never;
             header?: never;
@@ -525,9 +513,18 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description Error Response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
         };
     };
-    AdminUsersController_createManyUsers: {
+    AdminApiUsersController_createManyAndReturnUsers: {
         parameters: {
             query?: never;
             header?: never;
@@ -549,12 +546,21 @@ export interface operations {
                     "application/json": components["schemas"]["UsersResponseDto"];
                 };
             };
+            /** @description Error Response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
         };
     };
-    AdminAdminUsersController_findManyAdminUsers: {
+    AdminApiAdminUsersController_findManyAdminUsers: {
         parameters: {
             query?: {
-                /** @description List of admin user public IDs (optional) */
+                /** @description List of admin user public IDs (optional. if provided, only these users will be returned) */
                 publicIds?: string[];
             };
             header?: never;
@@ -572,30 +578,18 @@ export interface operations {
                     "application/json": components["schemas"]["AdminUsersResponseDto"];
                 };
             };
-            /** @description Unauthorized */
-            401: {
+            /** @description Error Response */
+            default: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
                 };
-                content?: never;
-            };
-            /** @description Admin users not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
-    AdminAdminUsersController_createAdminUser: {
+    AdminApiAdminUsersController_createAdminUser: {
         parameters: {
             query?: never;
             header?: never;
@@ -617,30 +611,18 @@ export interface operations {
                     "application/json": components["schemas"]["AdminUserResponseDto"];
                 };
             };
-            /** @description Bad request */
-            400: {
+            /** @description Error Response */
+            default: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
                 };
-                content?: never;
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
-    AdminAdminUsersController_deleteManyAdminUsers: {
+    AdminApiAdminUsersController_deleteManyAdminUsers: {
         parameters: {
             query?: never;
             header?: never;
@@ -660,30 +642,18 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Bad request */
-            400: {
+            /** @description Error Response */
+            default: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
                 };
-                content?: never;
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
-    AdminAdminUsersController_findAdminUserById: {
+    AdminApiAdminUsersController_findAdminUserById: {
         parameters: {
             query?: never;
             header?: never;
@@ -704,30 +674,18 @@ export interface operations {
                     "application/json": components["schemas"]["AdminUserResponseDto"];
                 };
             };
-            /** @description Unauthorized */
-            401: {
+            /** @description Error Response */
+            default: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
                 };
-                content?: never;
-            };
-            /** @description Admin user not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
-    AdminAdminUsersController_updateAdminUser: {
+    AdminApiAdminUsersController_updateAdminUser: {
         parameters: {
             query?: never;
             header?: never;
@@ -739,7 +697,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["UpdateAdminUserDataInputDto"];
+                "application/json": components["schemas"]["UpdateAdminUserInputData"];
             };
         };
         responses: {
@@ -752,37 +710,18 @@ export interface operations {
                     "application/json": components["schemas"]["AdminUserResponseDto"];
                 };
             };
-            /** @description Bad request */
-            400: {
+            /** @description Error Response */
+            default: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
                 };
-                content?: never;
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Admin user not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
-    AdminAdminUsersController_deleteAdminUser: {
+    AdminApiAdminUsersController_deleteAdminUser: {
         parameters: {
             query?: never;
             header?: never;
@@ -801,30 +740,18 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Unauthorized */
-            401: {
+            /** @description Error Response */
+            default: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
                 };
-                content?: never;
-            };
-            /** @description Admin user not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
-    AdminAdminUsersController_createManyAdminUsers: {
+    AdminApiAdminUsersController_createManyAdminUsers: {
         parameters: {
             query?: never;
             header?: never;
@@ -846,26 +773,14 @@ export interface operations {
                     "application/json": components["schemas"]["AdminUsersResponseDto"];
                 };
             };
-            /** @description Bad request */
-            400: {
+            /** @description Error Response */
+            default: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
                 };
-                content?: never;
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };

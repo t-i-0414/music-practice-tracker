@@ -4,125 +4,6 @@
  */
 
 export interface paths {
-    "/api/auth/signup": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Sign up with email and password */
-        post: operations["AppAuthController_signUp"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/auth/signin": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Sign in with email and password */
-        post: operations["AppAuthController_signIn"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/auth/oauth/signin": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Sign in with OAuth provider */
-        post: operations["AppAuthController_signInWithOAuth"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/auth/refresh": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Refresh access token */
-        post: operations["AppAuthController_refreshToken"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/auth/signout": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Sign out and invalidate tokens */
-        post: operations["AppAuthController_signOut"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/auth/change-password": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Change user password */
-        post: operations["AppAuthController_changePassword"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/auth/me": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get current user info */
-        get: operations["AppAuthController_getCurrentUser"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/users/{publicId}": {
         parameters: {
             query?: never;
@@ -131,9 +12,9 @@ export interface paths {
             cookie?: never;
         };
         /** Get a user by public ID */
-        get: operations["AppUsersController_findUserById"];
+        get: operations["AppApiUsersController_findUniqueOrThrowUserById"];
         /** Update a user by public ID */
-        put: operations["AppUsersController_updateUser"];
+        put: operations["AppApiUsersController_updateUserById"];
         post?: never;
         delete?: never;
         options?: never;
@@ -151,7 +32,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Create a new user */
-        post: operations["AppUsersController_createUser"];
+        post: operations["AppApiUsersController_createUser"];
         delete?: never;
         options?: never;
         head?: never;
@@ -162,60 +43,6 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        SignUpInputDto: {
-            /** @example user@example.com */
-            email: string;
-            /** @example John Doe */
-            name: string;
-            /** @example SecurePassword123! */
-            password: string;
-        };
-        AuthTokenResponseDto: {
-            /**
-             * @description JWT access token
-             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-             */
-            accessToken: string;
-            /**
-             * @description Refresh token for obtaining new access tokens
-             * @example a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0
-             */
-            refreshToken: string;
-            /**
-             * @description Token expiration time in seconds
-             * @example 900
-             */
-            expiresIn: number;
-        };
-        SignInInputDto: {
-            /** @example user@example.com */
-            email: string;
-            /** @example SecurePassword123! */
-            password: string;
-        };
-        OAuthSignInInputDto: {
-            /**
-             * @example google
-             * @enum {string}
-             */
-            provider: "google" | "apple";
-            /** @example 1234567890 */
-            providerId: string;
-            /** @example user@example.com */
-            email: string;
-            /** @example John Doe */
-            name: string;
-        };
-        RefreshTokenInputDto: {
-            /** @example a1b2c3d4e5f6... */
-            refreshToken: string;
-        };
-        ChangePasswordInputDto: {
-            /** @example CurrentPassword123! */
-            currentPassword: string;
-            /** @example NewSecurePassword123! */
-            newPassword: string;
-        };
         UserResponseDto: {
             /**
              * Format: uuid
@@ -252,6 +79,12 @@ export interface components {
              * @example 2024-06-16T14:45:30.123Z
              */
             updatedAt: string;
+        };
+        ErrorResponseDto: {
+            /** @example 400 */
+            statusCode: number;
+            /** @example RE0002 */
+            errorCode: string;
         };
         CreateUserInputDto: {
             /**
@@ -294,218 +127,7 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    AppAuthController_signUp: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SignUpInputDto"];
-            };
-        };
-        responses: {
-            /** @description User successfully registered */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthTokenResponseDto"];
-                };
-            };
-            /** @description Bad request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    AppAuthController_signIn: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SignInInputDto"];
-            };
-        };
-        responses: {
-            /** @description Successfully signed in */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthTokenResponseDto"];
-                };
-            };
-            /** @description Invalid credentials */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    AppAuthController_signInWithOAuth: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["OAuthSignInInputDto"];
-            };
-        };
-        responses: {
-            /** @description Successfully signed in */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthTokenResponseDto"];
-                };
-            };
-            /** @description Bad request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    AppAuthController_refreshToken: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RefreshTokenInputDto"];
-            };
-        };
-        responses: {
-            /** @description Token refreshed successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthTokenResponseDto"];
-                };
-            };
-            /** @description Invalid refresh token */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    AppAuthController_signOut: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    refreshToken?: string;
-                };
-            };
-        };
-        responses: {
-            /** @description Successfully signed out */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    AppAuthController_changePassword: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ChangePasswordInputDto"];
-            };
-        };
-        responses: {
-            /** @description Password changed successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthTokenResponseDto"];
-                };
-            };
-            /** @description Bad request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    AppAuthController_getCurrentUser: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Current user info */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    AppUsersController_findUserById: {
+    AppApiUsersController_findUniqueOrThrowUserById: {
         parameters: {
             query?: never;
             header?: never;
@@ -526,30 +148,18 @@ export interface operations {
                     "application/json": components["schemas"]["UserResponseDto"];
                 };
             };
-            /** @description Unauthorized */
-            401: {
+            /** @description Error Response */
+            default: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
                 };
-                content?: never;
-            };
-            /** @description User not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
-    AppUsersController_updateUser: {
+    AppApiUsersController_updateUserById: {
         parameters: {
             query?: never;
             header?: never;
@@ -574,9 +184,18 @@ export interface operations {
                     "application/json": components["schemas"]["UserResponseDto"];
                 };
             };
+            /** @description Error Response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
         };
     };
-    AppUsersController_createUser: {
+    AppApiUsersController_createUser: {
         parameters: {
             query?: never;
             header?: never;
@@ -598,26 +217,14 @@ export interface operations {
                     "application/json": components["schemas"]["UserResponseDto"];
                 };
             };
-            /** @description Bad request */
-            400: {
+            /** @description Error Response */
+            default: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
                 };
-                content?: never;
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
