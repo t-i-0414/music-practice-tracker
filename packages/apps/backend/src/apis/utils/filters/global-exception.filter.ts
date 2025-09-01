@@ -1,73 +1,91 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus } from '@nestjs/common';
-import { Response } from 'express';
+import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Request, Response } from 'express';
 
-import { isApiError } from '../api.error';
 import { ErrorResponse } from '../api.response';
 
-import { isDomainError } from '@/domain/utils/domain.error';
-import { buildRepositoryError, canConvertToRepositoryError } from '@/repository/utils/repository.error';
-import { isUnknownError } from '@/utils/errors/common.error';
-import { ERROR_CODE_RECORDS } from '@/utils/errors/error-code';
+import { DomainError, isDomainError } from '@/domain/utils/domain.error';
+import {
+  buildRepositoryError,
+  canConvertToRepositoryError,
+  RepositoryError,
+} from '@/repository/utils/repository.error';
+import { apiErrorPrefix, ERROR_CODE_RECORDS, isErrorCode } from '@/utils/errors/error-code';
+import { isUnknownError, UnknownError } from '@/utils/errors/unknown.error';
 
+const httpErrorCodePrefix = `${apiErrorPrefix}0`;
+
+@Injectable()
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
   public catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
+    const _request = ctx.getRequest<Request>();
 
     const errorResponse = this.buildErrorResponse(exception);
     response.status(errorResponse.statusCode).json(errorResponse);
   }
 
   private buildErrorResponse(exception: unknown): ErrorResponse {
-    if (canConvertToRepositoryError(exception)) {
-      const repositoryError = buildRepositoryError(exception);
-      return {
-        statusCode: HttpStatus.BAD_REQUEST,
-        errorCode: repositoryError.errorCode,
-        errorMessage: repositoryError.errorMessage,
-        detail: repositoryError.detail,
-        timestamp: new Date().toISOString(),
-      };
+    if (exception instanceof HttpException) {
+      return this.handleHttpException(exception);
     }
 
     if (isDomainError(exception)) {
-      return {
-        statusCode: HttpStatus.BAD_REQUEST,
-        errorCode: exception.errorCode,
-        errorMessage: exception.errorMessage,
-        detail: exception.detail,
-        timestamp: exception.timestamp,
-      };
+      return this.handleDomainError(exception);
     }
 
-    if (isApiError(exception)) {
-      return {
-        statusCode: HttpStatus.BAD_REQUEST,
-        errorCode: exception.errorCode,
-        errorMessage: exception.errorMessage,
-        detail: exception.detail,
-        timestamp: exception.timestamp,
-      };
+    if (canConvertToRepositoryError(exception)) {
+      const repositoryError = buildRepositoryError(exception);
+      return this.handleRepositoryError(repositoryError);
     }
 
     if (isUnknownError(exception)) {
-      return {
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-        errorCode: exception.errorCode,
-        errorMessage: exception.errorMessage,
-        detail: exception.detail,
-        timestamp: exception.timestamp,
-      };
+      return this.handleUnknownError(exception);
     }
 
     const errorCode = 'UN9999';
+
     return {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
       errorCode,
       errorMessage: ERROR_CODE_RECORDS[errorCode],
-      detail: exception instanceof Error ? exception.message : 'Internal server error',
-      timestamp: new Date().toISOString(),
+    };
+  }
+
+  private handleHttpException(exception: HttpException): ErrorResponse {
+    const statusCode = exception.getStatus();
+    const _errorCode = `${httpErrorCodePrefix}${statusCode}`;
+    const errorCode = isErrorCode(_errorCode) ? _errorCode : 'AP9999';
+
+    return {
+      statusCode,
+      errorCode,
+      errorMessage: ERROR_CODE_RECORDS[errorCode],
+    };
+  }
+
+  private handleDomainError(exception: DomainError): ErrorResponse {
+    return {
+      statusCode: HttpStatus.BAD_REQUEST,
+      errorCode: exception.errorCode,
+      errorMessage: exception.errorMessage,
+    };
+  }
+
+  private handleRepositoryError(exception: RepositoryError): ErrorResponse {
+    return {
+      statusCode: HttpStatus.BAD_REQUEST,
+      errorCode: exception.errorCode,
+      errorMessage: exception.errorMessage,
+    };
+  }
+
+  private handleUnknownError(exception: UnknownError): ErrorResponse {
+    return {
+      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+      errorCode: exception.errorCode,
+      errorMessage: exception.errorMessage,
     };
   }
 }

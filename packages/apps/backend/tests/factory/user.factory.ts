@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker';
 
 import { BaseFactory } from './base-factory';
 
-import type { UserResponseDto } from '@/aggregates/user/dto';
+import type { UserResponseDto } from '@/domain/aggregates/user/utils/dto';
 import type { User } from '@/generated/prisma';
 import { UserStatus } from '@/generated/prisma';
 
@@ -21,9 +21,6 @@ export class UserFactory extends BaseFactory<User> {
       email: faker.internet.email(),
       name: faker.person.fullName(),
       ...DEFAULT_USER,
-      appleId: null,
-      googleId: null,
-      passwordHash: null,
       createdAt: now,
       updatedAt: now,
       ...overrides,
@@ -50,9 +47,6 @@ export class UserResponseDtoFactory extends BaseFactory<UserResponseDto> {
       email: faker.internet.email(),
       name: faker.person.fullName(),
       ...DEFAULT_USER,
-      googleId: null,
-      appleId: null,
-      passwordHash: null,
       createdAt: now,
       updatedAt: now,
       ...overrides,

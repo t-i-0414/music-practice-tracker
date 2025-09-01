@@ -9,7 +9,7 @@ export type SuccessResponse<T> = {
 
 export type ErrorResponse = {
   statusCode: HttpStatus;
-} & CommonErrorBody;
+} & Omit<CommonErrorBody, 'detail' | 'timestamp'>;
 
 export type ApiResponse<T> = SuccessResponse<T> | ErrorResponse;
 

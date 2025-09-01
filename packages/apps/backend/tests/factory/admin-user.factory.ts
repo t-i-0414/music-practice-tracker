@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker';
 
 import { BaseFactory } from './base-factory';
 
-import type { AdminUserResponseDto } from '@/aggregates/admin-user/dto';
+import type { AdminUserResponseDto } from '@/domain/aggregates/admin-user/utils/dto';
 import type { AdminUser } from '@/generated/prisma';
 import { AdminRole, AdminStatus } from '@/generated/prisma';
 

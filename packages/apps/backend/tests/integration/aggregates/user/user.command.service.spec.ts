@@ -2,8 +2,8 @@ import { NotFoundException } from '@nestjs/common';
 
 import { createIntegrationTestHelper, type IntegrationTestHelper } from '../../helpers';
 
-import { UserCommandService } from '@/aggregates/user/command.service';
-import { UserModule } from '@/aggregates/user/module';
+import { UserCommandService } from '@/domain/aggregates/user/user.command.service';
+import { UserModule } from '@/domain/aggregates/user/user.module';
 import { RepositoryService } from '@/repository/repository.service';
 
 describe('userCommandService Integration', () => {
@@ -49,14 +49,9 @@ describe('userCommandService Integration', () => {
         where: { publicId: createdUser.publicId },
       });
 
-      const { appleId, googleId, passwordHash, ...rest } = createdUser;
-
       expect(foundUser).toStrictEqual({
-        ...rest,
+        ...createdUser,
         id: expect.any(Number),
-        appleId: null,
-        googleId: null,
-        passwordHash: null,
       });
     });
   });

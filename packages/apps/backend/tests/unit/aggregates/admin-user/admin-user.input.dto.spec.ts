@@ -10,7 +10,7 @@ import {
   DeleteManyAdminUsersInputDto,
   UpdateAdminUserInputDto,
   UpdateAdminUserInputData,
-} from '@/aggregates/admin-user/dto';
+} from '@/domain/aggregates/admin-user/utils/dto';
 import { AdminRole, AdminStatus } from '@/generated/prisma';
 
 describe('adminUser Input DTOs', () => {

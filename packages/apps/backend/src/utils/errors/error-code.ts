@@ -13,10 +13,10 @@ export const isErrorPrefix = (value: string): value is ErrorPrefix =>
 
 type Digit = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9';
 type FourDigits = `${Digit}${Digit}${Digit}${Digit}`;
-type PreservedApiErrorCode = `${typeof apiErrorPrefix}${FourDigits}`;
-type PreservedDomainErrorCode = `${typeof domainErrorPrefix}${FourDigits}`;
+export type PreservedApiErrorCode = `${typeof apiErrorPrefix}${FourDigits}`;
+export type PreservedDomainErrorCode = `${typeof domainErrorPrefix}${FourDigits}`;
 export type PreservedRepositoryErrorCode = `${typeof repositoryErrorPrefix}${FourDigits}`;
-type PreservedUnknownErrorCode = `${typeof unknownErrorPrefix}${FourDigits}`;
+export type PreservedUnknownErrorCode = `${typeof unknownErrorPrefix}${FourDigits}`;
 type PreservedErrorCode =
   | PreservedApiErrorCode
   | PreservedDomainErrorCode
@@ -31,7 +31,51 @@ type PreservedErrorCode =
  * - UN xxxx: Unknown Errors
  */
 export const ERROR_CODE_RECORDS = {
-  // Application Errors
+  // Application Errors  - http errors (AP0xxx)
+  // 4xx Client Errors
+  AP0400: 'Bad request',
+  AP0401: 'Unauthorized',
+  AP0402: 'Payment required',
+  AP0403: 'Forbidden',
+  AP0404: 'Not found',
+  AP0405: 'Method not allowed',
+  AP0406: 'Not acceptable',
+  AP0407: 'Proxy authentication required',
+  AP0408: 'Request timeout',
+  AP0409: 'Conflict',
+  AP0410: 'Gone',
+  AP0411: 'Length required',
+  AP0412: 'Precondition failed',
+  AP0413: 'Payload too large',
+  AP0414: 'URI too long',
+  AP0415: 'Unsupported media type',
+  AP0416: 'Requested range not satisfiable',
+  AP0417: 'Expectation failed',
+  AP0418: 'I am a teapot',
+  AP0421: 'Misdirected request',
+  AP0422: 'Unprocessable entity',
+  AP0423: 'Locked',
+  AP0424: 'Failed dependency',
+  AP0426: 'Upgrade required',
+  AP0428: 'Precondition required',
+  AP0429: 'Too many requests',
+  AP0431: 'Request header fields too large',
+  AP0451: 'Unavailable for legal reasons',
+
+  // 5xx Server Errors
+  AP0500: 'Internal server error',
+  AP0501: 'Not implemented',
+  AP0502: 'Bad gateway',
+  AP0503: 'Service unavailable',
+  AP0504: 'Gateway timeout',
+  AP0505: 'HTTP version not supported',
+  AP0506: 'Variant also negotiates',
+  AP0507: 'Insufficient storage',
+  AP0508: 'Loop detected',
+  AP0510: 'Not extended',
+  AP0511: 'Network authentication required',
+
+  // Unknown Errors
   AP9999: 'Unknown application error.',
 
   // Domain Errors
@@ -140,18 +184,8 @@ export const ERROR_CODE_RECORDS = {
   // Unknown Errors
   UN9999: 'Unknown error.',
 } as const satisfies Partial<Record<PreservedErrorCode, string>>;
+
 export type ErrorCode = keyof typeof ERROR_CODE_RECORDS;
-export type ErrorMessage = (typeof ERROR_CODE_RECORDS)[ErrorCode];
 export const isErrorCode = (value: string): value is ErrorCode => value in ERROR_CODE_RECORDS;
 
-export type ApiErrorCode = Extract<ErrorCode, PreservedApiErrorCode>;
-export const isApiErrorCode = (value: string): value is ApiErrorCode =>
-  isErrorCode(value) && value.startsWith(apiErrorPrefix);
-
-export type DomainErrorCode = Extract<ErrorCode, PreservedDomainErrorCode>;
-export const isDomainErrorCode = (value: string): value is DomainErrorCode =>
-  isErrorCode(value) && value.startsWith(domainErrorPrefix);
-
-export type UnknownErrorCode = Extract<ErrorCode, PreservedUnknownErrorCode>;
-export const isUnknownErrorCode = (value: string): value is UnknownErrorCode =>
-  isErrorCode(value) && value.startsWith(unknownErrorPrefix);
+export type ErrorMessage = (typeof ERROR_CODE_RECORDS)[ErrorCode];

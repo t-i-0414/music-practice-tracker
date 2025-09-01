@@ -1,9 +1,4 @@
-import {
-  ERROR_CODE_RECORDS,
-  type UnknownErrorCode,
-  type ErrorCode,
-  type ErrorMessage,
-} from '@/utils/errors/error-code';
+import { ERROR_CODE_RECORDS, type ErrorCode, type ErrorMessage } from '@/utils/errors/error-code';
 
 export type CommonErrorBody = {
   errorCode: ErrorCode;
@@ -43,10 +38,3 @@ export abstract class CommonError<TErrorCode extends ErrorCode = ErrorCode> exte
     return `${this.name} [${this.errorCode}](${this.timestamp}): ${this.errorMessage}. ${this.detail}`;
   }
 }
-
-export class UnknownError extends CommonError<UnknownErrorCode> {
-  public constructor(errorCode: UnknownErrorCode, detail: string, cause?: unknown) {
-    super(errorCode, detail, cause);
-  }
-}
-export const isUnknownError = (error: unknown): error is UnknownError => error instanceof UnknownError;
