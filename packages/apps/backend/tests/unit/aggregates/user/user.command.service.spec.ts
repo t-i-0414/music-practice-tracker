@@ -3,7 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UserCommandService } from '@/aggregates/user/command.service';
 import { toUserResponseDto, toUsersResponseDto } from '@/aggregates/user/dto';
 import { UserQueryService } from '@/aggregates/user/query.service';
-import { RepositoryService } from '@/repository/service';
+import { RepositoryService } from '@/repository/repository.service';
 import { UserFactory } from '@/tests/factory';
 
 describe('userCommandService', () => {

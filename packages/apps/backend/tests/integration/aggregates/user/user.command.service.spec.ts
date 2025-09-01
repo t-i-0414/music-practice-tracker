@@ -4,7 +4,7 @@ import { createIntegrationTestHelper, type IntegrationTestHelper } from '../../h
 
 import { UserCommandService } from '@/aggregates/user/command.service';
 import { UserModule } from '@/aggregates/user/module';
-import { RepositoryService } from '@/repository/service';
+import { RepositoryService } from '@/repository/repository.service';
 
 describe('userCommandService Integration', () => {
   let helper: IntegrationTestHelper;

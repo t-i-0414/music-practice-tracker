@@ -3,7 +3,7 @@ import * as request from 'supertest';
 
 import { E2ETestHelper } from '../../helpers';
 
-import { AdminApiModule } from '@/apis/admin/module';
+import { AdminApiModule } from '@/apis/admin/admin.module';
 import { AdminRole, AdminStatus, type PrismaClient } from '@/generated/prisma';
 import { getPrismaClient } from '@/tests/helpers/database-test-utils';
 

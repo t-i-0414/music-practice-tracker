@@ -9,7 +9,7 @@ import {
 } from '@/aggregates/admin-user/dto';
 import { AdminUserError } from '@/aggregates/admin-user/error';
 import { AdminUserQueryService } from '@/aggregates/admin-user/query.service';
-import { AdminAdminUsersController } from '@/apis/admin/admin-users/controller';
+import { AdminAdminUsersController } from '@/apis/admin/admin-users/admin-users.controller';
 import { BusinessException } from '@/common/exceptions/business.exception';
 import { AdminRole } from '@/generated/prisma';
 import { AdminUserFactory } from '@/tests/factory';

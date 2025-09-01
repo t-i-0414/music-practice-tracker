@@ -5,7 +5,7 @@ import { toAdminUserResponseDto, toAdminUsersResponseDto } from '@/aggregates/ad
 import { AdminUserErrorCode, AdminUserError } from '@/aggregates/admin-user/error';
 import { AdminUserQueryService } from '@/aggregates/admin-user/query.service';
 import { AdminRole } from '@/generated/prisma';
-import { RepositoryService } from '@/repository/service';
+import { RepositoryService } from '@/repository/repository.service';
 import { AdminUserFactory } from '@/tests/factory';
 import { Ok, Err } from '@/utils/result';
 

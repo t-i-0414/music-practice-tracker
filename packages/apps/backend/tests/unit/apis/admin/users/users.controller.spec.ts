@@ -3,7 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UserCommandService } from '@/aggregates/user/command.service';
 import { toUserResponseDto, toUsersResponseDto } from '@/aggregates/user/dto';
 import { UserQueryService } from '@/aggregates/user/query.service';
-import { AdminUsersController } from '@/apis/admin/users/controller';
+import { AdminUsersController } from '@/apis/admin/users/users.controller';
 import { UserResponseDtoFactory } from '@/tests/factory';
 
 describe('adminUsersController', () => {
