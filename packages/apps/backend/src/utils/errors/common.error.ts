@@ -35,6 +35,6 @@ export abstract class CommonError<TErrorCode extends ErrorCode = ErrorCode> exte
   }
 
   public toString(): string {
-    return `${this.name} [${this.errorCode}](${this.timestamp}): ${this.errorMessage}. ${this.detail}`;
+    return `${this.name} [${this.errorCode}](${this.timestamp}): ${this.errorMessage} ${this.detail}`;
   }
 }

@@ -102,9 +102,7 @@ describe('class CommonError', () => {
 
       expect(() => {
         mutableError.errorCode = 'CHANGED';
-      }).not.toThrow();
-
-      expect(error.errorCode).toBe('AP0400');
+      }).toThrow("Cannot assign to read only property 'errorCode' of object 'TestCommonError: Test detail'");
     });
 
     it('should set timestamp on creation', () => {

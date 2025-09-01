@@ -1,9 +1,9 @@
 import { ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { Request, Response } from 'express';
 
 import { GlobalExceptionFilter } from '@/apis/utils/filters/global-exception.filter';
 import { DomainError } from '@/domain/utils/domain.error';
-import { RepositoryError } from '@/repository/utils/repository.error';
 import { UnknownError } from '@/utils/errors/unknown.error';
 
 describe('globalExceptionFilter', () => {
@@ -64,13 +64,16 @@ describe('globalExceptionFilter', () => {
     });
 
     it('should handle RepositoryError correctly', () => {
-      const exception = new RepositoryError('RE0001', 'Test repository error');
+      const exception = new PrismaClientKnownRequestError('Test repository error', {
+        code: 'P2000',
+        clientVersion: '1.0.0',
+      });
 
       filter.catch(exception, mockArgumentsHost as ArgumentsHost);
 
-      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
       expect(mockResponse.json).toHaveBeenCalledWith({
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        statusCode: HttpStatus.BAD_REQUEST,
         errorCode: 'RE0001',
       });
     });

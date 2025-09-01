@@ -92,43 +92,21 @@ describe('function isUnknownError', () => {
 });
 
 describe('function isUnknownErrorCode', () => {
-  const mockIsErrorCode = jest.fn();
-  const mockUnknownErrorPrefix = 'UN';
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    jest.doMock<typeof import('@/utils/errors/error-code')>('@/utils/errors/error-code', () => {
-      const actual = jest.requireActual('@/utils/errors/error-code');
-      return {
-        ...actual,
-        isErrorCode: mockIsErrorCode,
-        unknownErrorPrefix: mockUnknownErrorPrefix,
-      };
-    });
-  });
-
   it('should return true for valid unknown error codes', () => {
-    mockIsErrorCode.mockReturnValue(true);
-
     expect(isUnknownErrorCode('UN9999')).toBe(true);
-    expect(isUnknownErrorCode('UN9999')).toBe(true);
-    expect(mockIsErrorCode).toHaveBeenCalledWith('UN9999');
   });
 
   it('should return false for non-UN error codes', () => {
-    mockIsErrorCode.mockReturnValue(true);
-
     expect(isUnknownErrorCode('RE0001')).toBe(false);
     expect(isUnknownErrorCode('AP0001')).toBe(false);
     expect(isUnknownErrorCode('DO0001')).toBe(false);
   });
 
   it('should return false for invalid error codes', () => {
-    mockIsErrorCode.mockReturnValue(false);
-
-    expect(isUnknownErrorCode('UN9999')).toBe(false);
     expect(isUnknownErrorCode('INVALID')).toBe(false);
     expect(isUnknownErrorCode('')).toBe(false);
+    expect(isUnknownErrorCode('UN99')).toBe(false);
+    expect(isUnknownErrorCode('UN99999')).toBe(false);
   });
 
   it('should return false for non-string values', () => {
@@ -136,20 +114,6 @@ describe('function isUnknownErrorCode', () => {
     expect(isUnknownErrorCode(undefined)).toBe(false);
     expect(isUnknownErrorCode(123)).toBe(false);
     expect(isUnknownErrorCode({})).toBe(false);
-  });
-
-  describe('with actual implementation', () => {
-    beforeEach(() => {
-      jest.resetModules();
-    });
-
-    it('should work with real error code validation', async () => {
-      expect.assertions(1);
-
-      const { isUnknownErrorCode: realIsUnknownErrorCode } = await import('@/utils/errors/unknown.error');
-
-      expect(typeof realIsUnknownErrorCode('UN9999')).toBe('boolean');
-    });
   });
 });
 

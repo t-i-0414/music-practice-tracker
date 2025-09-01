@@ -1,5 +1,5 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 
 import { ErrorResponseDto, HTTP_STATUS_ERROR_CODE_RECORD_BY_REPOSITORY_ERROR_CODE } from '../api.error';
 
@@ -20,7 +20,6 @@ export class GlobalExceptionFilter implements ExceptionFilter {
   public catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
-    const _request = ctx.getRequest<Request>();
 
     const errorResponse = this.buildErrorResponse(exception);
     response.status(errorResponse.statusCode).json(errorResponse);
