@@ -244,7 +244,7 @@ describe('repository-model-access-restriction', () => {
         filename: 'src/modules/aggregates/user-auth-token/command.service.ts',
       },
 
-      // Valid: PrismaClient import in repository/service.ts
+      // Valid: PrismaClient import in repository/repository.service.ts
       {
         code: `
           import { PrismaClient } from '@/generated/prisma';
@@ -254,9 +254,9 @@ describe('repository-model-access-restriction', () => {
             }
           }
         `,
-        filename: 'src/repository/service.ts',
+        filename: 'src/repository/repository.service.ts',
       },
-      // Valid: Default import from Prisma in repository/service.ts (covers non-ImportSpecifier case)
+      // Valid: Default import from Prisma in repository/repository.service.ts (covers non-ImportSpecifier case)
       {
         code: `
           import PrismaClient from '@/generated/prisma';
@@ -266,7 +266,7 @@ describe('repository-model-access-restriction', () => {
             }
           }
         `,
-        filename: 'src/repository/service.ts',
+        filename: 'src/repository/repository.service.ts',
       },
     ],
     invalid: [
