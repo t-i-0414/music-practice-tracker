@@ -2,12 +2,12 @@ import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus } from '@nestjs/commo
 import { Response } from 'express';
 
 import { isApiError } from '../api.error';
-import { ErrorResponse } from '../response';
+import { ErrorResponse } from '../api.response';
 
 import { isDomainError } from '@/domain/utils/domain.error';
-import { buildRepositoryError, canConvertToRepositoryError } from '@/repository/repository.error';
-import { isUnknownError } from '@/utils/common.error';
-import { ERROR_CODE_RECORDS } from '@/utils/error-code';
+import { buildRepositoryError, canConvertToRepositoryError } from '@/repository/utils/repository.error';
+import { isUnknownError } from '@/utils/errors/common.error';
+import { ERROR_CODE_RECORDS } from '@/utils/errors/error-code';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {

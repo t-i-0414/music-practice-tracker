@@ -1,5 +1,5 @@
-import { CommonError } from '@/utils/common.error';
-import { type ApiErrorCode } from '@/utils/error-code';
+import { CommonError } from '@/utils/errors/common.error';
+import { type ApiErrorCode } from '@/utils/errors/error-code';
 
 export class ApiError extends CommonError<ApiErrorCode> {
   public constructor(errorCode: ApiErrorCode, detail: string, cause?: unknown) {
