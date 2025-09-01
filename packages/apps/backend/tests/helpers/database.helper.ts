@@ -22,9 +22,11 @@ export class DatabaseHelper {
   }
 
   async cleanDatabase(): Promise<void> {
-    const tables = ['User', 'AdminUser'];
+    await this.deleteManyAllRecords();
+  }
 
-    await Promise.all(tables.map((table) => this.prisma.$executeRawUnsafe(`TRUNCATE TABLE "${table}" CASCADE`)));
+  private async deleteManyAllRecords(): Promise<void> {
+    await this.prisma.$transaction([this.prisma.adminUser.deleteMany({}), this.prisma.user.deleteMany({})]);
   }
 
   get client(): PrismaClient {

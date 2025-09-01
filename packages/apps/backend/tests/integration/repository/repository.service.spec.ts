@@ -65,7 +65,9 @@ describe('repositoryService (Integration)', () => {
     });
 
     it('should rollback transaction on error', async () => {
-      expect.assertions(1);
+      expect.assertions(3);
+
+      const countBefore = await service.user.count();
 
       await expect(
         service.$transaction(async (tx) => {
@@ -79,6 +81,56 @@ describe('repositoryService (Integration)', () => {
           throw new Error('Forced rollback');
         }),
       ).rejects.toThrow('Forced rollback');
+
+      const countAfter = await service.user.count();
+
+      expect(countAfter).toBe(countBefore);
+
+      const user = await service.user.findFirst({
+        where: { email: 'rollback@example.com' },
+      });
+
+      expect(user).toBeNull();
+    });
+
+    it('should rollback all operations in transaction on error', async () => {
+      expect.assertions(4);
+
+      const userCountBefore = await service.user.count();
+      const adminCountBefore = await service.adminUser.count();
+
+      await expect(
+        service.$transaction(async (tx) => {
+          await tx.user.create({
+            data: {
+              email: 'user-rollback@example.com',
+              name: 'User Rollback',
+            },
+          });
+
+          await tx.adminUser.create({
+            data: {
+              email: 'admin-rollback@example.com',
+              name: 'Admin Rollback',
+              role: 'ADMIN',
+            },
+          });
+
+          throw new Error('Forced rollback after multiple operations');
+        }),
+      ).rejects.toThrow('Forced rollback after multiple operations');
+
+      const userCountAfter = await service.user.count();
+      const adminCountAfter = await service.adminUser.count();
+
+      expect(userCountAfter).toBe(userCountBefore);
+      expect(adminCountAfter).toBe(adminCountBefore);
+
+      const user = await service.user.findFirst({
+        where: { email: 'user-rollback@example.com' },
+      });
+
+      expect(user).toBeNull();
     });
 
     it('should handle nested transactions', async () => {
@@ -135,8 +187,8 @@ describe('repositoryService (Integration)', () => {
 
       await expect(
         service.$executeRawUnsafe(
-          `INSERT INTO "User" (email, name, "publicId", "createdAt", "updatedAt", status) 
-           VALUES ($1, $2, $3, NOW(), NOW(), $4)`,
+          `INSERT INTO "User" (email, name, "publicId", "createdAt", "updatedAt", status)
+          VALUES ($1, $2, $3, NOW(), NOW(), $4)`,
           'fk@example.com',
           'FK User',
           'invalid-uuid',

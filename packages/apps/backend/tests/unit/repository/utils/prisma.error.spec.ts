@@ -9,43 +9,16 @@ import {
 import { isPrismaError, PRISMA_ERROR_CODE_MAP, isPrismaErrorCode } from '@/repository/utils/prisma.error';
 
 describe('function isPrismaError', () => {
-  it('should return true for PrismaClientKnownRequestError', () => {
-    expect.assertions(1);
-
-    const error = new PrismaClientKnownRequestError('Test', { code: 'P2002', clientVersion: '1.0.0' });
-
-    expect(isPrismaError(error)).toBe(true);
-  });
-
-  it('should return true for PrismaClientUnknownRequestError', () => {
-    expect.assertions(1);
-
-    const error = new PrismaClientUnknownRequestError('Test', { clientVersion: '1.0.0' });
-
-    expect(isPrismaError(error)).toBe(true);
-  });
-
-  it('should return true for PrismaClientRustPanicError', () => {
-    expect.assertions(1);
-
-    const error = new PrismaClientRustPanicError('Test', '1.0.0');
-
-    expect(isPrismaError(error)).toBe(true);
-  });
-
-  it('should return true for PrismaClientInitializationError', () => {
-    expect.assertions(1);
-
-    const error = new PrismaClientInitializationError('Test', '1.0.0');
-
-    expect(isPrismaError(error)).toBe(true);
-  });
-
-  it('should return true for PrismaClientValidationError', () => {
-    expect.assertions(1);
-
-    const error = new PrismaClientValidationError('Test', { clientVersion: '1.0.0' });
-
+  it.each([
+    [
+      'PrismaClientKnownRequestError',
+      new PrismaClientKnownRequestError('Test', { code: 'P2002', clientVersion: '1.0.0' }),
+    ],
+    ['PrismaClientUnknownRequestError', new PrismaClientUnknownRequestError('Test', { clientVersion: '1.0.0' })],
+    ['PrismaClientRustPanicError', new PrismaClientRustPanicError('Test', '1.0.0')],
+    ['PrismaClientInitializationError', new PrismaClientInitializationError('Test', '1.0.0')],
+    ['PrismaClientValidationError', new PrismaClientValidationError('Test', { clientVersion: '1.0.0' })],
+  ])('should return true for %s', (_errorType, error) => {
     expect(isPrismaError(error)).toBe(true);
   });
 
@@ -57,68 +30,84 @@ describe('function isPrismaError', () => {
     expect(isPrismaError(error)).toBe(false);
   });
 
-  it('should return false for non-error values', () => {
-    expect.assertions(4);
-
-    expect(isPrismaError(null)).toBe(false);
-    expect(isPrismaError(undefined)).toBe(false);
-    expect(isPrismaError('string')).toBe(false);
-    expect(isPrismaError({})).toBe(false);
+  it.each([
+    [null, 'null'],
+    [undefined, 'undefined'],
+    ['string', 'string'],
+    [{}, 'object'],
+  ])('should return false for %s', (value, _type) => {
+    expect(isPrismaError(value)).toBe(false);
   });
 });
 
 describe('constant PRISMA_ERROR_CODE_MAP', () => {
-  it('should map connection errors correctly', () => {
-    expect(PRISMA_ERROR_CODE_MAP.P1000).toBe('RE0221');
-    expect(PRISMA_ERROR_CODE_MAP.P1001).toBe('RE0209');
-    expect(PRISMA_ERROR_CODE_MAP.P1002).toBe('RE0203');
-    expect(PRISMA_ERROR_CODE_MAP.P1003).toBe('RE0201');
-  });
-
-  it('should map data validation errors correctly', () => {
-    expect(PRISMA_ERROR_CODE_MAP.P2000).toBe('RE0001');
-    expect(PRISMA_ERROR_CODE_MAP.P2001).toBe('RE0002');
-    expect(PRISMA_ERROR_CODE_MAP.P2002).toBe('RE0003');
-    expect(PRISMA_ERROR_CODE_MAP.P2003).toBe('RE0004');
-  });
-
-  it('should map query errors correctly', () => {
-    expect(PRISMA_ERROR_CODE_MAP.P2008).toBe('RE0101');
-    expect(PRISMA_ERROR_CODE_MAP.P2009).toBe('RE0102');
-    expect(PRISMA_ERROR_CODE_MAP.P2010).toBe('RE0103');
-    expect(PRISMA_ERROR_CODE_MAP.P2011).toBe('RE0104');
-  });
-
-  it('should map migration errors correctly', () => {
-    expect(PRISMA_ERROR_CODE_MAP.P3000).toBe('RE0301');
-    expect(PRISMA_ERROR_CODE_MAP.P3001).toBe('RE0302');
-    expect(PRISMA_ERROR_CODE_MAP.P3002).toBe('RE0303');
-    expect(PRISMA_ERROR_CODE_MAP.P3003).toBe('RE0310');
-  });
-
-  it('should map introspection errors correctly', () => {
-    expect(PRISMA_ERROR_CODE_MAP.P4000).toBe('RE0232');
-    expect(PRISMA_ERROR_CODE_MAP.P4001).toBe('RE0233');
-    expect(PRISMA_ERROR_CODE_MAP.P4002).toBe('RE0231');
-  });
-
-  it('should map Prisma Accelerate errors correctly', () => {
-    expect(PRISMA_ERROR_CODE_MAP.P6000).toBe('RE0234');
-    expect(PRISMA_ERROR_CODE_MAP.P6001).toBe('RE0235');
-    expect(PRISMA_ERROR_CODE_MAP.P6002).toBe('RE0209');
-    expect(PRISMA_ERROR_CODE_MAP.P6003).toBe('RE0236');
-  });
-
-  it('should have all required error mappings', () => {
-    expect.assertions(5);
-
-    const requiredCodes = ['P2002', 'P2025', 'P1001', 'P3000'];
-
-    requiredCodes.forEach((code) => {
-      expect(PRISMA_ERROR_CODE_MAP[code as keyof typeof PRISMA_ERROR_CODE_MAP]).toBeDefined();
+  describe('connection errors', () => {
+    it.each([
+      ['P1000', 'RE0221'],
+      ['P1001', 'RE0209'],
+      ['P1002', 'RE0203'],
+      ['P1003', 'RE0201'],
+    ])('%s should map to %s', (prismaCode, repoCode) => {
+      expect(PRISMA_ERROR_CODE_MAP[prismaCode as keyof typeof PRISMA_ERROR_CODE_MAP]).toBe(repoCode);
     });
+  });
 
-    expect(requiredCodes).toHaveLength(4);
+  describe('data validation errors', () => {
+    it.each([
+      ['P2000', 'RE0001'],
+      ['P2001', 'RE0002'],
+      ['P2002', 'RE0003'],
+      ['P2003', 'RE0004'],
+    ])('%s should map to %s', (prismaCode, repoCode) => {
+      expect(PRISMA_ERROR_CODE_MAP[prismaCode as keyof typeof PRISMA_ERROR_CODE_MAP]).toBe(repoCode);
+    });
+  });
+
+  describe('query errors', () => {
+    it.each([
+      ['P2008', 'RE0101'],
+      ['P2009', 'RE0102'],
+      ['P2010', 'RE0103'],
+      ['P2011', 'RE0104'],
+    ])('%s should map to %s', (prismaCode, repoCode) => {
+      expect(PRISMA_ERROR_CODE_MAP[prismaCode as keyof typeof PRISMA_ERROR_CODE_MAP]).toBe(repoCode);
+    });
+  });
+
+  describe('migration errors', () => {
+    it.each([
+      ['P3000', 'RE0301'],
+      ['P3001', 'RE0302'],
+      ['P3002', 'RE0303'],
+      ['P3003', 'RE0310'],
+    ])('%s should map to %s', (prismaCode, repoCode) => {
+      expect(PRISMA_ERROR_CODE_MAP[prismaCode as keyof typeof PRISMA_ERROR_CODE_MAP]).toBe(repoCode);
+    });
+  });
+
+  describe('introspection errors', () => {
+    it.each([
+      ['P4000', 'RE0232'],
+      ['P4001', 'RE0233'],
+      ['P4002', 'RE0231'],
+    ])('%s should map to %s', (prismaCode, repoCode) => {
+      expect(PRISMA_ERROR_CODE_MAP[prismaCode as keyof typeof PRISMA_ERROR_CODE_MAP]).toBe(repoCode);
+    });
+  });
+
+  describe('prisma Accelerate errors', () => {
+    it.each([
+      ['P6000', 'RE0234'],
+      ['P6001', 'RE0235'],
+      ['P6002', 'RE0209'],
+      ['P6003', 'RE0236'],
+    ])('%s should map to %s', (prismaCode, repoCode) => {
+      expect(PRISMA_ERROR_CODE_MAP[prismaCode as keyof typeof PRISMA_ERROR_CODE_MAP]).toBe(repoCode);
+    });
+  });
+
+  it.each(['P2002', 'P2025', 'P1001', 'P3000'])('should have required error mapping for %s', (code) => {
+    expect(PRISMA_ERROR_CODE_MAP[code as keyof typeof PRISMA_ERROR_CODE_MAP]).toBeDefined();
   });
 
   it('should map to valid repository error codes', () => {
@@ -135,75 +124,59 @@ describe('constant PRISMA_ERROR_CODE_MAP', () => {
 });
 
 describe('function isPrismaErrorCode', () => {
-  it('should return true for valid Prisma error codes', () => {
-    expect(isPrismaErrorCode('P2002')).toBe(true);
-    expect(isPrismaErrorCode('P2025')).toBe(true);
-    expect(isPrismaErrorCode('P1001')).toBe(true);
-    expect(isPrismaErrorCode('P3000')).toBe(true);
-    expect(isPrismaErrorCode('P6000')).toBe(true);
+  it.each(['P2002', 'P2025', 'P1001', 'P3000', 'P6000'])(
+    'should return true for valid Prisma error code %s',
+    (code) => {
+      expect(isPrismaErrorCode(code)).toBe(true);
+    },
+  );
+
+  it.each([
+    ['P9999', 'non-existent code'],
+    ['INVALID', 'invalid format'],
+    ['RE0001', 'repository error code'],
+    ['', 'empty string'],
+  ])('should return false for %s (%s)', (code, _reason) => {
+    expect(isPrismaErrorCode(code)).toBe(false);
   });
 
-  it('should return false for invalid Prisma error codes', () => {
-    expect(isPrismaErrorCode('P9999')).toBe(false);
-    expect(isPrismaErrorCode('INVALID')).toBe(false);
-    expect(isPrismaErrorCode('RE0001')).toBe(false);
-    expect(isPrismaErrorCode('')).toBe(false);
-  });
-
-  it('should return false for non-string values', () => {
-    expect(isPrismaErrorCode(null)).toBe(false);
-    expect(isPrismaErrorCode(undefined)).toBe(false);
-    expect(isPrismaErrorCode(123)).toBe(false);
-    expect(isPrismaErrorCode({})).toBe(false);
+  it.each([
+    [null, 'null'],
+    [undefined, 'undefined'],
+    [123, 'number'],
+    [{}, 'object'],
+  ])('should return false for %s (%s)', (value, _type) => {
+    expect(isPrismaErrorCode(value)).toBe(false);
   });
 });
 
 describe('error code mapping completeness', () => {
-  it('should cover common Prisma error scenarios', () => {
-    expect(PRISMA_ERROR_CODE_MAP.P2002).toBe('RE0003');
-
-    expect(PRISMA_ERROR_CODE_MAP.P2001).toBe('RE0002');
-    expect(PRISMA_ERROR_CODE_MAP.P2025).toBe('RE0002');
-
-    expect(PRISMA_ERROR_CODE_MAP.P1001).toBe('RE0209');
-    expect(PRISMA_ERROR_CODE_MAP.P1002).toBe('RE0203');
-
-    expect(PRISMA_ERROR_CODE_MAP.P2003).toBe('RE0004');
+  it.each([
+    ['P2002', 'RE0003', 'unique constraint'],
+    ['P2001', 'RE0002', 'record not found'],
+    ['P2025', 'RE0002', 'record not found'],
+    ['P1001', 'RE0209', 'connection failed'],
+    ['P1002', 'RE0203', 'connection timeout'],
+    ['P2003', 'RE0004', 'foreign key constraint'],
+  ])('%s should map to %s for %s', (prismaCode, repoCode, _scenario) => {
+    expect(PRISMA_ERROR_CODE_MAP[prismaCode as keyof typeof PRISMA_ERROR_CODE_MAP]).toBe(repoCode);
   });
 
-  it('should map all P1xxx connection errors', () => {
-    expect.hasAssertions();
+  describe('error code category mapping', () => {
+    it.each([
+      ['P1', 'connection errors'],
+      ['P2', 'data/query errors'],
+      ['P3', 'migration errors'],
+    ])('should map all %s*** %s', (prefix, _category) => {
+      expect.hasAssertions();
 
-    const connectionErrors = Object.keys(PRISMA_ERROR_CODE_MAP).filter((code) => code.startsWith('P1'));
+      const errors = Object.keys(PRISMA_ERROR_CODE_MAP).filter((code) => code.startsWith(prefix));
 
-    connectionErrors.forEach((code) => {
-      expect(PRISMA_ERROR_CODE_MAP[code as keyof typeof PRISMA_ERROR_CODE_MAP]).toMatch(/^RE\d{4}$/u);
+      errors.forEach((code) => {
+        expect(PRISMA_ERROR_CODE_MAP[code as keyof typeof PRISMA_ERROR_CODE_MAP]).toMatch(/^RE\d{4}$/u);
+      });
+
+      expect(errors.length).toBeGreaterThan(0);
     });
-
-    expect(connectionErrors.length).toBeGreaterThan(0);
-  });
-
-  it('should map all P2xxx data/query errors', () => {
-    expect.hasAssertions();
-
-    const dataErrors = Object.keys(PRISMA_ERROR_CODE_MAP).filter((code) => code.startsWith('P2'));
-
-    dataErrors.forEach((code) => {
-      expect(PRISMA_ERROR_CODE_MAP[code as keyof typeof PRISMA_ERROR_CODE_MAP]).toMatch(/^RE\d{4}$/u);
-    });
-
-    expect(dataErrors.length).toBeGreaterThan(0);
-  });
-
-  it('should map all P3xxx migration errors', () => {
-    expect.hasAssertions();
-
-    const migrationErrors = Object.keys(PRISMA_ERROR_CODE_MAP).filter((code) => code.startsWith('P3'));
-
-    migrationErrors.forEach((code) => {
-      expect(PRISMA_ERROR_CODE_MAP[code as keyof typeof PRISMA_ERROR_CODE_MAP]).toMatch(/^RE\d{4}$/u);
-    });
-
-    expect(migrationErrors.length).toBeGreaterThan(0);
   });
 });

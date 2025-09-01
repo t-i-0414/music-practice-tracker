@@ -32,7 +32,7 @@ describe('admin AdminUsers API (e2e)', () => {
     await databaseHelper.disconnect();
   });
 
-  describe('pOST /admin/admin-users', () => {
+  describe('post /admin/admin-users', () => {
     it('should create a new admin user', async () => {
       expect.assertions(2);
 
@@ -67,7 +67,7 @@ describe('admin AdminUsers API (e2e)', () => {
     });
   });
 
-  describe('gET /admin/admin-users', () => {
+  describe('get /admin/admin-users', () => {
     it('should get all admin users', async () => {
       expect.assertions(3);
 
@@ -115,7 +115,7 @@ describe('admin AdminUsers API (e2e)', () => {
     });
   });
 
-  describe('gET /admin/admin-users/:publicId', () => {
+  describe('get /admin/admin-users/:publicId', () => {
     it('should get an admin user by public ID', async () => {
       expect.assertions(1);
 
@@ -150,7 +150,7 @@ describe('admin AdminUsers API (e2e)', () => {
     });
   });
 
-  describe('pUT /admin/admin-users/:publicId', () => {
+  describe('put /admin/admin-users/:publicId', () => {
     it('should update an admin user', async () => {
       expect.assertions(1);
 
@@ -193,7 +193,7 @@ describe('admin AdminUsers API (e2e)', () => {
     });
   });
 
-  describe('dELETE /admin/admin-users/:publicId', () => {
+  describe('delete /admin/admin-users/:publicId', () => {
     it('should delete an admin user', async () => {
       expect.assertions(2);
 
@@ -226,7 +226,7 @@ describe('admin AdminUsers API (e2e)', () => {
     });
   });
 
-  describe('pOST /admin/admin-users/bulk', () => {
+  describe('post /admin/admin-users/bulk', () => {
     it('should create multiple admin users', async () => {
       expect.assertions(4);
 
@@ -247,7 +247,7 @@ describe('admin AdminUsers API (e2e)', () => {
     });
   });
 
-  describe('dELETE /admin/admin-users', () => {
+  describe('delete /admin/admin-users', () => {
     it('should delete multiple admin users', async () => {
       expect.assertions(2);
 
@@ -273,6 +273,206 @@ describe('admin AdminUsers API (e2e)', () => {
 
       expect(remainingAdminUsers.body.adminUsers).toHaveLength(1);
       expect(remainingAdminUsers.body.adminUsers[0].publicId).toBe(adminUsers[2].publicId);
+    });
+  });
+
+  describe('apiStandardResponses error format validation', () => {
+    describe('post /admin/admin-users', () => {
+      it('should return error with statusCode and errorCode for validation errors', async () => {
+        expect.assertions(3);
+
+        const invalidDto = {
+          email: 'invalid-email',
+          name: '',
+          role: 'INVALID_ROLE',
+        };
+
+        const response = await request(app.getHttpServer()).post('/admin/admin-users').send(invalidDto).expect(400);
+
+        expect(response.body).toHaveProperty('statusCode');
+        expect(response.body).toHaveProperty('errorCode');
+        expect(response.body.statusCode).toBe(400);
+      });
+
+      it('should return error with statusCode and errorCode for duplicate email', async () => {
+        expect.assertions(3);
+
+        const createDto = {
+          email: 'duplicate@example.com',
+          name: 'Duplicate User',
+          role: AdminRole.ADMIN,
+        };
+
+        await request(app.getHttpServer()).post('/admin/admin-users').send(createDto).expect(201);
+
+        const response = await request(app.getHttpServer()).post('/admin/admin-users').send(createDto).expect(409);
+
+        expect(response.body).toHaveProperty('statusCode');
+        expect(response.body).toHaveProperty('errorCode');
+        expect(response.body.statusCode).toBe(409);
+      });
+    });
+
+    describe('get /admin/admin-users', () => {
+      it('should return error with statusCode and errorCode for invalid query params', async () => {
+        expect.assertions(3);
+
+        const response = await request(app.getHttpServer())
+          .get('/admin/admin-users?publicIds=invalid-uuid')
+          .expect(400);
+
+        expect(response.body).toHaveProperty('statusCode');
+        expect(response.body).toHaveProperty('errorCode');
+        expect(response.body.statusCode).toBe(400);
+      });
+    });
+
+    describe('get /admin/admin-users/:publicId', () => {
+      it('should return error with statusCode and errorCode for invalid UUID', async () => {
+        expect.assertions(3);
+
+        const response = await request(app.getHttpServer()).get('/admin/admin-users/invalid-uuid').expect(400);
+
+        expect(response.body).toHaveProperty('statusCode');
+        expect(response.body).toHaveProperty('errorCode');
+        expect(response.body.statusCode).toBe(400);
+      });
+
+      it('should return error with statusCode and errorCode for non-existent admin user', async () => {
+        expect.assertions(3);
+
+        const response = await request(app.getHttpServer())
+          .get('/admin/admin-users/00000000-0000-0000-0000-000000000000')
+          .expect(404);
+
+        expect(response.body).toHaveProperty('statusCode');
+        expect(response.body).toHaveProperty('errorCode');
+        expect(response.body.statusCode).toBe(404);
+      });
+    });
+
+    describe('put /admin/admin-users/:publicId', () => {
+      it('should return error with statusCode and errorCode for invalid UUID', async () => {
+        expect.assertions(3);
+
+        const response = await request(app.getHttpServer())
+          .put('/admin/admin-users/invalid-uuid')
+          .send({ name: 'Updated Name' })
+          .expect(400);
+
+        expect(response.body).toHaveProperty('statusCode');
+        expect(response.body).toHaveProperty('errorCode');
+        expect(response.body.statusCode).toBe(400);
+      });
+
+      it('should return error with statusCode and errorCode for non-existent admin user', async () => {
+        expect.assertions(3);
+
+        const response = await request(app.getHttpServer())
+          .put('/admin/admin-users/00000000-0000-0000-0000-000000000000')
+          .send({ name: 'Updated Name' })
+          .expect(404);
+
+        expect(response.body).toHaveProperty('statusCode');
+        expect(response.body).toHaveProperty('errorCode');
+        expect(response.body.statusCode).toBe(404);
+      });
+
+      it('should return error with statusCode and errorCode for invalid update data', async () => {
+        expect.assertions(3);
+
+        const createDto = {
+          email: 'update@example.com',
+          name: 'Update User',
+          role: AdminRole.VIEWER,
+        };
+
+        const createResponse = await request(app.getHttpServer()).post('/admin/admin-users').send(createDto).expect(201);
+
+        const response = await request(app.getHttpServer())
+          .put(`/admin/admin-users/${createResponse.body.publicId}`)
+          .send({ role: 'INVALID_ROLE' })
+          .expect(400);
+
+        expect(response.body).toHaveProperty('statusCode');
+        expect(response.body).toHaveProperty('errorCode');
+        expect(response.body.statusCode).toBe(400);
+      });
+    });
+
+    describe('delete /admin/admin-users/:publicId', () => {
+      it('should return error with statusCode and errorCode for invalid UUID', async () => {
+        expect.assertions(3);
+
+        const response = await request(app.getHttpServer()).delete('/admin/admin-users/invalid-uuid').expect(400);
+
+        expect(response.body).toHaveProperty('statusCode');
+        expect(response.body).toHaveProperty('errorCode');
+        expect(response.body.statusCode).toBe(400);
+      });
+
+      it('should return error with statusCode and errorCode for non-existent admin user', async () => {
+        expect.assertions(3);
+
+        const response = await request(app.getHttpServer())
+          .delete('/admin/admin-users/00000000-0000-0000-0000-000000000000')
+          .expect(404);
+
+        expect(response.body).toHaveProperty('statusCode');
+        expect(response.body).toHaveProperty('errorCode');
+        expect(response.body.statusCode).toBe(404);
+      });
+    });
+
+    describe('post /admin/admin-users/bulk', () => {
+      it('should return error with statusCode and errorCode for invalid data', async () => {
+        expect.assertions(3);
+
+        const invalidDto = {
+          adminUsers: [
+            { email: 'invalid-email', name: '', role: 'INVALID' },
+          ],
+        };
+
+        const response = await request(app.getHttpServer()).post('/admin/admin-users/bulk').send(invalidDto).expect(400);
+
+        expect(response.body).toHaveProperty('statusCode');
+        expect(response.body).toHaveProperty('errorCode');
+        expect(response.body.statusCode).toBe(400);
+      });
+
+      it('should return error with statusCode and errorCode for duplicate emails', async () => {
+        expect.assertions(3);
+
+        const createDto = {
+          adminUsers: [
+            { email: 'same@example.com', name: 'User 1', role: AdminRole.VIEWER },
+            { email: 'same@example.com', name: 'User 2', role: AdminRole.ADMIN },
+          ],
+        };
+
+        const response = await request(app.getHttpServer()).post('/admin/admin-users/bulk').send(createDto).expect(409);
+
+        expect(response.body).toHaveProperty('statusCode');
+        expect(response.body).toHaveProperty('errorCode');
+        expect(response.body.statusCode).toBe(409);
+      });
+    });
+
+    describe('delete /admin/admin-users', () => {
+      it('should return error with statusCode and errorCode for invalid UUIDs', async () => {
+        expect.assertions(3);
+
+        const deleteDto = {
+          publicIds: ['invalid-uuid-1', 'invalid-uuid-2'],
+        };
+
+        const response = await request(app.getHttpServer()).delete('/admin/admin-users').send(deleteDto).expect(400);
+
+        expect(response.body).toHaveProperty('statusCode');
+        expect(response.body).toHaveProperty('errorCode');
+        expect(response.body.statusCode).toBe(400);
+      });
     });
   });
 });

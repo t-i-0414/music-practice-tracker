@@ -10,105 +10,120 @@ import {
 
 describe('error prefixes', () => {
   describe('constants', () => {
-    it('should have correct prefix values', () => {
-      expect(apiErrorPrefix).toBe('AP');
-      expect(domainErrorPrefix).toBe('DO');
-      expect(repositoryErrorPrefix).toBe('RE');
-      expect(unknownErrorPrefix).toBe('UN');
+    it.each([
+      ['apiErrorPrefix', apiErrorPrefix, 'AP'],
+      ['domainErrorPrefix', domainErrorPrefix, 'DO'],
+      ['repositoryErrorPrefix', repositoryErrorPrefix, 'RE'],
+      ['unknownErrorPrefix', unknownErrorPrefix, 'UN'],
+    ])('%s should be "%s"', (_name, actual, expected) => {
+      expect(actual).toBe(expected);
     });
   });
 
   describe('isErrorPrefix', () => {
-    it('should return true for valid prefixes', () => {
-      expect(isErrorPrefix('AP')).toBe(true);
-      expect(isErrorPrefix('DO')).toBe(true);
-      expect(isErrorPrefix('RE')).toBe(true);
-      expect(isErrorPrefix('UN')).toBe(true);
+    it.each(['AP', 'DO', 'RE', 'UN'])('should return true for valid prefix "%s"', (prefix) => {
+      expect(isErrorPrefix(prefix)).toBe(true);
     });
 
-    it('should return false for invalid prefixes', () => {
-      expect(isErrorPrefix('XX')).toBe(false);
-      expect(isErrorPrefix('AP0')).toBe(false);
-      expect(isErrorPrefix('DO1')).toBe(false);
-      expect(isErrorPrefix('')).toBe(false);
-      expect(isErrorPrefix('A')).toBe(false);
-    });
-
-    it('should be case sensitive', () => {
-      expect(isErrorPrefix('ap')).toBe(false);
-      expect(isErrorPrefix('do')).toBe(false);
-      expect(isErrorPrefix('re')).toBe(false);
-      expect(isErrorPrefix('un')).toBe(false);
-    });
+    it.each(['XX', 'AP0', 'DO1', '', 'A', 'ap', 'do', 're', 'un'])(
+      'should return false for invalid prefix "%s"',
+      (prefix) => {
+        expect(isErrorPrefix(prefix)).toBe(false);
+      },
+    );
   });
 });
 
 describe('constant ERROR_CODE_RECORDS', () => {
   describe('api error codes', () => {
-    it('should contain HTTP 4xx client error codes', () => {
-      expect(ERROR_CODE_RECORDS.AP0400).toBe('Bad request');
-      expect(ERROR_CODE_RECORDS.AP0401).toBe('Unauthorized');
-      expect(ERROR_CODE_RECORDS.AP0403).toBe('Forbidden');
-      expect(ERROR_CODE_RECORDS.AP0404).toBe('Not found');
-      expect(ERROR_CODE_RECORDS.AP0429).toBe('Too many requests');
+    describe('http 4xx client error codes', () => {
+      it.each([
+        ['AP0400', 'Bad request'],
+        ['AP0401', 'Unauthorized'],
+        ['AP0403', 'Forbidden'],
+        ['AP0404', 'Not found'],
+        ['AP0429', 'Too many requests'],
+      ])('%s should be "%s"', (code, message) => {
+        expect(ERROR_CODE_RECORDS[code as keyof typeof ERROR_CODE_RECORDS]).toBe(message);
+      });
     });
 
-    it('should contain HTTP 5xx server error codes', () => {
-      expect(ERROR_CODE_RECORDS.AP0500).toBe('Internal server error');
-      expect(ERROR_CODE_RECORDS.AP0501).toBe('Not implemented');
-      expect(ERROR_CODE_RECORDS.AP0502).toBe('Bad gateway');
-      expect(ERROR_CODE_RECORDS.AP0503).toBe('Service unavailable');
+    describe('http 5xx server error codes', () => {
+      it.each([
+        ['AP0500', 'Internal server error'],
+        ['AP0501', 'Not implemented'],
+        ['AP0502', 'Bad gateway'],
+        ['AP0503', 'Service unavailable'],
+      ])('%s should be "%s"', (code, message) => {
+        expect(ERROR_CODE_RECORDS[code as keyof typeof ERROR_CODE_RECORDS]).toBe(message);
+      });
     });
 
-    it('should contain unknown API error code', () => {
-      expect(ERROR_CODE_RECORDS.AP9999).toBe('Unknown application error.');
+    it.each([['AP9999', 'Unknown application error.']])('%s should be "%s"', (code, message) => {
+      expect(ERROR_CODE_RECORDS[code as keyof typeof ERROR_CODE_RECORDS]).toBe(message);
     });
   });
 
   describe('domain error codes', () => {
-    it('should contain unknown domain error code', () => {
-      expect(ERROR_CODE_RECORDS.DO9999).toBe('Unknown domain error.');
+    it.each([['DO9999', 'Unknown domain error.']])('%s should be "%s"', (code, message) => {
+      expect(ERROR_CODE_RECORDS[code as keyof typeof ERROR_CODE_RECORDS]).toBe(message);
     });
   });
 
   describe('repository error codes', () => {
-    it('should contain data validation errors (RE00xx)', () => {
-      expect(ERROR_CODE_RECORDS.RE0001).toBe('Column value too long for database field.');
-      expect(ERROR_CODE_RECORDS.RE0002).toBe('Record not found in database.');
-      expect(ERROR_CODE_RECORDS.RE0003).toBe('Unique constraint violation.');
-      expect(ERROR_CODE_RECORDS.RE0004).toBe('Foreign key constraint violation.');
-      expect(ERROR_CODE_RECORDS.RE0008).toBe('Data validation error.');
+    describe('data validation errors (RE00xx)', () => {
+      it.each([
+        ['RE0001', 'Column value too long for database field.'],
+        ['RE0002', 'Record not found in database.'],
+        ['RE0003', 'Unique constraint violation.'],
+        ['RE0004', 'Foreign key constraint violation.'],
+        ['RE0008', 'Data validation error.'],
+      ])('%s should be "%s"', (code, message) => {
+        expect(ERROR_CODE_RECORDS[code as keyof typeof ERROR_CODE_RECORDS]).toBe(message);
+      });
     });
 
-    it('should contain query errors (RE01xx)', () => {
-      expect(ERROR_CODE_RECORDS.RE0101).toBe('Query parsing failed.');
-      expect(ERROR_CODE_RECORDS.RE0102).toBe('Query validation failed.');
-      expect(ERROR_CODE_RECORDS.RE0103).toBe('Raw query execution failed.');
-      expect(ERROR_CODE_RECORDS.RE0108).toBe('Related record not found.');
+    describe('query errors (RE01xx)', () => {
+      it.each([
+        ['RE0101', 'Query parsing failed.'],
+        ['RE0102', 'Query validation failed.'],
+        ['RE0103', 'Raw query execution failed.'],
+        ['RE0108', 'Related record not found.'],
+      ])('%s should be "%s"', (code, message) => {
+        expect(ERROR_CODE_RECORDS[code as keyof typeof ERROR_CODE_RECORDS]).toBe(message);
+      });
     });
 
-    it('should contain connection & system errors (RE02xx)', () => {
-      expect(ERROR_CODE_RECORDS.RE0201).toBe('Table does not exist in database.');
-      expect(ERROR_CODE_RECORDS.RE0202).toBe('Column does not exist in table.');
-      expect(ERROR_CODE_RECORDS.RE0203).toBe('Connection pool timeout.');
-      expect(ERROR_CODE_RECORDS.RE0209).toBe('Database connection failed.');
+    describe('connection & system errors (RE02xx)', () => {
+      it.each([
+        ['RE0201', 'Table does not exist in database.'],
+        ['RE0202', 'Column does not exist in table.'],
+        ['RE0203', 'Connection pool timeout.'],
+        ['RE0209', 'Database connection failed.'],
+      ])('%s should be "%s"', (code, message) => {
+        expect(ERROR_CODE_RECORDS[code as keyof typeof ERROR_CODE_RECORDS]).toBe(message);
+      });
     });
 
-    it('should contain migration errors (RE03xx)', () => {
-      expect(ERROR_CODE_RECORDS.RE0301).toBe('Failed to create database.');
-      expect(ERROR_CODE_RECORDS.RE0302).toBe('Migration contains potential data loss.');
-      expect(ERROR_CODE_RECORDS.RE0303).toBe('Migration rollback error.');
-      expect(ERROR_CODE_RECORDS.RE0326).toBe('Failed to create database: permission denied.');
+    describe('migration errors (RE03xx)', () => {
+      it.each([
+        ['RE0301', 'Failed to create database.'],
+        ['RE0302', 'Migration contains potential data loss.'],
+        ['RE0303', 'Migration rollback error.'],
+        ['RE0326', 'Failed to create database: permission denied.'],
+      ])('%s should be "%s"', (code, message) => {
+        expect(ERROR_CODE_RECORDS[code as keyof typeof ERROR_CODE_RECORDS]).toBe(message);
+      });
     });
 
-    it('should contain unknown repository error code', () => {
-      expect(ERROR_CODE_RECORDS.RE9999).toBe('Unknown repository error.');
+    it.each([['RE9999', 'Unknown repository error.']])('%s should be "%s"', (code, message) => {
+      expect(ERROR_CODE_RECORDS[code as keyof typeof ERROR_CODE_RECORDS]).toBe(message);
     });
   });
 
   describe('unknown error codes', () => {
-    it('should contain unknown error code', () => {
-      expect(ERROR_CODE_RECORDS.UN9999).toBe('Unknown error.');
+    it.each([['UN9999', 'Unknown error.']])('%s should be "%s"', (code, message) => {
+      expect(ERROR_CODE_RECORDS[code as keyof typeof ERROR_CODE_RECORDS]).toBe(message);
     });
   });
 
@@ -139,89 +154,90 @@ describe('constant ERROR_CODE_RECORDS', () => {
       expect(errorMessages.length).toBeGreaterThan(0);
     });
 
-    it('should have proper categorization by prefix', () => {
-      const apiCodes = Object.keys(ERROR_CODE_RECORDS).filter((code) => code.startsWith('AP'));
-      const domainCodes = Object.keys(ERROR_CODE_RECORDS).filter((code) => code.startsWith('DO'));
-      const repositoryCodes = Object.keys(ERROR_CODE_RECORDS).filter((code) => code.startsWith('RE'));
-      const unknownCodes = Object.keys(ERROR_CODE_RECORDS).filter((code) => code.startsWith('UN'));
+    describe('error code categorization', () => {
+      it.each([
+        ['API', 'AP'],
+        ['Domain', 'DO'],
+        ['Repository', 'RE'],
+        ['Unknown', 'UN'],
+      ])('should have %s codes (prefix: %s)', (_category, prefix) => {
+        const codes = Object.keys(ERROR_CODE_RECORDS).filter((code) => code.startsWith(prefix));
 
-      expect(apiCodes.length).toBeGreaterThan(0);
-      expect(domainCodes.length).toBeGreaterThan(0);
-      expect(repositoryCodes.length).toBeGreaterThan(0);
-      expect(unknownCodes.length).toBeGreaterThan(0);
+        expect(codes.length).toBeGreaterThan(0);
+      });
     });
   });
 
   describe('specific error code ranges', () => {
-    it('should have proper HTTP status code mapping for API errors', () => {
-      expect(ERROR_CODE_RECORDS.AP0400).toContain('Bad request');
-      expect(ERROR_CODE_RECORDS.AP0404).toContain('Not found');
-
-      expect(ERROR_CODE_RECORDS.AP0500).toContain('Internal server error');
-      expect(ERROR_CODE_RECORDS.AP0503).toContain('Service unavailable');
+    describe('api error HTTP status mapping', () => {
+      it.each([
+        ['AP0400', 'Bad request'],
+        ['AP0404', 'Not found'],
+        ['AP0500', 'Internal server error'],
+        ['AP0503', 'Service unavailable'],
+      ])('%s should contain "%s"', (code, expectedSubstring) => {
+        expect(ERROR_CODE_RECORDS[code as keyof typeof ERROR_CODE_RECORDS]).toContain(expectedSubstring);
+      });
     });
 
-    it('should have specific repository error categories', () => {
-      const dataValidationCodes = Object.keys(ERROR_CODE_RECORDS).filter((code) => /^RE00\d{2}$/u.exec(code));
+    describe('repository error categories', () => {
+      it.each([
+        ['Data validation', /^RE00\d{2}$/u],
+        ['Query', /^RE01\d{2}$/u],
+        ['Connection & system', /^RE02\d{2}$/u],
+        ['Migration', /^RE03\d{2}$/u],
+      ])('should have %s codes', (_category, pattern) => {
+        const codes = Object.keys(ERROR_CODE_RECORDS).filter((code) => pattern.exec(code));
 
-      expect(dataValidationCodes.length).toBeGreaterThan(0);
-
-      const queryCodes = Object.keys(ERROR_CODE_RECORDS).filter((code) => /^RE01\d{2}$/u.exec(code));
-
-      expect(queryCodes.length).toBeGreaterThan(0);
-
-      const connectionCodes = Object.keys(ERROR_CODE_RECORDS).filter((code) => /^RE02\d{2}$/u.exec(code));
-
-      expect(connectionCodes.length).toBeGreaterThan(0);
-
-      const migrationCodes = Object.keys(ERROR_CODE_RECORDS).filter((code) => /^RE03\d{2}$/u.exec(code));
-
-      expect(migrationCodes.length).toBeGreaterThan(0);
+        expect(codes.length).toBeGreaterThan(0);
+      });
     });
   });
 });
 
 describe('function isErrorCode', () => {
-  it('should return true for valid error codes', () => {
-    expect(isErrorCode('AP0400')).toBe(true);
-    expect(isErrorCode('DO9999')).toBe(true);
-    expect(isErrorCode('RE0001')).toBe(true);
-    expect(isErrorCode('UN9999')).toBe(true);
-  });
-
-  it('should return false for invalid error codes', () => {
-    expect(isErrorCode('XX0001')).toBe(false);
-    expect(isErrorCode('AP0000')).toBe(false);
-    expect(isErrorCode('INVALID')).toBe(false);
-    expect(isErrorCode('')).toBe(false);
-    expect(isErrorCode('AP400')).toBe(false);
-    expect(isErrorCode('AP04000')).toBe(false);
-  });
-
-  it('should be case sensitive', () => {
-    expect(isErrorCode('ap0400')).toBe(false);
-    expect(isErrorCode('do9999')).toBe(false);
-    expect(isErrorCode('re0001')).toBe(false);
-    expect(isErrorCode('un9999')).toBe(false);
-  });
-
-  it('should return false for non-string values', () => {
-    expect(isErrorCode(null)).toBe(false);
-    expect(isErrorCode(undefined)).toBe(false);
-    expect(isErrorCode(400)).toBe(false);
-    expect(isErrorCode({})).toBe(false);
-  });
-
-  it('should check against actual ERROR_CODE_RECORDS', () => {
-    expect.hasAssertions();
-
-    const allValidCodes = Object.keys(ERROR_CODE_RECORDS);
-
-    allValidCodes.forEach((code) => {
+  describe('valid error codes', () => {
+    it.each(['AP0400', 'DO9999', 'RE0001', 'UN9999'])('should return true for "%s"', (code) => {
       expect(isErrorCode(code)).toBe(true);
     });
 
-    expect(allValidCodes.length).toBeGreaterThan(0);
+    it('should return true for all ERROR_CODE_RECORDS keys', () => {
+      expect.hasAssertions();
+
+      const allValidCodes = Object.keys(ERROR_CODE_RECORDS);
+
+      allValidCodes.forEach((code) => {
+        expect(isErrorCode(code)).toBe(true);
+      });
+
+      expect(allValidCodes.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('invalid error codes', () => {
+    it.each([
+      ['XX0001', 'invalid prefix'],
+      ['AP0000', 'non-existent code'],
+      ['INVALID', 'invalid format'],
+      ['', 'empty string'],
+      ['AP400', 'missing digit'],
+      ['AP04000', 'too many digits'],
+      ['ap0400', 'lowercase AP'],
+      ['do9999', 'lowercase DO'],
+      ['re0001', 'lowercase RE'],
+      ['un9999', 'lowercase UN'],
+    ])('should return false for %s (%s)', (code, _reason) => {
+      expect(isErrorCode(code)).toBe(false);
+    });
+
+    it.each([
+      [null, 'null'],
+      [undefined, 'undefined'],
+      [400, 'number'],
+      [{}, 'object'],
+    ])('should return false for %s (%s)', (value, _type) => {
+      expect(isErrorCode(value)).toBe(false);
+    });
   });
 });
 
@@ -241,16 +257,12 @@ describe('type safety and consistency', () => {
     expect(errorCodes).toHaveLength(uniqueCodes.size);
   });
 
-  it('should have meaningful error messages', () => {
-    expect.hasAssertions();
-
+  describe('error message validation', () => {
     const errorMessages = Object.values(ERROR_CODE_RECORDS);
 
-    errorMessages.forEach((message) => {
+    it.each(errorMessages)('message "%s" should be meaningful', (message) => {
       expect(message.length).toBeGreaterThan(5);
       expect(message).not.toBe('TODO');
     });
-
-    expect(errorMessages.length).toBeGreaterThan(0);
   });
 });

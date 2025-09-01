@@ -52,7 +52,7 @@ describe('appApiUsersController', () => {
     jest.clearAllMocks();
   });
 
-  describe('gET /users/:publicId', () => {
+  describe('get /users/:publicId', () => {
     it('should return user by public ID', async () => {
       expect.assertions(2);
 
@@ -79,7 +79,7 @@ describe('appApiUsersController', () => {
     });
   });
 
-  describe('pOST /users', () => {
+  describe('post /users', () => {
     it('should create a new user', async () => {
       expect.assertions(2);
 
@@ -98,7 +98,7 @@ describe('appApiUsersController', () => {
     });
   });
 
-  describe('pUT /users/:publicId', () => {
+  describe('put /users/:publicId', () => {
     it('should update a user', async () => {
       expect.assertions(2);
 

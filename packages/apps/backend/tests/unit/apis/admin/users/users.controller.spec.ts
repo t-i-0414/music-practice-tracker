@@ -51,7 +51,7 @@ describe('adminApiUsersController', () => {
     jest.clearAllMocks();
   });
 
-  describe('gET /admin/users', () => {
+  describe('get /admin/users', () => {
     it('should return users when publicIds not provided', async () => {
       expect.assertions(2);
 
@@ -94,7 +94,7 @@ describe('adminApiUsersController', () => {
     });
   });
 
-  describe('gET /admin/users/:publicId', () => {
+  describe('get /admin/users/:publicId', () => {
     it('should return user by public ID', async () => {
       expect.assertions(2);
 
@@ -111,7 +111,7 @@ describe('adminApiUsersController', () => {
     });
   });
 
-  describe('pOST /admin/users', () => {
+  describe('post /admin/users', () => {
     it('should create a new user', async () => {
       expect.assertions(2);
 
@@ -130,7 +130,7 @@ describe('adminApiUsersController', () => {
     });
   });
 
-  describe('pOST /admin/users/bulk', () => {
+  describe('post /admin/users/bulk', () => {
     it('should create multiple users', async () => {
       expect.assertions(2);
 
@@ -157,7 +157,7 @@ describe('adminApiUsersController', () => {
     });
   });
 
-  describe('pUT /admin/users/:publicId', () => {
+  describe('put /admin/users/:publicId', () => {
     it('should update a user', async () => {
       expect.assertions(2);
 
@@ -179,7 +179,7 @@ describe('adminApiUsersController', () => {
     });
   });
 
-  describe('dELETE /admin/users', () => {
+  describe('delete /admin/users', () => {
     it('should delete multiple users', async () => {
       expect.assertions(2);
 
@@ -194,7 +194,7 @@ describe('adminApiUsersController', () => {
     });
   });
 
-  describe('dELETE /admin/users/:publicId', () => {
+  describe('delete /admin/users/:publicId', () => {
     it('should delete a user', async () => {
       expect.assertions(2);
 

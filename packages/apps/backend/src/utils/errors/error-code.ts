@@ -43,7 +43,7 @@ export const ERROR_CODE_RECORDS = {
   AP0407: 'Proxy authentication required',
   AP0408: 'Request timeout',
   AP0409: 'Conflict',
-  AP0410: 'Gone',
+  AP0410: 'Resource gone',
   AP0411: 'Length required',
   AP0412: 'Precondition failed',
   AP0413: 'Payload too large',

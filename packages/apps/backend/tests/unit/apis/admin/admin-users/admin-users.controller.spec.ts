@@ -11,7 +11,7 @@ import {
 import { AdminRole } from '@/generated/prisma';
 import { AdminUserFactory } from '@/tests/factory';
 
-describe('adminApiAdminUsersController', () => {
+describe('controller AdminApiAdminUsersController', () => {
   let controller: AdminApiAdminUsersController;
   let queryService: jest.Mocked<AdminUserQueryService>;
   let commandService: jest.Mocked<AdminUserCommandService>;
@@ -57,7 +57,7 @@ describe('adminApiAdminUsersController', () => {
     jest.clearAllMocks();
   });
 
-  describe('gET /admin/admin-users', () => {
+  describe('get /admin/admin-users', () => {
     it('should return all admin users when no publicIds provided', async () => {
       expect.assertions(2);
 
@@ -100,7 +100,7 @@ describe('adminApiAdminUsersController', () => {
     });
   });
 
-  describe('gET /admin/admin-users/:publicId', () => {
+  describe('get /admin/admin-users/:publicId', () => {
     it('should return admin user by public ID', async () => {
       expect.assertions(2);
 
@@ -127,7 +127,7 @@ describe('adminApiAdminUsersController', () => {
     });
   });
 
-  describe('pOST /admin/admin-users', () => {
+  describe('post /admin/admin-users', () => {
     it('should create a new admin user', async () => {
       expect.assertions(2);
 
@@ -147,7 +147,7 @@ describe('adminApiAdminUsersController', () => {
     });
   });
 
-  describe('pOST /admin/admin-users/bulk', () => {
+  describe('post /admin/admin-users/bulk', () => {
     it('should create multiple admin users', async () => {
       expect.assertions(2);
 
@@ -179,7 +179,7 @@ describe('adminApiAdminUsersController', () => {
     });
   });
 
-  describe('pUT /admin/admin-users/:publicId', () => {
+  describe('put /admin/admin-users/:publicId', () => {
     it('should update an admin user', async () => {
       expect.assertions(2);
 
@@ -202,7 +202,7 @@ describe('adminApiAdminUsersController', () => {
     });
   });
 
-  describe('dELETE /admin/admin-users/:publicId', () => {
+  describe('delete /admin/admin-users/:publicId', () => {
     it('should delete an admin user', async () => {
       expect.assertions(2);
 
@@ -216,7 +216,7 @@ describe('adminApiAdminUsersController', () => {
     });
   });
 
-  describe('dELETE /admin/admin-users', () => {
+  describe('delete /admin/admin-users', () => {
     it('should delete multiple admin users', async () => {
       expect.assertions(2);
 

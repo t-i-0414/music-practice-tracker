@@ -69,27 +69,62 @@ describe('service RepositoryService', () => {
   });
 
   describe('transaction support', () => {
-    it('should support transactions', async () => {
-      expect.assertions(4);
+    it('should execute callback function within transaction', async () => {
+      expect.assertions(2);
 
-      const mockTransaction = jest.fn().mockImplementation((fn) => {
-        const tx = {
-          user: service.user,
-          adminUser: service.adminUser,
-        };
-        return fn(tx);
+      const expectedResult = { id: 1, name: 'Test User' };
+      const mockCallback = jest.fn().mockResolvedValue(expectedResult);
+
+      jest
+        .spyOn(service, '$transaction')
+        .mockImplementation((callback) => callback(service as Parameters<typeof callback>[0]));
+
+      const result = await service.$transaction(mockCallback);
+
+      expect(mockCallback).toHaveBeenCalledTimes(1);
+      expect(result).toStrictEqual(expectedResult);
+    });
+
+    it('should propagate errors from transaction callback', async () => {
+      expect.assertions(2);
+
+      const error = new Error('Transaction failed');
+      const mockCallback = jest.fn().mockRejectedValue(error);
+
+      jest
+        .spyOn(service, '$transaction')
+        .mockImplementation((callback) => callback(service as Parameters<typeof callback>[0]));
+
+      await expect(service.$transaction(mockCallback)).rejects.toThrow('Transaction failed');
+      expect(mockCallback).toHaveBeenCalledTimes(1);
+    });
+
+    it('should rollback transaction on failure', async () => {
+      expect.assertions(3);
+
+      const mockCreate = jest.fn().mockResolvedValue({ id: 1, name: 'Test User' });
+      const mockRollback = jest.fn();
+
+      service.user.create = mockCreate;
+
+      jest.spyOn(service, '$transaction').mockImplementation(async (callback) => {
+        try {
+          const result = await callback(service as Parameters<typeof callback>[0]);
+          return result;
+        } catch (error) {
+          mockRollback();
+          throw error;
+        }
       });
-      service.$transaction = mockTransaction;
 
-      const result = await service.$transaction(async (tx) => {
-        expect(tx.user).toBeDefined();
-        expect(tx.adminUser).toBeDefined();
-
-        return Promise.resolve('transaction-result');
+      const mockCallback = jest.fn().mockImplementation(async (tx) => {
+        await tx.user.create({ data: { name: 'Test User' } });
+        throw new Error('Forced rollback');
       });
 
-      expect(result).toBe('transaction-result');
-      expect(mockTransaction).toHaveBeenCalledWith(expect.any(Function));
+      await expect(service.$transaction(mockCallback)).rejects.toThrow('Forced rollback');
+      expect(mockCreate).toHaveBeenCalledTimes(1);
+      expect(mockRollback).toHaveBeenCalledTimes(1);
     });
   });
 
