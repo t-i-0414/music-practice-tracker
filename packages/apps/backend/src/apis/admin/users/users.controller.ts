@@ -2,6 +2,7 @@ import { Body, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Pu
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { ApiController } from '@/apis/utils/controllers/api.controller';
+import { ApiStandardResponses } from '@/apis/utils/decorators/api-default-response';
 import { ensurePublicIdsToArray } from '@/apis/utils/ensure-public-ids-to-array';
 import { UserCommandService } from '@/domain/aggregates/user/user.command.service';
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
@@ -34,9 +35,7 @@ export class AdminApiUsersController {
     example: ['123e4567-e89b-12d3-a456-426614174000', '456e7891-e89b-12d3-a456-426614174000'],
   })
   @ApiResponse({ status: 200, description: 'Users found', type: UsersResponseDto })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden' })
-  @ApiResponse({ status: 404, description: 'Users not found' })
+  @ApiStandardResponses()
   public async findManyUsersById(@Query('publicIds') publicIds: string | string[]): Promise<UsersResponseDto> {
     return this.userQuery.findManyUsersById({ publicIds: ensurePublicIdsToArray(publicIds) });
   }
@@ -45,9 +44,7 @@ export class AdminApiUsersController {
   @ApiOperation({ summary: 'Get a user by public ID' })
   @ApiParam({ name: 'publicId', description: 'User public ID', example: '123e4567-e89b-12d3-a456-426614174000' })
   @ApiResponse({ status: 200, description: 'User found', type: UserResponseDto })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden' })
-  @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiStandardResponses()
   public async findUniqueOrThrowUserById(
     @Param('publicId', new ParseUUIDPipe()) publicId: string,
   ): Promise<UserResponseDto> {
@@ -59,9 +56,7 @@ export class AdminApiUsersController {
   @ApiOperation({ summary: 'Create a new user' })
   @ApiBody({ type: CreateUserInputDto })
   @ApiResponse({ status: 201, description: 'The user has been successfully created.', type: UserResponseDto })
-  @ApiResponse({ status: 400, description: 'Bad request' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiStandardResponses()
   public async createUser(@Body() body: CreateUserInputDto): Promise<UserResponseDto> {
     return this.userCommand.createUser(body);
   }
@@ -71,6 +66,7 @@ export class AdminApiUsersController {
   @ApiOperation({ summary: 'Create multiple users' })
   @ApiBody({ type: CreateManyUsersInputDto })
   @ApiResponse({ status: 201, description: 'Users created successfully', type: UsersResponseDto })
+  @ApiStandardResponses()
   public async createManyAndReturnUsers(@Body() body: CreateManyUsersInputDto): Promise<UsersResponseDto> {
     return this.userCommand.createManyAndReturnUsers(body);
   }
@@ -80,6 +76,7 @@ export class AdminApiUsersController {
   @ApiParam({ name: 'publicId', description: 'User public ID', example: '123e4567-e89b-12d3-a456-426614174000' })
   @ApiBody({ type: UpdateUserDataDto })
   @ApiResponse({ status: 200, description: 'User updated successfully', type: UserResponseDto })
+  @ApiStandardResponses()
   public async updateUserById(
     @Param('publicId', new ParseUUIDPipe()) publicId: string,
     @Body() data: UpdateUserDataDto,
@@ -91,7 +88,7 @@ export class AdminApiUsersController {
   @ApiOperation({ summary: 'Delete multiple users by public IDs' })
   @ApiBody({ type: DeleteManyUsersInputDto })
   @ApiResponse({ status: 204, description: 'Users deleted' })
-  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiStandardResponses()
   public async deleteManyUsersById(@Body() body: DeleteManyUsersInputDto): Promise<void> {
     await this.userCommand.deleteManyUsersById(body);
   }
@@ -100,7 +97,7 @@ export class AdminApiUsersController {
   @ApiOperation({ summary: 'Delete a user by public ID' })
   @ApiParam({ name: 'publicId', description: 'User public ID' })
   @ApiResponse({ status: 204, description: 'User deleted' })
-  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiStandardResponses()
   public async deleteUserById(@Param('publicId', new ParseUUIDPipe()) publicId: string): Promise<void> {
     await this.userCommand.deleteUserById({ publicId });
   }

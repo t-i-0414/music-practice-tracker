@@ -8,11 +8,11 @@
   "projects": {
     "admin-api": {
       "type": "application",
-      "entryFile": "admin-api.main"
+      "entryFile": "apis/admin/main"
     },
     "app-api": {
       "type": "application",
-      "entryFile": "app-api.main"
+      "entryFile": "apis/app/main"
     }
   }
 }

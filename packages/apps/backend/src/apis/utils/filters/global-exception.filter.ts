@@ -1,7 +1,7 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Request, Response } from 'express';
 
-import { HTTP_STATUS_ERROR_CODE_RECORD_BY_REPOSITORY_ERROR_CODE } from '../api.error';
+import { ErrorResponseDto, HTTP_STATUS_ERROR_CODE_RECORD_BY_REPOSITORY_ERROR_CODE } from '../api.error';
 
 import { DomainError, isDomainError } from '@/domain/utils/domain.error';
 import {
@@ -9,15 +9,10 @@ import {
   canConvertToRepositoryError,
   RepositoryError,
 } from '@/repository/utils/repository.error';
-import { apiErrorPrefix, ErrorCode, isErrorCode } from '@/utils/errors/error-code';
+import { apiErrorPrefix, isErrorCode } from '@/utils/errors/error-code';
 import { isUnknownError, UnknownError } from '@/utils/errors/unknown.error';
 
 const httpErrorCodePrefix = `${apiErrorPrefix}0`;
-
-export type ErrorResponse = {
-  statusCode: HttpStatus;
-  errorCode: ErrorCode;
-};
 
 @Injectable()
 @Catch()
@@ -31,7 +26,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     response.status(errorResponse.statusCode).json(errorResponse);
   }
 
-  private buildErrorResponse(exception: unknown): ErrorResponse {
+  private buildErrorResponse(exception: unknown): ErrorResponseDto {
     if (exception instanceof HttpException) {
       return this.handleHttpException(exception);
     }
@@ -57,7 +52,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     };
   }
 
-  private handleHttpException(exception: HttpException): ErrorResponse {
+  private handleHttpException(exception: HttpException): ErrorResponseDto {
     const statusCode = exception.getStatus();
     const _errorCode = `${httpErrorCodePrefix}${statusCode}`;
     const errorCode = isErrorCode(_errorCode) ? _errorCode : 'AP9999';
@@ -68,14 +63,14 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     };
   }
 
-  private handleDomainError(exception: DomainError): ErrorResponse {
+  private handleDomainError(exception: DomainError): ErrorResponseDto {
     return {
       statusCode: HttpStatus.BAD_REQUEST,
       errorCode: exception.errorCode,
     };
   }
 
-  private handleRepositoryError(exception: RepositoryError): ErrorResponse {
+  private handleRepositoryError(exception: RepositoryError): ErrorResponseDto {
     const statusCode = HTTP_STATUS_ERROR_CODE_RECORD_BY_REPOSITORY_ERROR_CODE[exception.errorCode];
     return {
       statusCode,
@@ -83,7 +78,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     };
   }
 
-  private handleUnknownError(exception: UnknownError): ErrorResponse {
+  private handleUnknownError(exception: UnknownError): ErrorResponseDto {
     return {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
       errorCode: exception.errorCode,

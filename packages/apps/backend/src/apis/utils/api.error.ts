@@ -1,4 +1,5 @@
 import { HttpStatus } from '@nestjs/common';
+import { ApiProperty } from '@nestjs/swagger';
 
 import { type RepositoryErrorCode } from '@/repository/utils/repository.error';
 import { CommonError } from '@/utils/errors/common.error';
@@ -116,3 +117,11 @@ export const HTTP_STATUS_ERROR_CODE_RECORD_BY_REPOSITORY_ERROR_CODE: Record<Repo
   // Repository Errors - Generic
   RE9999: HttpStatus.INTERNAL_SERVER_ERROR, // Unknown repository error
 };
+
+export class ErrorResponseDto {
+  @ApiProperty({ example: 400 })
+  public statusCode: HttpStatus;
+
+  @ApiProperty({ example: 'RE0002' })
+  public errorCode: string;
+}
