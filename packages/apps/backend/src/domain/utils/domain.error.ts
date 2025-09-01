@@ -15,5 +15,5 @@ export class DomainError extends CommonError<DomainErrorCode> {
 export const isDomainError = (error: unknown): error is DomainError => error instanceof DomainError;
 
 export type DomainErrorCode = Extract<ErrorCode, PreservedDomainErrorCode>;
-export const isDomainErrorCode = (value: string): value is DomainErrorCode =>
-  isErrorCode(value) && value.startsWith(domainErrorPrefix);
+export const isDomainErrorCode = (value: unknown): value is DomainErrorCode =>
+  typeof value === 'string' && isErrorCode(value) && value.startsWith(domainErrorPrefix);

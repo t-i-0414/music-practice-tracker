@@ -15,5 +15,5 @@ export class UnknownError extends CommonError<UnknownErrorCode> {
 export const isUnknownError = (error: unknown): error is UnknownError => error instanceof UnknownError;
 
 export type UnknownErrorCode = Extract<ErrorCode, PreservedUnknownErrorCode>;
-export const isUnknownErrorCode = (value: string): value is UnknownErrorCode =>
-  isErrorCode(value) && value.startsWith(unknownErrorPrefix);
+export const isUnknownErrorCode = (value: unknown): value is UnknownErrorCode =>
+  typeof value === 'string' && isErrorCode(value) && value.startsWith(unknownErrorPrefix);

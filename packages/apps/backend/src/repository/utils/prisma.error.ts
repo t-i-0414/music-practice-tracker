@@ -134,4 +134,5 @@ export const PRISMA_ERROR_CODE_MAP = {
 } as const satisfies Record<string, RepositoryErrorCode>;
 
 export type PrismaErrorCode = keyof typeof PRISMA_ERROR_CODE_MAP;
-export const isPrismaErrorCode = (code: string): code is PrismaErrorCode => code in PRISMA_ERROR_CODE_MAP;
+export const isPrismaErrorCode = (code: unknown): code is PrismaErrorCode =>
+  typeof code === 'string' && code in PRISMA_ERROR_CODE_MAP;

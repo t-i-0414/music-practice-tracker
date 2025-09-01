@@ -186,6 +186,7 @@ export const ERROR_CODE_RECORDS = {
 } as const satisfies Partial<Record<PreservedErrorCode, string>>;
 
 export type ErrorCode = keyof typeof ERROR_CODE_RECORDS;
-export const isErrorCode = (value: string): value is ErrorCode => value in ERROR_CODE_RECORDS;
+export const isErrorCode = (value: unknown): value is ErrorCode =>
+  typeof value === 'string' && value in ERROR_CODE_RECORDS;
 
 export type ErrorMessage = (typeof ERROR_CODE_RECORDS)[ErrorCode];

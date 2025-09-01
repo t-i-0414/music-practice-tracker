@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 
 import { RepositoryService } from '@/repository/repository.service';
 
-describe('repositoryService', () => {
+describe('service RepositoryService', () => {
   let service: RepositoryService;
 
   beforeEach(async () => {
@@ -33,7 +33,7 @@ describe('repositoryService', () => {
     });
   });
 
-  describe('onModuleInit', () => {
+  describe('when module is initialized', () => {
     it('should connect to database on module init', async () => {
       expect.assertions(1);
 
