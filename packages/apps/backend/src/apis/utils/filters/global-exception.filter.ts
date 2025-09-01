@@ -1,21 +1,23 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Request, Response } from 'express';
 
+import { HTTP_STATUS_ERROR_CODE_RECORD_BY_REPOSITORY_ERROR_CODE } from '../api.error';
+
 import { DomainError, isDomainError } from '@/domain/utils/domain.error';
 import {
   buildRepositoryError,
   canConvertToRepositoryError,
   RepositoryError,
 } from '@/repository/utils/repository.error';
-import { CommonErrorBody } from '@/utils/errors/common.error';
-import { apiErrorPrefix, ERROR_CODE_RECORDS, isErrorCode } from '@/utils/errors/error-code';
+import { apiErrorPrefix, ErrorCode, isErrorCode } from '@/utils/errors/error-code';
 import { isUnknownError, UnknownError } from '@/utils/errors/unknown.error';
 
 const httpErrorCodePrefix = `${apiErrorPrefix}0`;
 
 export type ErrorResponse = {
   statusCode: HttpStatus;
-} & Omit<CommonErrorBody, 'detail' | 'timestamp'>;
+  errorCode: ErrorCode;
+};
 
 @Injectable()
 @Catch()
@@ -52,7 +54,6 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     return {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
       errorCode,
-      errorMessage: ERROR_CODE_RECORDS[errorCode],
     };
   }
 
@@ -64,7 +65,6 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     return {
       statusCode,
       errorCode,
-      errorMessage: ERROR_CODE_RECORDS[errorCode],
     };
   }
 
@@ -72,15 +72,14 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     return {
       statusCode: HttpStatus.BAD_REQUEST,
       errorCode: exception.errorCode,
-      errorMessage: exception.errorMessage,
     };
   }
 
   private handleRepositoryError(exception: RepositoryError): ErrorResponse {
+    const statusCode = HTTP_STATUS_ERROR_CODE_RECORD_BY_REPOSITORY_ERROR_CODE[exception.errorCode];
     return {
-      statusCode: HttpStatus.BAD_REQUEST,
+      statusCode,
       errorCode: exception.errorCode,
-      errorMessage: exception.errorMessage,
     };
   }
 
@@ -88,7 +87,6 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     return {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
       errorCode: exception.errorCode,
-      errorMessage: exception.errorMessage,
     };
   }
 }
