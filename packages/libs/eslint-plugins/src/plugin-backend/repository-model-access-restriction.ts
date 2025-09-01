@@ -65,8 +65,8 @@ const rule = createRule({
     const aggregatesIndex = pathParts.indexOf('aggregates');
     const isInAggregates = aggregatesIndex !== -1;
     const fileName = pathParts[pathParts.length - 1];
-    const isQueryService = fileName === 'query.service.ts';
-    const isCommandService = fileName === 'command.service.ts';
+    const isQueryService = fileName.endsWith('query.service.ts');
+    const isCommandService = fileName.endsWith('command.service.ts');
 
     // Track imported Prisma models
     const importedPrismaModels: Set<string> = new Set();
