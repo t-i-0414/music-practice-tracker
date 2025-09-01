@@ -1,5 +1,5 @@
-import { CommonError } from '@/utils/common.error';
-import { type DomainErrorCode } from '@/utils/error-code';
+import { CommonError } from '@/utils/errors/common.error';
+import { type DomainErrorCode } from '@/utils/errors/error-code';
 
 export class DomainError extends CommonError<DomainErrorCode> {
   public constructor(errorCode: DomainErrorCode, detail: string, cause?: unknown) {
