@@ -9,14 +9,14 @@ import {
 } from '@/aggregates/admin-user/dto';
 import { AdminUserError } from '@/aggregates/admin-user/error';
 import { AdminUserQueryService } from '@/aggregates/admin-user/query.service';
-import { AdminAdminUsersController } from '@/apis/admin/admin-users/admin-users.controller';
+import { AdminApiAdminUsersController } from '@/apis/admin/admin-users/admin-users.controller';
 import { BusinessException } from '@/common/exceptions/business.exception';
 import { AdminRole } from '@/generated/prisma';
 import { AdminUserFactory } from '@/tests/factory';
 import { Ok, Err } from '@/utils/result';
 
 describe('admin admin users controller', () => {
-  let controller: AdminAdminUsersController;
+  let controller: AdminApiAdminUsersController;
   let queryService: jest.Mocked<AdminUserQueryService>;
   let commandService: jest.Mocked<AdminUserCommandService>;
   let adminUserFactory: AdminUserFactory;
@@ -39,7 +39,7 @@ describe('admin admin users controller', () => {
     };
 
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [AdminAdminUsersController],
+      controllers: [AdminApiAdminUsersController],
       providers: [
         {
           provide: AdminUserQueryService,
@@ -52,7 +52,7 @@ describe('admin admin users controller', () => {
       ],
     }).compile();
 
-    controller = module.get<AdminAdminUsersController>(AdminAdminUsersController);
+    controller = module.get<AdminApiAdminUsersController>(AdminApiAdminUsersController);
     queryService = module.get(AdminUserQueryService);
     commandService = module.get(AdminUserCommandService);
   });

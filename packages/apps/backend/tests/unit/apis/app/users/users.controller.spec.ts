@@ -3,11 +3,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UserCommandService } from '@/aggregates/user/command.service';
 import { toUserResponseDto } from '@/aggregates/user/dto';
 import { UserQueryService } from '@/aggregates/user/query.service';
-import { AppUsersController } from '@/apis/app/users/users.controller';
+import { AppApiUsersController } from '@/apis/app/users/users.controller';
 import { UserResponseDtoFactory } from '@/tests/factory';
 
 describe('appUsersController', () => {
-  let controller: AppUsersController;
+  let controller: AppApiUsersController;
   let queryService: jest.Mocked<UserQueryService>;
   let commandService: jest.Mocked<UserCommandService>;
   let userResponseDtoFactory: UserResponseDtoFactory;
@@ -25,7 +25,7 @@ describe('appUsersController', () => {
     };
 
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [AppUsersController],
+      controllers: [AppApiUsersController],
       providers: [
         {
           provide: UserQueryService,
@@ -38,7 +38,7 @@ describe('appUsersController', () => {
       ],
     }).compile();
 
-    controller = module.get<AppUsersController>(AppUsersController);
+    controller = module.get<AppApiUsersController>(AppApiUsersController);
     queryService = module.get(UserQueryService);
     commandService = module.get(UserCommandService);
   });
@@ -56,7 +56,7 @@ describe('appUsersController', () => {
       const expectedResult = toUserResponseDto(mockUser);
       queryService.findUserByIdOrFail.mockResolvedValue(expectedResult);
 
-      const result = await controller.findUserById(publicId);
+      const result = await controller.findUniqueOrThrowUserById(publicId);
 
       expect(queryService.findUserByIdOrFail).toHaveBeenCalledWith({ publicId });
       expect(result).toStrictEqual(expectedResult);
@@ -89,7 +89,7 @@ describe('appUsersController', () => {
       const expectedResult = toUserResponseDto({ ...mockUser, name: 'Updated Name' });
       commandService.updateUserById.mockResolvedValue(expectedResult);
 
-      const result = await controller.updateUser(publicId, data);
+      const result = await controller.updateUserById(publicId, data);
 
       expect(commandService.updateUserById).toHaveBeenCalledWith({ publicId, data });
       expect(result).toStrictEqual(expectedResult);

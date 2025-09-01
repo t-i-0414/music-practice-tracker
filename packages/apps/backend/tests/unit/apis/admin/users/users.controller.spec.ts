@@ -3,11 +3,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UserCommandService } from '@/aggregates/user/command.service';
 import { toUserResponseDto, toUsersResponseDto } from '@/aggregates/user/dto';
 import { UserQueryService } from '@/aggregates/user/query.service';
-import { AdminUsersController } from '@/apis/admin/users/users.controller';
+import { AdminApiUsersController } from '@/apis/admin/users/users.controller';
 import { UserResponseDtoFactory } from '@/tests/factory';
 
 describe('adminUsersController', () => {
-  let controller: AdminUsersController;
+  let controller: AdminApiUsersController;
   let queryService: jest.Mocked<UserQueryService>;
   let commandService: jest.Mocked<UserCommandService>;
   let userResponseDtoFactory: UserResponseDtoFactory;
@@ -29,7 +29,7 @@ describe('adminUsersController', () => {
     };
 
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [AdminUsersController],
+      controllers: [AdminApiUsersController],
       providers: [
         {
           provide: UserQueryService,
@@ -42,7 +42,7 @@ describe('adminUsersController', () => {
       ],
     }).compile();
 
-    controller = module.get<AdminUsersController>(AdminUsersController);
+    controller = module.get<AdminApiUsersController>(AdminApiUsersController);
     queryService = module.get(UserQueryService);
     commandService = module.get(UserCommandService);
   });
