@@ -154,32 +154,26 @@ describe('constant ERROR_CODE_RECORDS', () => {
 
   describe('specific error code ranges', () => {
     it('should have proper HTTP status code mapping for API errors', () => {
-      // 4xx client errors
       expect(ERROR_CODE_RECORDS.AP0400).toContain('Bad request');
       expect(ERROR_CODE_RECORDS.AP0404).toContain('Not found');
 
-      // 5xx server errors
       expect(ERROR_CODE_RECORDS.AP0500).toContain('Internal server error');
       expect(ERROR_CODE_RECORDS.AP0503).toContain('Service unavailable');
     });
 
     it('should have specific repository error categories', () => {
-      // Data validation (00xx)
       const dataValidationCodes = Object.keys(ERROR_CODE_RECORDS).filter((code) => /^RE00\d{2}$/u.exec(code));
 
       expect(dataValidationCodes.length).toBeGreaterThan(0);
 
-      // Query errors (01xx)
       const queryCodes = Object.keys(ERROR_CODE_RECORDS).filter((code) => /^RE01\d{2}$/u.exec(code));
 
       expect(queryCodes.length).toBeGreaterThan(0);
 
-      // Connection & system (02xx)
       const connectionCodes = Object.keys(ERROR_CODE_RECORDS).filter((code) => /^RE02\d{2}$/u.exec(code));
 
       expect(connectionCodes.length).toBeGreaterThan(0);
 
-      // Migration (03xx)
       const migrationCodes = Object.keys(ERROR_CODE_RECORDS).filter((code) => /^RE03\d{2}$/u.exec(code));
 
       expect(migrationCodes.length).toBeGreaterThan(0);
@@ -197,11 +191,11 @@ describe('function isErrorCode', () => {
 
   it('should return false for invalid error codes', () => {
     expect(isErrorCode('XX0001')).toBe(false);
-    expect(isErrorCode('AP0000')).toBe(false); // Assuming this doesn't exist
+    expect(isErrorCode('AP0000')).toBe(false);
     expect(isErrorCode('INVALID')).toBe(false);
     expect(isErrorCode('')).toBe(false);
-    expect(isErrorCode('AP400')).toBe(false); // Missing digit
-    expect(isErrorCode('AP04000')).toBe(false); // Too many digits
+    expect(isErrorCode('AP400')).toBe(false);
+    expect(isErrorCode('AP04000')).toBe(false);
   });
 
   it('should be case sensitive', () => {
@@ -233,7 +227,6 @@ describe('function isErrorCode', () => {
 
 describe('type safety and consistency', () => {
   it('should maintain type consistency between ErrorCode and ERROR_CODE_RECORDS', () => {
-    // This test ensures that the types are working correctly
     const errorCodes = Object.keys(ERROR_CODE_RECORDS);
     const errorMessages = Object.values(ERROR_CODE_RECORDS);
 
@@ -254,8 +247,8 @@ describe('type safety and consistency', () => {
     const errorMessages = Object.values(ERROR_CODE_RECORDS);
 
     errorMessages.forEach((message) => {
-      expect(message.length).toBeGreaterThan(5); // Reasonable minimum length
-      expect(message).not.toBe('TODO'); // No placeholder messages
+      expect(message.length).toBeGreaterThan(5);
+      expect(message).not.toBe('TODO');
     });
 
     expect(errorMessages.length).toBeGreaterThan(0);

@@ -92,7 +92,6 @@ describe('function isDomainError', () => {
   });
 
   it('should return false for other CommonError subclasses', () => {
-    // Create a mock CommonError subclass
     class MockError extends CommonError {
       public constructor(errorCode: any, detail: string) {
         super(errorCode, detail);
@@ -136,7 +135,7 @@ describe('function isDomainErrorCode', () => {
   });
 
   it('should return false for invalid error codes', () => {
-    expect(isDomainErrorCode('DO0001')).toBe(false); // Valid format but not in ERROR_CODE_RECORDS
+    expect(isDomainErrorCode('DO0001')).toBe(false);
     expect(isDomainErrorCode('INVALID')).toBe(false);
     expect(isDomainErrorCode('')).toBe(false);
   });

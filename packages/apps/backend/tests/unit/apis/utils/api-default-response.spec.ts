@@ -4,7 +4,6 @@ import { ApiResponse } from '@nestjs/swagger';
 import { ApiStandardResponses } from '@/apis/utils/api-default-response';
 import { ErrorResponseDto } from '@/apis/utils/api.error';
 
-// Mock the dependencies
 jest.mock<typeof import('@nestjs/common')>('@nestjs/common', () => {
   const actual = jest.requireActual('@nestjs/common');
   return {

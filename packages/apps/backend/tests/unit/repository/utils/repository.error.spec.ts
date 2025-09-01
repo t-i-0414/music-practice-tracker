@@ -13,7 +13,6 @@ import {
   buildRepositoryError,
 } from '@/repository/utils/repository.error';
 
-// Mock the isPrismaError function
 jest.mock<typeof import('@/repository/utils/prisma.error')>('@/repository/utils/prisma.error', () => {
   const actual = jest.requireActual('@/repository/utils/prisma.error');
   return {
@@ -201,7 +200,6 @@ describe('function buildRepositoryError', () => {
 
   describe('unknown error type', () => {
     it('should build RepositoryError for unknown Prisma error', () => {
-      // Testing unreachable code path - in practice, only valid PrismaError types should be passed
       const unknownError = { message: 'Unknown error' } as unknown as PrismaError;
 
       const result = buildRepositoryError(unknownError);

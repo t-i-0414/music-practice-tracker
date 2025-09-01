@@ -112,7 +112,6 @@ describe('constant PRISMA_ERROR_CODE_MAP', () => {
   it('should have all required error mappings', () => {
     expect.assertions(5);
 
-    // Check that some key error codes are mapped
     const requiredCodes = ['P2002', 'P2025', 'P1001', 'P3000'];
 
     requiredCodes.forEach((code) => {
@@ -161,18 +160,14 @@ describe('function isPrismaErrorCode', () => {
 
 describe('error code mapping completeness', () => {
   it('should cover common Prisma error scenarios', () => {
-    // Unique constraint violation
     expect(PRISMA_ERROR_CODE_MAP.P2002).toBe('RE0003');
 
-    // Record not found
     expect(PRISMA_ERROR_CODE_MAP.P2001).toBe('RE0002');
     expect(PRISMA_ERROR_CODE_MAP.P2025).toBe('RE0002');
 
-    // Connection failures
     expect(PRISMA_ERROR_CODE_MAP.P1001).toBe('RE0209');
     expect(PRISMA_ERROR_CODE_MAP.P1002).toBe('RE0203');
 
-    // Foreign key violations
     expect(PRISMA_ERROR_CODE_MAP.P2003).toBe('RE0004');
   });
 

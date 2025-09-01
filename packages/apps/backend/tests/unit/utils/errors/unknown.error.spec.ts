@@ -92,13 +92,11 @@ describe('function isUnknownError', () => {
 });
 
 describe('function isUnknownErrorCode', () => {
-  // Mock the dependencies
   const mockIsErrorCode = jest.fn();
   const mockUnknownErrorPrefix = 'UN';
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // Mock the imported functions
     jest.doMock<typeof import('@/utils/errors/error-code')>('@/utils/errors/error-code', () => {
       const actual = jest.requireActual('@/utils/errors/error-code');
       return {
@@ -140,7 +138,6 @@ describe('function isUnknownErrorCode', () => {
     expect(isUnknownErrorCode({})).toBe(false);
   });
 
-  // Test with actual implementation
   describe('with actual implementation', () => {
     beforeEach(() => {
       jest.resetModules();
@@ -149,10 +146,8 @@ describe('function isUnknownErrorCode', () => {
     it('should work with real error code validation', async () => {
       expect.assertions(1);
 
-      // Re-import to get the actual implementation
       const { isUnknownErrorCode: realIsUnknownErrorCode } = await import('@/utils/errors/unknown.error');
 
-      // These should be tested with real error codes from your system
       expect(typeof realIsUnknownErrorCode('UN9999')).toBe('boolean');
     });
   });

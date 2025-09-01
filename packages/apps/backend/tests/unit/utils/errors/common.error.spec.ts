@@ -1,7 +1,6 @@
 import { CommonError } from '@/utils/errors/common.error';
 import { ERROR_CODE_RECORDS, type ErrorCode } from '@/utils/errors/error-code';
 
-// Create a concrete implementation for testing
 class TestCommonError extends CommonError {
   public constructor(errorCode: ErrorCode, detail: string, cause?: unknown) {
     super(errorCode, detail, cause);
@@ -99,20 +98,18 @@ describe('class CommonError', () => {
     it('should have readonly properties', () => {
       const error = new TestCommonError('AP0400', 'Test detail');
 
-      // TypeScript would prevent this, but let's ensure runtime behavior
       const mutableError = error as unknown as Record<string, unknown>;
 
       expect(() => {
         mutableError.errorCode = 'CHANGED';
-      }).not.toThrow(); // JavaScript allows it, but TypeScript prevents it
+      }).not.toThrow();
 
-      // The original value should still be accessible
       expect(error.errorCode).toBe('AP0400');
     });
 
     it('should set timestamp on creation', () => {
       const beforeCreate = Date.now();
-      dateNowSpy.mockRestore(); // Use real date for this test
+      dateNowSpy.mockRestore();
 
       const error = new TestCommonError('AP0400', 'Test detail');
       const afterCreate = Date.now();
@@ -127,7 +124,7 @@ describe('class CommonError', () => {
       const error = new TestCommonError('AP0401', 'API error detail');
 
       expect(error.errorMessage).toBe('Unauthorized');
-      expect(error.errorMessage).toBe((ERROR_CODE_RECORDS as Record<string, string>).AP0401);
+      expect(error.errorMessage).toBe(ERROR_CODE_RECORDS.AP0401);
     });
   });
 

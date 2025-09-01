@@ -2,7 +2,6 @@ import { ExecutionContext } from '@nestjs/common';
 
 import { CurrentUserData } from '@/apis/utils/decorators/current-user.decorator';
 
-// Test the factory function directly instead of the decorator
 const currentUserFactory = (
   data: keyof CurrentUserData | undefined,
   ctx: ExecutionContext,

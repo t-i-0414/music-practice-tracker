@@ -1,9 +1,6 @@
-// Since Publicize is a type utility, we'll test its usage patterns and type behavior
-
 import type { Publicize } from '@/domain/utils/publicize';
 
 describe('publicize type utility', () => {
-  // Define test interfaces to verify type behavior
   interface InternalUser {
     id: number;
     publicId: string;
@@ -26,7 +23,6 @@ describe('publicize type utility', () => {
     it('should remove id property from type', () => {
       type PublicUser = Publicize<InternalUser>;
 
-      // Create an object that should match the publicized type
       const publicUser: PublicUser = {
         publicId: 'user-123',
         email: 'test@example.com',
@@ -35,14 +31,12 @@ describe('publicize type utility', () => {
         updatedAt: new Date(),
       };
 
-      // Verify the object has the expected properties
       expect(publicUser).toHaveProperty('publicId');
       expect(publicUser).toHaveProperty('email');
       expect(publicUser).toHaveProperty('name');
       expect(publicUser).toHaveProperty('createdAt');
       expect(publicUser).toHaveProperty('updatedAt');
 
-      // Verify it doesn't have the id property (this is more of a compile-time check)
       expect(publicUser).not.toHaveProperty('id');
     });
 
@@ -68,7 +62,6 @@ describe('publicize type utility', () => {
     it('should preserve all other properties unchanged', () => {
       type PublicUser = Publicize<InternalUser>;
 
-      // The type should preserve all properties except 'id'
       const user: PublicUser = {
         publicId: 'user-789',
         email: 'user@test.com',
@@ -77,7 +70,6 @@ describe('publicize type utility', () => {
         updatedAt: new Date('2023-01-02'),
       };
 
-      // Check all properties are present and correctly typed
       expect(typeof user.publicId).toBe('string');
       expect(typeof user.email).toBe('string');
       expect(typeof user.name).toBe('string');
@@ -97,7 +89,6 @@ describe('publicize type utility', () => {
         updatedAt: new Date(),
       };
 
-      // Function that transforms internal to public
       const publicize = <T extends { id: any }>(internal: T): Publicize<T> => {
         const { id, ...publicData } = internal;
         return publicData as Publicize<T>;
@@ -171,7 +162,6 @@ describe('publicize type utility', () => {
 
       type PublicObject = Publicize<ObjectWithoutId>;
 
-      // This should be the same as the original since there's no 'id' to remove
       const obj: PublicObject = {
         publicId: 'obj-123',
         name: 'Test Object',
@@ -195,7 +185,6 @@ describe('publicize type utility', () => {
       const publicUser: PublicUserOptional = {
         publicId: 'user-optional',
         email: 'optional@test.com',
-        // name and avatar are optional and can be omitted
       };
 
       expect(publicUser).not.toHaveProperty('id');
@@ -228,10 +217,8 @@ describe('publicize type utility', () => {
 
   describe('type utility validation', () => {
     it('should be a pure type transformation', () => {
-      // This is mainly a compile-time test to ensure the type works correctly
       type TestType = Publicize<{ id: number; value: string }>;
 
-      // The type should only have 'value' property
       const test: TestType = { value: 'test' };
 
       expect(test).toHaveProperty('value');

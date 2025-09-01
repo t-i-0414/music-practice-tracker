@@ -34,10 +34,9 @@ describe('app API Decorators and Guards (e2e)', () => {
     it('should apply correct route prefix', async () => {
       expect.assertions(1);
 
-      // The users controller should be available at /users
       const response = await request(app.getHttpServer())
         .get('/users/00000000-0000-0000-0000-000000000000')
-        .expect(HttpStatus.NOT_FOUND); // Expected since user doesn't exist
+        .expect(HttpStatus.NOT_FOUND);
 
       expect(response.body).toHaveProperty('message');
     });
@@ -55,7 +54,6 @@ describe('app API Decorators and Guards (e2e)', () => {
     it('should validate UUID format in path parameters', async () => {
       expect.assertions(1);
 
-      // Invalid UUID format should be rejected
       const response = await request(app.getHttpServer()).get('/users/invalid-uuid').expect(HttpStatus.BAD_REQUEST);
 
       expect(response.body.message).toContain('Validation failed');
@@ -66,7 +64,7 @@ describe('app API Decorators and Guards (e2e)', () => {
 
       const invalidBody = {
         email: 'not-an-email',
-        name: '', // Empty name
+        name: '',
       };
 
       const response = await request(app.getHttpServer())
@@ -96,7 +94,6 @@ describe('app API Decorators and Guards (e2e)', () => {
     it('should handle array query parameters', async () => {
       expect.assertions(1);
 
-      // Create test users
       const createPromises = Array.from({ length: 3 }, (_, i) =>
         request(app.getHttpServer())
           .post('/users')
@@ -107,8 +104,6 @@ describe('app API Decorators and Guards (e2e)', () => {
       const responses = await Promise.all(createPromises);
       const users = responses.map((response) => response.body);
 
-      // Query with array of IDs (when admin endpoint is available)
-      // For now, test that the endpoint exists
       const response = await request(app.getHttpServer()).get(`/users/${users[0].publicId}`).expect(HttpStatus.OK);
 
       expect(response.body.publicId).toBe(users[0].publicId);
@@ -164,7 +159,7 @@ describe('app API Decorators and Guards (e2e)', () => {
       const response = await request(app.getHttpServer())
         .patch('/users/123')
         .send({ name: 'Patch Name' })
-        .expect(HttpStatus.NOT_FOUND); // PATCH not implemented
+        .expect(HttpStatus.NOT_FOUND);
 
       expect(response.status).toBe(HttpStatus.NOT_FOUND);
     });
@@ -246,7 +241,6 @@ describe('app API Decorators and Guards (e2e)', () => {
 
       const response = await request(app.getHttpServer()).post('/users').send(userData).expect(HttpStatus.CREATED);
 
-      // Response should include all ApiProperty decorated fields
       expect(response.body).toHaveProperty('publicId');
       expect(response.body).toHaveProperty('email');
       expect(response.body).toHaveProperty('name');
@@ -263,7 +257,7 @@ describe('app API Decorators and Guards (e2e)', () => {
         .post('/users')
         .send({
           email: 'invalid-email-format',
-          name: 'a'.repeat(256), // Exceeds max length
+          name: 'a'.repeat(256),
         })
         .expect(HttpStatus.BAD_REQUEST);
 
@@ -279,10 +273,8 @@ describe('app API Decorators and Guards (e2e)', () => {
         name: 'Unique User',
       };
 
-      // Create first user
       await request(app.getHttpServer()).post('/users').send(userData).expect(HttpStatus.CREATED);
 
-      // Try to create duplicate
       const response = await request(app.getHttpServer()).post('/users').send(userData).expect(HttpStatus.CONFLICT);
 
       expect(response.body).toHaveProperty('message');

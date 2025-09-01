@@ -57,7 +57,6 @@ describe('repositoryService (Integration)', () => {
       expect(result.user.email).toBe('transaction@example.com');
       expect(result.adminUser.email).toBe('admin@example.com');
 
-      // Verify data was actually committed
       const foundUser = await service.user.findUnique({
         where: { publicId: result.user.publicId },
       });
@@ -77,7 +76,6 @@ describe('repositoryService (Integration)', () => {
             },
           });
 
-          // Force an error
           throw new Error('Forced rollback');
         }),
       ).rejects.toThrow('Forced rollback');
@@ -206,7 +204,7 @@ describe('repositoryService (Integration)', () => {
 
       const emails = results.map((r) => r.email);
 
-      expect(new Set(emails).size).toBe(5); // All unique
+      expect(new Set(emails).size).toBe(5);
       expect(results[0].email).toContain('concurrent');
     });
   });
