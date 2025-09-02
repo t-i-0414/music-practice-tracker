@@ -1,10 +1,16 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { type TestingModule } from '@nestjs/testing';
 
 import { AppApiUsersController } from '@/apis/app/users/users.controller';
 import { UserCommandService } from '@/domain/aggregates/user/user.command.service';
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 import { toUserResponseDto } from '@/domain/aggregates/user/utils/dto';
 import { UserFactory } from '@/tests/factory';
+import {
+  createTestModule,
+  createMockUserQueryService,
+  createMockUserCommandService,
+  resetAllMocks,
+} from '@/tests/unit/helpers';
 
 describe('appApiUsersController', () => {
   let controller: AppApiUsersController;
@@ -15,22 +21,11 @@ describe('appApiUsersController', () => {
   beforeEach(async () => {
     userFactory = new UserFactory();
 
-    const mockQueryService = {
-      findUniqueOrThrowUserById: jest.fn(),
-      findManyUsersById: jest.fn(),
-      findAllUsers: jest.fn(),
-    };
+    const mockQueryService = createMockUserQueryService();
+    const mockCommandService = createMockUserCommandService();
 
-    const mockCommandService = {
-      createUser: jest.fn(),
-      createManyAndReturnUsers: jest.fn(),
-      updateUserById: jest.fn(),
-      deleteUserById: jest.fn(),
-      deleteManyUsersById: jest.fn(),
-    };
-
-    const module: TestingModule = await Test.createTestingModule({
-      controllers: [AppApiUsersController],
+    const module: TestingModule = await createTestModule({
+      controller: AppApiUsersController,
       providers: [
         {
           provide: UserQueryService,
@@ -41,15 +36,15 @@ describe('appApiUsersController', () => {
           useValue: mockCommandService,
         },
       ],
-    }).compile();
+    });
 
     controller = module.get<AppApiUsersController>(AppApiUsersController);
-    queryService = module.get(UserQueryService);
-    commandService = module.get(UserCommandService);
+    queryService = module.get<jest.Mocked<UserQueryService>>(UserQueryService);
+    commandService = module.get<jest.Mocked<UserCommandService>>(UserCommandService);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    resetAllMocks(queryService, commandService);
   });
 
   describe('get /users/:publicId', () => {

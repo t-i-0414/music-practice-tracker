@@ -41,10 +41,10 @@
     "test": "jest --config ./tests/jest.config.ts",
     "test:cov": "bun run test --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --config ./tests/jest.config.ts --runInBand",
-    "test:e2e": "bun run test --testMatch=\"<rootDir>/e2e/**/*.spec.ts\"",
-    "test:integration": "bun run test --testMatch=\"<rootDir>/integration/**/*.spec.ts\"",
+    "test:e2e": "bun run test --testMatch=\"<rootDir>/tests/e2e/**/*.spec.ts\"",
+    "test:integration": "bun run test --testMatch=\"<rootDir>/tests/integration/**/*.spec.ts\"",
     "test:ui": "majestic",
-    "test:unit": "bun run test --testMatch=\"<rootDir>/unit/**/*.spec.ts\"",
+    "test:unit": "bun run test --testMatch=\"<rootDir>/tests/unit/**/*.spec.ts\"",
     "test:watch": "bun run test --watch",
     "type:check": "tsc --noEmit"
   },

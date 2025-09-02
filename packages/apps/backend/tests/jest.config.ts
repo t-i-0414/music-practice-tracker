@@ -5,11 +5,14 @@ const config: Config = {
   rootDir: '..',
   testMatch: ['<rootDir>/tests/**/*.spec.ts'],
   transform: {
-    '^.+\\.(t|j)s$': ['ts-jest', {
-      tsconfig: {
-        allowJs: true,
+    '^.+\\.(t|j)s$': [
+      'ts-jest',
+      {
+        tsconfig: {
+          allowJs: true,
+        },
       },
-    }],
+    ],
   },
   collectCoverageFrom: [
     '<rootDir>/src/**/*.ts',

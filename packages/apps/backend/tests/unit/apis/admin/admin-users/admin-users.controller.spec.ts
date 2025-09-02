@@ -1,4 +1,4 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { type TestingModule } from '@nestjs/testing';
 
 import { AdminApiAdminUsersController } from '@/apis/admin/admin-users/admin-users.controller';
 import { AdminUserCommandService } from '@/domain/aggregates/admin-user/admin-user.command.service';
@@ -10,6 +10,12 @@ import {
 } from '@/domain/aggregates/admin-user/utils/dto';
 import { AdminRole } from '@/generated/prisma';
 import { AdminUserFactory } from '@/tests/factory';
+import {
+  createTestModule,
+  createMockAdminUserQueryService,
+  createMockAdminUserCommandService,
+  resetAllMocks,
+} from '@/tests/unit/helpers';
 
 describe('controller AdminApiAdminUsersController', () => {
   let controller: AdminApiAdminUsersController;
@@ -20,22 +26,11 @@ describe('controller AdminApiAdminUsersController', () => {
   beforeEach(async () => {
     adminUserFactory = new AdminUserFactory();
 
-    const mockQueryService = {
-      findUniqueOrThrowAdminUser: jest.fn(),
-      findManyAdminUsersById: jest.fn(),
-      findAllAdminUsers: jest.fn(),
-    };
+    const mockQueryService = createMockAdminUserQueryService();
+    const mockCommandService = createMockAdminUserCommandService();
 
-    const mockCommandService = {
-      createAdminUser: jest.fn(),
-      createManyAndReturnAdminUsers: jest.fn(),
-      updateAdminUserById: jest.fn(),
-      deleteAdminUserById: jest.fn(),
-      deleteManyAdminUsersByIds: jest.fn(),
-    };
-
-    const module: TestingModule = await Test.createTestingModule({
-      controllers: [AdminApiAdminUsersController],
+    const module: TestingModule = await createTestModule({
+      controller: AdminApiAdminUsersController,
       providers: [
         {
           provide: AdminUserQueryService,
@@ -46,15 +41,15 @@ describe('controller AdminApiAdminUsersController', () => {
           useValue: mockCommandService,
         },
       ],
-    }).compile();
+    });
 
     controller = module.get<AdminApiAdminUsersController>(AdminApiAdminUsersController);
-    queryService = module.get(AdminUserQueryService);
-    commandService = module.get(AdminUserCommandService);
+    queryService = module.get<jest.Mocked<AdminUserQueryService>>(AdminUserQueryService);
+    commandService = module.get<jest.Mocked<AdminUserCommandService>>(AdminUserCommandService);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    resetAllMocks(queryService, commandService);
   });
 
   describe('get /admin/admin-users', () => {

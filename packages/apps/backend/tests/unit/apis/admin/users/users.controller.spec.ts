@@ -1,10 +1,16 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { type TestingModule } from '@nestjs/testing';
 
 import { AdminApiUsersController } from '@/apis/admin/users/users.controller';
 import { UserCommandService } from '@/domain/aggregates/user/user.command.service';
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 import { toUserResponseDto, toUsersResponseDto } from '@/domain/aggregates/user/utils/dto';
 import { UserFactory } from '@/tests/factory';
+import {
+  createTestModule,
+  createMockUserQueryService,
+  createMockUserCommandService,
+  resetAllMocks,
+} from '@/tests/unit/helpers';
 
 describe('adminApiUsersController', () => {
   let controller: AdminApiUsersController;
@@ -15,21 +21,11 @@ describe('adminApiUsersController', () => {
   beforeEach(async () => {
     userFactory = new UserFactory();
 
-    const mockQueryService = {
-      findUniqueOrThrowUserById: jest.fn(),
-      findManyUsersById: jest.fn(),
-    };
+    const mockQueryService = createMockUserQueryService();
+    const mockCommandService = createMockUserCommandService();
 
-    const mockCommandService = {
-      createUser: jest.fn(),
-      createManyAndReturnUsers: jest.fn(),
-      updateUserById: jest.fn(),
-      deleteUserById: jest.fn(),
-      deleteManyUsersById: jest.fn(),
-    };
-
-    const module: TestingModule = await Test.createTestingModule({
-      controllers: [AdminApiUsersController],
+    const module: TestingModule = await createTestModule({
+      controller: AdminApiUsersController,
       providers: [
         {
           provide: UserQueryService,
@@ -40,15 +36,15 @@ describe('adminApiUsersController', () => {
           useValue: mockCommandService,
         },
       ],
-    }).compile();
+    });
 
     controller = module.get<AdminApiUsersController>(AdminApiUsersController);
-    queryService = module.get(UserQueryService);
-    commandService = module.get(UserCommandService);
+    queryService = module.get<jest.Mocked<UserQueryService>>(UserQueryService);
+    commandService = module.get<jest.Mocked<UserCommandService>>(UserCommandService);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    resetAllMocks(queryService, commandService);
   });
 
   describe('get /admin/users', () => {
