@@ -5,7 +5,7 @@ import { toAdminUserResponseDto, toAdminUsersResponseDto } from '@/domain/aggreg
 import { RepositoryService } from '@/repository/repository.service';
 import { AdminUserFactory } from '@/tests/factory';
 
-describe('adminUserQueryService', () => {
+describe('unit AdminUserQueryService', () => {
   let service: AdminUserQueryService;
   let repository: {
     adminUser: {

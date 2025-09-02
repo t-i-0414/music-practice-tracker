@@ -1,6 +1,6 @@
 import { isDevelopment, isProduction, isTest, getEnvironment } from '@/utils/environment';
 
-describe('environment utilities', () => {
+describe('unit environment utilities', () => {
   const originalEnv = process.env;
 
   beforeEach(() => {

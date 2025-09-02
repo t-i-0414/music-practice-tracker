@@ -5,7 +5,7 @@ import { toUserResponseDto, toUsersResponseDto } from '@/domain/aggregates/user/
 import { RepositoryService } from '@/repository/repository.service';
 import { UserFactory } from '@/tests/factory';
 
-describe('userQueryService', () => {
+describe('unit UserQueryService', () => {
   let service: UserQueryService;
   let repository: {
     user: {

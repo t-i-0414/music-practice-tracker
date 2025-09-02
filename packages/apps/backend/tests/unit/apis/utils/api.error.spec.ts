@@ -8,7 +8,7 @@ import {
   HTTP_STATUS_ERROR_CODE_RECORD_BY_REPOSITORY_ERROR_CODE,
 } from '@/apis/utils/api.error';
 
-describe('class ApiError', () => {
+describe('unit ApiError', () => {
   describe('constructor', () => {
     it('should create ApiError with correct properties', () => {
       const error = new ApiError('AP0400', 'Test error');

@@ -28,7 +28,7 @@ jest.mock<typeof import('@/apis/utils/api.error')>('@/apis/utils/api.error', () 
   };
 });
 
-describe('decorator ApiStandardResponses', () => {
+describe('unit ApiStandardResponses', () => {
   const mockApplyDecorators = jest.mocked(applyDecorators);
   const mockApiResponse = jest.mocked(ApiResponse);
 

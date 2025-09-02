@@ -7,7 +7,7 @@ import { AdminApiModule } from '@/apis/admin/admin.module';
 import { AdminRole } from '@/generated/prisma';
 import { DatabaseHelper } from '@/tests/helpers/database.helper';
 
-describe('admin AdminUsers API (e2e)', () => {
+describe('e2e AdminApiUsersController', () => {
   let app: INestApplication;
   let databaseHelper: DatabaseHelper;
 

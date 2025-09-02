@@ -7,7 +7,7 @@ import {
 } from '@/generated/prisma/runtime/library';
 import { isPrismaError, PRISMA_ERROR_CODE_MAP, isPrismaErrorCode } from '@/repository/utils/prisma.error';
 
-describe('function isPrismaError', () => {
+describe('unit isPrismaError', () => {
   it.each([
     [
       'PrismaClientKnownRequestError',

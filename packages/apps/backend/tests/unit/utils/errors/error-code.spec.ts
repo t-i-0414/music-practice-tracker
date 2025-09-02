@@ -8,7 +8,7 @@ import {
   isErrorCode,
 } from '@/utils/errors/error-code';
 
-describe('error prefixes', () => {
+describe('unit ErrorPrefixes', () => {
   describe('constants', () => {
     it.each([
       ['apiErrorPrefix', apiErrorPrefix, 'AP'],

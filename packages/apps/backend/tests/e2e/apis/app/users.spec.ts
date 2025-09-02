@@ -6,7 +6,7 @@ import * as request from 'supertest';
 import { AppApiModule } from '@/apis/app/app.module';
 import { DatabaseHelper } from '@/tests/helpers/database.helper';
 
-describe('app Users API (e2e)', () => {
+describe('e2e AppApiUsersController', () => {
   let app: INestApplication;
   let databaseHelper: DatabaseHelper;
 

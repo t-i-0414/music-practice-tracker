@@ -6,7 +6,7 @@ import * as request from 'supertest';
 import { AdminApiModule } from '@/apis/admin/admin.module';
 import { DatabaseHelper } from '@/tests/helpers/database.helper';
 
-describe('admin Users API (e2e)', () => {
+describe('e2e AdminApiUsersController', () => {
   let app: INestApplication;
   let databaseHelper: DatabaseHelper;
 

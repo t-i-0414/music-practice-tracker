@@ -4,7 +4,7 @@ import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 import { RepositoryService } from '@/repository/repository.service';
 import { DatabaseHelper } from '@/tests/helpers/database.helper';
 
-describe('userQueryService (Integration)', () => {
+describe('integration UserQueryService', () => {
   let service: UserQueryService;
   let databaseHelper: DatabaseHelper;
   let repository: any;

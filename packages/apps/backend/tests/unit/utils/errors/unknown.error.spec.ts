@@ -1,7 +1,7 @@
 import { CommonError } from '@/utils/errors/common.error';
 import { UnknownError, isUnknownError, isUnknownErrorCode } from '@/utils/errors/unknown.error';
 
-describe('class UnknownError', () => {
+describe('unit UnknownError', () => {
   describe('constructor', () => {
     it('should create UnknownError with correct properties', () => {
       const error = new UnknownError('UN9999', 'Test unknown error');

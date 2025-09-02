@@ -7,7 +7,7 @@ import { AdminRole } from '@/generated/prisma';
 import { RepositoryService } from '@/repository/repository.service';
 import { AdminUserFactory } from '@/tests/factory';
 
-describe('adminUserCommandService', () => {
+describe('unit AdminUserCommandService', () => {
   let service: AdminUserCommandService;
   let repository: {
     adminUser: {

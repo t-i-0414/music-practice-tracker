@@ -1,7 +1,7 @@
 import { DomainError, isDomainError, isDomainErrorCode } from '@/domain/utils/domain.error';
 import { CommonError } from '@/utils/errors/common.error';
 
-describe('class DomainError', () => {
+describe('unit DomainError', () => {
   describe('constructor', () => {
     it('should create DomainError with correct properties', () => {
       const error = new DomainError('DO9999', 'Test domain error');

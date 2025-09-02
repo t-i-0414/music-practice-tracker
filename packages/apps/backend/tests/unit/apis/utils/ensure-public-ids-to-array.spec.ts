@@ -1,6 +1,6 @@
 import { ensurePublicIdsToArray } from '@/apis/utils/ensure-public-ids-to-array';
 
-describe('ensurePublicIdsToArray', () => {
+describe('unit ensurePublicIdsToArray', () => {
   describe('null and undefined inputs', () => {
     it('should return empty array for null', () => {
       const result = ensurePublicIdsToArray(null);

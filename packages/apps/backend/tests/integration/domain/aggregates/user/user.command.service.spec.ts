@@ -5,7 +5,7 @@ import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 import { RepositoryService } from '@/repository/repository.service';
 import { DatabaseHelper } from '@/tests/helpers/database.helper';
 
-describe('userCommandService (Integration)', () => {
+describe('integration UserCommandService', () => {
   let service: UserCommandService;
   let queryService: UserQueryService;
   let databaseHelper: DatabaseHelper;

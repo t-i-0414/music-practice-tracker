@@ -26,7 +26,7 @@ jest.mock<typeof import('@/repository/utils/prisma.error')>('@/repository/utils/
   };
 });
 
-describe('class RepositoryError', () => {
+describe('unit RepositoryError', () => {
   describe('constructor', () => {
     it('should create RepositoryError with correct properties', () => {
       const error = new RepositoryError('RE0001', 'Test error');

@@ -6,7 +6,7 @@ import { AdminRole } from '@/generated/prisma';
 import { RepositoryService } from '@/repository/repository.service';
 import { DatabaseHelper } from '@/tests/helpers/database.helper';
 
-describe('adminUserCommandService (Integration)', () => {
+describe('integration AdminUserCommandService', () => {
   let service: AdminUserCommandService;
   let queryService: AdminUserQueryService;
   let databaseHelper: DatabaseHelper;

@@ -3,7 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { RepositoryService } from '@/repository/repository.service';
 import { DatabaseHelper } from '@/tests/helpers/database.helper';
 
-describe('repositoryService (Integration)', () => {
+describe('integration RepositoryService', () => {
   let service: RepositoryService;
   let databaseHelper: DatabaseHelper;
 

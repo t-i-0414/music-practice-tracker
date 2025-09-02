@@ -7,7 +7,7 @@ class TestCommonError extends CommonError {
   }
 }
 
-describe('class CommonError', () => {
+describe('unit CommonError', () => {
   const mockDate = '2023-01-01T00:00:00.000Z';
   let dateNowSpy: jest.SpyInstance;
 

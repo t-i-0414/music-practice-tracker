@@ -1,6 +1,6 @@
 import type { Publicize } from '@/domain/utils/publicize';
 
-describe('publicize type utility', () => {
+describe('unit Publicize', () => {
   interface InternalUser {
     id: number;
     publicId: string;
