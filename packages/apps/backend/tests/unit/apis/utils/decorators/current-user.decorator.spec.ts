@@ -1,24 +1,25 @@
 import { ExecutionContext } from '@nestjs/common';
+import { ROUTE_ARGS_METADATA } from '@nestjs/common/constants';
 
-import { CurrentUserData } from '@/apis/utils/decorators/current-user.decorator';
+import { CurrentUser, CurrentUserData } from '@/apis/utils/decorators/current-user.decorator';
 
-const currentUserFactory = (
-  data: keyof CurrentUserData | undefined,
-  ctx: ExecutionContext,
-): CurrentUserData | CurrentUserData[keyof CurrentUserData] | undefined => {
-  const request = ctx.switchToHttp().getRequest<{ user?: CurrentUserData }>();
-  const { user } = request;
+type ParamDecorator = (data?: any, ctx?: any) => ParameterDecorator;
 
-  if (data && user) {
-    return user[data];
+const getParamDecoratorFactory = (decorator: ParamDecorator) => {
+  class Test {
+    public test(@decorator() user: any) {
+      return user;
+    }
   }
 
-  return user;
+  const args = Reflect.getMetadata(ROUTE_ARGS_METADATA, Test, 'test');
+  return args[Object.keys(args)[0]].factory;
 };
 
 describe('currentUser decorator', () => {
   let mockRequest: { user?: CurrentUserData };
   let mockExecutionContext: ExecutionContext;
+  let decoratorFactory: any;
 
   const mockUser: CurrentUserData = {
     publicId: 'user-123',
@@ -45,12 +46,14 @@ describe('currentUser decorator', () => {
       switchToWs: jest.fn(),
       getType: jest.fn(),
     } as unknown as ExecutionContext;
+
+    decoratorFactory = getParamDecoratorFactory(CurrentUser);
   });
 
   it('should return the entire user object when no data parameter is provided', () => {
     mockRequest.user = mockUser;
 
-    const result = currentUserFactory(undefined, mockExecutionContext);
+    const result = decoratorFactory(undefined, mockExecutionContext);
 
     expect(result).toStrictEqual(mockUser);
   });
@@ -58,7 +61,7 @@ describe('currentUser decorator', () => {
   it('should return specific user property when data parameter is provided', () => {
     mockRequest.user = mockUser;
 
-    const result = currentUserFactory('email', mockExecutionContext);
+    const result = decoratorFactory('email', mockExecutionContext);
 
     expect(result).toBe('test@example.com');
   });
@@ -66,7 +69,7 @@ describe('currentUser decorator', () => {
   it('should return publicId when data parameter is publicId', () => {
     mockRequest.user = mockUser;
 
-    const result = currentUserFactory('publicId', mockExecutionContext);
+    const result = decoratorFactory('publicId', mockExecutionContext);
 
     expect(result).toBe('user-123');
   });
@@ -74,19 +77,19 @@ describe('currentUser decorator', () => {
   it('should return name when data parameter is name', () => {
     mockRequest.user = mockUser;
 
-    const result = currentUserFactory('name', mockExecutionContext);
+    const result = decoratorFactory('name', mockExecutionContext);
 
     expect(result).toBe('Test User');
   });
 
   it('should return undefined when user is not present in request', () => {
-    const result = currentUserFactory(undefined, mockExecutionContext);
+    const result = decoratorFactory(undefined, mockExecutionContext);
 
     expect(result).toBeUndefined();
   });
 
   it('should return undefined when user is not present and data parameter is provided', () => {
-    const result = currentUserFactory('email', mockExecutionContext);
+    const result = decoratorFactory('email', mockExecutionContext);
 
     expect(result).toBeUndefined();
   });
@@ -94,7 +97,7 @@ describe('currentUser decorator', () => {
   it('should handle user with missing properties gracefully', () => {
     mockRequest.user = { publicId: 'user-123' } as CurrentUserData;
 
-    const result = currentUserFactory('email', mockExecutionContext);
+    const result = decoratorFactory('email', mockExecutionContext);
 
     expect(result).toBeUndefined();
   });
