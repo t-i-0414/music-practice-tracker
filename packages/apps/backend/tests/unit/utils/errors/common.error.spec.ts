@@ -1,3 +1,4 @@
+import { setupDateMock, restoreDateMocks } from '@/tests/unit/utils/helpers/date-mock.helper';
 import { CommonError } from '@/utils/errors/common.error';
 import { ERROR_CODE_RECORDS, type ErrorCode } from '@/utils/errors/error-code';
 
@@ -9,14 +10,17 @@ class TestCommonError extends CommonError {
 
 describe('unit CommonError', () => {
   const mockDate = '2023-01-01T00:00:00.000Z';
+  let toISOStringSpy: jest.SpyInstance;
   let dateNowSpy: jest.SpyInstance;
 
   beforeEach(() => {
-    dateNowSpy = jest.spyOn(Date.prototype, 'toISOString').mockReturnValue(mockDate);
+    const { toISOStringSpy: toISO, dateNowSpy: dateNow } = setupDateMock(mockDate);
+    toISOStringSpy = toISO;
+    dateNowSpy = dateNow;
   });
 
   afterEach(() => {
-    dateNowSpy.mockRestore();
+    restoreDateMocks(toISOStringSpy, dateNowSpy);
   });
 
   describe('constructor', () => {
@@ -96,8 +100,8 @@ describe('unit CommonError', () => {
 
   describe('error properties', () => {
     it('should set timestamp on creation', () => {
+      restoreDateMocks(toISOStringSpy, dateNowSpy);
       const beforeCreate = Date.now();
-      dateNowSpy.mockRestore();
 
       const error = new TestCommonError('AP0400', 'Test detail');
       const afterCreate = Date.now();

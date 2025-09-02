@@ -1,4 +1,4 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 
 import { AdminUserCommandService } from '@/domain/aggregates/admin-user/admin-user.command.service';
 import { AdminUserQueryService } from '@/domain/aggregates/admin-user/admin-user.query.service';
@@ -6,46 +6,31 @@ import { toAdminUserResponseDto, toAdminUsersResponseDto } from '@/domain/aggreg
 import { AdminRole } from '@/generated/prisma';
 import { RepositoryService } from '@/repository/repository.service';
 import { AdminUserFactory } from '@/tests/factory';
+import {
+  createMockAdminUserQueryService,
+  createMockAdminUserRepository,
+} from '@/tests/unit/domain/helpers/domain-service-mocks';
 
 describe('unit AdminUserCommandService', () => {
   let service: AdminUserCommandService;
-  let repository: {
-    adminUser: {
-      create: jest.Mock;
-      createManyAndReturn: jest.Mock;
-      update: jest.Mock;
-      delete: jest.Mock;
-      deleteMany: jest.Mock;
-    };
-  };
+  let repository: ReturnType<typeof createMockAdminUserRepository>;
   let _queryService: jest.Mocked<AdminUserQueryService>;
   let adminUserFactory: AdminUserFactory;
+  let module: TestingModule;
 
   beforeEach(async () => {
     adminUserFactory = new AdminUserFactory();
 
-    const mockRepository = {
-      adminUser: {
-        create: jest.fn(),
-        createManyAndReturn: jest.fn(),
-        update: jest.fn(),
-        delete: jest.fn(),
-        deleteMany: jest.fn(),
-      },
-    };
+    repository = createMockAdminUserRepository();
+    const mockQueryService = createMockAdminUserQueryService();
 
-    const mockQueryService = {
-      findUniqueOrThrowAdminUser: jest.fn(),
-      findManyAdminUsersById: jest.fn(),
-      findAllAdminUsers: jest.fn(),
-    };
-
-    const module: TestingModule = await Test.createTestingModule({
+    const { Test } = await import('@nestjs/testing');
+    module = await Test.createTestingModule({
       providers: [
         AdminUserCommandService,
         {
           provide: RepositoryService,
-          useValue: mockRepository,
+          useValue: repository,
         },
         {
           provide: AdminUserQueryService,
@@ -55,7 +40,6 @@ describe('unit AdminUserCommandService', () => {
     }).compile();
 
     service = module.get<AdminUserCommandService>(AdminUserCommandService);
-    repository = module.get(RepositoryService);
     _queryService = module.get(AdminUserQueryService);
   });
 

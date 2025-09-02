@@ -1,50 +1,32 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 
 import { UserCommandService } from '@/domain/aggregates/user/user.command.service';
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 import { toUserResponseDto, toUsersResponseDto } from '@/domain/aggregates/user/utils/dto';
 import { RepositoryService } from '@/repository/repository.service';
 import { UserFactory } from '@/tests/factory';
+import { createMockUserQueryService, createMockUserRepository } from '@/tests/unit/domain/helpers/domain-service-mocks';
 
 describe('unit UserCommandService', () => {
   let service: UserCommandService;
-  let repository: {
-    user: {
-      create: jest.Mock;
-      createManyAndReturn: jest.Mock;
-      update: jest.Mock;
-      delete: jest.Mock;
-      deleteMany: jest.Mock;
-    };
-  };
+  let repository: ReturnType<typeof createMockUserRepository>;
   let _queryService: jest.Mocked<UserQueryService>;
   let userFactory: UserFactory;
+  let module: TestingModule;
 
   beforeEach(async () => {
     userFactory = new UserFactory();
 
-    const mockRepository = {
-      user: {
-        create: jest.fn(),
-        createManyAndReturn: jest.fn(),
-        update: jest.fn(),
-        delete: jest.fn(),
-        deleteMany: jest.fn(),
-      },
-    };
+    repository = createMockUserRepository();
+    const mockQueryService = createMockUserQueryService();
 
-    const mockQueryService = {
-      findUniqueOrThrowUserById: jest.fn(),
-      findManyUsersById: jest.fn(),
-      findAllUsers: jest.fn(),
-    };
-
-    const module: TestingModule = await Test.createTestingModule({
+    const { Test } = await import('@nestjs/testing');
+    module = await Test.createTestingModule({
       providers: [
         UserCommandService,
         {
           provide: RepositoryService,
-          useValue: mockRepository,
+          useValue: repository,
         },
         {
           provide: UserQueryService,
@@ -54,7 +36,6 @@ describe('unit UserCommandService', () => {
     }).compile();
 
     service = module.get<UserCommandService>(UserCommandService);
-    repository = module.get(RepositoryService);
     _queryService = module.get(UserQueryService);
   });
 
