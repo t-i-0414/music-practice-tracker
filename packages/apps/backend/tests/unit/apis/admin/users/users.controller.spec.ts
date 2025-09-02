@@ -10,7 +10,7 @@ import {
   createMockUserQueryService,
   createMockUserCommandService,
   resetAllMocks,
-} from '@/tests/unit/helpers';
+} from '@/tests/unit/apis/helpers';
 
 describe('adminApiUsersController', () => {
   let controller: AdminApiUsersController;

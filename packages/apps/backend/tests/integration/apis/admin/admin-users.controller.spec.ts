@@ -103,9 +103,9 @@ describe('integration AdminApiAdminUsersController', () => {
       const result = await controller.findManyAdminUsers(undefined);
 
       expect(result.adminUsers).toHaveLength(2);
-      
+
       const emails = result.adminUsers.map((u) => u.email).sort();
-      
+
       expect(emails).toStrictEqual(['admin1@example.com', 'admin2@example.com']);
     });
 
