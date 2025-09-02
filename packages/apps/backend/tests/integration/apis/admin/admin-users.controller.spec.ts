@@ -4,7 +4,6 @@ import { AdminApiAdminUsersController } from '@/apis/admin/admin-users/admin-use
 import { AdminRole } from '@/generated/prisma';
 import { DatabaseHelper } from '@/tests/helpers/database.helper';
 
-
 describe('integration AdminApiAdminUsersController', () => {
   let controller: AdminApiAdminUsersController;
   let databaseHelper: DatabaseHelper;
