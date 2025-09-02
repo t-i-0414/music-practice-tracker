@@ -1,12 +1,12 @@
+import { type RepositoryErrorCode } from './repository.error';
+
 import {
   PrismaClientKnownRequestError,
   PrismaClientUnknownRequestError,
   PrismaClientRustPanicError,
   PrismaClientInitializationError,
   PrismaClientValidationError,
-} from '@prisma/client/runtime/library';
-
-import { type RepositoryErrorCode } from './repository.error';
+} from '@/generated/prisma/runtime/library';
 
 export type PrismaError =
   | PrismaClientKnownRequestError

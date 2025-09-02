@@ -1,13 +1,12 @@
+import { isPrismaError, isPrismaErrorCode, PRISMA_ERROR_CODE_MAP, type PrismaError } from './prisma.error';
+
 import {
   PrismaClientInitializationError,
   PrismaClientKnownRequestError,
   PrismaClientRustPanicError,
   PrismaClientUnknownRequestError,
   PrismaClientValidationError,
-} from '@prisma/client/runtime/library';
-
-import { isPrismaError, isPrismaErrorCode, PRISMA_ERROR_CODE_MAP, type PrismaError } from './prisma.error';
-
+} from '@/generated/prisma/runtime/library';
 import { CommonError } from '@/utils/errors/common.error';
 import { type PreservedRepositoryErrorCode, type ErrorCode } from '@/utils/errors/error-code';
 
