@@ -1,5 +1,5 @@
 import { ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { PrismaClientKnownRequestError } from '@/generated/prisma/runtime/library';
 import { Request, Response } from 'express';
 
 import { GlobalExceptionFilter } from '@/apis/utils/filters/global-exception.filter';
