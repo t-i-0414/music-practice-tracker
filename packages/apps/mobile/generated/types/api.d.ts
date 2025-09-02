@@ -12,11 +12,12 @@ export interface paths {
             cookie?: never;
         };
         /** Get a user by public ID */
-        get: operations["AppUsersController_findUserById"];
+        get: operations["AppApiUsersController_findUniqueOrThrowUserById"];
         /** Update a user by public ID */
-        put: operations["AppUsersController_updateUser"];
+        put: operations["AppApiUsersController_updateUserById"];
         post?: never;
-        delete?: never;
+        /** Delete a user by public ID */
+        delete: operations["AppApiUsersController_deleteUserById"];
         options?: never;
         head?: never;
         patch?: never;
@@ -32,7 +33,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Create a new user */
-        post: operations["AppUsersController_createUser"];
+        post: operations["AppApiUsersController_createUser"];
         delete?: never;
         options?: never;
         head?: never;
@@ -80,6 +81,12 @@ export interface components {
              */
             updatedAt: string;
         };
+        ErrorResponseDto: {
+            /** @example 400 */
+            statusCode: number;
+            /** @example RE0002 */
+            errorCode: string;
+        };
         CreateUserInputDto: {
             /**
              * Format: email
@@ -121,7 +128,7 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    AppUsersController_findUserById: {
+    AppApiUsersController_findUniqueOrThrowUserById: {
         parameters: {
             query?: never;
             header?: never;
@@ -142,30 +149,18 @@ export interface operations {
                     "application/json": components["schemas"]["UserResponseDto"];
                 };
             };
-            /** @description Unauthorized */
-            401: {
+            /** @description Error Response */
+            default: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
                 };
-                content?: never;
-            };
-            /** @description User not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
-    AppUsersController_updateUser: {
+    AppApiUsersController_updateUserById: {
         parameters: {
             query?: never;
             header?: never;
@@ -190,9 +185,48 @@ export interface operations {
                     "application/json": components["schemas"]["UserResponseDto"];
                 };
             };
+            /** @description Error Response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
         };
     };
-    AppUsersController_createUser: {
+    AppApiUsersController_deleteUserById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description User public ID */
+                publicId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description User deleted successfully */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error Response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    AppApiUsersController_createUser: {
         parameters: {
             query?: never;
             header?: never;
@@ -214,26 +248,14 @@ export interface operations {
                     "application/json": components["schemas"]["UserResponseDto"];
                 };
             };
-            /** @description Bad request */
-            400: {
+            /** @description Error Response */
+            default: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
                 };
-                content?: never;
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };

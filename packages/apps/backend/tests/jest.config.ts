@@ -1,26 +1,28 @@
 import type { Config } from 'jest';
 
-const ignorePatterns = ['/node_modules/', '/dist/', '/coverage/', '/generated/', 'scripts/'];
-
 const config: Config = {
-  collectCoverageFrom: ['<rootDir>/src/**/*.ts'],
-  moduleFileExtensions: ['js', 'json', 'ts'],
-  moduleNameMapper: {
-    '^@/generated/(.*)$': '<rootDir>/generated/$1',
-    '^@/tests/(.*)$': '<rootDir>/tests/$1',
-    '^@/(.*)$': '<rootDir>/src/$1',
-  },
+  preset: 'ts-jest',
   rootDir: '..',
-  setupFiles: ['<rootDir>/tests/jest-env.setup.ts'],
-  setupFilesAfterEnv: ['<rootDir>/tests/jest.setup.ts'],
-  testEnvironment: 'node',
   testMatch: ['<rootDir>/tests/**/*.spec.ts'],
   transform: {
-    '^.+\\.ts$': 'ts-jest',
+    '^.+\\.(t|j)s$': [
+      'ts-jest',
+      {
+        tsconfig: {
+          allowJs: true,
+        },
+      },
+    ],
   },
-  testPathIgnorePatterns: ignorePatterns,
+  collectCoverageFrom: [
+    '<rootDir>/src/**/*.ts',
+    '!<rootDir>/src/**/*.d.ts',
+    '!<rootDir>/src/**/*.spec.ts',
+    '!<rootDir>/src/**/*.test.ts',
+    '!<rootDir>/src/**/main.ts',
+    '!<rootDir>/src/generated/**',
+  ],
   coverageDirectory: '<rootDir>/coverage',
-  coveragePathIgnorePatterns: [...ignorePatterns, 'main.ts', '.*\\.module\\.ts$'],
   coverageThreshold: {
     global: {
       branches: 95,
@@ -29,6 +31,14 @@ const config: Config = {
       statements: 95,
     },
   },
+  testEnvironment: 'node',
+  moduleNameMapper: {
+    '^@/generated/(.*)$': '<rootDir>/generated/$1',
+    '^@/tests/(.*)$': '<rootDir>/tests/$1',
+    '^@/(.*)$': '<rootDir>/src/$1',
+  },
+  setupFilesAfterEnv: ['<rootDir>/tests/jest.setup.ts'],
+  setupFiles: ['<rootDir>/tests/jest-env.setup.ts'],
   maxWorkers: 1,
 };
 

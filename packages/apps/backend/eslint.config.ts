@@ -36,10 +36,13 @@ const config = tseslint.config(
     rules: enabledBackendPluginRules,
   },
   {
-    files: ['tests/**/*.ts'],
+    files: ['src/repository/**/*.ts'],
+    plugins: {
+      'custom-backend-eslint': pluginBackend,
+    },
     rules: {
-      'custom-backend-eslint/prisma-repository-only-access': 'off',
-      'custom-backend-eslint/no-internal-id': 'off',
+      ...enabledBackendPluginRules,
+      'custom-backend-eslint/repository-model-access-restriction': 'off',
     },
   },
   {

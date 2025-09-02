@@ -31,21 +31,34 @@ bun run ci:temp  # Must pass before ANY commit
 2. **Admin Dashboard** (Next.js) - Port 8000
 3. **Mobile App** (React Native/Expo) - Port 8081
 
-### Service Layer Pattern (Backend)
+### Domain-Driven Design (DDD) Architecture
 
 ```typescript
-// Each aggregate has 4 layers:
-UserRepositoryService; // Database access only
-UserQueryService; // Read operations (OrFail pattern)
-UserCommandService; // Write operations (CUD)
-UserFacadeService; // API orchestration
+// Domain Layer - Business logic
+domain/aggregates/[entity]/
+├── [entity].query.service.ts     // Read operations (OrFail pattern)
+├── [entity].command.service.ts   // Write operations (CUD)
+└── utils/
+    ├── dto.ts                    // Domain DTOs
+    └── constants.ts              // Entity constants
+
+// API Layer - Interface adapters
+apis/[admin|app]/[entity]/
+├── [entity].controller.ts        // HTTP endpoints
+└── [entity].module.ts           // API module
+
+// Repository Layer - Data access
+repository/
+└── repository.service.ts         // Centralized Prisma access
 ```
 
 ### Key Patterns
 
+- **Domain-Driven Design**: Clear separation of domain, API, and repository layers
 - **Dual APIs**: App (user-scoped) vs Admin (full access)
 - **UUID Keys**: Never expose internal IDs (use publicId)
-- **Repository Pattern**: Database access only through repositories
+- **Repository Pattern**: Centralized database access through single repository service
+- **Query/Command Separation**: Read and write operations are separated
 - **DTO Pattern**: Input validation and response transformation
 
 ### Database Schema (Prisma)
@@ -102,33 +115,45 @@ bun run type:check        # TypeScript
 └── docker-compose.yml   # PostgreSQL
 ```
 
-### Backend Module Structure
+### Backend DDD Structure
 
 ```
-modules/
-├── aggregate/[entity]/
-│   ├── *.repository.service.ts
-│   ├── *.query.service.ts
-│   ├── *.command.service.ts
-│   ├── *.facade.service.ts
-│   ├── *.input.dto.ts
-│   └── *.response.dto.ts
-├── api/
-│   ├── admin/
-│   └── app/
-└── repository/
+src/
+├── domain/
+│   ├── aggregates/[entity]/
+│   │   ├── [entity].query.service.ts
+│   │   ├── [entity].command.service.ts
+│   │   ├── [entity].module.ts
+│   │   └── utils/
+│   │       ├── dto.ts
+│   │       └── constants.ts
+│   ├── usecases/        # Complex business logic
+│   └── utils/           # Domain utilities
+├── apis/
+│   ├── admin/[entity]/
+│   │   ├── [entity].controller.ts
+│   │   └── [entity].module.ts
+│   ├── app/[entity]/
+│   │   ├── [entity].controller.ts
+│   │   └── [entity].module.ts
+│   └── utils/           # API utilities
+├── repository/
+│   ├── repository.service.ts
+│   ├── repository.module.ts
+│   └── utils/           # Repository utilities
+└── utils/               # Global utilities
 ```
 
 ## 🏗️ Implementation Workflow
 
 ### Feature Implementation
 
-1. Create domain aggregate
-2. Implement repository service
-3. Add query/command services
-4. Create facade services
-5. Add controllers with DTOs
-6. Write tests (95% coverage minimum)
+1. **Domain Layer**: Create aggregate with query/command services and DTOs
+2. **API Layer**: Add controllers and API modules for admin/app endpoints
+3. **Repository Integration**: Use centralized repository.service.ts for data access
+4. **Error Handling**: Implement proper error types and OrFail patterns
+5. **Testing**: Write comprehensive tests (95% coverage minimum)
+6. **Documentation**: Update module templates and examples
 
 ### Database Changes
 
@@ -188,7 +213,8 @@ type(scope): description
 
 ### Custom ESLint Rules
 
-- `prisma-repository-only-access` - Enforces repository pattern
+- `repository-model-access-restriction` - Enforces centralized repository access
+- `aggregate-import-restriction` - Prevents cross-aggregate dependencies
 - `no-internal-id` - Prevents ID exposure
 
 ### Testing

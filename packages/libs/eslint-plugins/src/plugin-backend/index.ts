@@ -1,6 +1,6 @@
+import aggregateImportRestriction from './aggregate-import-restriction';
 import noInternalId from './no-internal-id';
 import prismaNamingConvention from './prisma-naming-convention';
-import prismaRepositoryOnlyAccess from './prisma-repository-only-access';
 import repositoryModelAccessRestriction from './repository-model-access-restriction';
 
 const plugin = {
@@ -9,9 +9,9 @@ const plugin = {
     version: '1.0.0',
   },
   rules: {
+    'aggregate-import-restriction': aggregateImportRestriction,
     'no-internal-id': noInternalId,
     'prisma-naming-convention': prismaNamingConvention,
-    'prisma-repository-only-access': prismaRepositoryOnlyAccess,
     'repository-model-access-restriction': repositoryModelAccessRestriction,
   },
 };

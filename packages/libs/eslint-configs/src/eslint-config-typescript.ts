@@ -38,7 +38,7 @@ export const tsConfigRules: FlatConfig.Rules = {
   'init-declarations': 'off',
   '@typescript-eslint/init-declarations': 'error',
   'max-params': 'off',
-  '@typescript-eslint/max-params': 'error',
+  '@typescript-eslint/max-params': ['error', { max: 5 }],
   '@typescript-eslint/method-signature-style': ['error', 'method'],
   'no-array-constructor': 'off',
   '@typescript-eslint/no-array-constructor': 'error',

@@ -9,6 +9,8 @@ set -eu
 # 5. Check that each model has updatedAt field with DateTime @updatedAt
 # 6. Check that each model has @@index([createdAt])
 # 7. Support both camelCase with @map and snake_case naming
+# 8. Check that foreign keys reference publicId, not id
+# 9. Check that foreign key field names end with PublicId (e.g., userPublicId, not userId)
 
 error_count=0
 
@@ -137,7 +139,32 @@ validate_model() {
       if echo "$line" | grep -q "@@index.*\[createdAt\]" || echo "$line" | grep -q "@@index.*\[created_at\]"; then
         has_createdAt_index=true
       fi
+    fi
 
+    # Check for @relation with references to ensure they reference publicId, not id
+    if echo "$line" | grep -q "@relation"; then
+    # Extract the references part if it exists
+    if echo "$line" | grep -q "references:[[:space:]]*\[id\]"; then
+    echo "Error at line $current_line: Foreign key should reference publicId, not id in model $model_name"
+    echo "  Found: $line"
+    echo "  Expected: references: [publicId] or references: [public_id]"
+    ((error_count++))
+    fi
+
+    # Check that the foreign key field name (in fields: [...]) ends with PublicId for foreign keys referencing publicId
+    if echo "$line" | grep -q "references:[[:space:]]*\[publicId\]\|references:[[:space:]]*\[public_id\]"; then
+    # Extract the field name from fields: [fieldName]
+    if echo "$line" | grep -q "fields:[[:space:]]*\["; then
+      fk_field_name=$(echo "$line" | sed -n 's/.*fields:[[:space:]]*\[\([^]]*\)\].*/\1/p')
+      # Check if field name ends with PublicId or public_id
+    if [ -n "$fk_field_name" ] && ! echo "$fk_field_name" | grep -qE "(PublicId|public_id)$"; then
+      echo "Error at line $current_line: Foreign key field name should end with 'PublicId' or 'public_id' in model $model_name"
+      echo "  Found field name in fields: [$fk_field_name]"
+      echo "  Expected pattern: *PublicId or *public_id (e.g., userPublicId, user_public_id)"
+        ((error_count++))
+        fi
+        fi
+      fi
     fi
   done <<< "$model_content"
 
@@ -184,7 +211,8 @@ while IFS= read -r line; do
   # Check if this is a model declaration - use more portable approach
   if echo "$line" | grep -E '^model[[:space:]]+[[:alnum:]_]+[[:space:]]*\{' > /dev/null; then
     # Extract model name using sed for portability
-    model_name=$(echo "$line" | sed -n 's/^model[[:space:]]\+\([[:alnum:]_]\+\)[[:space:]]*{.*/\1/p')
+    # shellcheck disable=SC2001
+    model_name=$(echo "$line" | sed 's/^model[[:space:]]*\([[:alnum:]_]*\)[[:space:]]*{.*/\1/')
 
     # If we were already in a model, validate it first
     if [ "$in_model" = true ] && [ -n "$current_model" ]; then
