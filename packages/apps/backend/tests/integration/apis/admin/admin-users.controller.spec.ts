@@ -1,11 +1,9 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { setupAdminAdminUsersControllerIntegration } from '../helpers/api-integration.helper';
 
 import { AdminApiAdminUsersController } from '@/apis/admin/admin-users/admin-users.controller';
-import { AdminUserCommandService } from '@/domain/aggregates/admin-user/admin-user.command.service';
-import { AdminUserQueryService } from '@/domain/aggregates/admin-user/admin-user.query.service';
 import { AdminRole } from '@/generated/prisma';
-import { RepositoryService } from '@/repository/repository.service';
 import { DatabaseHelper } from '@/tests/helpers/database.helper';
+
 
 describe('integration AdminApiAdminUsersController', () => {
   let controller: AdminApiAdminUsersController;
@@ -19,19 +17,8 @@ describe('integration AdminApiAdminUsersController', () => {
   beforeEach(async () => {
     await databaseHelper.cleanDatabase();
 
-    const module: TestingModule = await Test.createTestingModule({
-      controllers: [AdminApiAdminUsersController],
-      providers: [
-        AdminUserCommandService,
-        AdminUserQueryService,
-        {
-          provide: RepositoryService,
-          useValue: databaseHelper.client,
-        },
-      ],
-    }).compile();
-
-    controller = module.get<AdminApiAdminUsersController>(AdminApiAdminUsersController);
+    const { controller: ctrl } = await setupAdminAdminUsersControllerIntegration(databaseHelper);
+    controller = ctrl;
   });
 
   afterAll(async () => {

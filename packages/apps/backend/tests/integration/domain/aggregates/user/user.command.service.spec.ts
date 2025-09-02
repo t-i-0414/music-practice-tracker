@@ -1,8 +1,7 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { setupUserServicesIntegration } from '../../helpers/domain-integration.helper';
 
 import { UserCommandService } from '@/domain/aggregates/user/user.command.service';
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
-import { RepositoryService } from '@/repository/repository.service';
 import { DatabaseHelper } from '@/tests/helpers/database.helper';
 
 describe('integration UserCommandService', () => {
@@ -18,19 +17,9 @@ describe('integration UserCommandService', () => {
   beforeEach(async () => {
     await databaseHelper.cleanDatabase();
 
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        UserCommandService,
-        UserQueryService,
-        {
-          provide: RepositoryService,
-          useValue: databaseHelper.client,
-        },
-      ],
-    }).compile();
-
-    service = module.get<UserCommandService>(UserCommandService);
-    queryService = module.get<UserQueryService>(UserQueryService);
+    const { commandService, queryService: qService } = await setupUserServicesIntegration(databaseHelper);
+    service = commandService;
+    queryService = qService;
   });
 
   afterAll(async () => {

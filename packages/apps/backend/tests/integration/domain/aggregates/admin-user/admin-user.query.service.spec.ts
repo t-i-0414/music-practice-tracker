@@ -1,8 +1,7 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { setupAdminUserQueryServiceIntegration } from '../../helpers/domain-integration.helper';
 
 import { AdminUserQueryService } from '@/domain/aggregates/admin-user/admin-user.query.service';
 import { AdminRole } from '@/generated/prisma';
-import { RepositoryService } from '@/repository/repository.service';
 import { DatabaseHelper } from '@/tests/helpers/database.helper';
 
 describe('integration AdminUserQueryService', () => {
@@ -18,17 +17,8 @@ describe('integration AdminUserQueryService', () => {
   beforeEach(async () => {
     await databaseHelper.cleanDatabase();
 
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        AdminUserQueryService,
-        {
-          provide: RepositoryService,
-          useValue: databaseHelper.client,
-        },
-      ],
-    }).compile();
-
-    service = module.get<AdminUserQueryService>(AdminUserQueryService);
+    const { service: svc } = await setupAdminUserQueryServiceIntegration(databaseHelper);
+    service = svc;
     repository = databaseHelper.client;
   });
 
