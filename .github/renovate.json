@@ -1,7 +1,8 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended"],
+  "extends": ["config:recommended", "group:monorepos", "group:recommended"],
   "timezone": "Asia/Tokyo",
+  "schedule": ["after 10pm and before 5am every weekday", "every weekend"],
   "prHourlyLimit": 20,
   "prConcurrentLimit": 20,
   "branchConcurrentLimit": 20,
@@ -10,133 +11,31 @@
   "commitMessageTopic": "{{depName}}",
   "commitMessageExtra": "to {{#if isPinDigest}}{{{newDigestShort}}}{{else}}{{#if isMajor}}{{prettyNewMajor}}{{else}}{{#if isSingleVersion}}{{prettyNewVersion}}{{else}}{{#if newValue}}{{{newValue}}}{{else}}{{{newDigestShort}}}{{/if}}{{/if}}{{/if}}{{/if}}",
   "rangeStrategy": "bump",
+  "separateMajorMinor": true,
+  "separateMinorPatch": false,
+  "minimumReleaseAge": "3 days",
+  "dependencyDashboard": true,
+  "dependencyDashboardTitle": "Dependency Dashboard",
   "packageRules": [
     {
-      "description": "Root dependencies",
-      "matchFileNames": ["package.json"],
-      "matchManagers": ["npm"],
-      "matchDepTypes": ["dependencies"],
-      "matchUpdateTypes": ["patch", "minor"],
-      "addLabels": ["root"],
-      "commitMessagePrefix": "chore(root): ",
-      "groupName": "root dependencies",
-      "groupSlug": "root-dependencies"
-    },
-    {
-      "description": "Root devdependencies",
-      "matchFileNames": ["package.json"],
-      "matchManagers": ["npm"],
-      "matchDepTypes": ["devDependencies"],
-      "matchUpdateTypes": ["patch", "minor"],
-      "addLabels": ["root"],
-      "commitMessagePrefix": "chore(root): ",
-      "groupName": "root devdependencies",
-      "groupSlug": "root-dev-dependencies"
-    },
-    {
-      "description": "Backend dependencies",
-      "matchFileNames": ["packages/apps/backend/package.json"],
-      "matchManagers": ["npm"],
-      "matchDepTypes": ["dependencies"],
-      "matchUpdateTypes": ["patch", "minor"],
-      "addLabels": ["backend"],
-      "commitMessagePrefix": "chore(backend): ",
-      "groupName": "backend dependencies",
-      "groupSlug": "backend-dependencies"
-    },
-    {
-      "description": "Backend devdependencies",
-      "matchFileNames": ["packages/apps/backend/package.json"],
-      "matchManagers": ["npm"],
-      "matchDepTypes": ["devDependencies"],
-      "matchUpdateTypes": ["patch", "minor"],
-      "addLabels": ["backend"],
-      "commitMessagePrefix": "chore(backend): ",
-      "groupName": "backend devdependencies",
-      "groupSlug": "backend-dev-dependencies"
-    },
-    {
-      "description": "Group NestJS packages",
-      "matchFileNames": ["packages/apps/backend/package.json"],
-      "matchManagers": ["npm"],
-      "matchDepTypes": ["dependencies", "devDependencies"],
-      "matchUpdateTypes": ["patch", "minor", "major"],
-      "addLabels": ["backend"],
-      "commitMessagePrefix": "chore(backend): ",
-      "groupName": "NestJS packages",
-      "groupSlug": "nestjs",
-      "matchPackageNames": ["/^@nestjs//", "/^nest-/"]
-    },
-    {
-      "description": "Admin dependencies",
-      "matchFileNames": ["packages/apps/admin/package.json"],
-      "matchManagers": ["npm"],
-      "matchDepTypes": ["dependencies"],
-      "matchUpdateTypes": ["patch", "minor"],
-      "addLabels": ["admin"],
-      "commitMessagePrefix": "chore(admin): ",
-      "groupName": "admin dependencies",
-      "groupSlug": "admin-dependencies"
-    },
-    {
-      "description": "Admin devdependencies",
-      "matchFileNames": ["packages/apps/admin/package.json"],
-      "matchManagers": ["npm"],
-      "matchDepTypes": ["devDependencies"],
-      "matchUpdateTypes": ["patch", "minor"],
-      "addLabels": ["admin"],
-      "commitMessagePrefix": "chore(admin): ",
-      "groupName": "admin devdependencies",
-      "groupSlug": "admin-dev-dependencies"
-    },
-    {
-      "description": "Group Next.js packages",
-      "matchFileNames": ["packages/apps/admin/package.json"],
-      "matchManagers": ["npm"],
-      "matchDepTypes": ["dependencies", "devDependencies"],
-      "matchUpdateTypes": ["patch", "minor", "major"],
-      "addLabels": ["admin"],
-      "commitMessagePrefix": "chore(admin): ",
-      "groupName": "Next.js packages",
-      "groupSlug": "nextjs",
-      "matchPackageNames": ["/^next$/", "/^@next//", "/^eslint-config-next/"]
-    },
-    {
-      "description": "Group Prisma packages",
-      "matchFileNames": ["package.json", "packages/apps/backend/package.json"],
-      "matchManagers": ["npm"],
-      "matchDepTypes": ["dependencies", "devDependencies"],
-      "matchUpdateTypes": ["patch", "minor", "major"],
-      "commitMessagePrefix": "chore: ",
-      "groupName": "Prisma packages",
-      "groupSlug": "prisma",
-      "matchPackageNames": ["/^@prisma//", "/^prisma/"]
-    },
-    {
-      "description": "Disable all updates for @prisma/client",
-      "matchPackageNames": ["@prisma/client"],
+      "description": "Disable updates for specific packages",
+      "matchPackageNames": ["@prisma/client", "react", "react-dom", "react-test-renderer"],
       "enabled": false
     },
     {
-      "description": "Disable all updates for React packages",
-      "matchPackageNames": ["react", "react-dom", "react-test-renderer"],
+      "description": "Disable updates for anthropics/claude-code-action",
+      "matchPackageNames": ["anthropics/claude-code-action"],
       "enabled": false
     },
     {
-      "description": "Security updates",
+      "description": "Security updates - high priority",
       "matchDatasources": ["npm"],
       "matchUpdateTypes": ["patch", "minor", "major"],
       "matchCategories": ["security"],
       "prPriority": 10,
-      "addLabels": ["security"]
-    },
-    {
-      "description": "Group GitHub Actions",
-      "matchManagers": ["github-actions"],
-      "groupName": "GitHub Actions",
-      "groupSlug": "github-actions",
-      "addLabels": ["github-actions"],
-      "commitMessagePrefix": "ci: "
+      "addLabels": ["security"],
+      "automerge": true,
+      "groupName": "Security updates"
     },
     {
       "description": "Pin GitHub Actions digests",
@@ -144,14 +43,140 @@
       "pinDigests": true
     },
     {
-      "description": "Disable updates for anthropics/claude-code-action",
-      "matchPackageNames": ["anthropics/claude-code-action"],
-      "enabled": false
+      "description": "Group all GitHub Actions",
+      "matchManagers": ["github-actions"],
+      "groupName": "GitHub Actions",
+      "groupSlug": "github-actions",
+      "addLabels": ["github-actions"],
+      "commitMessagePrefix": "ci: ",
+      "automerge": true,
+      "automergeType": "branch"
+    },
+    {
+      "description": "Group all Storybook packages",
+      "matchPackagePatterns": ["^@storybook/", "^@chromatic-com/storybook"],
+      "groupName": "Storybook packages",
+      "groupSlug": "storybook"
+    },
+    {
+      "description": "Group all ESLint packages",
+      "matchPackagePatterns": ["^eslint", "^@eslint/", "^@typescript-eslint/", "^@vitest/eslint-plugin"],
+      "groupName": "ESLint packages",
+      "groupSlug": "eslint"
+    },
+    {
+      "description": "Group all Jest packages",
+      "matchPackagePatterns": ["^jest", "^@jest/", "^ts-jest", "^babel-jest", "^@types/jest"],
+      "groupName": "Jest packages",
+      "groupSlug": "jest"
+    },
+    {
+      "description": "Group all testing packages",
+      "matchPackagePatterns": ["^@testing-library/", "^@playwright/", "^cypress", "^msw"],
+      "groupName": "Testing packages",
+      "groupSlug": "testing"
+    },
+    {
+      "description": "Group all TypeScript type definitions",
+      "matchPackagePatterns": ["^@types/"],
+      "groupName": "TypeScript type definitions",
+      "groupSlug": "types",
+      "automerge": true,
+      "automergeType": "branch"
+    },
+    {
+      "description": "Group all Prisma packages",
+      "matchPackagePatterns": ["^@prisma/", "^prisma"],
+      "groupName": "Prisma packages",
+      "groupSlug": "prisma",
+      "excludePackageNames": ["@prisma/client"]
+    },
+    {
+      "description": "Group all NestJS packages",
+      "matchFileNames": ["packages/apps/backend/package.json"],
+      "matchPackagePatterns": ["^@nestjs/", "^nest-"],
+      "groupName": "NestJS packages",
+      "groupSlug": "nestjs",
+      "addLabels": ["backend"],
+      "commitMessagePrefix": "chore(backend): "
+    },
+    {
+      "description": "Group all Next.js packages",
+      "matchFileNames": ["packages/apps/admin/package.json"],
+      "matchPackagePatterns": ["^next$", "^@next/", "^eslint-config-next"],
+      "groupName": "Next.js packages",
+      "groupSlug": "nextjs",
+      "addLabels": ["admin"],
+      "commitMessagePrefix": "chore(admin): "
+    },
+    {
+      "description": "Group all root non-major dependencies",
+      "matchFileNames": ["package.json"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "excludePackagePatterns": [
+        "^@storybook/",
+        "^@chromatic-com/",
+        "^eslint",
+        "^@eslint/",
+        "^@typescript-eslint/",
+        "^jest",
+        "^@jest/",
+        "^@types/",
+        "^@testing-library/",
+        "^@playwright/",
+        "^prisma",
+        "^@prisma/"
+      ],
+      "groupName": "Root dependencies (non-major)",
+      "groupSlug": "root-non-major",
+      "addLabels": ["root"],
+      "commitMessagePrefix": "chore(root): "
+    },
+    {
+      "description": "Group all backend non-major dependencies",
+      "matchFileNames": ["packages/apps/backend/package.json"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "excludePackagePatterns": ["^@nestjs/", "^nest-", "^@types/", "^prisma", "^@prisma/"],
+      "groupName": "Backend dependencies (non-major)",
+      "groupSlug": "backend-non-major",
+      "addLabels": ["backend"],
+      "commitMessagePrefix": "chore(backend): "
+    },
+    {
+      "description": "Group all admin non-major dependencies",
+      "matchFileNames": ["packages/apps/admin/package.json"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "excludePackagePatterns": ["^next", "^@next/", "^@types/"],
+      "groupName": "Admin dependencies (non-major)",
+      "groupSlug": "admin-non-major",
+      "addLabels": ["admin"],
+      "commitMessagePrefix": "chore(admin): "
+    },
+    {
+      "description": "Automerge patch updates for non-critical packages",
+      "matchUpdateTypes": ["patch"],
+      "excludePackagePatterns": ["^@nestjs/", "^next", "^react", "^@prisma/"],
+      "automerge": true,
+      "automergeType": "branch"
+    },
+    {
+      "description": "Lock file maintenance",
+      "matchManagers": ["npm"],
+      "matchUpdateTypes": ["lockFileMaintenance"],
+      "automerge": true,
+      "automergeType": "branch",
+      "schedule": ["before 4am on monday"]
     }
   ],
   "ignorePaths": ["**/node_modules/**", "packages/apps/mobile/**"],
   "vulnerabilityAlerts": {
     "enabled": true,
     "labels": ["security"]
+  },
+  "postUpdateOptions": ["npmDedupe"],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "automerge": true,
+    "schedule": ["before 4am on monday"]
   }
 }
