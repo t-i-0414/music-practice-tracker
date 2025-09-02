@@ -180,6 +180,15 @@ describe('repositoryService (Integration)', () => {
       ).rejects.toMatchObject({
         code: 'P2002',
       });
+
+      await expect(
+        service.user.create({
+          data: {
+            email: 'duplicate@example.com',
+            name: 'Third User',
+          },
+        }),
+      ).rejects.toThrow('Unique constraint failed on the fields');
     });
 
     it('should handle foreign key constraint violations', async () => {
@@ -202,11 +211,9 @@ describe('repositoryService (Integration)', () => {
 
       await expect(
         service.user.findUniqueOrThrow({
-          where: { publicId: 'non-existent-id' },
+          where: { publicId: '00000000-0000-0000-0000-000000000000' },
         }),
-      ).rejects.toMatchObject({
-        message: expect.stringContaining('No User found'),
-      });
+      ).rejects.toThrow('No record was found for a query');
     });
   });
 
@@ -280,7 +287,7 @@ describe('repositoryService (Integration)', () => {
     });
 
     it('should handle updateMany operation', async () => {
-      expect.assertions(2);
+      expect.assertions(4);
 
       await service.user.createManyAndReturn({
         data: [
@@ -311,7 +318,7 @@ describe('repositoryService (Integration)', () => {
     });
 
     it('should handle deleteMany operation', async () => {
-      expect.assertions(3);
+      expect.assertions(5);
 
       await service.user.createManyAndReturn({
         data: [

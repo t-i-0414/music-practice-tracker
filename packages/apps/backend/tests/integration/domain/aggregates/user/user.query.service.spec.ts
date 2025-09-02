@@ -1,4 +1,3 @@
-import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
@@ -56,9 +55,9 @@ describe('userQueryService (Integration)', () => {
     it('should throw NotFoundException for non-existent user', async () => {
       expect.assertions(1);
 
-      await expect(service.findUniqueOrThrowUserById({ publicId: 'non-existent-id' })).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        service.findUniqueOrThrowUserById({ publicId: '00000000-0000-0000-0000-000000000000' }),
+      ).rejects.toThrow('No record was found for a query');
     });
 
     it('should return correct user when multiple users exist', async () => {
@@ -112,7 +111,9 @@ describe('userQueryService (Integration)', () => {
     it('should throw NotFoundException for non-existent email', async () => {
       expect.assertions(1);
 
-      await expect(service.findUniqueOrThrowUserByEmail('nonexistent@example.com')).rejects.toThrow(NotFoundException);
+      await expect(service.findUniqueOrThrowUserByEmail('nonexistent@example.com')).rejects.toThrow(
+        'No record was found for a query',
+      );
     });
 
     it('should be case-sensitive for email', async () => {
@@ -125,7 +126,9 @@ describe('userQueryService (Integration)', () => {
         },
       });
 
-      await expect(service.findUniqueOrThrowUserByEmail('TEST@EXAMPLE.COM')).rejects.toThrow(NotFoundException);
+      await expect(service.findUniqueOrThrowUserByEmail('TEST@EXAMPLE.COM')).rejects.toThrow(
+        'No record was found for a query',
+      );
 
       const result = await service.findUniqueOrThrowUserByEmail('test@example.com');
 
@@ -202,7 +205,7 @@ describe('userQueryService (Integration)', () => {
       expect.assertions(1);
 
       const result = await service.findManyUsersById({
-        publicIds: ['non-existent-1', 'non-existent-2'],
+        publicIds: ['00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002'],
       });
 
       expect(result.users).toHaveLength(0);
@@ -219,7 +222,7 @@ describe('userQueryService (Integration)', () => {
       });
 
       const result = await service.findManyUsersById({
-        publicIds: [user.publicId, 'non-existent'],
+        publicIds: [user.publicId, '00000000-0000-0000-0000-000000000000'],
       });
 
       expect(result.users).toHaveLength(1);

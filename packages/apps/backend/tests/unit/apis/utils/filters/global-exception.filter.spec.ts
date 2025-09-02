@@ -78,6 +78,22 @@ describe('globalExceptionFilter', () => {
       });
     });
 
+    it('should handle P2025 (record not found) error correctly', () => {
+      const exception = new PrismaClientKnownRequestError('Record to delete does not exist.', {
+        code: 'P2025',
+        clientVersion: '5.0.0',
+        meta: { cause: 'Record to delete does not exist.' },
+      });
+
+      filter.catch(exception, mockArgumentsHost as ArgumentsHost);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.NOT_FOUND);
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        statusCode: HttpStatus.NOT_FOUND,
+        errorCode: 'RE0002',
+      });
+    });
+
     it('should handle UnknownError correctly', () => {
       const exception = new UnknownError('UN9999', 'Test unknown error');
 
