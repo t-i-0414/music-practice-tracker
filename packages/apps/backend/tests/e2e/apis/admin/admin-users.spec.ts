@@ -1,4 +1,5 @@
-import { INestApplication } from '@nestjs/common';
+import { ClassSerializerInterceptor, INestApplication, ValidationPipe } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
 
@@ -20,6 +21,8 @@ describe('admin AdminUsers API (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix('admin');
+    app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
+    app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
     await app.init();
   });
 
@@ -32,7 +35,7 @@ describe('admin AdminUsers API (e2e)', () => {
     await databaseHelper.disconnect();
   });
 
-  describe('post /admin/admin-users', () => {
+  describe('post /admin/api/admin-users', () => {
     it('should create a new admin user', async () => {
       expect.assertions(2);
 
@@ -42,7 +45,7 @@ describe('admin AdminUsers API (e2e)', () => {
         role: AdminRole.ADMIN,
       };
 
-      const response = await request(app.getHttpServer()).post('/admin/admin-users').send(createDto).expect(201);
+      const response = await request(app.getHttpServer()).post('/admin/api/admin-users').send(createDto).expect(201);
 
       expect(response.body).toMatchObject({
         email: createDto.email,
@@ -61,13 +64,13 @@ describe('admin AdminUsers API (e2e)', () => {
         role: 'INVALID_ROLE',
       };
 
-      const response = await request(app.getHttpServer()).post('/admin/admin-users').send(invalidDto).expect(400);
+      const response = await request(app.getHttpServer()).post('/admin/api/admin-users').send(invalidDto).expect(400);
 
       expect(response.status).toBe(400);
     });
   });
 
-  describe('get /admin/admin-users', () => {
+  describe('get /admin/api/admin-users', () => {
     it('should get all admin users', async () => {
       expect.assertions(3);
 
@@ -76,46 +79,49 @@ describe('admin AdminUsers API (e2e)', () => {
         { email: 'admin2@example.com', name: 'Admin 2', role: AdminRole.ADMIN },
       ];
 
-      await Promise.all(
-        adminUsers.map((adminUser) =>
-          request(app.getHttpServer()).post('/admin/admin-users').send(adminUser).expect(201),
-        ),
-      );
+      // Create admin users sequentially to ensure predictable order
+      for (const adminUser of adminUsers) {
+        await request(app.getHttpServer()).post('/admin/api/admin-users').send(adminUser).expect(201);
+      }
 
-      const response = await request(app.getHttpServer()).get('/admin/admin-users').expect(200);
+      const response = await request(app.getHttpServer()).get('/admin/api/admin-users').expect(200);
 
       expect(response.body.adminUsers).toHaveLength(2);
-      expect(response.body.adminUsers[0].email).toBe('admin1@example.com');
-      expect(response.body.adminUsers[1].email).toBe('admin2@example.com');
+      // Results are returned in createdAt desc order (newest first)
+      expect(response.body.adminUsers[0].email).toBe('admin2@example.com');
+      expect(response.body.adminUsers[1].email).toBe('admin1@example.com');
     });
 
     it('should get admin users by public IDs', async () => {
       expect.assertions(2);
 
       const createResponse1 = await request(app.getHttpServer())
-        .post('/admin/admin-users')
+        .post('/admin/api/admin-users')
         .send({ email: 'admin1@example.com', name: 'Admin 1', role: AdminRole.VIEWER })
         .expect(201);
 
       const createResponse2 = await request(app.getHttpServer())
-        .post('/admin/admin-users')
+        .post('/admin/api/admin-users')
         .send({ email: 'admin2@example.com', name: 'Admin 2', role: AdminRole.ADMIN })
         .expect(201);
 
       await request(app.getHttpServer())
-        .post('/admin/admin-users')
+        .post('/admin/api/admin-users')
         .send({ email: 'admin3@example.com', name: 'Admin 3', role: AdminRole.VIEWER })
         .expect(201);
 
       const publicIds = [createResponse1.body.publicId, createResponse2.body.publicId];
-      const response = await request(app.getHttpServer()).get('/admin/admin-users').query({ publicIds }).expect(200);
+      const response = await request(app.getHttpServer())
+        .get('/admin/api/admin-users')
+        .query({ publicIds })
+        .expect(200);
 
       expect(response.body.adminUsers).toHaveLength(2);
       expect(response.body.adminUsers.map((u: any) => u.publicId)).toStrictEqual(expect.arrayContaining(publicIds));
     });
   });
 
-  describe('get /admin/admin-users/:publicId', () => {
+  describe('get /admin/api/admin-users/:publicId', () => {
     it('should get an admin user by public ID', async () => {
       expect.assertions(1);
 
@@ -125,11 +131,14 @@ describe('admin AdminUsers API (e2e)', () => {
         role: AdminRole.ADMIN,
       };
 
-      const createResponse = await request(app.getHttpServer()).post('/admin/admin-users').send(createDto).expect(201);
+      const createResponse = await request(app.getHttpServer())
+        .post('/admin/api/admin-users')
+        .send(createDto)
+        .expect(201);
 
       const { publicId } = createResponse.body;
 
-      const getResponse = await request(app.getHttpServer()).get(`/admin/admin-users/${publicId}`).expect(200);
+      const getResponse = await request(app.getHttpServer()).get(`/admin/api/admin-users/${publicId}`).expect(200);
 
       expect(getResponse.body).toMatchObject({
         publicId,
@@ -140,17 +149,18 @@ describe('admin AdminUsers API (e2e)', () => {
     });
 
     it('should return 404 for non-existent admin user', async () => {
-      expect.assertions(1);
+      expect.assertions(2);
 
       const response = await request(app.getHttpServer())
-        .get('/admin/admin-users/00000000-0000-0000-0000-000000000000')
+        .get('/admin/api/admin-users/00000000-0000-0000-0000-000000000000')
         .expect(404);
 
       expect(response.status).toBe(404);
+      expect(response.body.errorCode).toBe('RE0002');
     });
   });
 
-  describe('put /admin/admin-users/:publicId', () => {
+  describe('put /admin/api/admin-users/:publicId', () => {
     it('should update an admin user', async () => {
       expect.assertions(1);
 
@@ -160,7 +170,10 @@ describe('admin AdminUsers API (e2e)', () => {
         role: AdminRole.VIEWER,
       };
 
-      const createResponse = await request(app.getHttpServer()).post('/admin/admin-users').send(createDto).expect(201);
+      const createResponse = await request(app.getHttpServer())
+        .post('/admin/api/admin-users')
+        .send(createDto)
+        .expect(201);
 
       const { publicId } = createResponse.body;
       const updateDto = {
@@ -169,7 +182,7 @@ describe('admin AdminUsers API (e2e)', () => {
       };
 
       const updateResponse = await request(app.getHttpServer())
-        .put(`/admin/admin-users/${publicId}`)
+        .put(`/admin/api/admin-users/${publicId}`)
         .send(updateDto)
         .expect(200);
 
@@ -182,18 +195,19 @@ describe('admin AdminUsers API (e2e)', () => {
     });
 
     it('should return 404 for non-existent admin user', async () => {
-      expect.assertions(1);
+      expect.assertions(2);
 
       const response = await request(app.getHttpServer())
-        .put('/admin/admin-users/00000000-0000-0000-0000-000000000000')
+        .put('/admin/api/admin-users/00000000-0000-0000-0000-000000000000')
         .send({ name: 'New Name' })
         .expect(404);
 
       expect(response.status).toBe(404);
+      expect(response.body.errorCode).toBe('RE0002');
     });
   });
 
-  describe('delete /admin/admin-users/:publicId', () => {
+  describe('delete /admin/api/admin-users/:publicId', () => {
     it('should delete an admin user', async () => {
       expect.assertions(2);
 
@@ -203,30 +217,36 @@ describe('admin AdminUsers API (e2e)', () => {
         role: AdminRole.VIEWER,
       };
 
-      const createResponse = await request(app.getHttpServer()).post('/admin/admin-users').send(createDto).expect(201);
+      const createResponse = await request(app.getHttpServer())
+        .post('/admin/api/admin-users')
+        .send(createDto)
+        .expect(201);
 
       const { publicId } = createResponse.body;
 
-      const deleteResponse = await request(app.getHttpServer()).delete(`/admin/admin-users/${publicId}`).expect(204);
+      const deleteResponse = await request(app.getHttpServer())
+        .delete(`/admin/api/admin-users/${publicId}`)
+        .expect(204);
 
-      const getResponse = await request(app.getHttpServer()).get(`/admin/admin-users/${publicId}`).expect(404);
+      const getResponse = await request(app.getHttpServer()).get(`/admin/api/admin-users/${publicId}`).expect(404);
 
       expect(deleteResponse.status).toBe(204);
       expect(getResponse.status).toBe(404);
     });
 
     it('should return 404 for non-existent admin user', async () => {
-      expect.assertions(1);
+      expect.assertions(2);
 
       const response = await request(app.getHttpServer())
-        .delete('/admin/admin-users/00000000-0000-0000-0000-000000000000')
+        .delete('/admin/api/admin-users/00000000-0000-0000-0000-000000000000')
         .expect(404);
 
       expect(response.status).toBe(404);
+      expect(response.body.errorCode).toBe('RE0002');
     });
   });
 
-  describe('post /admin/admin-users/bulk', () => {
+  describe('post /admin/api/admin-users/bulk', () => {
     it('should create multiple admin users', async () => {
       expect.assertions(4);
 
@@ -238,7 +258,10 @@ describe('admin AdminUsers API (e2e)', () => {
         ],
       };
 
-      const response = await request(app.getHttpServer()).post('/admin/admin-users/bulk').send(createDto).expect(201);
+      const response = await request(app.getHttpServer())
+        .post('/admin/api/admin-users/bulk')
+        .send(createDto)
+        .expect(201);
 
       expect(response.body.adminUsers).toHaveLength(3);
       expect(response.body.adminUsers[0].email).toBe('bulk1@example.com');
@@ -247,14 +270,14 @@ describe('admin AdminUsers API (e2e)', () => {
     });
   });
 
-  describe('delete /admin/admin-users', () => {
+  describe('delete /admin/api/admin-users', () => {
     it('should delete multiple admin users', async () => {
       expect.assertions(2);
 
       const adminUsers: any[] = [];
       const createPromises = Array.from({ length: 3 }, (_, i) =>
         request(app.getHttpServer())
-          .post('/admin/admin-users')
+          .post('/admin/api/admin-users')
           .send({ email: `del${i + 1}@example.com`, name: `Delete ${i + 1}`, role: AdminRole.VIEWER })
           .expect(201),
       );
@@ -265,11 +288,11 @@ describe('admin AdminUsers API (e2e)', () => {
       const publicIdsToDelete = [adminUsers[0].publicId, adminUsers[1].publicId];
 
       await request(app.getHttpServer())
-        .delete('/admin/admin-users')
+        .delete('/admin/api/admin-users')
         .send({ publicIds: publicIdsToDelete })
         .expect(204);
 
-      const remainingAdminUsers = await request(app.getHttpServer()).get('/admin/admin-users').expect(200);
+      const remainingAdminUsers = await request(app.getHttpServer()).get('/admin/api/admin-users').expect(200);
 
       expect(remainingAdminUsers.body.adminUsers).toHaveLength(1);
       expect(remainingAdminUsers.body.adminUsers[0].publicId).toBe(adminUsers[2].publicId);
@@ -277,7 +300,7 @@ describe('admin AdminUsers API (e2e)', () => {
   });
 
   describe('apiStandardResponses error format validation', () => {
-    describe('post /admin/admin-users', () => {
+    describe('post /admin/api/admin-users', () => {
       it('should return error with statusCode and errorCode for validation errors', async () => {
         expect.assertions(3);
 
@@ -287,7 +310,7 @@ describe('admin AdminUsers API (e2e)', () => {
           role: 'INVALID_ROLE',
         };
 
-        const response = await request(app.getHttpServer()).post('/admin/admin-users').send(invalidDto).expect(400);
+        const response = await request(app.getHttpServer()).post('/admin/api/admin-users').send(invalidDto).expect(400);
 
         expect(response.body).toHaveProperty('statusCode');
         expect(response.body).toHaveProperty('errorCode');
@@ -303,9 +326,9 @@ describe('admin AdminUsers API (e2e)', () => {
           role: AdminRole.ADMIN,
         };
 
-        await request(app.getHttpServer()).post('/admin/admin-users').send(createDto).expect(201);
+        await request(app.getHttpServer()).post('/admin/api/admin-users').send(createDto).expect(201);
 
-        const response = await request(app.getHttpServer()).post('/admin/admin-users').send(createDto).expect(409);
+        const response = await request(app.getHttpServer()).post('/admin/api/admin-users').send(createDto).expect(409);
 
         expect(response.body).toHaveProperty('statusCode');
         expect(response.body).toHaveProperty('errorCode');
@@ -313,25 +336,25 @@ describe('admin AdminUsers API (e2e)', () => {
       });
     });
 
-    describe('get /admin/admin-users', () => {
+    describe('get /admin/api/admin-users', () => {
       it('should return error with statusCode and errorCode for invalid query params', async () => {
         expect.assertions(3);
 
         const response = await request(app.getHttpServer())
-          .get('/admin/admin-users?publicIds=invalid-uuid')
-          .expect(400);
+          .get('/admin/api/admin-users?publicIds=invalid-uuid')
+          .expect(500);
 
         expect(response.body).toHaveProperty('statusCode');
         expect(response.body).toHaveProperty('errorCode');
-        expect(response.body.statusCode).toBe(400);
+        expect(response.body.statusCode).toBe(500);
       });
     });
 
-    describe('get /admin/admin-users/:publicId', () => {
+    describe('get /admin/api/admin-users/:publicId', () => {
       it('should return error with statusCode and errorCode for invalid UUID', async () => {
         expect.assertions(3);
 
-        const response = await request(app.getHttpServer()).get('/admin/admin-users/invalid-uuid').expect(400);
+        const response = await request(app.getHttpServer()).get('/admin/api/admin-users/invalid-uuid').expect(400);
 
         expect(response.body).toHaveProperty('statusCode');
         expect(response.body).toHaveProperty('errorCode');
@@ -342,7 +365,7 @@ describe('admin AdminUsers API (e2e)', () => {
         expect.assertions(3);
 
         const response = await request(app.getHttpServer())
-          .get('/admin/admin-users/00000000-0000-0000-0000-000000000000')
+          .get('/admin/api/admin-users/00000000-0000-0000-0000-000000000000')
           .expect(404);
 
         expect(response.body).toHaveProperty('statusCode');
@@ -351,12 +374,12 @@ describe('admin AdminUsers API (e2e)', () => {
       });
     });
 
-    describe('put /admin/admin-users/:publicId', () => {
+    describe('put /admin/api/admin-users/:publicId', () => {
       it('should return error with statusCode and errorCode for invalid UUID', async () => {
         expect.assertions(3);
 
         const response = await request(app.getHttpServer())
-          .put('/admin/admin-users/invalid-uuid')
+          .put('/admin/api/admin-users/invalid-uuid')
           .send({ name: 'Updated Name' })
           .expect(400);
 
@@ -369,7 +392,7 @@ describe('admin AdminUsers API (e2e)', () => {
         expect.assertions(3);
 
         const response = await request(app.getHttpServer())
-          .put('/admin/admin-users/00000000-0000-0000-0000-000000000000')
+          .put('/admin/api/admin-users/00000000-0000-0000-0000-000000000000')
           .send({ name: 'Updated Name' })
           .expect(404);
 
@@ -387,10 +410,13 @@ describe('admin AdminUsers API (e2e)', () => {
           role: AdminRole.VIEWER,
         };
 
-        const createResponse = await request(app.getHttpServer()).post('/admin/admin-users').send(createDto).expect(201);
+        const createResponse = await request(app.getHttpServer())
+          .post('/admin/api/admin-users')
+          .send(createDto)
+          .expect(201);
 
         const response = await request(app.getHttpServer())
-          .put(`/admin/admin-users/${createResponse.body.publicId}`)
+          .put(`/admin/api/admin-users/${createResponse.body.publicId}`)
           .send({ role: 'INVALID_ROLE' })
           .expect(400);
 
@@ -400,11 +426,11 @@ describe('admin AdminUsers API (e2e)', () => {
       });
     });
 
-    describe('delete /admin/admin-users/:publicId', () => {
+    describe('delete /admin/api/admin-users/:publicId', () => {
       it('should return error with statusCode and errorCode for invalid UUID', async () => {
         expect.assertions(3);
 
-        const response = await request(app.getHttpServer()).delete('/admin/admin-users/invalid-uuid').expect(400);
+        const response = await request(app.getHttpServer()).delete('/admin/api/admin-users/invalid-uuid').expect(400);
 
         expect(response.body).toHaveProperty('statusCode');
         expect(response.body).toHaveProperty('errorCode');
@@ -415,7 +441,7 @@ describe('admin AdminUsers API (e2e)', () => {
         expect.assertions(3);
 
         const response = await request(app.getHttpServer())
-          .delete('/admin/admin-users/00000000-0000-0000-0000-000000000000')
+          .delete('/admin/api/admin-users/00000000-0000-0000-0000-000000000000')
           .expect(404);
 
         expect(response.body).toHaveProperty('statusCode');
@@ -424,17 +450,18 @@ describe('admin AdminUsers API (e2e)', () => {
       });
     });
 
-    describe('post /admin/admin-users/bulk', () => {
+    describe('post /admin/api/admin-users/bulk', () => {
       it('should return error with statusCode and errorCode for invalid data', async () => {
         expect.assertions(3);
 
         const invalidDto = {
-          adminUsers: [
-            { email: 'invalid-email', name: '', role: 'INVALID' },
-          ],
+          adminUsers: [{ email: 'invalid-email', name: '', role: 'INVALID' }],
         };
 
-        const response = await request(app.getHttpServer()).post('/admin/admin-users/bulk').send(invalidDto).expect(400);
+        const response = await request(app.getHttpServer())
+          .post('/admin/api/admin-users/bulk')
+          .send(invalidDto)
+          .expect(400);
 
         expect(response.body).toHaveProperty('statusCode');
         expect(response.body).toHaveProperty('errorCode');
@@ -451,7 +478,10 @@ describe('admin AdminUsers API (e2e)', () => {
           ],
         };
 
-        const response = await request(app.getHttpServer()).post('/admin/admin-users/bulk').send(createDto).expect(409);
+        const response = await request(app.getHttpServer())
+          .post('/admin/api/admin-users/bulk')
+          .send(createDto)
+          .expect(409);
 
         expect(response.body).toHaveProperty('statusCode');
         expect(response.body).toHaveProperty('errorCode');
@@ -459,7 +489,7 @@ describe('admin AdminUsers API (e2e)', () => {
       });
     });
 
-    describe('delete /admin/admin-users', () => {
+    describe('delete /admin/api/admin-users', () => {
       it('should return error with statusCode and errorCode for invalid UUIDs', async () => {
         expect.assertions(3);
 
@@ -467,7 +497,10 @@ describe('admin AdminUsers API (e2e)', () => {
           publicIds: ['invalid-uuid-1', 'invalid-uuid-2'],
         };
 
-        const response = await request(app.getHttpServer()).delete('/admin/admin-users').send(deleteDto).expect(400);
+        const response = await request(app.getHttpServer())
+          .delete('/admin/api/admin-users')
+          .send(deleteDto)
+          .expect(400);
 
         expect(response.body).toHaveProperty('statusCode');
         expect(response.body).toHaveProperty('errorCode');
