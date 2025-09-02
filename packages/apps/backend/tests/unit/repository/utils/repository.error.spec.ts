@@ -5,7 +5,6 @@ import {
   PrismaClientUnknownRequestError,
   PrismaClientValidationError,
 } from '@/generated/prisma/runtime/library';
-
 import { isPrismaError, isPrismaErrorCode, type PrismaError } from '@/repository/utils/prisma.error';
 import {
   RepositoryError,

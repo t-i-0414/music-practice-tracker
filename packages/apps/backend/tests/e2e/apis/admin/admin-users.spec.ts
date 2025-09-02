@@ -74,15 +74,12 @@ describe('admin AdminUsers API (e2e)', () => {
     it('should get all admin users', async () => {
       expect.assertions(3);
 
-      const adminUsers = [
-        { email: 'admin1@example.com', name: 'Admin 1', role: AdminRole.VIEWER },
-        { email: 'admin2@example.com', name: 'Admin 2', role: AdminRole.ADMIN },
-      ];
+      const adminUser1 = { email: 'admin1@example.com', name: 'Admin 1', role: AdminRole.VIEWER };
+      const adminUser2 = { email: 'admin2@example.com', name: 'Admin 2', role: AdminRole.ADMIN };
 
       // Create admin users sequentially to ensure predictable order
-      for (const adminUser of adminUsers) {
-        await request(app.getHttpServer()).post('/admin/api/admin-users').send(adminUser).expect(201);
-      }
+      await request(app.getHttpServer()).post('/admin/api/admin-users').send(adminUser1).expect(201);
+      await request(app.getHttpServer()).post('/admin/api/admin-users').send(adminUser2).expect(201);
 
       const response = await request(app.getHttpServer()).get('/admin/api/admin-users').expect(200);
 
