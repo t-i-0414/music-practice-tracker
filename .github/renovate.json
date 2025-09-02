@@ -229,7 +229,7 @@
       "matchUpdateTypes": ["lockFileMaintenance"],
       "automerge": true,
       "automergeType": "branch",
-      "schedule": ["at 9:00am on Monday"] // メイン実行の1時間前
+      "schedule": ["at 9:00am on Monday"] // 1 hour before main execution
     }
   ],
   "ignorePaths": ["**/node_modules/**", "packages/apps/mobile/**"],
@@ -241,6 +241,6 @@
   "lockFileMaintenance": {
     "enabled": true,
     "automerge": true,
-    "schedule": ["at 9:00am on Monday"] // メイン実行の1時間前
+    "schedule": ["at 9:00am on Monday"] // 1 hour before main execution
   }
 }
