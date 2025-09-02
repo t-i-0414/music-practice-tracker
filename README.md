@@ -7,13 +7,21 @@
 
 ## 📋 Project Overview
 
-A comprehensive music practice tracking application built with modern web technologies. This project demonstrates full-stack development skills including mobile app development, backend API design, and admin dashboard creation.
+A comprehensive music practice tracking application built with modern web technologies and Domain-Driven Design (DDD) architecture. This project demonstrates advanced full-stack development skills including mobile app development, scalable backend API design, and admin dashboard creation.
 
 ### 🎯 Purpose
 
-- **Portfolio demonstration** of technical capabilities
-- **Educational reference** for architecture patterns
-- **Code quality showcase** with modern development practices
+- **Portfolio demonstration** of enterprise-level technical capabilities
+- **Educational reference** for DDD architecture patterns and clean code practices
+- **Code quality showcase** with 95%+ test coverage and modern development workflows
+
+### 🏗️ Technical Highlights
+
+- **Domain-Driven Design**: Clean separation of domain, API, and repository layers
+- **Dual API Architecture**: Separate user-scoped and admin APIs
+- **Comprehensive Testing**: Unit, integration, and E2E tests with high coverage
+- **Modern Tooling**: Bun runtime, TypeScript, ESLint with custom rules
+- **Quality Gates**: Automated CI/CD with mandatory quality checks
 
 ## 📄 License & Usage
 
@@ -30,11 +38,20 @@ For actual security concerns, please contact: <takuya.iwashiro@takudev.net>
 
 This project showcases my expertise in:
 
-- Full-stack JavaScript/TypeScript development
-- Mobile application development
-- API design and backend architecture
-- Modern development workflows and tooling
-- Code quality and testing practices
+- **Architecture Design**: Domain-Driven Design, Clean Architecture, SOLID principles
+- **Full-stack Development**: TypeScript, Node.js, React Native, Next.js
+- **Backend Engineering**: NestJS, PostgreSQL, Prisma ORM, microservices patterns
+- **Quality Engineering**: TDD/Behavior-Driven Development, 95%+ test coverage, custom ESLint rules
+- **DevOps & Tooling**: CI/CD pipelines, automated quality gates, modern toolchain
+- **Database Design**: Relational modeling, performance optimization, migration strategies
+
+### 🛠️ Technology Stack
+
+**Backend**: NestJS, TypeScript, PostgreSQL, Prisma, Bun runtime  
+**Frontend**: Next.js (Admin), React Native/Expo (Mobile)  
+**Testing**: Jest, custom test utilities, integration testing  
+**Quality**: ESLint (custom rules), Prettier, comprehensive CI/CD  
+**Infrastructure**: Docker, automated deployments, monitoring
 
 ## 📞 Contact
 
