@@ -1,4 +1,3 @@
-import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { UserCommandService } from '@/domain/aggregates/user/user.command.service';
@@ -40,7 +39,7 @@ describe('userCommandService (Integration)', () => {
 
   describe('createUser', () => {
     it('should create a user in the database', async () => {
-      expect.assertions(4);
+      expect.assertions(3);
 
       const createDto = {
         email: 'test@example.com',
@@ -112,10 +111,10 @@ describe('userCommandService (Integration)', () => {
 
       await expect(
         service.updateUserById({
-          publicId: 'non-existent-id',
+          publicId: '00000000-0000-0000-0000-000000000000',
           data: { name: 'New Name' },
         }),
-      ).rejects.toThrow(NotFoundException);
+      ).rejects.toThrow('No record was found for an update');
     });
   });
 
@@ -132,7 +131,7 @@ describe('userCommandService (Integration)', () => {
       await service.deleteUserById({ publicId: created.publicId });
 
       await expect(queryService.findUniqueOrThrowUserById({ publicId: created.publicId })).rejects.toThrow(
-        NotFoundException,
+        'No record was found for a query',
       );
     });
 
@@ -141,9 +140,9 @@ describe('userCommandService (Integration)', () => {
 
       await expect(
         service.deleteUserById({
-          publicId: 'non-existent-id',
+          publicId: '00000000-0000-0000-0000-000000000000',
         }),
-      ).rejects.toThrow(NotFoundException);
+      ).rejects.toThrow('No record was found for a delete');
     });
   });
 

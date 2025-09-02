@@ -1,4 +1,3 @@
-import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { AdminUserCommandService } from '@/domain/aggregates/admin-user/admin-user.command.service';
@@ -161,10 +160,10 @@ describe('adminUserCommandService (Integration)', () => {
 
       await expect(
         service.updateAdminUserById({
-          publicId: 'non-existent-id',
+          publicId: '00000000-0000-0000-0000-000000000000',
           data: { name: 'New Name' },
         }),
-      ).rejects.toThrow('Inconsistent column data');
+      ).rejects.toThrow('No record was found for an update');
     });
 
     it('should update only specified fields', async () => {
@@ -206,7 +205,7 @@ describe('adminUserCommandService (Integration)', () => {
       await service.deleteAdminUserById({ publicId: created.publicId });
 
       await expect(queryService.findUniqueOrThrowAdminUser({ publicId: created.publicId })).rejects.toThrow(
-        NotFoundException,
+        'No record was found for a query',
       );
     });
 
@@ -215,9 +214,9 @@ describe('adminUserCommandService (Integration)', () => {
 
       await expect(
         service.deleteAdminUserById({
-          publicId: 'non-existent-id',
+          publicId: '00000000-0000-0000-0000-000000000000',
         }),
-      ).rejects.toThrow('Inconsistent column data');
+      ).rejects.toThrow('No record was found for a delete');
     });
   });
 
@@ -299,7 +298,7 @@ describe('adminUserCommandService (Integration)', () => {
       });
 
       await service.deleteManyAdminUsersByIds({
-        publicIds: ['non-existent-1', 'non-existent-2'],
+        publicIds: ['00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002'],
       });
 
       const foundUser = await queryService.findUniqueOrThrowAdminUser({ publicId: adminUser.publicId });

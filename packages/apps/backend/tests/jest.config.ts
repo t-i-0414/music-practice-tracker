@@ -17,6 +17,7 @@ const config: Config = {
   },
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   setupFiles: ['<rootDir>/jest-env.setup.ts'],
+  maxWorkers: 1,
 };
 
 export default config;

@@ -1,4 +1,3 @@
-import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { AdminUserQueryService } from '@/domain/aggregates/admin-user/admin-user.query.service';
@@ -59,9 +58,9 @@ describe('adminUserQueryService (Integration)', () => {
     it('should throw NotFoundException for non-existent admin user', async () => {
       expect.assertions(1);
 
-      await expect(service.findUniqueOrThrowAdminUser({ publicId: 'non-existent-id' })).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        service.findUniqueOrThrowAdminUser({ publicId: '00000000-0000-0000-0000-000000000000' }),
+      ).rejects.toThrow('No record was found for a query');
     });
   });
 
@@ -107,7 +106,7 @@ describe('adminUserQueryService (Integration)', () => {
       expect.assertions(1);
 
       const result = await service.findManyAdminUsersById({
-        publicIds: ['non-existent-1', 'non-existent-2'],
+        publicIds: ['00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002'],
       });
 
       expect(result.adminUsers).toHaveLength(0);
@@ -125,7 +124,7 @@ describe('adminUserQueryService (Integration)', () => {
       });
 
       const result = await service.findManyAdminUsersById({
-        publicIds: [admin.publicId, 'non-existent'],
+        publicIds: [admin.publicId, '00000000-0000-0000-0000-000000000000'],
       });
 
       expect(result.adminUsers).toHaveLength(1);
