@@ -57,18 +57,15 @@ These notes guide coding agents (e.g., Serena/Codex CLI) working in this repo.
 
 When you need external library/framework documentation, use Context7 — not ad‑hoc web searches.
 
-1) Resolve library ID
-
+1. Resolve library ID
    - Call `context7__resolve-library-id` with a clear library name.
    - Use the returned Context7‑compatible ID with `context7__get-library-docs`.
 
-2) Fetch focused docs
-
+2. Fetch focused docs
    - Call `context7__get-library-docs` with the resolved ID.
    - Optionally set `topic` to narrow (e.g., "routing", "prisma-migrate").
 
-3) Apply with care
-
+3. Apply with care
    - Prefer primary, official docs retrieved via Context7.
    - Summarize essentials and cite the doc URL in PR descriptions when relevant.
    - Avoid long verbatim quotes; paraphrase and link.

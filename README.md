@@ -27,11 +27,11 @@ A comprehensive music practice tracking application built with modern web techno
 
 Prerequisites: Node.js 22.19.0, Bun 1.2.21, Docker. For mobile: Android/iOS tooling, Expo CLI (optional: `npm i -g eas-cli`).
 
-1) Setup: `make setup`
-2) Start DB: `docker compose up -d`
-3) Backend (terminal A): `cd packages/apps/backend && bun run start:dev`
-4) Admin (terminal B): `cd packages/apps/admin && bun run start:dev`
-5) Mobile (optional, terminal C): `cd packages/apps/mobile && bun run start:dev`
+1. Setup: `make setup`
+2. Start DB: `docker compose up -d`
+3. Backend (terminal A): `cd packages/apps/backend && bun run start:dev`
+4. Admin (terminal B): `cd packages/apps/admin && bun run start:dev`
+5. Mobile (optional, terminal C): `cd packages/apps/mobile && bun run start:dev`
 
 All‑in‑one checks: `bun run quality:check` (format, spell, lint, types).
 
