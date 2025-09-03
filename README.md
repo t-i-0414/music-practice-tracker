@@ -23,6 +23,24 @@ A comprehensive music practice tracking application built with modern web techno
 - **Modern Tooling**: Bun runtime, TypeScript, ESLint with custom rules
 - **Quality Gates**: Automated CI/CD with mandatory quality checks
 
+## 🚀 Quick Start
+
+Prerequisites: Node.js 22.19.0, Bun 1.2.21, Docker. For mobile: Android/iOS tooling, Expo CLI (optional: `npm i -g eas-cli`).
+
+1. Setup: `make setup`
+2. Start DB: `docker compose up -d`
+3. Backend (terminal A): `cd packages/apps/backend && bun run start:dev`
+4. Admin (terminal B): `cd packages/apps/admin && bun run start:dev`
+5. Mobile (optional, terminal C): `cd packages/apps/mobile && bun run start:dev`
+
+All‑in‑one checks: `bun run quality:check` (format, spell, lint, types).
+
+## 🧭 Architecture Overview
+
+- **DDD layering** with explicit domain, API, and repository boundaries.
+- **Dual APIs**: user app API and admin API run as separate NestJS apps.
+- **Data model**: Prisma with internal numeric IDs and UUID public IDs; commit hook validates schema conventions.
+
 ## 📄 License & Usage
 
 **⚠️ IMPORTANT**: This project is **NOT** open source.
