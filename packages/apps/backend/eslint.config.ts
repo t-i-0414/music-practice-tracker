@@ -17,7 +17,7 @@ const enabledBackendPluginRules = Object.keys(pluginBackend.rules).reduce<Record
   return acc;
 }, {});
 
-const config = tseslint.config(
+const config: unknown = tseslint.config(
   {
     languageOptions: {
       parserOptions: {

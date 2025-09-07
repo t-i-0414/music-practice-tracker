@@ -6,11 +6,12 @@ import {
   testFilePatterns,
   importConfig,
 } from '@music-practice-tracker/eslint-configs';
+import type { FlatConfig } from '@typescript-eslint/utils/ts-eslint';
 import { globalIgnores } from 'eslint/config';
 import prettierConfig from 'eslint-config-prettier/flat';
 import tseslint from 'typescript-eslint';
 
-export default tseslint.config(
+const config: FlatConfig.ConfigArray = tseslint.config(
   {
     languageOptions: {
       parserOptions: {
@@ -46,3 +47,5 @@ export default tseslint.config(
   globalIgnores([...sharedIgnores, './types']),
   prettierConfig,
 );
+
+export default config;

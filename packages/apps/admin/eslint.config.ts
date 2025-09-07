@@ -15,6 +15,7 @@ import {
   tsConfigRules,
   vitestConfig,
 } from '@music-practice-tracker/eslint-configs';
+import type { FlatConfig } from '@typescript-eslint/utils/ts-eslint';
 import { globalIgnores } from 'eslint/config';
 import prettierConfig from 'eslint-config-prettier/flat';
 import unusedImportsPlugin from 'eslint-plugin-unused-imports';
@@ -27,7 +28,7 @@ const compat = new FlatCompat({
 });
 
 const nextEslintConfig = [...compat.extends('next/core-web-vitals', 'next/typescript', 'prettier')];
-const config = tseslint.config(
+const config: FlatConfig.ConfigArray = tseslint.config(
   ...nextEslintConfig,
   {
     languageOptions: {

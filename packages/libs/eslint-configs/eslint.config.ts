@@ -1,10 +1,11 @@
+import type { FlatConfig } from '@typescript-eslint/utils/ts-eslint';
 import { globalIgnores } from 'eslint/config';
 import prettierConfig from 'eslint-config-prettier/flat';
 import tseslint from 'typescript-eslint';
 
-import { baseConfig, tsConfig, sharedIgnores, importConfig } from './src';
+import { baseConfig, importConfig, sharedIgnores, tsConfig } from './src';
 
-export default tseslint.config(
+const config: FlatConfig.ConfigArray = tseslint.config(
   {
     languageOptions: {
       parserOptions: {
@@ -20,3 +21,5 @@ export default tseslint.config(
   globalIgnores([...sharedIgnores, './types']),
   prettierConfig,
 );
+
+export default config;
