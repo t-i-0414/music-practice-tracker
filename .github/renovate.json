@@ -1,11 +1,11 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:best-practices"],
+  "extends": ["config:best-practices", ":preserveSemverRanges"],
   "labels": ["dependencies"],
   "prConcurrentLimit": 0,
   "prHourlyLimit": 0,
   "commitMessagePrefix": "chore: ",
-  "rangeStrategy": "bump",
+  "rangeStrategy": "replace",
   "separateMajorMinor": true,
   "separateMinorPatch": false,
   "dependencyDashboard": true,
