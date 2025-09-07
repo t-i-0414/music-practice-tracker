@@ -62,6 +62,7 @@
   },
   "postUpdateOptions": ["npmDedupe"],
   "lockFileMaintenance": {
-    "enabled": true
+    "enabled": true,
+    "schedule": ["after 9am on Monday"]
   }
 }
