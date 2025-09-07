@@ -15,7 +15,7 @@ setup:
 	@make -C packages/apps/backend setup
 	@make -C packages/apps/mobile setup
 	@make -C packages/apps/admin setup
-	@mkdir -p .vscode && printf '{\n  "files.exclude": {\n    ".postgres-backups": true\n  },\n  "jest.enable": false\n}' > .vscode/settings.json
+	@mkdir -p .vscode && printf '{\n  "files.exclude": {\n    ".postgres-backups": true\n  },\n  "jest.enable": false,\n  "editor.codeActionsOnSave": {\n    "source.organizeImports": "never"\n  }\n}' > .vscode/settings.json
 	@echo "✅ Setup complete!"
 
 .PHONY: setup-env
