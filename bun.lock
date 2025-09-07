@@ -21,7 +21,7 @@
         "@music-practice-tracker/eslint-configs": "workspace:*",
         "@music-practice-tracker/tsconfig-base": "workspace:*",
         "@playwright/test": "^1.55.0",
-        "@secretlint/secretlint-rule-preset-recommend": "^11.2.0",
+        "@secretlint/secretlint-rule-preset-recommend": "^11.2.3",
         "@storybook/addon-a11y": "^9.1.5",
         "@storybook/addon-docs": "^9.1.5",
         "@storybook/addon-onboarding": "^9.1.5",
@@ -1261,7 +1261,7 @@
 
     "@secretlint/resolver": ["@secretlint/resolver@11.2.0", "", {}, "sha512-1hEiGqBFvUs+y1AFL6jD+i+n/ThqOSk8vVYQJU+SDc7PWx8EymCKOqTJ+aXI87w8uuLsQuVXIkybkInNhC9ZKQ=="],
 
-    "@secretlint/secretlint-rule-preset-recommend": ["@secretlint/secretlint-rule-preset-recommend@11.2.0", "", {}, "sha512-3pQY45yR+RGwDSikuYXL254PAtkMSJ/X9pbgb3pFDM4lMmffhETlssvU/SOR9owlJk6RWXTogOgOqcAxUMmNug=="],
+    "@secretlint/secretlint-rule-preset-recommend": ["@secretlint/secretlint-rule-preset-recommend@11.2.3", "", {}, "sha512-tpjzerm1KedNnf8xkittHW0sIeCARH8+JFzgQDslQNtbqJ2MSPEs5e5VcJ0i2ZdHVhq1LC1osm88RmwV4k65yA=="],
 
     "@secretlint/source-creator": ["@secretlint/source-creator@11.2.0", "", { "dependencies": { "@secretlint/types": "11.2.0", "istextorbinary": "^9.5.0" } }, "sha512-rUuH+8M14e4HsGxrJ1HmM3Eu0E+RVm4ZNMWWuETQYrUONn7U/rZZ9WvSCEnRnBqnxLZIo6bI7RtIt3gJ4fU8bA=="],
 
