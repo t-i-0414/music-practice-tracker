@@ -11,6 +11,9 @@
   "dependencyDashboard": true,
   "packageRules": [
     {
+      "ignoreDeps": ["anthropics/claude-code-action", "postgres"]
+    },
+    {
       "description": "Exclude react and react-dom repo-wide",
       "enabled": false,
       "matchPackageNames": ["react", "react-dom", "react-test-renderer"]
