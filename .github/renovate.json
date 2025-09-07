@@ -87,13 +87,7 @@
     },
     {
       "description": "Group Jest packages",
-      "matchPackageNames": [
-        "jest",
-        "ts-jest",
-        "babel-jest",
-        "/@jest/*/",
-        "/@types/jest/"
-      ],
+      "matchPackageNames": ["jest", "ts-jest", "babel-jest", "/@jest/*/", "/@types/jest/"],
       "groupName": "Jest packages",
       "groupSlug": "jest",
       "addLabels": ["testing"]
@@ -208,14 +202,7 @@
       "matchUpdateTypes": ["patch"],
       "automerge": true,
       "automergeType": "branch",
-      "matchPackageNames": [
-        "!react",
-        "!react-dom",
-        "!/@nestjs/*/",
-        "!/next*/",
-        "!/@next/*/",
-        "!/@prisma/*/"
-      ]
+      "matchPackageNames": ["!react", "!react-dom", "!/@nestjs/*/", "!/next*/", "!/@next/*/", "!/@prisma/*/"]
     },
     {
       "description": "Lock file maintenance",
