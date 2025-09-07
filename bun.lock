@@ -85,7 +85,7 @@
         "playwright": "^1.55.0",
         "prettier": "^3.6.2",
         "react-test-renderer": "19.0.0",
-        "secretlint": "^11.2.0",
+        "secretlint": "^11.2.3",
         "source-map-support": "^0.5.21",
         "storybook": "^9.1.4",
         "ts-jest": "^29.4.1",
@@ -1247,25 +1247,25 @@
 
     "@scarf/scarf": ["@scarf/scarf@1.4.0", "", {}, "sha512-xxeapPiUXdZAE3che6f3xogoJPeZgig6omHEy1rIY5WVsB3H2BHNnZH+gHG6x91SCWyQCzWGsuL2Hh3ClO5/qQ=="],
 
-    "@secretlint/config-creator": ["@secretlint/config-creator@11.2.0", "", { "dependencies": { "@secretlint/types": "11.2.0" } }, "sha512-5wmGfmDFqGvp67tVic4QQ/FZi69h4QFUUChNvIDc3WxCsy/tfNMP+wxjM9Sz+MMB2AeZ4JjSyEIbXr3iEVz7GQ=="],
+    "@secretlint/config-creator": ["@secretlint/config-creator@11.2.3", "", { "dependencies": { "@secretlint/types": "11.2.3" } }, "sha512-urBi+HGFquINu1e5nDfelz7WAXXunSJQo3HqehDPG+ovNjf11NssnxxJd7aFLXWX8Oc304CoCfnEYsJg+u9oSQ=="],
 
-    "@secretlint/config-loader": ["@secretlint/config-loader@11.2.0", "", { "dependencies": { "@secretlint/profiler": "11.2.0", "@secretlint/resolver": "11.2.0", "@secretlint/types": "11.2.0", "ajv": "^8.17.1", "debug": "^4.4.1", "rc-config-loader": "^4.1.3" } }, "sha512-fSoiwOy+/kuENLwmpS0FfUl0hqd3EpvryYiRxgxbQtv0tj6kwqCnpGBGQ6/YvY8UmL3npTyjnCEmygS16APImQ=="],
+    "@secretlint/config-loader": ["@secretlint/config-loader@11.2.3", "", { "dependencies": { "@secretlint/profiler": "11.2.3", "@secretlint/resolver": "11.2.3", "@secretlint/types": "11.2.3", "ajv": "^8.17.1", "debug": "^4.4.1", "rc-config-loader": "^4.1.3" } }, "sha512-kTkNZGOEOvhONeUIHu3FFKfiIyFOaapvL6JEC60ZOZ77CDH2y0HespcgJa8MT9NsAwth9Y7j+EwWpFOb4ynotQ=="],
 
-    "@secretlint/core": ["@secretlint/core@11.2.0", "", { "dependencies": { "@secretlint/profiler": "11.2.0", "@secretlint/types": "11.2.0", "debug": "^4.4.1", "structured-source": "^4.0.0" } }, "sha512-WDie0fhCPpeZVT3/v2UkbuN8GUT/JTr5kSTddhETdw42l9tkM+S0xadXS3yXzbF/VF7U2BMWdclt5dcNthNYtA=="],
+    "@secretlint/core": ["@secretlint/core@11.2.3", "", { "dependencies": { "@secretlint/profiler": "11.2.3", "@secretlint/types": "11.2.3", "debug": "^4.4.1", "structured-source": "^4.0.0" } }, "sha512-pfPFy2nKGCRwEQFsWUQz/apcEE43PqAoCPPNNnj2xYYSCs2VRd/yUrFzdibIiY3Ww9SK2a6fHC8luliLGkZ2Ew=="],
 
-    "@secretlint/formatter": ["@secretlint/formatter@11.2.0", "", { "dependencies": { "@secretlint/resolver": "11.2.0", "@secretlint/types": "11.2.0", "@textlint/linter-formatter": "^15.2.1", "@textlint/module-interop": "^15.2.1", "@textlint/types": "^15.2.1", "chalk": "^5.6.0", "debug": "^4.4.1", "pluralize": "^8.0.0", "strip-ansi": "^7.1.0", "table": "^6.9.0", "terminal-link": "^4.0.0" } }, "sha512-yLQAwapEXF2Pec3wE2pPoCmOL63vABkyk4Wji/+UtYPkQjVB6ZjxAYBjbVNCbtj7/q+SW5DL5byON6Cbc6D2VA=="],
+    "@secretlint/formatter": ["@secretlint/formatter@11.2.3", "", { "dependencies": { "@secretlint/resolver": "11.2.3", "@secretlint/types": "11.2.3", "@textlint/linter-formatter": "^15.2.2", "@textlint/module-interop": "^15.2.2", "@textlint/types": "^15.2.2", "chalk": "^5.6.0", "debug": "^4.4.1", "pluralize": "^8.0.0", "strip-ansi": "^7.1.0", "table": "^6.9.0", "terminal-link": "^4.0.0" } }, "sha512-6R+kwSDL9rnuy4TixNM+f1bbRkl1yOzTkpEVkchR9bZWXANdPXMQyLubCgohPYUSD4eib9ObvcndvS81p8jZPQ=="],
 
-    "@secretlint/node": ["@secretlint/node@11.2.0", "", { "dependencies": { "@secretlint/config-loader": "11.2.0", "@secretlint/core": "11.2.0", "@secretlint/formatter": "11.2.0", "@secretlint/profiler": "11.2.0", "@secretlint/source-creator": "11.2.0", "@secretlint/types": "11.2.0", "debug": "^4.4.1", "p-map": "^7.0.3" } }, "sha512-qbv4er0JfdFxAgLp/APcGuADAd34lLD/kVimgPJudjaKsoS2Tp3ODV5A8vGmrqvZXbh2TeJQOWpB7TswM1P/8g=="],
+    "@secretlint/node": ["@secretlint/node@11.2.3", "", { "dependencies": { "@secretlint/config-loader": "11.2.3", "@secretlint/core": "11.2.3", "@secretlint/formatter": "11.2.3", "@secretlint/profiler": "11.2.3", "@secretlint/source-creator": "11.2.3", "@secretlint/types": "11.2.3", "debug": "^4.4.1", "p-map": "^7.0.3" } }, "sha512-8mYOdHVwuMNXq0bwwC309xUmmgisMjIypJl5z0U1TQqWZoqRK+N1OQ7vHKZfzA/lnEIm4MAqKclr2rLDNaapfQ=="],
 
-    "@secretlint/profiler": ["@secretlint/profiler@11.2.0", "", {}, "sha512-TqwLUiP8NstY+q2cLChrO2ZegZ8reNsijg1+MJQAT1YfRAYhmEDv0apPLgd2tjjBNP0ECIhuLa9sJdXi5ct8+w=="],
+    "@secretlint/profiler": ["@secretlint/profiler@11.2.3", "", {}, "sha512-CpXYj8LhwsRhZ7HYIapIVROoJ0wJVnmKPX/HnpyJzyGSKZoqbsW+VsAF4npspfZBjP6uLBZKfQHvOitQFOqOPg=="],
 
-    "@secretlint/resolver": ["@secretlint/resolver@11.2.0", "", {}, "sha512-1hEiGqBFvUs+y1AFL6jD+i+n/ThqOSk8vVYQJU+SDc7PWx8EymCKOqTJ+aXI87w8uuLsQuVXIkybkInNhC9ZKQ=="],
+    "@secretlint/resolver": ["@secretlint/resolver@11.2.3", "", {}, "sha512-f2b9wgLS1GwyRo4E459Q3n534KC0azYmMFRSwnRT65HDtZCci0BGv/m2AUCvor8+q2oSePrCC6NZnLwJDzm6Kg=="],
 
     "@secretlint/secretlint-rule-preset-recommend": ["@secretlint/secretlint-rule-preset-recommend@11.2.0", "", {}, "sha512-3pQY45yR+RGwDSikuYXL254PAtkMSJ/X9pbgb3pFDM4lMmffhETlssvU/SOR9owlJk6RWXTogOgOqcAxUMmNug=="],
 
-    "@secretlint/source-creator": ["@secretlint/source-creator@11.2.0", "", { "dependencies": { "@secretlint/types": "11.2.0", "istextorbinary": "^9.5.0" } }, "sha512-rUuH+8M14e4HsGxrJ1HmM3Eu0E+RVm4ZNMWWuETQYrUONn7U/rZZ9WvSCEnRnBqnxLZIo6bI7RtIt3gJ4fU8bA=="],
+    "@secretlint/source-creator": ["@secretlint/source-creator@11.2.3", "", { "dependencies": { "@secretlint/types": "11.2.3", "istextorbinary": "^9.5.0" } }, "sha512-x555rAk0BuVKbYVidoxWMV/YksGtLCfHDn0lSQPNUlD1SXTyP4kmscSfBMgp3g5HC1TK8fwT3oN1WRnivY92Fg=="],
 
-    "@secretlint/types": ["@secretlint/types@11.2.0", "", {}, "sha512-ElyZjAFfc5PgVtadPIQLJuaZtkxcCta/bUcPiMU+qhkD6z6S9Q5+BsH11BVgAZ0ZnH5z5gWbIfAyakVtLHs7SQ=="],
+    "@secretlint/types": ["@secretlint/types@11.2.3", "", {}, "sha512-zD7+FP700caEOErMp5ecds9twTs/YfmjwEQGJ44k0TnGmeZOovB/EoxAcYIeBXk46mia1MJh9dY+oc/Pu3EFrA=="],
 
     "@sinclair/typebox": ["@sinclair/typebox@0.34.41", "", {}, "sha512-6gS8pZzSXdyRHTIqoqSVknxolr1kzfy4/CeDnrzsVz8TTIWUbOBr6gnzOmTYJ3eXQNh4IYHIGi5aIL7sOZ2G/g=="],
 
@@ -3569,7 +3569,7 @@
 
     "schema-utils": ["schema-utils@4.3.2", "", { "dependencies": { "@types/json-schema": "^7.0.9", "ajv": "^8.9.0", "ajv-formats": "^2.1.1", "ajv-keywords": "^5.1.0" } }, "sha512-Gn/JaSk/Mt9gYubxTtSn/QCV4em9mpAPiR1rqy/Ocu19u/G9J5WWdNoUT4SiV6mFC3y6cxyFcFwdzPM3FgxGAQ=="],
 
-    "secretlint": ["secretlint@11.2.0", "", { "dependencies": { "@secretlint/config-creator": "11.2.0", "@secretlint/formatter": "11.2.0", "@secretlint/node": "11.2.0", "@secretlint/profiler": "11.2.0", "@secretlint/resolver": "11.2.0", "debug": "^4.4.1", "globby": "^14.1.0", "read-pkg": "^9.0.1" }, "bin": { "secretlint": "bin/secretlint.js" } }, "sha512-/ZuUnrreQ0efIHMNP+7/vl3tRcLZHuc91LDWZ8K39xetjZb9tTZeDWQ64ERAR1VyOANgLRbNjq0MLa7AUV8ebg=="],
+    "secretlint": ["secretlint@11.2.3", "", { "dependencies": { "@secretlint/config-creator": "11.2.3", "@secretlint/formatter": "11.2.3", "@secretlint/node": "11.2.3", "@secretlint/profiler": "11.2.3", "@secretlint/resolver": "11.2.3", "debug": "^4.4.1", "globby": "^14.1.0", "read-pkg": "^9.0.1" }, "bin": { "secretlint": "bin/secretlint.js" } }, "sha512-5ystbwO88qCbkv+8LX+n//Pq7b7aKHvTRuYAvKJVI6qKlPP0j4xtx3loMJCZFer+4/Y7AjpCTmFPAwPhqQpdqQ=="],
 
     "seek-bzip": ["seek-bzip@2.0.0", "", { "dependencies": { "commander": "^6.0.0" }, "bin": { "seek-bunzip": "bin/seek-bunzip", "seek-table": "bin/seek-bzip-table" } }, "sha512-SMguiTnYrhpLdk3PwfzHeotrcwi8bNV4iemL9tx9poR/yeaMYwB9VzR1w7b57DuWpuqR8n6oZboi0hj3AxZxQg=="],
 
