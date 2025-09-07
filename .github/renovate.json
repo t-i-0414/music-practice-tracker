@@ -48,17 +48,16 @@
     {
       "description": "Group NestJS packages (backend only)",
       "matchFileNames": ["packages/apps/backend/package.json"],
-      "matchPackagePatterns": ["@nestjs/*", "nest-*"],
       "groupName": "NestJS packages",
       "groupSlug": "nestjs",
       "addLabels": ["backend", "nestjs"],
-      "commitMessagePrefix": "chore(backend): "
+      "commitMessagePrefix": "chore(backend): ",
+      "matchPackageNames": ["/@nestjs/*/", "/nest-*/"]
     },
     {
       "description": "Group Next.js packages (admin only)",
       "matchFileNames": ["packages/apps/admin/package.json"],
-      "matchPackageNames": ["next", "eslint-config-next"],
-      "matchPackagePatterns": ["@next/*"],
+      "matchPackageNames": ["next", "eslint-config-next", "/@next/*/"],
       "groupName": "Next.js packages",
       "groupSlug": "nextjs",
       "addLabels": ["admin", "nextjs"],
@@ -66,64 +65,66 @@
     },
     {
       "description": "Group Storybook packages",
-      "matchPackagePatterns": ["@storybook/*", "@chromatic-com/storybook"],
       "groupName": "Storybook packages",
       "groupSlug": "storybook",
-      "addLabels": ["storybook"]
+      "addLabels": ["storybook"],
+      "matchPackageNames": ["/@storybook/*/", "/@chromatic-com/storybook/"]
     },
     {
       "description": "Group ESLint packages",
-      "matchPackageNames": ["eslint", "eslint-config-next"],
-      "matchPackagePatterns": ["eslint-*", "@eslint/*", "@typescript-eslint/*", "@vitest/eslint-plugin"],
-      "excludePackageNames": ["eslint-config-next"],
+      "matchPackageNames": [
+        "eslint",
+        "eslint-config-next",
+        "/eslint-*/",
+        "/@eslint/*/",
+        "/@typescript-eslint/*/",
+        "/@vitest/eslint-plugin/",
+        "!eslint-config-next"
+      ],
       "groupName": "ESLint packages",
       "groupSlug": "eslint",
       "addLabels": ["linting"]
     },
     {
       "description": "Group Jest packages",
-      "matchPackageNames": ["jest", "ts-jest", "babel-jest"],
-      "matchPackagePatterns": ["@jest/*", "@types/jest"],
+      "matchPackageNames": ["jest", "ts-jest", "babel-jest", "/@jest/*/", "/@types/jest/"],
       "groupName": "Jest packages",
       "groupSlug": "jest",
       "addLabels": ["testing"]
     },
     {
       "description": "Group Testing Library packages",
-      "matchPackagePatterns": ["@testing-library/*"],
       "groupName": "Testing Library packages",
       "groupSlug": "testing-library",
-      "addLabels": ["testing"]
+      "addLabels": ["testing"],
+      "matchPackageNames": ["/@testing-library/*/"]
     },
     {
       "description": "Group Playwright packages",
-      "matchPackagePatterns": ["@playwright/*"],
       "groupName": "Playwright packages",
       "groupSlug": "playwright",
-      "addLabels": ["testing"]
+      "addLabels": ["testing"],
+      "matchPackageNames": ["/@playwright/*/"]
     },
     {
       "description": "Group MSW packages",
-      "matchPackageNames": ["msw"],
-      "matchPackagePatterns": ["msw-*"],
+      "matchPackageNames": ["msw", "/msw-*/"],
       "groupName": "MSW packages",
       "groupSlug": "msw",
       "addLabels": ["testing"]
     },
     {
       "description": "Group TypeScript type definitions",
-      "matchPackagePatterns": ["@types/*"],
       "groupName": "TypeScript type definitions",
       "groupSlug": "types",
       "addLabels": ["types"],
       "automerge": true,
-      "automergeType": "branch"
+      "automergeType": "branch",
+      "matchPackageNames": ["/@types/*/"]
     },
     {
       "description": "Group Prisma packages (excluding client)",
-      "matchPackageNames": ["prisma"],
-      "matchPackagePatterns": ["@prisma/*"],
-      "excludePackageNames": ["@prisma/client"],
+      "matchPackageNames": ["prisma", "/@prisma/*/", "!@prisma/client"],
       "groupName": "Prisma packages",
       "groupSlug": "prisma",
       "addLabels": ["database"]
@@ -132,76 +133,76 @@
       "description": "Backend other dependencies (non-major)",
       "matchFileNames": ["packages/apps/backend/package.json"],
       "matchUpdateTypes": ["patch", "minor"],
-      "excludePackagePatterns": [
-        "@nestjs/*",
-        "nest-*",
-        "@types/*",
-        "@prisma/*",
-        "prisma",
-        "eslint*",
-        "@eslint/*",
-        "@typescript-eslint/*",
-        "jest*",
-        "@jest/*",
-        "@testing-library/*",
-        "@playwright/*",
-        "msw*"
-      ],
       "groupName": "Backend other dependencies (non-major)",
       "groupSlug": "backend-other",
       "addLabels": ["backend"],
-      "commitMessagePrefix": "chore(backend): "
+      "commitMessagePrefix": "chore(backend): ",
+      "matchPackageNames": [
+        "!/@nestjs/*/",
+        "!/nest-*/",
+        "!/@types/*/",
+        "!/@prisma/*/",
+        "!/prisma/",
+        "!/eslint*/",
+        "!/@eslint/*/",
+        "!/@typescript-eslint/*/",
+        "!/jest*/",
+        "!/@jest/*/",
+        "!/@testing-library/*/",
+        "!/@playwright/*/",
+        "!/msw*/"
+      ]
     },
     {
       "description": "Admin other dependencies (non-major)",
       "matchFileNames": ["packages/apps/admin/package.json"],
       "matchUpdateTypes": ["patch", "minor"],
-      "excludePackageNames": ["next", "eslint-config-next"],
-      "excludePackagePatterns": [
-        "@next/*",
-        "@types/*",
-        "eslint*",
-        "@eslint/*",
-        "@typescript-eslint/*",
-        "@testing-library/*",
-        "@storybook/*"
-      ],
       "groupName": "Admin other dependencies (non-major)",
       "groupSlug": "admin-other",
       "addLabels": ["admin"],
-      "commitMessagePrefix": "chore(admin): "
+      "commitMessagePrefix": "chore(admin): ",
+      "matchPackageNames": [
+        "!next",
+        "!eslint-config-next",
+        "!/@next/*/",
+        "!/@types/*/",
+        "!/eslint*/",
+        "!/@eslint/*/",
+        "!/@typescript-eslint/*/",
+        "!/@testing-library/*/",
+        "!/@storybook/*/"
+      ]
     },
     {
       "description": "Root other dependencies (non-major)",
       "matchFileNames": ["package.json"],
       "matchUpdateTypes": ["patch", "minor"],
-      "excludePackagePatterns": [
-        "@storybook/*",
-        "@chromatic-com/*",
-        "eslint*",
-        "@eslint/*",
-        "@typescript-eslint/*",
-        "jest*",
-        "@jest/*",
-        "@types/*",
-        "@testing-library/*",
-        "@playwright/*",
-        "prisma",
-        "@prisma/*",
-        "msw*"
-      ],
       "groupName": "Root other dependencies (non-major)",
       "groupSlug": "root-other",
       "addLabels": ["root"],
-      "commitMessagePrefix": "chore(root): "
+      "commitMessagePrefix": "chore(root): ",
+      "matchPackageNames": [
+        "!/@storybook/*/",
+        "!/@chromatic-com/*/",
+        "!/eslint*/",
+        "!/@eslint/*/",
+        "!/@typescript-eslint/*/",
+        "!/jest*/",
+        "!/@jest/*/",
+        "!/@types/*/",
+        "!/@testing-library/*/",
+        "!/@playwright/*/",
+        "!/prisma/",
+        "!/@prisma/*/",
+        "!/msw*/"
+      ]
     },
     {
       "description": "Automerge patch updates for non-critical packages",
       "matchUpdateTypes": ["patch"],
-      "excludePackageNames": ["react", "react-dom"],
-      "excludePackagePatterns": ["@nestjs/*", "next*", "@next/*", "@prisma/*"],
       "automerge": true,
-      "automergeType": "branch"
+      "automergeType": "branch",
+      "matchPackageNames": ["!react", "!react-dom", "!/@nestjs/*/", "!/next*/", "!/@next/*/", "!/@prisma/*/"]
     },
     {
       "description": "Lock file maintenance",
