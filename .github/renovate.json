@@ -13,7 +13,7 @@
     {
       "description": "Exclude react and react-dom repo-wide",
       "enabled": false,
-      "matchPackageNames": ["react", "react-dom"]
+      "matchPackageNames": ["react", "react-dom", "react-test-renderer"]
     },
     {
       "description": "Root package.json updates",
