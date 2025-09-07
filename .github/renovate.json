@@ -23,8 +23,7 @@
     },
     {
       "description": "Majors: 1 PR per library (default behavior)",
-      "matchUpdateTypes": ["major"],
-      "separateMultipleMajor": false
+      "matchUpdateTypes": ["major"]
     }
   ],
   "ignorePaths": ["**/node_modules/**", "packages/apps/mobile/**"],
