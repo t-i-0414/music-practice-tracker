@@ -1,225 +1,61 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended", "group:monorepos", "group:recommended"],
-  "prHourlyLimit": 20,
-  "prConcurrentLimit": 20,
-  "branchConcurrentLimit": 20,
-  "labels": ["dependencies"],
+  "extends": [
+    ":semanticCommits",
+    ":semanticCommitTypeAll(chore)"
+  ],
+  "semanticCommitScope": "{{#if parentDir}}{{parentDir}}{{else}}root{{/if}}",
+  "labels": [
+    "dependencies"
+  ],
   "commitMessagePrefix": "chore: ",
-  "commitMessageTopic": "{{depName}}",
-  "commitMessageExtra": "to {{#if isPinDigest}}{{{newDigestShort}}}{{else}}{{#if isMajor}}{{prettyNewMajor}}{{else}}{{#if isSingleVersion}}{{prettyNewVersion}}{{else}}{{#if newValue}}{{{newValue}}}{{else}}{{{newDigestShort}}}{{/if}}{{/if}}{{/if}}{{/if}}",
   "rangeStrategy": "bump",
   "separateMajorMinor": true,
   "separateMinorPatch": false,
   "dependencyDashboard": true,
-  "dependencyDashboardTitle": "Dependency Dashboard",
   "packageRules": [
     {
-      "description": "==== Priority 1: Disabled packages (highest priority) ====",
+      "description": "Exclude react and react-dom repo-wide",
+      "enabled": false,
       "matchPackageNames": [
-        "@prisma/client",
         "react",
-        "react-dom",
-        "react-test-renderer",
-        "anthropics/claude-code-action"
+        "react-dom"
+      ]
+    },
+    {
+      "description": "Group patch+minor per package.json (npm)",
+      "matchManagers": [
+        "npm"
       ],
-      "enabled": false
-    },
-    {
-      "description": "==== Priority 2: Security updates ====",
-      "matchUpdateTypes": ["patch"],
-      "matchCategories": ["security"],
-      "prPriority": 10,
-      "addLabels": ["security"],
-      "automerge": true,
-      "groupName": "Security updates"
-    },
-    {
-      "description": "==== Priority 3: GitHub Actions ====",
-      "matchManagers": ["github-actions"],
-      "pinDigests": true,
-      "groupName": "GitHub Actions",
-      "groupSlug": "github-actions",
-      "addLabels": ["github-actions"],
-      "commitMessagePrefix": "ci: ",
-      "automerge": true,
-      "automergeType": "branch"
-    },
-    {
-      "description": "Group NestJS packages (backend only)",
-      "matchFileNames": ["packages/apps/backend/package.json"],
-      "groupName": "NestJS packages",
-      "groupSlug": "nestjs",
-      "addLabels": ["backend", "nestjs"],
-      "commitMessagePrefix": "chore(backend): ",
-      "matchPackageNames": ["/@nestjs/*/", "/nest-*/"]
-    },
-    {
-      "description": "Group Next.js packages (admin only)",
-      "matchFileNames": ["packages/apps/admin/package.json"],
-      "matchPackageNames": ["next", "eslint-config-next", "/@next/*/"],
-      "groupName": "Next.js packages",
-      "groupSlug": "nextjs",
-      "addLabels": ["admin", "nextjs"],
-      "commitMessagePrefix": "chore(admin): "
-    },
-    {
-      "description": "Group Storybook packages",
-      "groupName": "Storybook packages",
-      "groupSlug": "storybook",
-      "addLabels": ["storybook"],
-      "matchPackageNames": ["/@storybook/*/", "/@chromatic-com/storybook/"]
-    },
-    {
-      "description": "Group ESLint packages",
-      "matchPackageNames": [
-        "eslint",
-        "eslint-config-next",
-        "/eslint-*/",
-        "/@eslint/*/",
-        "/@typescript-eslint/*/",
-        "/@vitest/eslint-plugin/",
-        "!eslint-config-next"
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
       ],
-      "groupName": "ESLint packages",
-      "groupSlug": "eslint",
-      "addLabels": ["linting"]
+      "groupName": "non-major updates ({{packageFileDir}})",
+      "additionalBranchPrefix": "{{packageFileDir}}/"
     },
     {
-      "description": "Group Jest packages",
-      "matchPackageNames": ["jest", "ts-jest", "babel-jest", "/@jest/*/", "/@types/jest/"],
-      "groupName": "Jest packages",
-      "groupSlug": "jest",
-      "addLabels": ["testing"]
-    },
-    {
-      "description": "Group Testing Library packages",
-      "groupName": "Testing Library packages",
-      "groupSlug": "testing-library",
-      "addLabels": ["testing"],
-      "matchPackageNames": ["/@testing-library/*/"]
-    },
-    {
-      "description": "Group Playwright packages",
-      "groupName": "Playwright packages",
-      "groupSlug": "playwright",
-      "addLabels": ["testing"],
-      "matchPackageNames": ["/@playwright/*/"]
-    },
-    {
-      "description": "Group MSW packages",
-      "matchPackageNames": ["msw", "/msw-*/"],
-      "groupName": "MSW packages",
-      "groupSlug": "msw",
-      "addLabels": ["testing"]
-    },
-    {
-      "description": "Group TypeScript type definitions",
-      "groupName": "TypeScript type definitions",
-      "groupSlug": "types",
-      "addLabels": ["types"],
-      "automerge": true,
-      "automergeType": "branch",
-      "matchPackageNames": ["/@types/*/"]
-    },
-    {
-      "description": "Group Prisma packages (excluding client)",
-      "matchPackageNames": ["prisma", "/@prisma/*/", "!@prisma/client"],
-      "groupName": "Prisma packages",
-      "groupSlug": "prisma",
-      "addLabels": ["database"]
-    },
-    {
-      "description": "Backend other dependencies (non-major)",
-      "matchFileNames": ["packages/apps/backend/package.json"],
-      "matchUpdateTypes": ["patch", "minor"],
-      "groupName": "Backend other dependencies (non-major)",
-      "groupSlug": "backend-other",
-      "addLabels": ["backend"],
-      "commitMessagePrefix": "chore(backend): ",
-      "matchPackageNames": [
-        "!/@nestjs/*/",
-        "!/nest-*/",
-        "!/@types/*/",
-        "!/@prisma/*/",
-        "!/prisma/",
-        "!/eslint*/",
-        "!/@eslint/*/",
-        "!/@typescript-eslint/*/",
-        "!/jest*/",
-        "!/@jest/*/",
-        "!/@testing-library/*/",
-        "!/@playwright/*/",
-        "!/msw*/"
-      ]
-    },
-    {
-      "description": "Admin other dependencies (non-major)",
-      "matchFileNames": ["packages/apps/admin/package.json"],
-      "matchUpdateTypes": ["patch", "minor"],
-      "groupName": "Admin other dependencies (non-major)",
-      "groupSlug": "admin-other",
-      "addLabels": ["admin"],
-      "commitMessagePrefix": "chore(admin): ",
-      "matchPackageNames": [
-        "!next",
-        "!eslint-config-next",
-        "!/@next/*/",
-        "!/@types/*/",
-        "!/eslint*/",
-        "!/@eslint/*/",
-        "!/@typescript-eslint/*/",
-        "!/@testing-library/*/",
-        "!/@storybook/*/"
-      ]
-    },
-    {
-      "description": "Root other dependencies (non-major)",
-      "matchFileNames": ["package.json"],
-      "matchUpdateTypes": ["patch", "minor"],
-      "groupName": "Root other dependencies (non-major)",
-      "groupSlug": "root-other",
-      "addLabels": ["root"],
-      "commitMessagePrefix": "chore(root): ",
-      "matchPackageNames": [
-        "!/@storybook/*/",
-        "!/@chromatic-com/*/",
-        "!/eslint*/",
-        "!/@eslint/*/",
-        "!/@typescript-eslint/*/",
-        "!/jest*/",
-        "!/@jest/*/",
-        "!/@types/*/",
-        "!/@testing-library/*/",
-        "!/@playwright/*/",
-        "!/prisma/",
-        "!/@prisma/*/",
-        "!/msw*/"
-      ]
-    },
-    {
-      "description": "Automerge patch updates for non-critical packages",
-      "matchUpdateTypes": ["patch"],
-      "automerge": true,
-      "automergeType": "branch",
-      "matchPackageNames": ["!react", "!react-dom", "!/@nestjs/*/", "!/next*/", "!/@next/*/", "!/@prisma/*/"]
-    },
-    {
-      "description": "Lock file maintenance",
-      "matchManagers": ["npm"],
-      "matchUpdateTypes": ["lockFileMaintenance"],
-      "automerge": true,
-      "automergeType": "branch"
+      "description": "Majors: 1 PR per library (default behavior)",
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "separateMultipleMajor": false
     }
   ],
-  "ignorePaths": ["**/node_modules/**", "packages/apps/mobile/**"],
+  "ignorePaths": [
+    "**/node_modules/**",
+    "packages/apps/mobile/**"
+  ],
   "vulnerabilityAlerts": {
     "enabled": true,
-    "labels": ["security"]
+    "labels": [
+      "security"
+    ]
   },
-  "postUpdateOptions": ["npmDedupe"],
+  "postUpdateOptions": [
+    "npmDedupe"
+  ],
   "lockFileMaintenance": {
-    "enabled": true,
-    "automerge": true
+    "enabled": true
   }
 }
