@@ -1,21 +1,20 @@
 import {
   baseConfig,
-  storybookConfig,
-  reactNativeConfig,
-  sharedIgnores,
-  tsConfigRules,
+  baseScriptConfigRules,
   importConfigRules,
   reactConfigRules,
+  reactNativeConfig,
+  sharedIgnores,
+  storybookConfig,
   testFilePatterns,
+  tsConfigRules,
   vitestConfig,
-  baseScriptConfigRules,
 } from '@music-practice-tracker/eslint-configs';
-import { globalIgnores } from 'eslint/config';
+import { defineConfig, globalIgnores } from 'eslint/config';
 import prettierConfig from 'eslint-config-prettier/flat';
 import unusedImportsPlugin from 'eslint-plugin-unused-imports';
-import tseslint from 'typescript-eslint';
 
-const config = tseslint.config(
+const config = defineConfig(
   {
     files: ['**/*.ts', '**/*.tsx'],
     plugins: {

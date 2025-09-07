@@ -8,16 +8,15 @@ import {
   tsConfig,
 } from '@music-practice-tracker/eslint-configs';
 import { pluginBackend } from '@music-practice-tracker/eslint-plugins';
-import { globalIgnores } from 'eslint/config';
+import { defineConfig, globalIgnores } from 'eslint/config';
 import prettierConfig from 'eslint-config-prettier/flat';
-import tseslint from 'typescript-eslint';
 
 const enabledBackendPluginRules = Object.keys(pluginBackend.rules).reduce<Record<string, 'error'>>((acc, rule) => {
   acc[`custom-backend-eslint/${rule}`] = 'error';
   return acc;
 }, {});
 
-const config = tseslint.config(
+const config = defineConfig(
   {
     languageOptions: {
       parserOptions: {

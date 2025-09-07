@@ -1,5 +1,6 @@
 import type { FlatConfig } from '@typescript-eslint/utils/ts-eslint';
-import tseslint, { type ConfigArray, configs } from 'typescript-eslint';
+import { defineConfig } from 'eslint/config';
+import { configs } from 'typescript-eslint';
 
 export const tsConfigRules: FlatConfig.Rules = {
   '@typescript-eslint/adjacent-overload-signatures': 'error',
@@ -151,7 +152,7 @@ export const tsConfigRules: FlatConfig.Rules = {
   '@typescript-eslint/use-unknown-in-catch-callback-variable': 'error',
 };
 
-export const tsConfig: ConfigArray = tseslint.config(
+export const tsConfig = defineConfig(
   configs.recommendedTypeChecked,
   {
     rules: tsConfigRules,

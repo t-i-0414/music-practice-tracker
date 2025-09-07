@@ -1,7 +1,7 @@
 import eslint from '@eslint/js';
-import tseslint, { type ConfigArray } from 'typescript-eslint';
+import { defineConfig } from 'eslint/config';
 
-export const baseConfig: ConfigArray = tseslint.config(eslint.configs.recommended, {
+export const baseConfig = defineConfig(eslint.configs.recommended, {
   rules: {
     'array-callback-return': 'error',
     'no-await-in-loop': 'error',

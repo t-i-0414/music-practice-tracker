@@ -2,8 +2,10 @@ import { faker } from '@faker-js/faker';
 
 import { type AdminUser, AdminRole, AdminStatus } from '@/generated/prisma';
 
+const firstIdCounter = 1;
+
 export class AdminUserFactory {
-  private idCounter = 1;
+  private idCounter = firstIdCounter;
 
   public build(overrides: Partial<AdminUser> = {}): AdminUser {
     const id = this.idCounter++;

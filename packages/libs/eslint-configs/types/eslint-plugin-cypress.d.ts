@@ -1,7 +1,7 @@
 declare module 'eslint-plugin-cypress' {
-  import type { ConfigArray } from 'typescript-eslint';
+  import type { Linter } from 'eslint';
 
-  const config: ConfigArray;
+  const config: Linter.Config;
   const obj = { configs: { recommended: config } };
   export default obj;
 }

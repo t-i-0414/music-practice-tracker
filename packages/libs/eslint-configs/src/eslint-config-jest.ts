@@ -1,9 +1,9 @@
+import { defineConfig } from 'eslint/config';
 import jestPlugin from 'eslint-plugin-jest';
-import tseslint, { type ConfigArray } from 'typescript-eslint';
 
 import { disabledRulesOnTests } from './eslint-config-vitest';
 
-export const jestConfig: ConfigArray = tseslint.config({
+export const jestConfig = defineConfig({
   extends: [jestPlugin.configs['flat/all']],
   rules: {
     ...disabledRulesOnTests,

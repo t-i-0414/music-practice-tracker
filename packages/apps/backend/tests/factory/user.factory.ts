@@ -1,9 +1,11 @@
 import { faker } from '@faker-js/faker';
 
+const firstIdCounter = 1;
+
 import { type User, UserStatus } from '@/generated/prisma';
 
 export class UserFactory {
-  private idCounter = 1;
+  private idCounter = firstIdCounter;
 
   public build(overrides: Partial<User> = {}): User {
     const id = this.idCounter++;

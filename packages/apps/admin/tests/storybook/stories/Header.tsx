@@ -3,7 +3,8 @@ import type React from 'react';
 import { Button } from './Button';
 import './header.css';
 
-export default {};
+const defaultStory = {};
+export default defaultStory;
 type User = {
   name: string;
 };
