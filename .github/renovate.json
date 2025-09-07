@@ -1,13 +1,8 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    ":semanticCommits",
-    ":semanticCommitTypeAll(chore)"
-  ],
+  "extends": [":semanticCommits", ":semanticCommitTypeAll(chore)"],
   "semanticCommitScope": "{{#if parentDir}}{{parentDir}}{{else}}root{{/if}}",
-  "labels": [
-    "dependencies"
-  ],
+  "labels": ["dependencies"],
   "commitMessagePrefix": "chore: ",
   "rangeStrategy": "bump",
   "separateMajorMinor": true,
@@ -17,44 +12,27 @@
     {
       "description": "Exclude react and react-dom repo-wide",
       "enabled": false,
-      "matchPackageNames": [
-        "react",
-        "react-dom"
-      ]
+      "matchPackageNames": ["react", "react-dom"]
     },
     {
       "description": "Group patch+minor per package.json (npm)",
-      "matchManagers": [
-        "npm"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
+      "matchManagers": ["npm"],
+      "matchUpdateTypes": ["minor", "patch"],
       "groupName": "non-major updates ({{packageFileDir}})",
       "additionalBranchPrefix": "{{packageFileDir}}/"
     },
     {
       "description": "Majors: 1 PR per library (default behavior)",
-      "matchUpdateTypes": [
-        "major"
-      ],
+      "matchUpdateTypes": ["major"],
       "separateMultipleMajor": false
     }
   ],
-  "ignorePaths": [
-    "**/node_modules/**",
-    "packages/apps/mobile/**"
-  ],
+  "ignorePaths": ["**/node_modules/**", "packages/apps/mobile/**"],
   "vulnerabilityAlerts": {
     "enabled": true,
-    "labels": [
-      "security"
-    ]
+    "labels": ["security"]
   },
-  "postUpdateOptions": [
-    "npmDedupe"
-  ],
+  "postUpdateOptions": ["npmDedupe"],
   "lockFileMaintenance": {
     "enabled": true
   }
