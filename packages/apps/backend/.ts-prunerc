@@ -1,3 +1,0 @@
-{
-  ignore: "(config.ts|dist|build|coverage|generated)",
-}

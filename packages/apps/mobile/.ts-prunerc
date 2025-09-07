@@ -1,3 +1,0 @@
-{
-  ignore: '(generated|.expo|config.ts|app|.web|.ios|.android)',
-}

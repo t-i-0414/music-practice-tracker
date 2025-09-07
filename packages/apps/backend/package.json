@@ -8,7 +8,6 @@
   "scripts": {
     "build": "nest build",
     "lint:es:check": "eslint",
-    "lint:es:deadcode:check": "ts-prune -e",
     "lint:es:fix": "eslint --fix",
     "open:swagger-ui": "run-p -c open:swagger-ui:*",
     "open:swagger-ui:admin": "ts-node scripts/open-swagger-ui.ts admin",
