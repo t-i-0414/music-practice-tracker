@@ -1,8 +1,13 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [":semanticCommits", ":semanticCommitTypeAll(chore)"],
-  "semanticCommitScope": "{{#if parentDir}}{{parentDir}}{{else}}root{{/if}}",
-  "labels": ["dependencies"],
+  "extends": [
+    "config:best-practices"
+  ],
+  "labels": [
+    "dependencies"
+  ],
+  "prConcurrentLimit": 0,
+  "prHourlyLimit": 0,
   "commitMessagePrefix": "chore: ",
   "rangeStrategy": "bump",
   "separateMajorMinor": true,
@@ -12,26 +17,91 @@
     {
       "description": "Exclude react and react-dom repo-wide",
       "enabled": false,
-      "matchPackageNames": ["react", "react-dom"]
+      "matchPackageNames": [
+        "react",
+        "react-dom"
+      ]
     },
     {
-      "description": "Group patch+minor per package.json (npm)",
-      "matchManagers": ["npm"],
-      "matchUpdateTypes": ["minor", "patch"],
-      "groupName": "non-major updates ({{packageFileDir}})",
-      "additionalBranchPrefix": "{{packageFileDir}}/"
+      "description": "Root package.json updates",
+      "matchFiles": [
+        "package.json"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "groupName": "Root other dependencies (non-major)",
+      "semanticCommitScope": "root"
+    },
+    {
+      "description": "Backend package updates",
+      "matchFiles": [
+        "packages/apps/backend/package.json"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "groupName": "Backend other dependencies (non-major)",
+      "semanticCommitScope": "backend"
+    },
+    {
+      "description": "Admin package updates",
+      "matchFiles": [
+        "packages/apps/admin/package.json"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "groupName": "Admin other dependencies (non-major)",
+      "semanticCommitScope": "admin"
+    },
+    {
+      "description": "ESLint configs package updates",
+      "matchFiles": [
+        "packages/libs/eslint-configs/package.json"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "groupName": "ESLint configs other dependencies (non-major)",
+      "semanticCommitScope": "eslint-configs"
+    },
+    {
+      "description": "ESLint plugins package updates",
+      "matchFiles": [
+        "packages/libs/eslint-plugins/package.json"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "groupName": "ESLint plugins other dependencies (non-major)",
+      "semanticCommitScope": "eslint-plugins"
     },
     {
       "description": "Majors: 1 PR per library (default behavior)",
-      "matchUpdateTypes": ["major"]
+      "matchUpdateTypes": [
+        "major"
+      ]
     }
   ],
-  "ignorePaths": ["**/node_modules/**", "packages/apps/mobile/**"],
+  "ignorePaths": [
+    "**/node_modules/**",
+    "packages/apps/mobile/**"
+  ],
   "vulnerabilityAlerts": {
     "enabled": true,
-    "labels": ["security"]
+    "labels": [
+      "security"
+    ]
   },
-  "postUpdateOptions": ["npmDedupe"],
+  "postUpdateOptions": [
+    "npmDedupe"
+  ],
   "lockFileMaintenance": {
     "enabled": true
   }
