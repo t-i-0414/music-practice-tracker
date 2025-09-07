@@ -1,3 +1,0 @@
-{
-  ignore: '(src/index.ts|config.ts|dist)',
-}

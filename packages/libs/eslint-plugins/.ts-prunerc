@@ -1,3 +1,0 @@
-{
-  "ignore": "(src/index.ts|src/plugin-backend/index.ts|config.mts|config.ts|dist)"
-}

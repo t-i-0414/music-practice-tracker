@@ -8,7 +8,6 @@
   "scripts": {
     "build": "nest build",
     "lint:es:check": "eslint",
-    "lint:es:deadcode:check": "ts-prune -e",
     "lint:es:fix": "eslint --fix",
     "open:swagger-ui": "run-p -c open:swagger-ui:*",
     "open:swagger-ui:admin": "ts-node scripts/open-swagger-ui.ts admin",
@@ -43,44 +42,38 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --config ./tests/jest.config.ts --runInBand",
     "test:e2e": "bun run test --testMatch=\"<rootDir>/tests/e2e/**/*.spec.ts\"",
     "test:integration": "bun run test --testMatch=\"<rootDir>/tests/integration/**/*.spec.ts\"",
-    "test:ui": "majestic",
     "test:unit": "bun run test --testMatch=\"<rootDir>/tests/unit/**/*.spec.ts\"",
     "test:watch": "bun run test --watch",
     "type:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@nestjs/common": "^11.1.6",
-    "@nestjs/config": "^4.0.2",
-    "@nestjs/core": "^11.1.6",
-    "@nestjs/jwt": "^11.0.0",
-    "@nestjs/passport": "^11.0.5",
-    "@nestjs/platform-express": "^11.1.6",
-    "@nestjs/swagger": "^11.2.0",
-    "bcrypt": "^6.0.0",
-    "passport": "^0.7.0",
-    "passport-jwt": "^4.0.1",
-    "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.2"
+    "@nestjs/common": "11.1.6",
+    "@nestjs/config": "4.0.2",
+    "@nestjs/core": "11.1.6",
+    "@nestjs/jwt": "11.0.0",
+    "@nestjs/passport": "11.0.5",
+    "@nestjs/platform-express": "11.1.6",
+    "@nestjs/swagger": "11.2.0",
+    "bcrypt": "6.0.0",
+    "passport": "0.7.0",
+    "passport-jwt": "4.0.1",
+    "reflect-metadata": "0.2.2",
+    "rxjs": "7.8.2"
   },
   "devDependencies": {
-    "@golevelup/ts-jest": "^0.7.0",
+    "@golevelup/ts-jest": "0.7.0",
     "@music-practice-tracker/eslint-plugins": "workspace:*",
-    "@nestjs/cli": "^11.0.10",
-    "@nestjs/schematics": "^11.0.7",
-    "@nestjs/testing": "^11.1.6",
-    "@types/bcrypt": "^6.0.0",
-    "@types/express": "^5.0.3",
-    "@types/passport-jwt": "^4.0.1",
-    "@types/supertest": "^6.0.3",
-    "class-transformer": "^0.5.1",
-    "class-validator": "^0.14.2",
-    "prisma": "^6.15.0",
-    "supertest": "^7.1.4"
-  },
-  "majestic": {
-    "args": [
-      "--config=./tests/jest.config.ts"
-    ]
+    "@nestjs/cli": "11.0.10",
+    "@nestjs/schematics": "11.0.7",
+    "@nestjs/testing": "11.1.6",
+    "@types/bcrypt": "6.0.0",
+    "@types/express": "5.0.3",
+    "@types/passport-jwt": "4.0.1",
+    "@types/supertest": "6.0.3",
+    "class-transformer": "0.5.1",
+    "class-validator": "0.14.2",
+    "prisma": "6.15.0",
+    "supertest": "7.1.4"
   },
   "prisma": {
     "schema": "./prisma"
