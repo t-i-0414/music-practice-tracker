@@ -73,6 +73,7 @@ export default defineConfig({
     'maxage',
     'osx',
     'ondevice',
+    'pnp',
     'Pressable',
     'psql',
     'refetches',
