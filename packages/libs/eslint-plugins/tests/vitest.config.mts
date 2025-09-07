@@ -1,3 +1,4 @@
+import { join } from 'path';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
@@ -23,6 +24,11 @@ export default defineConfig({
         branches: 95,
         statements: 95,
       },
+    },
+  },
+  resolve: {
+    alias: {
+      '@': join(process.cwd(), 'src'),
     },
   },
 });
