@@ -1,8 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended", "group:monorepos", "group:recommended"],
-  "timezone": "Asia/Tokyo",
-  "schedule": ["at 10:00am on Monday"],
   "prHourlyLimit": 20,
   "prConcurrentLimit": 20,
   "branchConcurrentLimit": 20,
@@ -50,10 +48,6 @@
       "automergeType": "branch"
     },
     {
-      "description": "==== Priority 4: Framework-specific groups ====",
-      "enabled": false
-    },
-    {
       "description": "Group NestJS packages (backend only)",
       "matchFileNames": ["packages/apps/backend/package.json"],
       "matchPackagePatterns": ["@nestjs/*", "nest-*"],
@@ -71,10 +65,6 @@
       "groupSlug": "nextjs",
       "addLabels": ["admin", "nextjs"],
       "commitMessagePrefix": "chore(admin): "
-    },
-    {
-      "description": "==== Priority 5: Common package groups ====",
-      "enabled": false
     },
     {
       "description": "Group Storybook packages",
@@ -139,10 +129,6 @@
       "groupName": "Prisma packages",
       "groupSlug": "prisma",
       "addLabels": ["database"]
-    },
-    {
-      "description": "==== Priority 6: Location-specific non-major updates ====",
-      "enabled": false
     },
     {
       "description": "Backend other dependencies (non-major)",
@@ -212,10 +198,6 @@
       "commitMessagePrefix": "chore(root): "
     },
     {
-      "description": "==== Priority 7: Automerge rules ====",
-      "enabled": false
-    },
-    {
       "description": "Automerge patch updates for non-critical packages",
       "matchUpdateTypes": ["patch"],
       "excludePackageNames": ["react", "react-dom"],
@@ -228,8 +210,7 @@
       "matchManagers": ["npm"],
       "matchUpdateTypes": ["lockFileMaintenance"],
       "automerge": true,
-      "automergeType": "branch",
-      "schedule": ["at 9:00am on Monday"] // 1 hour before main execution
+      "automergeType": "branch"
     }
   ],
   "ignorePaths": ["**/node_modules/**", "packages/apps/mobile/**"],
@@ -240,7 +221,6 @@
   "postUpdateOptions": ["npmDedupe"],
   "lockFileMaintenance": {
     "enabled": true,
-    "automerge": true,
-    "schedule": ["at 9:00am on Monday"] // 1 hour before main execution
+    "automerge": true
   }
 }
