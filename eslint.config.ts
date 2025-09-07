@@ -1,9 +1,8 @@
 import { baseConfig, importConfig, sharedIgnores, tsConfig } from '@music-practice-tracker/eslint-configs';
-import { globalIgnores } from 'eslint/config';
+import { defineConfig, globalIgnores } from 'eslint/config';
 import prettierConfig from 'eslint-config-prettier/flat';
-import tseslint from 'typescript-eslint';
 
-export default tseslint.config(
+export default defineConfig(
   {
     languageOptions: {
       parserOptions: {

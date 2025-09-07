@@ -8,7 +8,7 @@ export type CommonErrorBody = {
 };
 
 export abstract class CommonError<TErrorCode extends ErrorCode = ErrorCode> extends Error {
-  public readonly errorCode: CommonErrorBody['errorCode'];
+  public readonly errorCode: TErrorCode;
   public readonly errorMessage: CommonErrorBody['errorMessage'];
   public readonly detail: CommonErrorBody['detail'];
   public readonly timestamp: CommonErrorBody['timestamp'];

@@ -1,14 +1,15 @@
 import { FlatCompat } from '@eslint/eslintrc';
-import tseslint, { type ConfigArray } from 'typescript-eslint';
+import type { Linter } from 'eslint';
+import { defineConfig } from 'eslint/config';
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const expoConfig = require('eslint-config-expo/flat');
+// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-unsafe-assignment
+const expoConfig: Linter.Config = require('eslint-config-expo/flat');
 const compat = new FlatCompat({});
 
-export const reactNativeConfig: ConfigArray = tseslint.config(
+export const reactNativeConfig = defineConfig(
   ...compat.extends('plugin:react-native/all'),
   ...compat.plugins('eslint-plugin-react-native'),
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+
   expoConfig,
   {
     settings: {

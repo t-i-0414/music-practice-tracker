@@ -1,9 +1,7 @@
-import tsconfigPaths from 'vite-tsconfig-paths';
+import { join } from 'path';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
-  // @ts-expect-error NOTE: https://github.com/aleclarson/vite-tsconfig-paths/issues/176
-  plugins: [tsconfigPaths()],
   test: {
     globals: true,
     environment: 'node',
@@ -26,6 +24,11 @@ export default defineConfig({
         branches: 95,
         statements: 95,
       },
+    },
+  },
+  resolve: {
+    alias: {
+      '@': join(process.cwd(), 'src'),
     },
   },
 });

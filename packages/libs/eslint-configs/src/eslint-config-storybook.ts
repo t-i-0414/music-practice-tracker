@@ -1,6 +1,6 @@
+import { defineConfig } from 'eslint/config';
 import storybookPlugin from 'eslint-plugin-storybook';
-import tseslint, { type ConfigArray } from 'typescript-eslint';
-export const storybookConfig: ConfigArray = tseslint.config(
+export const storybookConfig = defineConfig(
   {
     files: ['**/stories/**/*.ts', '**/stories/**/*.tsx', '**/*/*.stories.ts', '**/*/*.stories.tsx'],
     extends: [storybookPlugin.configs['flat/recommended']],

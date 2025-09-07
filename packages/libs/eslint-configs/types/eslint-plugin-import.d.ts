@@ -1,6 +1,6 @@
 declare module 'eslint-plugin-import' {
-  import type { ConfigArray } from 'typescript-eslint';
+  import type { Linter } from 'eslint';
 
-  const config: ConfigArray;
+  const config: Linter.Config;
   export default { flatConfigs: { recommended: config, typescript: config } };
 }

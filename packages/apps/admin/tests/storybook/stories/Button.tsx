@@ -2,7 +2,8 @@ import type React from 'react';
 
 import './button.css';
 
-export default {};
+const defaultStory = {};
+export default defaultStory;
 export type ButtonProps = {
   /** Is this the principal call to action on the page? */
   primary?: boolean;

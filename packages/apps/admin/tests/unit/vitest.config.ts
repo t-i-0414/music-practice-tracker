@@ -1,11 +1,8 @@
 import path from 'path';
 
-import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
-  // @ts-expect-error NOTE: https://github.com/aleclarson/vite-tsconfig-paths/issues/176
-  plugins: [react()],
   test: {
     environment: 'jsdom',
     globals: true,

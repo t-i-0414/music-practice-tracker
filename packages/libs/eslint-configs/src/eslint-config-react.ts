@@ -1,8 +1,8 @@
 import type { FlatConfig } from '@typescript-eslint/utils/ts-eslint';
+import { defineConfig } from 'eslint/config';
 import reactPlugin from 'eslint-plugin-react';
 import reactHooksPlugin from 'eslint-plugin-react-hooks';
 import testingLibraryPlugin from 'eslint-plugin-testing-library';
-import tseslint, { type ConfigArray } from 'typescript-eslint';
 
 export const reactConfigRules: FlatConfig.Rules = {
   'react/jsx-no-useless-fragment': 'error',
@@ -23,7 +23,7 @@ export const reactConfigRules: FlatConfig.Rules = {
   ],
 };
 
-export const reactConfig: ConfigArray = tseslint.config(
+export const reactConfig = defineConfig(
   reactPlugin.configs.flat['recommended'],
   reactPlugin.configs.flat['jsx-runtime'],
   reactHooksPlugin.configs['recommended-latest'],

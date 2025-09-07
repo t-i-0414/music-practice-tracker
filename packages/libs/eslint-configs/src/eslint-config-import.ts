@@ -1,7 +1,7 @@
 import type { FlatConfig } from '@typescript-eslint/utils/ts-eslint';
+import { defineConfig } from 'eslint/config';
 import importPlugin from 'eslint-plugin-import';
 import unusedImportsPlugin from 'eslint-plugin-unused-imports';
-import tseslint, { type ConfigArray } from 'typescript-eslint';
 
 export const importConfigRules: FlatConfig.Rules = {
   'no-unused-vars': 'off',
@@ -44,7 +44,7 @@ export const importConfigRules: FlatConfig.Rules = {
   ],
 };
 
-export const importConfig: ConfigArray = tseslint.config({
+export const importConfig = defineConfig({
   extends: [importPlugin.flatConfigs.recommended, importPlugin.flatConfigs.typescript],
   plugins: {
     'unused-imports': unusedImportsPlugin,

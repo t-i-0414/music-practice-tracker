@@ -1,6 +1,6 @@
 import type { FlatConfig } from '@typescript-eslint/utils/ts-eslint';
 import vitestPlugin from '@vitest/eslint-plugin';
-import tseslint, { type ConfigArray } from 'typescript-eslint';
+import { defineConfig } from 'eslint/config';
 
 export const disabledRulesOnTests: FlatConfig.Rules = {
   '@typescript-eslint/init-declarations': 'off',
@@ -25,7 +25,7 @@ export const disabledRulesOnTests: FlatConfig.Rules = {
   '@typescript-eslint/consistent-type-imports': 'off',
 };
 
-export const vitestConfig: ConfigArray = tseslint.config({
+export const vitestConfig = defineConfig({
   extends: [vitestPlugin.configs.all],
   rules: {
     ...disabledRulesOnTests,

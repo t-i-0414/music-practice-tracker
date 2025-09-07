@@ -1,9 +1,9 @@
+import { defineConfig } from 'eslint/config';
 import playwright from 'eslint-plugin-playwright';
-import tseslint, { type ConfigArray } from 'typescript-eslint';
 
 import { disabledRulesOnTests } from './eslint-config-vitest';
 
-export const playwrightConfig: ConfigArray = tseslint.config({
+export const playwrightConfig = defineConfig({
   extends: [playwright.configs['flat/recommended']],
   rules: { ...disabledRulesOnTests, 'no-undef': 'off' },
 });
