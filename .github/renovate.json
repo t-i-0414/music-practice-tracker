@@ -9,10 +9,8 @@
   "separateMajorMinor": true,
   "separateMinorPatch": false,
   "dependencyDashboard": true,
+  "ignoreDeps": ["anthropics/claude-code-action", "postgres"],
   "packageRules": [
-    {
-      "ignoreDeps": ["anthropics/claude-code-action", "postgres"]
-    },
     {
       "description": "Exclude react and react-dom repo-wide",
       "enabled": false,
