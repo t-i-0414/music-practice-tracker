@@ -9,6 +9,7 @@
   "separateMajorMinor": true,
   "separateMinorPatch": false,
   "dependencyDashboard": true,
+  "abandonmentThreshold": "3 years",
   "ignoreDeps": ["anthropics/claude-code-action", "postgres"],
   "packageRules": [
     {
