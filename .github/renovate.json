@@ -2,13 +2,14 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:best-practices"],
   "labels": ["dependencies"],
-  "prConcurrentLimit": 0,
-  "prHourlyLimit": 0,
+  "prConcurrentLimit": 10,
+  "prHourlyLimit": 10,
   "commitMessagePrefix": "chore: ",
   "rangeStrategy": "bump",
   "separateMajorMinor": true,
   "separateMinorPatch": false,
   "dependencyDashboard": true,
+  "minimumReleaseAge": "5 days",
   "ignoreDeps": ["anthropics/claude-code-action", "postgres"],
   "packageRules": [
     {
