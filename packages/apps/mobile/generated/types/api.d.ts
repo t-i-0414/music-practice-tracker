@@ -4,20 +4,18 @@
  */
 
 export interface paths {
-    "/api/users/{publicId}": {
+    "/auth/verify": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get a user by public ID */
-        get: operations["AppApiUsersController_findUniqueOrThrowUserById"];
-        /** Update a user by public ID */
-        put: operations["AppApiUsersController_updateUserById"];
-        post?: never;
-        /** Delete a user by public ID */
-        delete: operations["AppApiUsersController_deleteUserById"];
+        get?: never;
+        put?: never;
+        /** Verify Firebase ID token and sync user */
+        post: operations["AppApiAuthController_verify"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -40,46 +38,73 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/users/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get current authenticated user */
+        get: operations["AppApiUsersController_me"];
+        /** Update current user profile */
+        put: operations["AppApiUsersController_updateCurrentUserProfile"];
+        post?: never;
+        /** Delete current user */
+        delete: operations["AppApiUsersController_deleteUserById"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/users/{publicId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a user by public ID */
+        get: operations["AppApiUsersController_findUniqueOrThrowUserById"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        UserResponseDto: {
+        FirebaseAuthVerifyTokenDto: {
             /**
-             * Format: uuid
-             * @description The user public ID
+             * @description Firebase ID token
+             * @example eyJhbGciOiJSUzI1NiIsImtpZCI6IjAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwIn0...
+             */
+            idToken: string;
+        };
+        FirebaseAuthUserDto: {
+            /**
+             * @description User public ID
              * @example 123e4567-e89b-12d3-a456-426614174000
              */
             publicId: string;
             /**
-             * Format: email
-             * @description The user email address
-             * @example takuya.iwashiro@takudev.net
+             * @description User email
+             * @example user@example.com
              */
             email: string;
             /**
-             * @description The user name
-             * @example Takuya Iwashiro
+             * @description User name
+             * @example John Doe
              */
             name: string;
-            /**
-             * @description The user status
-             * @example ACTIVE
-             * @enum {string}
-             */
-            status: "ACTIVE" | "INACTIVE" | "SUSPENDED" | "PENDING" | "BANNED";
-            /**
-             * Format: date-time
-             * @description The user created at timestamp
-             * @example 2024-01-15T09:30:00.000Z
-             */
-            createdAt: string;
-            /**
-             * Format: date-time
-             * @description The user updated at timestamp
-             * @example 2024-06-16T14:45:30.123Z
-             */
-            updatedAt: string;
+        };
+        FirebaseAuthUserResponseDto: {
+            /** @description Authenticated user information */
+            user: components["schemas"]["FirebaseAuthUserDto"];
         };
         ErrorResponseDto: {
             /** @example 400 */
@@ -99,6 +124,53 @@ export interface components {
              * @example Takuya Iwashiro
              */
             name: string;
+            /**
+             * @description Firebase UID
+             * @example abc123def456
+             */
+            firebaseUid?: string;
+        };
+        UserResponseDto: {
+            /**
+             * Format: uuid
+             * @description The user public ID
+             * @example 123e4567-e89b-12d3-a456-426614174000
+             */
+            publicId: string;
+            /**
+             * Format: email
+             * @description The user email address
+             * @example takuya.iwashiro@takudev.net
+             */
+            email: string;
+            /**
+             * @description The user name
+             * @example Takuya Iwashiro
+             */
+            name: string;
+            /**
+             * @description Firebase UID
+             * @example abc123def456
+             */
+            firebaseUid?: Record<string, never> | null;
+            /**
+             * @description The user status
+             * @example ACTIVE
+             * @enum {string}
+             */
+            status: "ACTIVE" | "INACTIVE" | "SUSPENDED" | "PENDING" | "BANNED";
+            /**
+             * Format: date-time
+             * @description The user created at timestamp
+             * @example 2024-01-15T09:30:00.000Z
+             */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @description The user updated at timestamp
+             * @example 2024-06-16T14:45:30.123Z
+             */
+            updatedAt: string;
         };
         UpdateUserDataDto: {
             /**
@@ -112,6 +184,11 @@ export interface components {
              * @example Takuya Iwashiro
              */
             name?: string;
+            /**
+             * @description Firebase UID
+             * @example abc123def456
+             */
+            firebaseUid?: string;
             /**
              * @description The user status
              * @example ACTIVE
@@ -128,19 +205,82 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    AppApiUsersController_findUniqueOrThrowUserById: {
+    AppApiAuthController_verify: {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                /** @description User public ID */
-                publicId: string;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FirebaseAuthVerifyTokenDto"];
             };
+        };
+        responses: {
+            /** @description Token verified and user synced */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FirebaseAuthUserResponseDto"];
+                };
+            };
+            /** @description Error Response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    AppApiUsersController_createUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateUserInputDto"];
+            };
+        };
+        responses: {
+            /** @description The user has been successfully created. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserResponseDto"];
+                };
+            };
+            /** @description Error Response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    AppApiUsersController_me: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description User found */
+            /** @description Current user information */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -160,14 +300,11 @@ export interface operations {
             };
         };
     };
-    AppApiUsersController_updateUserById: {
+    AppApiUsersController_updateCurrentUserProfile: {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                /** @description User public ID */
-                publicId: string;
-            };
+            path?: never;
             cookie?: never;
         };
         requestBody: {
@@ -200,10 +337,7 @@ export interface operations {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                /** @description User public ID */
-                publicId: string;
-            };
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
@@ -226,21 +360,20 @@ export interface operations {
             };
         };
     };
-    AppApiUsersController_createUser: {
+    AppApiUsersController_findUniqueOrThrowUserById: {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
+            path: {
+                /** @description User public ID */
+                publicId: string;
+            };
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateUserInputDto"];
-            };
-        };
+        requestBody?: never;
         responses: {
-            /** @description The user has been successfully created. */
-            201: {
+            /** @description User found */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
