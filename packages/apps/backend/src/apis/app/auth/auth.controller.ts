@@ -1,7 +1,6 @@
-import { Body, Controller, Post, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import { Body, Controller, Post, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-import { UserAuthGuard } from '../utils/guards/user-auth.guard';
 
 import { ApiStandardResponses } from '@/apis/utils/api-default-response';
 import { Public } from '@/apis/utils/decorators/public.decorator';
@@ -9,7 +8,6 @@ import { FirebaseAuthVerifyTokenDto, FirebaseAuthUserResponseDto } from '@/domai
 import { UserAuthService } from '@/domain/usecases/user-auth/user-auth.service';
 
 @ApiTags('auth')
-@UseGuards(UserAuthGuard)
 @Controller('auth')
 export class AppApiAuthController {
   public constructor(private readonly userAuthService: UserAuthService) {}

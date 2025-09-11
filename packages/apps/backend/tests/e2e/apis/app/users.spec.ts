@@ -4,7 +4,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
 
 import { AppApiUsersController } from '@/apis/app/users/users.controller';
-import { UserAuthGuard } from '@/apis/app/utils/guards/user-auth.guard';
 import { GlobalExceptionFilter } from '@/apis/utils/filters/global-exception.filter';
 import { FirebaseAuthModule } from '@/domain/aggregates/firebase-auth/firebase-auth.module';
 import { UserModule } from '@/domain/aggregates/user/user.module';
@@ -26,10 +25,7 @@ describe('e2e AppApiUsersController', () => {
         { provide: APP_FILTER, useClass: GlobalExceptionFilter },
         { provide: RepositoryService, useValue: databaseHelper.client },
       ],
-    })
-      .overrideGuard(UserAuthGuard)
-      .useValue({ canActivate: () => true })
-      .compile();
+    }).compile();
 
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));

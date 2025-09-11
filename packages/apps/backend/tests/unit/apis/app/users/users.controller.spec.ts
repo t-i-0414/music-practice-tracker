@@ -1,17 +1,16 @@
 import { type TestingModule } from '@nestjs/testing';
 
 import { AppApiUsersController } from '@/apis/app/users/users.controller';
-import { UserAuthGuard } from '@/apis/app/utils/guards/user-auth.guard';
 import { FirebaseAuthService } from '@/domain/aggregates/firebase-auth/firebase-auth.service';
 import { UserCommandService } from '@/domain/aggregates/user/user.command.service';
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 import { toUserResponseDto } from '@/domain/aggregates/user/utils/dto';
 import { UserFactory } from '@/tests/factory';
 import {
-  createTestModule,
-  createMockUserQueryService,
-  createMockUserCommandService,
   createMockFirebaseAuthService,
+  createMockUserCommandService,
+  createMockUserQueryService,
+  createTestModule,
   resetAllMocks,
 } from '@/tests/unit/apis/helpers';
 
@@ -31,10 +30,6 @@ describe('appApiUsersController', () => {
     const module: TestingModule = await createTestModule({
       controller: AppApiUsersController,
       providers: [
-        {
-          provide: UserAuthGuard,
-          useValue: { canActivate: jest.fn().mockReturnValue(true) },
-        },
         {
           provide: FirebaseAuthService,
           useValue: mockFirebaseAuthService,

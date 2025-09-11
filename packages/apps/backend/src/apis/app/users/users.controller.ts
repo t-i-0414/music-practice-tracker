@@ -1,7 +1,6 @@
-import { Body, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Put } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-import { UserAuthGuard } from '../utils/guards/user-auth.guard';
 
 import { CurrentUser, type CurrentUserData } from '@/apis/app/utils/decorators/current-user.decorator'
 import { ApiStandardResponses } from '@/apis/utils/api-default-response';
@@ -11,7 +10,6 @@ import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 import { CreateUserInputDto, UpdateUserDataDto, UserResponseDto } from '@/domain/aggregates/user/utils/dto';
 
 @ApiTags('users')
-@UseGuards(UserAuthGuard)
 @ApiController('users')
 export class AppApiUsersController {
   public constructor(
