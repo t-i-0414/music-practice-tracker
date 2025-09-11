@@ -268,6 +268,7 @@ describe('repository-model-access-restriction', () => {
         `,
         filename: 'src/repository/repository.service.ts',
       },
+      
     ],
     invalid: [
       // ===== Prisma Import Tests =====
@@ -704,6 +705,24 @@ describe('repository-model-access-restriction', () => {
           }
         `,
         filename: 'src/repository/service.ts',
+        errors: [
+          {
+            messageId: 'invalidPrismaImport',
+            data: {
+              allowedFiles: 'command.service.ts or query.service.ts within aggregates folder',
+            },
+          },
+        ],
+      },
+      // Invalid: Namespace import directly from @prisma/client in repository/repository.service.ts
+      {
+        code: `
+          import * as Prisma from '@prisma/client';
+          export class RepositoryService extends Prisma.PrismaClient {
+            constructor() { super(); }
+          }
+        `,
+        filename: 'src/repository/repository.service.ts',
         errors: [
           {
             messageId: 'invalidPrismaImport',
