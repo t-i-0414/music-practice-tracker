@@ -32,10 +32,6 @@ export class UserAuthGuard implements CanActivate {
       process.env.FIREBASE_CHECK_REVOKED === 'true',
     );
 
-    if (!decodedIdToken.uid) {
-      throw new ApiError('AP0401', 'Invalid token: missing uid');
-    }
-
     const user = await this.usersQueryService.findUniqueOrThrowUserByFirebaseUid(decodedIdToken.uid);
 
     const currentUser: CurrentUserData = {
