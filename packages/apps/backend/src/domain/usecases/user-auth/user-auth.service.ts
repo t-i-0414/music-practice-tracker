@@ -25,7 +25,6 @@ export class UserAuthService {
       publicId: user.publicId,
       data: {
         firebaseUid: decoded.uid,
-        name: decoded.name ?? user.name,
       },
     });
 
