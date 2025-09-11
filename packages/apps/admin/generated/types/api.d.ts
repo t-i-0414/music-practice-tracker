@@ -137,6 +137,11 @@ export interface components {
              */
             name: string;
             /**
+             * @description Firebase UID
+             * @example abc123def456
+             */
+            firebaseUid?: Record<string, never> | null;
+            /**
              * @description The user status
              * @example ACTIVE
              * @enum {string}
@@ -176,6 +181,11 @@ export interface components {
              * @example Takuya Iwashiro
              */
             name: string;
+            /**
+             * @description Firebase UID
+             * @example abc123def456
+             */
+            firebaseUid?: string;
         };
         CreateManyUsersInputDto: {
             /** @description List of users to create */
@@ -193,6 +203,11 @@ export interface components {
              * @example Takuya Iwashiro
              */
             name?: string;
+            /**
+             * @description Firebase UID
+             * @example abc123def456
+             */
+            firebaseUid?: string;
             /**
              * @description The user status
              * @example ACTIVE
