@@ -2,10 +2,10 @@ import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 
-import { ApiError } from '../api.error';
 import { CurrentUserData } from '../decorators/current-user.decorator';
-import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
+import { ApiError } from '@/apis/utils/api.error';
+import { IS_PUBLIC_KEY } from '@/apis/utils/decorators/public.decorator';
 import { FirebaseAuthService } from '@/domain/aggregates/firebase-auth/firebase-auth.service';
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 

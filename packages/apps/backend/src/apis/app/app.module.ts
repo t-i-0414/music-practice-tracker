@@ -6,12 +6,14 @@ import { GlobalExceptionFilter } from '../utils/filters/global-exception.filter'
 
 import { AppApiAuthModule } from './auth/auth.module';
 import { AppApiUsersModule } from './users/users.module';
+import { CommonModule } from './utils/common.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    CommonModule,
     AppApiAuthModule,
     AppApiUsersModule,
   ],

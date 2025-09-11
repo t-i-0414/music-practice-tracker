@@ -4,8 +4,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
 
 import { AppApiUsersController } from '@/apis/app/users/users.controller';
+import { UserAuthGuard } from '@/apis/app/utils/guards/user-auth.guard';
 import { GlobalExceptionFilter } from '@/apis/utils/filters/global-exception.filter';
-import { UserAuthGuard } from '@/apis/utils/guards/user-auth.guard';
 import { FirebaseAuthModule } from '@/domain/aggregates/firebase-auth/firebase-auth.module';
 import { UserModule } from '@/domain/aggregates/user/user.module';
 import { RepositoryService } from '@/repository/repository.service';

@@ -1,7 +1,7 @@
 import { ExecutionContext } from '@nestjs/common';
 import { ROUTE_ARGS_METADATA } from '@nestjs/common/constants';
 
-import { CurrentUser, CurrentUserData } from '@/apis/utils/decorators/current-user.decorator';
+import { CurrentUser, CurrentUserData } from '@/apis/app/utils/decorators/current-user.decorator';
 
 type ParamDecorator = (data?: any, ctx?: any) => ParameterDecorator;
 

@@ -1,7 +1,7 @@
 import { type TestingModule } from '@nestjs/testing';
 
 import { AppApiUsersController } from '@/apis/app/users/users.controller';
-import { UserAuthGuard } from '@/apis/utils/guards/user-auth.guard';
+import { UserAuthGuard } from '@/apis/app/utils/guards/user-auth.guard';
 import { FirebaseAuthService } from '@/domain/aggregates/firebase-auth/firebase-auth.service';
 import { UserCommandService } from '@/domain/aggregates/user/user.command.service';
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';

@@ -1,9 +1,10 @@
 import { Body, Controller, Post, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
+import { UserAuthGuard } from '../utils/guards/user-auth.guard';
+
 import { ApiStandardResponses } from '@/apis/utils/api-default-response';
 import { Public } from '@/apis/utils/decorators/public.decorator';
-import { UserAuthGuard } from '@/apis/utils/guards/user-auth.guard';
 import { FirebaseAuthVerifyTokenDto, FirebaseAuthUserResponseDto } from '@/domain/aggregates/firebase-auth/utils/dto';
 import { UserAuthService } from '@/domain/usecases/user-auth/user-auth.service';
 
