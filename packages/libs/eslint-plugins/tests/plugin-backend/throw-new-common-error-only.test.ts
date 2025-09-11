@@ -50,9 +50,7 @@ describe('throw-new-common-error-only', () => {
           }
           function svc() { throw new LocalServiceError(); }
         `,
-        options: [
-          { allowSubclasses: false, allowedClassNames: ['LocalServiceError'] },
-        ],
+        options: [{ allowSubclasses: false, allowedClassNames: ['LocalServiceError'] }],
       },
       // Local subclass of CommonError is allowed
       {
@@ -106,9 +104,7 @@ describe('throw-new-common-error-only', () => {
           }
           function svc() { throw new LocalServiceError(); }
         `,
-        options: [
-          { allowSubclasses: false },
-        ],
+        options: [{ allowSubclasses: false }],
         errors: [{ messageId: 'onlyCommonError', data: { thrown: 'LocalServiceError' } }],
       },
       // Unknown callee pattern (e.g., new (getCtor())()) should report with 'unknown'

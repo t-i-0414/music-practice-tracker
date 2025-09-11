@@ -268,7 +268,6 @@ describe('repository-model-access-restriction', () => {
         `,
         filename: 'src/repository/repository.service.ts',
       },
-      
     ],
     invalid: [
       // ===== Prisma Import Tests =====

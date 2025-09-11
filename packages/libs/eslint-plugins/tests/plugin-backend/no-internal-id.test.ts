@@ -338,9 +338,7 @@ describe('no-internal-id', () => {
             return await prisma.user.findUnique({ id: '123' });
           }
         `,
-        errors: [
-          { messageId: 'noIdInQuery', data: {} },
-        ],
+        errors: [{ messageId: 'noIdInQuery', data: {} }],
       },
       // Top-level id with findMany
       {
@@ -349,9 +347,7 @@ describe('no-internal-id', () => {
             return await prisma.user.findMany({ id: '123' });
           }
         `,
-        errors: [
-          { messageId: 'noIdInQuery', data: {} },
-        ],
+        errors: [{ messageId: 'noIdInQuery', data: {} }],
       },
       // Top-level id with update
       {
@@ -360,9 +356,7 @@ describe('no-internal-id', () => {
             return await prisma.user.update({ id: '123' });
           }
         `,
-        errors: [
-          { messageId: 'noIdInQuery', data: {} },
-        ],
+        errors: [{ messageId: 'noIdInQuery', data: {} }],
       },
       // Top-level id with updateMany
       {
@@ -371,9 +365,7 @@ describe('no-internal-id', () => {
             return await prisma.user.updateMany({ id: '123' });
           }
         `,
-        errors: [
-          { messageId: 'noIdInQuery', data: {} },
-        ],
+        errors: [{ messageId: 'noIdInQuery', data: {} }],
       },
       // updateMany with id
       {
