@@ -1,7 +1,12 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Response } from 'express';
 
-import { ErrorResponseDto, HTTP_STATUS_ERROR_CODE_RECORD_BY_REPOSITORY_ERROR_CODE } from '../api.error';
+import {
+  ApiError,
+  ErrorResponseDto,
+  HTTP_STATUS_ERROR_CODE_RECORD_BY_REPOSITORY_ERROR_CODE,
+  isApiError,
+} from '../api.error';
 
 import { DomainError, isDomainError } from '@/domain/utils/domain.error';
 import {
@@ -28,6 +33,10 @@ export class GlobalExceptionFilter implements ExceptionFilter {
   private buildErrorResponse(exception: unknown): ErrorResponseDto {
     if (exception instanceof HttpException) {
       return this.handleHttpException(exception);
+    }
+
+    if (isApiError(exception)) {
+      return this.handleApiError(exception);
     }
 
     if (isDomainError(exception)) {
@@ -59,6 +68,19 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     return {
       statusCode,
       errorCode,
+    };
+  }
+
+  private handleApiError(exception: ApiError): ErrorResponseDto {
+    const statusMatch = /^AP0(?<status>\d{3})$/u.exec(exception.errorCode);
+    const statusCode =
+      statusMatch?.groups?.status !== undefined && statusMatch.groups.status !== ''
+        ? parseInt(statusMatch.groups.status, 10)
+        : HttpStatus.INTERNAL_SERVER_ERROR;
+
+    return {
+      statusCode,
+      errorCode: exception.errorCode,
     };
   }
 

@@ -14,6 +14,7 @@ export class UserFactory {
       publicId: overrides.publicId ?? faker.string.uuid(),
       email: overrides.email ?? faker.internet.email(),
       name: overrides.name ?? faker.person.fullName(),
+      firebaseUid: overrides.firebaseUid ?? null,
       status: overrides.status ?? UserStatus.ACTIVE,
       createdAt: overrides.createdAt ?? new Date(),
       updatedAt: overrides.updatedAt ?? new Date(),

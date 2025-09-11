@@ -1,6 +1,8 @@
 import { type TestingModule } from '@nestjs/testing';
 
 import { AppApiUsersController } from '@/apis/app/users/users.controller';
+import { UserAuthGuard } from '@/apis/utils/guards/user-auth.guard';
+import { FirebaseAuthService } from '@/domain/aggregates/firebase-auth/firebase-auth.service';
 import { UserCommandService } from '@/domain/aggregates/user/user.command.service';
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 import { toUserResponseDto } from '@/domain/aggregates/user/utils/dto';
@@ -9,6 +11,7 @@ import {
   createTestModule,
   createMockUserQueryService,
   createMockUserCommandService,
+  createMockFirebaseAuthService,
   resetAllMocks,
 } from '@/tests/unit/apis/helpers';
 
@@ -23,10 +26,19 @@ describe('appApiUsersController', () => {
 
     const mockQueryService = createMockUserQueryService();
     const mockCommandService = createMockUserCommandService();
+    const mockFirebaseAuthService = createMockFirebaseAuthService();
 
     const module: TestingModule = await createTestModule({
       controller: AppApiUsersController,
       providers: [
+        {
+          provide: UserAuthGuard,
+          useValue: { canActivate: jest.fn().mockReturnValue(true) },
+        },
+        {
+          provide: FirebaseAuthService,
+          useValue: mockFirebaseAuthService,
+        },
         {
           provide: UserQueryService,
           useValue: mockQueryService,
@@ -89,28 +101,6 @@ describe('appApiUsersController', () => {
       const result = await controller.createUser(createDto);
 
       expect(commandService.createUser).toHaveBeenCalledWith(createDto);
-      expect(result).toStrictEqual(mockResponseDto);
-    });
-  });
-
-  describe('put /users/:publicId', () => {
-    it('should update a user', async () => {
-      expect.assertions(2);
-
-      const publicId = 'user-public-id';
-      const updateDto = {
-        name: 'Updated Name',
-      };
-      const mockUpdatedUser = userFactory.build({
-        publicId,
-        ...updateDto,
-      });
-      const mockResponseDto = toUserResponseDto(mockUpdatedUser);
-      commandService.updateUserById.mockResolvedValue(mockResponseDto);
-
-      const result = await controller.updateUserById(publicId, updateDto);
-
-      expect(commandService.updateUserById).toHaveBeenCalledWith({ publicId, data: updateDto });
       expect(result).toStrictEqual(mockResponseDto);
     });
   });

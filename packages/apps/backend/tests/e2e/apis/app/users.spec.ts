@@ -1,9 +1,14 @@
 import { ClassSerializerInterceptor, INestApplication, ValidationPipe } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
+import { APP_FILTER, Reflector } from '@nestjs/core';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
 
-import { AppApiModule } from '@/apis/app/app.module';
+import { AppApiUsersController } from '@/apis/app/users/users.controller';
+import { GlobalExceptionFilter } from '@/apis/utils/filters/global-exception.filter';
+import { UserAuthGuard } from '@/apis/utils/guards/user-auth.guard';
+import { FirebaseAuthModule } from '@/domain/aggregates/firebase-auth/firebase-auth.module';
+import { UserModule } from '@/domain/aggregates/user/user.module';
+import { RepositoryService } from '@/repository/repository.service';
 import { DatabaseHelper } from '@/tests/helpers/database.helper';
 
 describe('e2e AppApiUsersController', () => {
@@ -15,8 +20,16 @@ describe('e2e AppApiUsersController', () => {
     await databaseHelper.connect();
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppApiModule],
-    }).compile();
+      imports: [UserModule, FirebaseAuthModule],
+      controllers: [AppApiUsersController],
+      providers: [
+        { provide: APP_FILTER, useClass: GlobalExceptionFilter },
+        { provide: RepositoryService, useValue: databaseHelper.client },
+      ],
+    })
+      .overrideGuard(UserAuthGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
@@ -99,78 +112,6 @@ describe('e2e AppApiUsersController', () => {
     });
   });
 
-  describe('put /users/:publicId', () => {
-    it('should update a user', async () => {
-      expect.assertions(1);
-
-      const createDto = {
-        email: 'update@example.com',
-        name: 'Original Name',
-      };
-
-      const createResponse = await request(app.getHttpServer()).post('/api/users').send(createDto).expect(201);
-
-      const { publicId } = createResponse.body;
-      const updateDto = { name: 'Updated Name' };
-
-      const updateResponse = await request(app.getHttpServer())
-        .put(`/api/users/${publicId}`)
-        .send(updateDto)
-        .expect(200);
-
-      expect(updateResponse.body).toMatchObject({
-        publicId,
-        email: createDto.email,
-        name: updateDto.name,
-      });
-    });
-
-    it('should return 404 for non-existent user', async () => {
-      expect.assertions(2);
-
-      const response = await request(app.getHttpServer())
-        .put('/api/users/00000000-0000-0000-0000-000000000000')
-        .send({ name: 'New Name' })
-        .expect(404);
-
-      expect(response.status).toBe(404);
-      expect(response.body.errorCode).toBe('RE0002');
-    });
-  });
-
-  describe('delete /users/:publicId', () => {
-    it('should delete a user', async () => {
-      expect.assertions(2);
-
-      const createDto = {
-        email: 'delete@example.com',
-        name: 'Delete User',
-      };
-
-      const createResponse = await request(app.getHttpServer()).post('/api/users').send(createDto).expect(201);
-
-      const { publicId } = createResponse.body;
-
-      const deleteResponse = await request(app.getHttpServer()).delete(`/api/users/${publicId}`).expect(204);
-
-      const getResponse = await request(app.getHttpServer()).get(`/api/users/${publicId}`).expect(404);
-
-      expect(deleteResponse.status).toBe(204);
-      expect(getResponse.status).toBe(404);
-    });
-
-    it('should return 404 for non-existent user', async () => {
-      expect.assertions(2);
-
-      const response = await request(app.getHttpServer())
-        .delete('/api/users/00000000-0000-0000-0000-000000000000')
-        .expect(404);
-
-      expect(response.status).toBe(404);
-      expect(response.body.errorCode).toBe('RE0002');
-    });
-  });
-
   describe('apiStandardResponses error format validation', () => {
     describe('post /users', () => {
       it('should return error with statusCode and errorCode for validation errors', async () => {
@@ -222,78 +163,6 @@ describe('e2e AppApiUsersController', () => {
 
         const response = await request(app.getHttpServer())
           .get('/api/users/00000000-0000-0000-0000-000000000000')
-          .expect(404);
-
-        expect(response.body).toHaveProperty('statusCode');
-        expect(response.body).toHaveProperty('errorCode');
-        expect(response.body.statusCode).toBe(404);
-      });
-    });
-
-    describe('put /users/:publicId', () => {
-      it('should return error with statusCode and errorCode for invalid UUID', async () => {
-        expect.assertions(3);
-
-        const response = await request(app.getHttpServer())
-          .put('/api/users/invalid-uuid')
-          .send({ name: 'Updated Name' })
-          .expect(400);
-
-        expect(response.body).toHaveProperty('statusCode');
-        expect(response.body).toHaveProperty('errorCode');
-        expect(response.body.statusCode).toBe(400);
-      });
-
-      it('should return error with statusCode and errorCode for non-existent user', async () => {
-        expect.assertions(3);
-
-        const response = await request(app.getHttpServer())
-          .put('/api/users/00000000-0000-0000-0000-000000000000')
-          .send({ name: 'Updated Name' })
-          .expect(404);
-
-        expect(response.body).toHaveProperty('statusCode');
-        expect(response.body).toHaveProperty('errorCode');
-        expect(response.body.statusCode).toBe(404);
-      });
-
-      it('should return error with statusCode and errorCode for invalid update data', async () => {
-        expect.assertions(3);
-
-        const createDto = {
-          email: 'update@example.com',
-          name: 'Update User',
-        };
-
-        const createResponse = await request(app.getHttpServer()).post('/api/users').send(createDto).expect(201);
-
-        const response = await request(app.getHttpServer())
-          .put(`/api/users/${createResponse.body.publicId}`)
-          .send({ email: 'invalid-email' })
-          .expect(400);
-
-        expect(response.body).toHaveProperty('statusCode');
-        expect(response.body).toHaveProperty('errorCode');
-        expect(response.body.statusCode).toBe(400);
-      });
-    });
-
-    describe('delete /users/:publicId', () => {
-      it('should return error with statusCode and errorCode for invalid UUID', async () => {
-        expect.assertions(3);
-
-        const response = await request(app.getHttpServer()).delete('/api/users/invalid-uuid').expect(400);
-
-        expect(response.body).toHaveProperty('statusCode');
-        expect(response.body).toHaveProperty('errorCode');
-        expect(response.body.statusCode).toBe(400);
-      });
-
-      it('should return error with statusCode and errorCode for non-existent user', async () => {
-        expect.assertions(3);
-
-        const response = await request(app.getHttpServer())
-          .delete('/api/users/00000000-0000-0000-0000-000000000000')
           .expect(404);
 
         expect(response.body).toHaveProperty('statusCode');

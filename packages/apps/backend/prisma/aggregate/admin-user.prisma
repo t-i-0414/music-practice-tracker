@@ -28,7 +28,6 @@ model AdminUser {
   createdAt DateTime    @default(now()) @map("created_at")
   updatedAt DateTime    @updatedAt @map("updated_at")
 
-  @@index([email])
   @@index([role])
   @@index([status])
   @@index([createdAt])

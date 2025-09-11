@@ -4,9 +4,6 @@ CREATE TYPE "public"."admin_role" AS ENUM ('SUPER_ADMIN', 'ADMIN', 'EDITOR', 'MO
 -- CreateEnum
 CREATE TYPE "public"."admin_status" AS ENUM ('ACTIVE', 'INACTIVE', 'SUSPENDED', 'PENDING');
 
--- AlterTable
-ALTER TABLE "public"."users" ALTER COLUMN "public_id" DROP DEFAULT;
-
 -- CreateTable
 CREATE TABLE "public"."admin_users" (
     "id" SERIAL NOT NULL,
@@ -28,9 +25,6 @@ CREATE UNIQUE INDEX "admin_users_public_id_key" ON "public"."admin_users"("publi
 CREATE UNIQUE INDEX "admin_users_email_key" ON "public"."admin_users"("email");
 
 -- CreateIndex
-CREATE INDEX "admin_users_email_idx" ON "public"."admin_users"("email");
-
--- CreateIndex
 CREATE INDEX "admin_users_role_idx" ON "public"."admin_users"("role");
 
 -- CreateIndex
@@ -38,6 +32,3 @@ CREATE INDEX "admin_users_status_idx" ON "public"."admin_users"("status");
 
 -- CreateIndex
 CREATE INDEX "admin_users_created_at_idx" ON "public"."admin_users"("created_at");
-
--- CreateIndex
-CREATE INDEX "users_email_idx" ON "public"."users"("email");

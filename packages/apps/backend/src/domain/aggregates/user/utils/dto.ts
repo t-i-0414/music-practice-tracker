@@ -68,6 +68,15 @@ export class CreateUserInputDto {
   @MaxLength(MAX_NAME_LENGTH)
   @IsNotEmpty()
   public name: string;
+
+  @ApiProperty({
+    description: 'Firebase UID',
+    example: 'abc123def456',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  public firebaseUid?: string;
 }
 
 export class CreateManyUsersInputDto {
@@ -150,6 +159,14 @@ export class UserResponseDto implements Publicize<User> {
   })
   @Expose()
   public name: string;
+
+  @ApiProperty({
+    description: 'Firebase UID',
+    example: 'abc123def456',
+    required: false,
+    nullable: true,
+  })
+  public firebaseUid: string | null;
 
   @ApiProperty({
     description: 'The user status',
