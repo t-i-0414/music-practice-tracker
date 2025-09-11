@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { APP_FILTER,APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 
 import { GlobalExceptionFilter } from '../utils/filters/global-exception.filter';
 
@@ -25,8 +25,8 @@ import { UserAuthGuard } from './utils/guards/user-auth.guard';
     },
     {
       provide: APP_GUARD,
-      useClass: UserAuthGuard
-    }
+      useClass: UserAuthGuard,
+    },
   ],
 })
 export class AppApiModule {}

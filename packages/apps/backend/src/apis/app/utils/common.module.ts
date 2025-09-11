@@ -4,12 +4,10 @@ import { FirebaseAuthModule } from '@/domain/aggregates/firebase-auth/firebase-a
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 import { RepositoryModule } from '@/repository/repository.module';
 
-
-
 @Global()
 @Module({
-  imports: [FirebaseAuthModule,RepositoryModule],
+  imports: [FirebaseAuthModule, RepositoryModule],
   providers: [UserQueryService],
-  exports: [FirebaseAuthModule,UserQueryService],
+  exports: [FirebaseAuthModule, UserQueryService],
 })
 export class CommonModule {}

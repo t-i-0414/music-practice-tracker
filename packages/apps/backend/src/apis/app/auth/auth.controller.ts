@@ -1,7 +1,6 @@
 import { Body, Controller, Post, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-
 import { ApiStandardResponses } from '@/apis/utils/api-default-response';
 import { Public } from '@/apis/utils/decorators/public.decorator';
 import { FirebaseAuthVerifyTokenDto, FirebaseAuthUserResponseDto } from '@/domain/aggregates/firebase-auth/utils/dto';

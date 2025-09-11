@@ -1,8 +1,7 @@
 import { Body, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Put } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-
-import { CurrentUser, type CurrentUserData } from '@/apis/app/utils/decorators/current-user.decorator'
+import { CurrentUser, type CurrentUserData } from '@/apis/app/utils/decorators/current-user.decorator';
 import { ApiStandardResponses } from '@/apis/utils/api-default-response';
 import { ApiController } from '@/apis/utils/controllers/api.controller';
 import { UserCommandService } from '@/domain/aggregates/user/user.command.service';
