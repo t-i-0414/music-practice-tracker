@@ -161,11 +161,12 @@ export class UserResponseDto implements Publicize<User> {
   public name: string;
 
   @ApiProperty({
+    type: String,
     description: 'Firebase UID',
     example: 'abc123def456',
-    required: false,
     nullable: true,
   })
+  @Expose()
   public firebaseUid: string | null;
 
   @ApiProperty({

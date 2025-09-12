@@ -140,7 +140,7 @@ export interface components {
              * @description Firebase UID
              * @example abc123def456
              */
-            firebaseUid?: Record<string, never> | null;
+            firebaseUid: string | null;
             /**
              * @description The user status
              * @example ACTIVE

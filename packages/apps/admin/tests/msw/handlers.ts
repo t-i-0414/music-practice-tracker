@@ -17,6 +17,7 @@ export const handlers = [
         email: `user${index + 1}@example.com`,
         name: `Test User ${index + 1}`,
         status: 'ACTIVE',
+        firebaseUid: `firebase-uid-${index + 1}`,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       })),
@@ -31,6 +32,7 @@ export const handlers = [
       email: `user${params.publicId}@example.com`,
       name: `Test User ${params.publicId}`,
       status: 'ACTIVE',
+      firebaseUid: `firebase-uid-${params.publicId}`,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -45,6 +47,7 @@ export const handlers = [
       publicId: crypto.randomUUID(),
       ...body,
       status: 'ACTIVE',
+      firebaseUid: body.firebaseUid ?? null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -59,6 +62,7 @@ export const handlers = [
         publicId: crypto.randomUUID(),
         ...user,
         status: 'ACTIVE',
+        firebaseUid: user.firebaseUid ?? null,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       })),
@@ -75,6 +79,7 @@ export const handlers = [
       email: body.email ?? `updated${params.publicId}@example.com`,
       name: body.name ?? `Updated User ${params.publicId}`,
       status: 'ACTIVE',
+      firebaseUid: body.firebaseUid ?? `updated-firebase-uid-${params.publicId}`,
       createdAt: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
       updatedAt: new Date().toISOString(),
     };
