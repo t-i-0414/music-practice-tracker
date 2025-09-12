@@ -23,6 +23,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/users/bulk": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create multiple users */
+        post: operations["AdminApiUsersController_createManyAndReturnUsers"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/users/{publicId}": {
         parameters: {
             query?: never;
@@ -37,23 +54,6 @@ export interface paths {
         post?: never;
         /** Delete a user by public ID */
         delete: operations["AdminApiUsersController_deleteUserById"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/users/bulk": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Create multiple users */
-        post: operations["AdminApiUsersController_createManyAndReturnUsers"];
-        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -187,6 +187,16 @@ export interface components {
              */
             firebaseUid?: string;
         };
+        DeleteManyUsersInputDto: {
+            /**
+             * @description List of user public IDs
+             * @example [
+             *       "123e4567-e89b-12d3-a456-426614174000",
+             *       "789e1234-e89b-12d3-a456-426614174000"
+             *     ]
+             */
+            publicIds: string[];
+        };
         CreateManyUsersInputDto: {
             /** @description List of users to create */
             users: components["schemas"]["CreateUserInputDto"][];
@@ -214,16 +224,6 @@ export interface components {
              * @enum {string}
              */
             status?: "ACTIVE" | "INACTIVE" | "SUSPENDED" | "PENDING" | "BANNED";
-        };
-        DeleteManyUsersInputDto: {
-            /**
-             * @description List of user public IDs
-             * @example [
-             *       "123e4567-e89b-12d3-a456-426614174000",
-             *       "789e1234-e89b-12d3-a456-426614174000"
-             *     ]
-             */
-            publicIds: string[];
         };
         AdminUserResponseDto: {
             /**
@@ -441,6 +441,39 @@ export interface operations {
             };
         };
     };
+    AdminApiUsersController_createManyAndReturnUsers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateManyUsersInputDto"];
+            };
+        };
+        responses: {
+            /** @description Users created successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UsersResponseDto"];
+                };
+            };
+            /** @description Error Response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
     AdminApiUsersController_findUniqueOrThrowUserById: {
         parameters: {
             query?: never;
@@ -527,39 +560,6 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-            /** @description Error Response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-        };
-    };
-    AdminApiUsersController_createManyAndReturnUsers: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateManyUsersInputDto"];
-            };
-        };
-        responses: {
-            /** @description Users created successfully */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["UsersResponseDto"];
-                };
             };
             /** @description Error Response */
             default: {
