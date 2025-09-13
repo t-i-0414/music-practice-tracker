@@ -12,7 +12,7 @@ model User {
   publicId    String     @unique @default(dbgenerated("gen_random_uuid()")) @map("public_id") @db.Uuid
   firebaseUid String     @unique @map("firebase_uid")
   name        String     @unique
-  status      UserStatus @default(PENDING) @map("status")
+  status      UserStatus @default(ACTIVE) @map("status")
   createdAt   DateTime   @default(now()) @map("created_at")
   updatedAt   DateTime   @updatedAt @map("updated_at")
 

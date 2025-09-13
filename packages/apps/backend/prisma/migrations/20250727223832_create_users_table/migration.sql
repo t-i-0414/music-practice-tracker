@@ -6,7 +6,7 @@ CREATE TABLE
     "public_id" UUID NOT NULL DEFAULT gen_random_uuid (),
     "firebase_uid" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "status" "public"."user_status" NOT NULL DEFAULT 'PENDING',
+    "status" "public"."user_status" NOT NULL DEFAULT 'ACTIVE',
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
