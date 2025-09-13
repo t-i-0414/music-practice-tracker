@@ -11,22 +11,22 @@ enum AdminRole {
 
 enum AdminStatus {
   ACTIVE
-  INACTIVE
-  SUSPENDED
   PENDING
+  SUSPENDED
+  BANNED
 
   @@map("admin_status")
 }
 
 model AdminUser {
-  id        Int         @id @default(autoincrement())
-  publicId  String      @unique @default(dbgenerated("gen_random_uuid()")) @map("public_id") @db.Uuid
-  email     String      @unique
-  name      String
-  role      AdminRole   @default(VIEWER)
-  status    AdminStatus @default(PENDING)
-  createdAt DateTime    @default(now()) @map("created_at")
-  updatedAt DateTime    @updatedAt @map("updated_at")
+  id         Int         @id @default(autoincrement())
+  publicId   String      @unique @default(dbgenerated("gen_random_uuid()")) @map("public_id") @db.Uuid
+  cognitoSub String      @unique @map("cognito_sub")
+  name       String      @unique
+  role       AdminRole   @default(VIEWER)
+  status     AdminStatus @default(ACTIVE)
+  createdAt  DateTime    @default(now()) @map("created_at")
+  updatedAt  DateTime    @updatedAt @map("updated_at")
 
   @@index([role])
   @@index([status])

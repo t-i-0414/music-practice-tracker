@@ -3,7 +3,6 @@ import { Type, Exclude, Expose, plainToInstance } from 'class-transformer';
 import {
   ArrayNotEmpty,
   IsArray,
-  IsEmail,
   IsEnum,
   IsNotEmpty,
   IsNotEmptyObject,
@@ -14,13 +13,9 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-import { MAX_EMAIL_LENGTH, MAX_NAME_LENGTH, AdminRoleRecord, AdminStatusRecord, AdminUser } from './constants';
+import { MAX_NAME_LENGTH, AdminRoleRecord, AdminStatusRecord, AdminUser } from './constants';
 
 import { Publicize } from '@/domain/utils/publicize';
-
-// ============================================
-// Command DTOs (Input)
-// ============================================
 
 export class FindAdminUserByIdInputDto {
   @ApiProperty({
@@ -49,15 +44,12 @@ export class FindManyAdminUsersByIdInputDto {
 
 export class CreateAdminUserInputDto {
   @ApiProperty({
-    description: 'The admin user email address',
-    example: 'admin@example.com',
-    format: 'email',
-    maxLength: MAX_EMAIL_LENGTH,
+    description: 'The admin user Cognito sub',
+    example: 'cognito-sub-1234567890',
   })
-  @IsEmail()
-  @MaxLength(MAX_EMAIL_LENGTH)
+  @IsString()
   @IsNotEmpty()
-  public email: string;
+  public cognitoSub: string;
 
   @ApiProperty({
     description: 'The admin user name',
@@ -103,18 +95,6 @@ export class CreateManyAdminUsersInputDto {
 }
 
 export class UpdateAdminUserInputData {
-  @ApiProperty({
-    description: 'The admin user email address',
-    example: 'admin@example.com',
-    format: 'email',
-    maxLength: MAX_EMAIL_LENGTH,
-    required: false,
-  })
-  @IsEmail()
-  @MaxLength(MAX_EMAIL_LENGTH)
-  @IsOptional()
-  public email?: string;
-
   @ApiProperty({
     description: 'The admin user name',
     example: 'Admin User',
@@ -192,10 +172,6 @@ export class DeleteManyAdminUsersInputDto {
   public publicIds: string[];
 }
 
-// ============================================
-// Query DTOs (Response)
-// ============================================
-
 @Exclude()
 export class AdminUserResponseDto implements Publicize<AdminUser> {
   @ApiProperty({
@@ -207,13 +183,12 @@ export class AdminUserResponseDto implements Publicize<AdminUser> {
   public publicId: string;
 
   @ApiProperty({
-    description: 'The admin user email address',
-    example: 'admin@example.com',
-    format: 'email',
-    maxLength: MAX_EMAIL_LENGTH,
+    type: String,
+    description: 'The admin user Cognito sub',
+    example: 'cognito-sub-1234567890',
   })
   @Expose()
-  public email: string;
+  public cognitoSub: string;
 
   @ApiProperty({
     description: 'The admin user name',
@@ -275,6 +250,6 @@ export class AdminUsersResponseDto {
 }
 export function toAdminUsersResponseDto(adminUsers: AdminUser[]): AdminUsersResponseDto {
   return {
-    adminUsers: adminUsers.map((adminUser) => toAdminUserResponseDto(adminUser)),
+    adminUsers: plainToInstance(AdminUserResponseDto, adminUsers),
   };
 }

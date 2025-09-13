@@ -44,6 +44,14 @@ export class FindManyUsersByIdInputDto {
 
 export class CreateUserInputDto {
   @ApiProperty({
+    description: 'Firebase UID',
+    example: 'abc123def456',
+  })
+  @IsString()
+  @IsNotEmpty()
+  public firebaseUid: string;
+
+  @ApiProperty({
     description: 'The user name',
     example: 'Takuya Iwashiro',
     maxLength: MAX_NAME_LENGTH,
@@ -52,14 +60,6 @@ export class CreateUserInputDto {
   @MaxLength(MAX_NAME_LENGTH)
   @IsNotEmpty()
   public name: string;
-
-  @ApiProperty({
-    description: 'Firebase UID',
-    example: 'abc123def456',
-  })
-  @IsString()
-  @IsNotEmpty()
-  public firebaseUid: string;
 }
 
 export class CreateManyUsersInputDto {
@@ -134,20 +134,20 @@ export class UserResponseDto implements Publicize<User> {
   public publicId: string;
 
   @ApiProperty({
-    description: 'The user name',
-    example: 'Takuya Iwashiro',
-    maxLength: MAX_NAME_LENGTH,
-  })
-  @Expose()
-  public name: string;
-
-  @ApiProperty({
     type: String,
     description: 'Firebase UID',
     example: 'abc123def456',
   })
   @Expose()
   public firebaseUid: string;
+
+  @ApiProperty({
+    description: 'The user name',
+    example: 'Takuya Iwashiro',
+    maxLength: MAX_NAME_LENGTH,
+  })
+  @Expose()
+  public name: string;
 
   @ApiProperty({
     description: 'The user status',
