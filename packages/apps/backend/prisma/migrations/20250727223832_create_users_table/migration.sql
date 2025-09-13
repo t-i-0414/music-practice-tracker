@@ -14,6 +14,6 @@ CREATE TABLE
 
 CREATE UNIQUE INDEX "users_public_id_key" ON "users" ("public_id");
 CREATE UNIQUE INDEX "users_firebase_uid_key" ON "users" ("firebase_uid");
-CREATE UNIQUE INDEX "users_name_idx" ON "users" ("name");
+CREATE UNIQUE INDEX "users_name_key" ON "users" ("name");
 CREATE INDEX "users_status_idx" ON "users" ("status");
 CREATE INDEX "users_created_at_idx" ON "users" ("created_at");
