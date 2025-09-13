@@ -12,7 +12,7 @@ export class AdminUserFactory {
     return {
       id,
       publicId: overrides.publicId ?? faker.string.uuid(),
-      email: overrides.email ?? faker.internet.email(),
+      cognitoSub: overrides.cognitoSub ?? faker.string.uuid(),
       name: overrides.name ?? faker.person.fullName(),
       role: overrides.role ?? AdminRole.VIEWER,
       status: overrides.status ?? AdminStatus.ACTIVE,

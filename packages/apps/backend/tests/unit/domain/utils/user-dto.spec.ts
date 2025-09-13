@@ -12,7 +12,6 @@ describe('unit User DTOs', () => {
         publicId: '123e4567-e89b-12d3-a456-426614174000',
         data: {
           name: 'Updated User',
-          email: 'user@example.com',
         },
       };
 
@@ -65,7 +64,7 @@ describe('unit User DTOs', () => {
       const plainObject = {
         publicId: '123e4567-e89b-12d3-a456-426614174000',
         data: {
-          email: 'newemail@example.com',
+          name: 'Partial Update',
         },
       };
 
@@ -73,7 +72,7 @@ describe('unit User DTOs', () => {
       const errors = await validate(dto);
 
       expect(errors).toHaveLength(0);
-      expect(dto.data.email).toBe('newemail@example.com');
+      expect(dto.data.name).toBe('Partial Update');
     });
 
     it('should fail validation without data', async () => {
@@ -96,14 +95,14 @@ describe('unit User DTOs', () => {
       expect.assertions(2);
 
       const plainObject = {
-        email: 'new@example.com',
+        name: 'Optional Name',
       };
 
       const dto = plainToClass(UpdateUserDataDto, plainObject);
       const errors = await validate(dto);
 
       expect(errors).toHaveLength(0);
-      expect(dto.email).toBe('new@example.com');
+      expect(dto.name).toBe('Optional Name');
     });
 
     it('should validate with only name field', async () => {
@@ -120,18 +119,6 @@ describe('unit User DTOs', () => {
       expect(dto.name).toBe('New Name');
     });
 
-    it('should fail validation with invalid email', async () => {
-      expect.assertions(2);
-
-      const plainObject = {
-        email: 'invalid-email',
-      };
-
-      const dto = plainToClass(UpdateUserDataDto, plainObject);
-      const errors = await validate(dto);
-
-      expect(errors.length).toBeGreaterThan(0);
-      expect(errors.some((error) => error.property === 'email')).toBe(true);
-    });
+    // email field removed from user model; validation now focuses on name/status
   });
 });

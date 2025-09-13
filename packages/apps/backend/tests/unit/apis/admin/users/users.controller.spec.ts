@@ -114,6 +114,7 @@ describe('adminApiUsersController', () => {
       const createDto = {
         email: 'user@example.com',
         name: 'New User',
+        firebaseUid: 'uid-admin-new-user',
       };
       const mockUser = userFactory.build(createDto);
       const mockResponseDto = toUserResponseDto(mockUser);
@@ -135,10 +136,12 @@ describe('adminApiUsersController', () => {
           {
             email: 'user1@example.com',
             name: 'User 1',
+            firebaseUid: 'uid-admin-bulk-1',
           },
           {
             email: 'user2@example.com',
             name: 'User 2',
+            firebaseUid: 'uid-admin-bulk-2',
           },
         ],
       };

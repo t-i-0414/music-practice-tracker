@@ -88,8 +88,9 @@ describe('appApiUsersController', () => {
       const createDto = {
         email: 'user@example.com',
         name: 'New User',
-      };
-      const mockUser = userFactory.build(createDto);
+        firebaseUid: 'uid-user-example',
+      } as const;
+      const mockUser = userFactory.build({ ...createDto });
       const mockResponseDto = toUserResponseDto(mockUser);
       commandService.createUser.mockResolvedValue(mockResponseDto);
 

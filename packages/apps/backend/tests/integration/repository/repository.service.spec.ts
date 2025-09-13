@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
+import { UserStatusRecord } from '@/domain/aggregates/user/utils/constants';
 import { RepositoryService } from '@/repository/repository.service';
 import { DatabaseHelper } from '@/tests/helpers/database.helper';
 
@@ -38,14 +39,14 @@ describe('integration RepositoryService', () => {
       const result = await service.$transaction(async (tx) => {
         const user = await tx.user.create({
           data: {
-            email: 'transaction@example.com',
             name: 'Transaction User',
+            firebaseUid: 'uid-repo-transaction',
           },
         });
 
         const adminUser = await tx.adminUser.create({
           data: {
-            email: 'admin@example.com',
+            cognitoSub: 'sub-repo-admin',
             name: 'Admin User',
             role: 'ADMIN',
           },
@@ -54,8 +55,8 @@ describe('integration RepositoryService', () => {
         return { user, adminUser };
       });
 
-      expect(result.user.email).toBe('transaction@example.com');
-      expect(result.adminUser.email).toBe('admin@example.com');
+      expect(result.user.name).toBe('Transaction User');
+      expect(result.adminUser.cognitoSub).toBe('sub-repo-admin');
 
       const foundUser = await service.user.findUnique({
         where: { publicId: result.user.publicId },
@@ -73,8 +74,8 @@ describe('integration RepositoryService', () => {
         service.$transaction(async (tx) => {
           await tx.user.create({
             data: {
-              email: 'rollback@example.com',
               name: 'Rollback User',
+              firebaseUid: 'uid-repo-rollback',
             },
           });
 
@@ -87,7 +88,7 @@ describe('integration RepositoryService', () => {
       expect(countAfter).toBe(countBefore);
 
       const user = await service.user.findFirst({
-        where: { email: 'rollback@example.com' },
+        where: { name: 'Rollback User' },
       });
 
       expect(user).toBeNull();
@@ -103,14 +104,14 @@ describe('integration RepositoryService', () => {
         service.$transaction(async (tx) => {
           await tx.user.create({
             data: {
-              email: 'user-rollback@example.com',
               name: 'User Rollback',
+              firebaseUid: 'uid-repo-user-rollback',
             },
           });
 
           await tx.adminUser.create({
             data: {
-              email: 'admin-rollback@example.com',
+              cognitoSub: 'sub-repo-admin-rollback',
               name: 'Admin Rollback',
               role: 'ADMIN',
             },
@@ -127,7 +128,7 @@ describe('integration RepositoryService', () => {
       expect(adminCountAfter).toBe(adminCountBefore);
 
       const user = await service.user.findFirst({
-        where: { email: 'user-rollback@example.com' },
+        where: { name: 'User Rollback' },
       });
 
       expect(user).toBeNull();
@@ -139,23 +140,23 @@ describe('integration RepositoryService', () => {
       const result = await service.$transaction(async (tx) => {
         const user1 = await tx.user.create({
           data: {
-            email: 'nested1@example.com',
             name: 'Nested User 1',
+            firebaseUid: 'uid-repo-nested-1',
           },
         });
 
         const user2 = await tx.user.create({
           data: {
-            email: 'nested2@example.com',
             name: 'Nested User 2',
+            firebaseUid: 'uid-repo-nested-2',
           },
         });
 
         return { user1, user2 };
       });
 
-      expect(result.user1.email).toBe('nested1@example.com');
-      expect(result.user2.email).toBe('nested2@example.com');
+      expect(result.user1.name).toBe('Nested User 1');
+      expect(result.user2.name).toBe('Nested User 2');
     });
   });
 
@@ -165,16 +166,16 @@ describe('integration RepositoryService', () => {
 
       await service.user.create({
         data: {
-          email: 'duplicate@example.com',
           name: 'First User',
+          firebaseUid: 'uid-repo-dup',
         },
       });
 
       await expect(
         service.user.create({
           data: {
-            email: 'duplicate@example.com',
             name: 'Second User',
+            firebaseUid: 'uid-repo-dup',
           },
         }),
       ).rejects.toMatchObject({
@@ -184,8 +185,8 @@ describe('integration RepositoryService', () => {
       await expect(
         service.user.create({
           data: {
-            email: 'duplicate@example.com',
             name: 'Third User',
+            firebaseUid: 'uid-repo-dup',
           },
         }),
       ).rejects.toThrow('Unique constraint failed on the fields');
@@ -223,8 +224,8 @@ describe('integration RepositoryService', () => {
 
       const user = await service.user.create({
         data: {
-          email: 'concurrent@example.com',
           name: 'Concurrent User',
+          firebaseUid: 'uid-repo-concurrent',
         },
       });
 
@@ -239,7 +240,7 @@ describe('integration RepositoryService', () => {
       expect(results).toHaveLength(10);
 
       results.forEach((result) => {
-        expect(result?.email).toBe('concurrent@example.com');
+        expect(result?.name).toBe('Concurrent User');
       });
 
       expect(results.every((result) => result !== null)).toBe(true);
@@ -248,11 +249,11 @@ describe('integration RepositoryService', () => {
     it('should handle concurrent writes with different records', async () => {
       expect.assertions(3);
 
-      const promises = Array.from({ length: 5 }, (_, i) =>
+      const promises = Array.from({ length: 5 }, (__, i) =>
         service.user.create({
           data: {
-            email: `concurrent${i}@example.com`,
             name: `Concurrent User ${i}`,
+            firebaseUid: `uid-repo-concurrent-${i}`,
           },
         }),
       );
@@ -261,10 +262,10 @@ describe('integration RepositoryService', () => {
 
       expect(results).toHaveLength(5);
 
-      const emails = results.map((r) => r.email);
+      const uidList = results.map((r) => r.firebaseUid);
 
-      expect(new Set(emails).size).toBe(5);
-      expect(results[0].email).toContain('concurrent');
+      expect(new Set(uidList).size).toBe(5);
+      expect(results[0].firebaseUid).toContain('uid-repo-concurrent-');
     });
   });
 
@@ -274,16 +275,20 @@ describe('integration RepositoryService', () => {
 
       const result = await service.user.createManyAndReturn({
         data: [
-          { email: 'batch1@example.com', name: 'Batch User 1' },
-          { email: 'batch2@example.com', name: 'Batch User 2' },
-          { email: 'batch3@example.com', name: 'Batch User 3' },
+          { name: 'Batch User 1', firebaseUid: 'uid-repo-batch-1' },
+          { name: 'Batch User 2', firebaseUid: 'uid-repo-batch-2' },
+          { name: 'Batch User 3', firebaseUid: 'uid-repo-batch-3' },
         ],
       });
 
+      expect(Array.isArray(result)).toBe(true);
       expect(result).toHaveLength(3);
-      expect(result[0].email).toBe('batch1@example.com');
-      expect(result[1].email).toBe('batch2@example.com');
-      expect(result[2].email).toBe('batch3@example.com');
+      expect(result.map((u) => u.name)).toStrictEqual(['Batch User 1', 'Batch User 2', 'Batch User 3']);
+      expect(result.map((u) => u.firebaseUid)).toStrictEqual([
+        'uid-repo-batch-1',
+        'uid-repo-batch-2',
+        'uid-repo-batch-3',
+      ]);
     });
 
     it('should handle updateMany operation', async () => {
@@ -291,27 +296,27 @@ describe('integration RepositoryService', () => {
 
       await service.user.createManyAndReturn({
         data: [
-          { email: 'update1@example.com', name: 'Old Name 1' },
-          { email: 'update2@example.com', name: 'Old Name 2' },
+          { name: 'update-Old Name 1', firebaseUid: 'uid-repo-update-1' },
+          { name: 'update-Old Name 2', firebaseUid: 'uid-repo-update-2' },
         ],
       });
 
       const result = await service.user.updateMany({
         where: {
-          email: { contains: 'update' },
+          name: { contains: 'update' },
         },
         data: {
-          name: 'Updated Name',
+          status: UserStatusRecord.SUSPENDED,
         },
       });
 
       expect(result.count).toBe(2);
 
       const users = await service.user.findMany({
-        where: { email: { contains: 'update' } },
+        where: { name: { contains: 'update' } },
       });
       users.forEach((user) => {
-        expect(user.name).toBe('Updated Name');
+        expect(user.status).toBe(UserStatusRecord.SUSPENDED);
       });
 
       expect(users).toHaveLength(2);
@@ -322,15 +327,15 @@ describe('integration RepositoryService', () => {
 
       await service.user.createManyAndReturn({
         data: [
-          { email: 'delete1@example.com', name: 'Delete User 1' },
-          { email: 'delete2@example.com', name: 'Delete User 2' },
-          { email: 'keep@example.com', name: 'Keep User' },
+          { name: 'Delete User 1', firebaseUid: 'uid-repo-del-1' },
+          { name: 'Delete User 2', firebaseUid: 'uid-repo-del-2' },
+          { name: 'Keep User', firebaseUid: 'uid-repo-keep' },
         ],
       });
 
       const result = await service.user.deleteMany({
         where: {
-          email: { contains: 'delete' },
+          name: { contains: 'Delete User' },
         },
       });
 
@@ -339,7 +344,7 @@ describe('integration RepositoryService', () => {
       const remainingUsers = await service.user.findMany();
 
       expect(remainingUsers).toHaveLength(1);
-      expect(remainingUsers[0].email).toBe('keep@example.com');
+      expect(remainingUsers[0].name).toBe('Keep User');
       expect(remainingUsers[0]).toBeDefined();
       expect(result.count).toBeGreaterThan(0);
     });

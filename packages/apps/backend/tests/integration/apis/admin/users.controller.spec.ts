@@ -140,10 +140,7 @@ describe('integration AdminApiUsersController', () => {
     it('should delete a user', async () => {
       expect.assertions(1);
 
-      const created = await controller.createUser({
-        email: 'user@example.com',
-        name: 'To Delete',
-      });
+      const created = await controller.createUser({ name: 'To Delete', firebaseUid: 'uid-admin-delete' });
 
       await controller.deleteUserById(created.publicId);
 
@@ -155,20 +152,11 @@ describe('integration AdminApiUsersController', () => {
     it('should delete multiple users', async () => {
       expect.assertions(1);
 
-      const user1 = await controller.createUser({
-        email: 'user1@example.com',
-        name: 'User 1',
-      });
+      const user1 = await controller.createUser({ name: 'User 1', firebaseUid: 'uid-admin-del-1' });
 
-      const user2 = await controller.createUser({
-        email: 'user2@example.com',
-        name: 'User 2',
-      });
+      const user2 = await controller.createUser({ name: 'User 2', firebaseUid: 'uid-admin-del-2' });
 
-      const user3 = await controller.createUser({
-        email: 'user3@example.com',
-        name: 'User 3',
-      });
+      const user3 = await controller.createUser({ name: 'User 3', firebaseUid: 'uid-admin-del-3' });
 
       await controller.deleteManyUsersById({ publicIds: [user1.publicId, user2.publicId] });
 

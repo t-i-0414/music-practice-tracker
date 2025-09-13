@@ -11,7 +11,7 @@ import { DatabaseHelper } from '@/tests/helpers/database.helper';
 describe('integration AppApiUsersController', () => {
   let controller: AppApiUsersController;
   let databaseHelper: DatabaseHelper;
-  let testUser: { publicId: string; email: string; name: string };
+  let testUser: import('@/domain/aggregates/user/utils/dto').UserResponseDto;
 
   beforeAll(async () => {
     databaseHelper = new DatabaseHelper();
@@ -40,8 +40,8 @@ describe('integration AppApiUsersController', () => {
     // Create a test user for most tests (simulating logged-in user)
     const commandService = module.get<UserCommandService>(UserCommandService);
     testUser = await commandService.createUser({
-      email: 'current-user@example.com',
       name: 'Current User',
+      firebaseUid: 'uid-current-user',
     });
   });
 
@@ -51,12 +51,11 @@ describe('integration AppApiUsersController', () => {
 
   describe('get /users/:publicId', () => {
     it('should return the current user by publicId', async () => {
-      expect.assertions(3);
+      expect.assertions(2);
 
       const result = await controller.findUniqueOrThrowUserById(testUser.publicId);
 
       expect(result.publicId).toBe(testUser.publicId);
-      expect(result.email).toBe('current-user@example.com');
       expect(result.name).toBe('Current User');
     });
 

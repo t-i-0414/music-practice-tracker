@@ -7,14 +7,13 @@ import { type User, UserStatus } from '@/generated/prisma';
 export class UserFactory {
   private idCounter = firstIdCounter;
 
-  public build(overrides: Partial<User> = {}): User {
+  public build(overrides: Partial<User> & Record<string, unknown> = {}): User {
     const id = this.idCounter++;
     return {
       id,
       publicId: overrides.publicId ?? faker.string.uuid(),
-      email: overrides.email ?? faker.internet.email(),
       name: overrides.name ?? faker.person.fullName(),
-      firebaseUid: overrides.firebaseUid ?? null,
+      firebaseUid: overrides.firebaseUid ?? faker.string.uuid(),
       status: overrides.status ?? UserStatus.ACTIVE,
       createdAt: overrides.createdAt ?? new Date(),
       updatedAt: overrides.updatedAt ?? new Date(),
