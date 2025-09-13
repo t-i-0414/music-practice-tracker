@@ -25,16 +25,6 @@ export class UserQueryService {
     );
   }
 
-  public async findUniqueOrThrowUserByEmail(email: string): Promise<UserResponseDto> {
-    return toUserResponseDto(
-      await this.repository.user.findUniqueOrThrow({
-        where: {
-          email,
-        },
-      }),
-    );
-  }
-
   public async findManyUsersById(dto: FindManyUsersByIdInputDto): Promise<UsersResponseDto> {
     return toUsersResponseDto(
       await this.repository.user.findMany({
@@ -55,5 +45,14 @@ export class UserQueryService {
         },
       }),
     );
+  }
+
+  public async findUniqueUserByFirebaseUid(firebaseUid: string): Promise<UserResponseDto | null> {
+    const user = await this.repository.user.findUnique({
+      where: {
+        firebaseUid,
+      },
+    });
+    return user ? toUserResponseDto(user) : null;
   }
 }

@@ -1,9 +1,8 @@
-import { ApiProperty, PartialType } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { Type, Exclude, Expose, plainToInstance } from 'class-transformer';
 import {
   ArrayNotEmpty,
   IsArray,
-  IsEmail,
   IsEnum,
   IsNotEmpty,
   IsNotEmptyObject,
@@ -14,13 +13,9 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-import { MAX_EMAIL_LENGTH, MAX_NAME_LENGTH, UserStatusRecord, User } from './constants';
+import { MAX_NAME_LENGTH, UserStatusRecord, User } from './constants';
 
 import { Publicize } from '@/domain/utils/publicize';
-
-// ============================================
-// Command DTOs (Input)
-// ============================================
 
 export class FindUserByIdInputDto {
   @ApiProperty({
@@ -49,17 +44,6 @@ export class FindManyUsersByIdInputDto {
 
 export class CreateUserInputDto {
   @ApiProperty({
-    description: 'The user email address',
-    example: 'takuya.iwashiro@takudev.net',
-    format: 'email',
-    maxLength: MAX_EMAIL_LENGTH,
-  })
-  @IsEmail()
-  @MaxLength(MAX_EMAIL_LENGTH)
-  @IsNotEmpty()
-  public email: string;
-
-  @ApiProperty({
     description: 'The user name',
     example: 'Takuya Iwashiro',
     maxLength: MAX_NAME_LENGTH,
@@ -72,11 +56,10 @@ export class CreateUserInputDto {
   @ApiProperty({
     description: 'Firebase UID',
     example: 'abc123def456',
-    required: false,
   })
   @IsString()
-  @IsOptional()
-  public firebaseUid?: string;
+  @IsNotEmpty()
+  public firebaseUid: string;
 }
 
 export class CreateManyUsersInputDto {
@@ -92,7 +75,18 @@ export class CreateManyUsersInputDto {
   public users: CreateUserInputDto[];
 }
 
-export class UpdateUserDataDto extends PartialType(CreateUserInputDto) {
+export class UpdateUserDataDto {
+  @ApiProperty({
+    description: 'The user name',
+    example: 'Takuya Iwashiro',
+    maxLength: MAX_NAME_LENGTH,
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(MAX_NAME_LENGTH)
+  public name?: string;
+
   @ApiProperty({
     description: 'The user status',
     example: UserStatusRecord.ACTIVE,
@@ -129,10 +123,6 @@ export class DeleteUserByIdInputDto extends FindUserByIdInputDto {}
 
 export class DeleteManyUsersInputDto extends FindManyUsersByIdInputDto {}
 
-// ============================================
-// Query DTOs (Response)
-// ============================================
-
 @Exclude()
 export class UserResponseDto implements Publicize<User> {
   @ApiProperty({
@@ -142,15 +132,6 @@ export class UserResponseDto implements Publicize<User> {
   })
   @Expose()
   public publicId: string;
-
-  @ApiProperty({
-    description: 'The user email address',
-    example: 'takuya.iwashiro@takudev.net',
-    format: 'email',
-    maxLength: MAX_EMAIL_LENGTH,
-  })
-  @Expose()
-  public email: string;
 
   @ApiProperty({
     description: 'The user name',
@@ -164,10 +145,9 @@ export class UserResponseDto implements Publicize<User> {
     type: String,
     description: 'Firebase UID',
     example: 'abc123def456',
-    nullable: true,
   })
   @Expose()
-  public firebaseUid: string | null;
+  public firebaseUid: string;
 
   @ApiProperty({
     description: 'The user status',
@@ -198,7 +178,7 @@ export class UserResponseDto implements Publicize<User> {
   public updatedAt: Date;
 }
 
-export function toUserResponseDto(user: unknown): UserResponseDto {
+export function toUserResponseDto(user: User): UserResponseDto {
   return plainToInstance(UserResponseDto, user);
 }
 
@@ -206,7 +186,7 @@ export class UsersResponseDto {
   @ApiProperty({ type: [UserResponseDto] })
   public users: UserResponseDto[];
 }
-export function toUsersResponseDto(users: unknown[]): UsersResponseDto {
+export function toUsersResponseDto(users: User[]): UsersResponseDto {
   return {
     users: plainToInstance(UserResponseDto, users),
   };
