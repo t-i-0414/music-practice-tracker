@@ -44,7 +44,7 @@ endif
 .PHONY: setup-database
 setup-database:
 	@echo "🗄️ Setting up database..."
-	bun run prisma:generate
+	bun run prisma:client:generate
 ifneq ($(SKIP_MIGRATIONS),true)
 	@${MAKE} run-migrations
 endif
@@ -54,8 +54,7 @@ endif
 .PHONY: run-migrations
 run-migrations:
 	@echo "📊 Running database migrations..."
-	bun run prisma:migrate:deploy
-	bun run prisma:migrate:deploy:test
+	bun run prisma:migrate:apply
 	@echo "✅ Migrations complete"
 
 # -------------------------------------------------------------

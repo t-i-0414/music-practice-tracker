@@ -180,6 +180,7 @@ jobs:
         run: |
           cd packages/apps/backend
           bun run prisma:validate
+          bun run prisma:schema:diff:check
 
       - name: Start Backend Server
         uses: ./.github/actions/start-backend
