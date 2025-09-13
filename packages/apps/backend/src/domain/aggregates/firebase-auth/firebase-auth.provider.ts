@@ -3,14 +3,10 @@ import * as firebaseAdmin from 'firebase-admin';
 
 import { DomainError } from '@/domain/utils/domain.error';
 
-const MINIMUM_INVALID_FIREBASE_APPS_LENGTH = 0;
-
 @Injectable()
 export class FirebaseAuthProvider implements OnModuleInit {
-  private app!: firebaseAdmin.app.App;
-
   public onModuleInit(): void {
-    if (firebaseAdmin.apps.length > MINIMUM_INVALID_FIREBASE_APPS_LENGTH) {
+    if (this.hasInitialized()) {
       this.app = firebaseAdmin.app();
       return;
     }
@@ -20,39 +16,80 @@ export class FirebaseAuthProvider implements OnModuleInit {
         credential: firebaseAdmin.credential.applicationDefault(),
       });
     } catch (adcCause) {
-      const json = process.env.FIREBASE_SERVICE_ACCOUNT;
-      if (json === undefined || json === '') {
+      const emulatorHost = process.env.FIREBASE_AUTH_EMULATOR_HOST;
+      if (typeof emulatorHost === 'string' && emulatorHost.trim() !== '') {
+        const projectId =
+          process.env.GOOGLE_CLOUD_PROJECT ?? process.env.GCLOUD_PROJECT ?? process.env.FIREBASE_PROJECT_ID;
+        if (typeof projectId === 'string' && projectId.trim() !== '') {
+          this.app = firebaseAdmin.initializeApp({ projectId: projectId.trim() });
+          return;
+        }
+      }
+
+      const serviceAccountJsonString = process.env.FIREBASE_SERVICE_ACCOUNT;
+      if (serviceAccountJsonString === undefined || serviceAccountJsonString.trim() === '') {
         throw new DomainError(
           'DO0001',
           'FIREBASE_SERVICE_ACCOUNT is not set and Application Default Credentials are not available.',
           adcCause,
         );
       }
+      try {
+        JSON.parse(serviceAccountJsonString);
+      } catch (e) {
+        throw new DomainError('DO0002', 'Invalid FIREBASE_SERVICE_ACCOUNT: JSON parse failed.', e);
+      }
 
-      const isServiceAccount = (obj: unknown): obj is firebaseAdmin.ServiceAccount =>
-        typeof obj === 'object' && obj !== null;
+      const serviceAccount: unknown = JSON.parse(serviceAccountJsonString);
+      if (!this.isServiceAccount(serviceAccount)) {
+        throw new DomainError('DO0002', 'Invalid FIREBASE_SERVICE_ACCOUNT format. Expecting JSON object.');
+      }
+      const normalizedServiceAccount: firebaseAdmin.ServiceAccount = {
+        projectId: serviceAccount.projectId,
+        clientEmail: serviceAccount.clientEmail,
+        privateKey: serviceAccount.privateKey.replace(/\\n/gu, '\n'),
+      };
 
       try {
-        const parsed: unknown = JSON.parse(json);
-        if (!isServiceAccount(parsed)) {
-          throw new DomainError('DO0002', 'Invalid FIREBASE_SERVICE_ACCOUNT format. Expecting JSON object.');
-        }
-
-        try {
-          this.app = firebaseAdmin.initializeApp({
-            credential: firebaseAdmin.credential.cert(parsed),
-          });
-        } catch (cause) {
-          throw new DomainError('DO0003', 'Failed to initialize Firebase Admin SDK with service account.', cause);
-        }
+        this.app = firebaseAdmin.initializeApp({
+          credential: firebaseAdmin.credential.cert(normalizedServiceAccount),
+        });
       } catch (cause) {
-        if (cause instanceof DomainError) throw cause;
-        throw new DomainError('DO0002', 'FIREBASE_SERVICE_ACCOUNT is not valid JSON.', cause);
+        throw new DomainError('DO0003', 'Failed to initialize Firebase Admin SDK with service account.', cause);
       }
     }
   }
 
+  public onModuleDestroy(): Promise<void> | void {
+    const EXIT_CODE_ON_CATCH = 0;
+    return this.app.delete().catch(() => void EXIT_CODE_ON_CATCH);
+  }
+
   public auth(): firebaseAdmin.auth.Auth {
     return this.app.auth();
+  }
+
+  private app!: firebaseAdmin.app.App;
+
+  private hasInitialized(): boolean {
+    const MINIMUM_INVALID_FIREBASE_APPS_LENGTH = 0;
+    return firebaseAdmin.apps.length > MINIMUM_INVALID_FIREBASE_APPS_LENGTH;
+  }
+
+  private isServiceAccount(obj: unknown): obj is {
+    projectId: string;
+    clientEmail: string;
+    privateKey: string;
+  } {
+    return (
+      typeof obj === 'object' &&
+      obj !== null &&
+      'projectId' in obj &&
+      typeof obj.projectId === 'string' &&
+      'clientEmail' in obj &&
+      typeof obj.clientEmail === 'string' &&
+      'privateKey' in obj &&
+      typeof obj.privateKey === 'string'
+    );
   }
 }

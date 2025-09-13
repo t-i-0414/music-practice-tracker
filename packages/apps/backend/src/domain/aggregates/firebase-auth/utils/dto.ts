@@ -1,5 +1,5 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class FirebaseAuthVerifyTokenDto {
   @ApiProperty({
@@ -8,15 +8,7 @@ export class FirebaseAuthVerifyTokenDto {
   })
   @IsString()
   @IsNotEmpty()
-  public idToken!: string;
-
-  @ApiPropertyOptional({
-    description: 'User name (required when provisioning a new user)',
-    example: 'John Doe',
-  })
-  @IsOptional()
-  @IsString()
-  public name?: string;
+  public idToken: string;
 }
 
 export class FirebaseAuthUserDto {
@@ -24,13 +16,13 @@ export class FirebaseAuthUserDto {
     description: 'User public ID',
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
-  public publicId!: string;
+  public publicId: string;
 
   @ApiProperty({
     description: 'User name',
     example: 'John Doe',
   })
-  public name!: string;
+  public name: string;
 }
 
 export class FirebaseAuthUserResponseDto {
@@ -38,5 +30,5 @@ export class FirebaseAuthUserResponseDto {
     description: 'Authenticated user information',
     type: FirebaseAuthUserDto,
   })
-  public user!: FirebaseAuthUserDto;
+  public user: FirebaseAuthUserDto;
 }

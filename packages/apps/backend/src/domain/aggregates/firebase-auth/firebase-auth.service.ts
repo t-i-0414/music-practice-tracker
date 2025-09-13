@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import type { DecodedIdToken } from 'firebase-admin/auth';
+import type { DecodedIdToken, UserRecord } from 'firebase-admin/auth';
 
 import { FirebaseAuthProvider } from './firebase-auth.provider';
 
@@ -13,22 +13,34 @@ export class FirebaseAuthService {
     try {
       return await this.provider.auth().verifyIdToken(idToken, checkRevoked);
     } catch (e) {
-      const error = e instanceof Error && 'code' in e ? e : { code: undefined, message: 'Unknown error' };
-      if (error.code === 'auth/id-token-expired') {
-        throw new ApiError('AP0401', 'Token expired', e);
+      if (e instanceof Error && 'code' in e) {
+        switch (e.code) {
+          case 'auth/id-token-expired':
+            throw new ApiError('AP0401', 'Firebase token expired', e);
+          case 'auth/id-token-revoked':
+            throw new ApiError('AP0401', 'Firebase token revoked', e);
+          default:
+            throw new ApiError('AP0401', 'Firebase invalid token', e);
+        }
       }
-      if (error.code === 'auth/id-token-revoked') {
-        throw new ApiError('AP0401', 'Token revoked', e);
-      }
-      throw new ApiError('AP0401', 'Invalid token', e);
+
+      throw new ApiError('AP0401', 'Firebase invalid token', e);
     }
   }
 
-  public async createCustomToken(uid: string, claims?: object): Promise<string> {
+  public async getUser(uid: string): Promise<UserRecord> {
     try {
-      return await this.provider.auth().createCustomToken(uid, claims);
+      return await this.provider.auth().getUser(uid);
     } catch (e) {
-      throw new ApiError('AP0500', 'Failed to create custom token', e);
+      throw new ApiError('AP0404', 'Firebase user not found', e);
+    }
+  }
+
+  public async deleteUser(uid: string): Promise<void> {
+    try {
+      await this.provider.auth().deleteUser(uid);
+    } catch (e) {
+      throw new ApiError('AP0500', 'Failed to delete Firebase user', e);
     }
   }
 }
