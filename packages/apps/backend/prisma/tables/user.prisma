@@ -9,7 +9,7 @@ enum UserStatus {
 
 model User {
   id          Int        @id @default(autoincrement())
-  publicId    String     @unique @default(uuid()) @map("public_id") @db.Uuid
+  publicId    String     @unique @default(dbgenerated("gen_random_uuid()")) @map("public_id") @db.Uuid
   firebaseUid String     @unique @map("firebase_uid")
   name        String     @unique
   status      UserStatus @default(PENDING) @map("status")
