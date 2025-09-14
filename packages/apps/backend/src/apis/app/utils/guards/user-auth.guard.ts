@@ -36,7 +36,6 @@ export class UserAuthGuard implements CanActivate {
 
     const currentUser: CurrentUserData = {
       publicId: user.publicId,
-      email: user.email,
       name: user.name,
     };
     req.user = currentUser;
