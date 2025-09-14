@@ -2,7 +2,7 @@ import { createParamDecorator, type ExecutionContext } from '@nestjs/common';
 
 import { type UserResponseDto } from '@/domain/aggregates/user/utils/dto';
 
-export type CurrentUserData = Pick<UserResponseDto, 'publicId' | 'email' | 'name'>;
+export type CurrentUserData = Pick<UserResponseDto, 'publicId' | 'name'>;
 
 type AuthenticatedRequest = {
   user?: CurrentUserData;
@@ -10,14 +10,14 @@ type AuthenticatedRequest = {
 
 export const CurrentUser = createParamDecorator(
   (
-    data: keyof CurrentUserData | undefined,
+    dataKey: keyof CurrentUserData | undefined,
     ctx: ExecutionContext,
   ): CurrentUserData | CurrentUserData[keyof CurrentUserData] | undefined => {
     const request = ctx.switchToHttp().getRequest<AuthenticatedRequest>();
     const { user } = request;
 
-    if (data && user) {
-      return user[data];
+    if (dataKey && user) {
+      return user[dataKey];
     }
 
     return user;
