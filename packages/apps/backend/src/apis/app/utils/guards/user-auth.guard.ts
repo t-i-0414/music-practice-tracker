@@ -6,7 +6,7 @@ import { CurrentUserData } from '../decorators/current-user.decorator';
 
 import { ApiError } from '@/apis/utils/api.error';
 import { IS_PUBLIC_KEY } from '@/apis/utils/decorators/public.decorator';
-import { extractTokenFromIncomingHttpHeaders } from '@/apis/utils/extract-token-from-incoming-http-headers';
+import { extractTokenFromHttpHeaders } from '@/apis/utils/extract-token-from-http-headers';
 import { FirebaseAuthService } from '@/domain/aggregates/firebase-auth/firebase-auth.service';
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 
@@ -24,7 +24,7 @@ export class UserAuthGuard implements CanActivate {
 
     const req = ctx.switchToHttp().getRequest<Request>();
 
-    const token = extractTokenFromIncomingHttpHeaders(req.headers);
+    const token = extractTokenFromHttpHeaders(req.headers);
     if (token === undefined) {
       throw new ApiError('AP0401', 'Authorization token not found');
     }

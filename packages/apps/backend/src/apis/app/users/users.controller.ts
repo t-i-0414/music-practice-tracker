@@ -73,7 +73,7 @@ export class AppApiUsersController {
   @ApiOperation({ summary: 'Get current authenticated user' })
   @ApiResponse({ status: 200, description: 'Current user information', type: UserResponseDto })
   @ApiStandardResponses()
-  public me(@CurrentUser() user: CurrentUserData): Promise<UserResponseDto> {
+  public fetchCurrentUser(@CurrentUser() user: CurrentUserData): Promise<UserResponseDto> {
     return this.userQueryService.findUniqueOrThrowUserById({ publicId: user.publicId });
   }
 
@@ -94,7 +94,7 @@ export class AppApiUsersController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiResponse({ status: 204, description: 'User deleted successfully' })
   @ApiStandardResponses()
-  public async deleteUserById(@CurrentUser() user: CurrentUserData): Promise<void> {
+  public async deleteCurrentUser(@CurrentUser() user: CurrentUserData): Promise<void> {
     await this.deleteUserService.execute(user.publicId);
   }
 
@@ -103,9 +103,7 @@ export class AppApiUsersController {
   @ApiParam({ name: 'publicId', description: 'User public ID', example: '123e4567-e89b-12d3-a456-426614174000' })
   @ApiResponse({ status: 200, description: 'User found', type: UserResponseDto })
   @ApiStandardResponses()
-  public async findUniqueOrThrowUserById(
-    @Param('publicId', new ParseUUIDPipe()) publicId: string,
-  ): Promise<UserResponseDto> {
+  public async fetchUserById(@Param('publicId', new ParseUUIDPipe()) publicId: string): Promise<UserResponseDto> {
     return this.userQueryService.findUniqueOrThrowUserById({ publicId });
   }
 }

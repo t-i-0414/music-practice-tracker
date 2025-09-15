@@ -1,6 +1,6 @@
 import { type IncomingHttpHeaders } from 'node:http';
 
-export const extractTokenFromIncomingHttpHeaders = (headers: IncomingHttpHeaders): string | undefined => {
+export const extractTokenFromHttpHeaders = (headers: IncomingHttpHeaders): string | undefined => {
   const raw = headers.authorization;
 
   if (typeof raw !== 'string') return undefined;
