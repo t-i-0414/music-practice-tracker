@@ -4,23 +4,6 @@
  */
 
 export interface paths {
-    "/api/auth/verify": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Verify Firebase ID token */
-        post: operations["AppApiAuthController_verify"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/users": {
         parameters: {
             query?: never;
@@ -46,12 +29,12 @@ export interface paths {
             cookie?: never;
         };
         /** Get current authenticated user */
-        get: operations["AppApiUsersController_me"];
+        get: operations["AppApiUsersController_fetchCurrentUser"];
         /** Update current user profile */
         put: operations["AppApiUsersController_updateCurrentUserProfile"];
         post?: never;
         /** Delete current user (Firebase + DB) */
-        delete: operations["AppApiUsersController_deleteUserById"];
+        delete: operations["AppApiUsersController_deleteCurrentUser"];
         options?: never;
         head?: never;
         patch?: never;
@@ -65,7 +48,7 @@ export interface paths {
             cookie?: never;
         };
         /** Get a user by public ID */
-        get: operations["AppApiUsersController_findUniqueOrThrowUserById"];
+        get: operations["AppApiUsersController_fetchUserById"];
         put?: never;
         post?: never;
         delete?: never;
@@ -78,42 +61,6 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        FirebaseAuthVerifyTokenDto: {
-            /**
-             * @description Firebase ID token
-             * @example eyJhbGciOiJSUzI1NiIsImtpZCI6IjAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwIn0...
-             */
-            idToken: string;
-        };
-        VerifiedTokenResponseDto: {
-            /**
-             * @description Firebase UID
-             * @example uid12345
-             */
-            uid: string;
-            /**
-             * Format: email
-             * @description Firebase email
-             * @example user@example.com
-             */
-            email?: string;
-            /**
-             * @description Whether the Firebase email is verified
-             * @example true
-             */
-            emailVerified: boolean;
-            /**
-             * @description Sign-in provider
-             * @example google.com
-             */
-            signInProvider?: string;
-        };
-        ErrorResponseDto: {
-            /** @example 400 */
-            statusCode: number;
-            /** @example RE0002 */
-            errorCode: string;
-        };
         CreateUserInputDto: {
             /**
              * @description Firebase UID
@@ -162,6 +109,12 @@ export interface components {
              */
             updatedAt: string;
         };
+        ErrorResponseDto: {
+            /** @example 400 */
+            statusCode: number;
+            /** @example RE0002 */
+            errorCode: string;
+        };
         UpdateUserDataDto: {
             /**
              * @description The user name
@@ -184,39 +137,6 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    AppApiAuthController_verify: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["FirebaseAuthVerifyTokenDto"];
-            };
-        };
-        responses: {
-            /** @description Token verification result */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["VerifiedTokenResponseDto"];
-                };
-            };
-            /** @description Error Response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-        };
-    };
     AppApiUsersController_createUser: {
         parameters: {
             query?: never;
@@ -250,7 +170,7 @@ export interface operations {
             };
         };
     };
-    AppApiUsersController_me: {
+    AppApiUsersController_fetchCurrentUser: {
         parameters: {
             query?: never;
             header?: never;
@@ -312,7 +232,7 @@ export interface operations {
             };
         };
     };
-    AppApiUsersController_deleteUserById: {
+    AppApiUsersController_deleteCurrentUser: {
         parameters: {
             query?: never;
             header?: never;
@@ -339,7 +259,7 @@ export interface operations {
             };
         };
     };
-    AppApiUsersController_findUniqueOrThrowUserById: {
+    AppApiUsersController_fetchUserById: {
         parameters: {
             query?: never;
             header?: never;
