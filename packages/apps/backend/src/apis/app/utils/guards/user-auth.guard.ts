@@ -6,6 +6,7 @@ import { CurrentUserData } from '../decorators/current-user.decorator';
 
 import { ApiError } from '@/apis/utils/api.error';
 import { IS_PUBLIC_KEY } from '@/apis/utils/decorators/public.decorator';
+import { extractTokenFromIncomingHttpHeaders } from '@/apis/utils/extract-token-from-incoming-http-headers';
 import { FirebaseAuthService } from '@/domain/aggregates/firebase-auth/firebase-auth.service';
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 
@@ -22,13 +23,14 @@ export class UserAuthGuard implements CanActivate {
     if (isPublic) return true;
 
     const req = ctx.switchToHttp().getRequest<Request>();
-    const { authorization } = req.headers;
-    if (typeof authorization !== 'string' || !authorization.startsWith('Bearer ')) {
-      throw new ApiError('AP0401', 'No bearer token');
+
+    const token = extractTokenFromIncomingHttpHeaders(req.headers);
+    if (token === undefined) {
+      throw new ApiError('AP0401', 'Authorization token not found');
     }
 
     const decodedIdToken = await this.firebaseAuthService.verifyIdToken(
-      authorization.slice('Bearer '.length).trim(),
+      token,
       process.env.FIREBASE_CHECK_REVOKED === 'true',
     );
 
