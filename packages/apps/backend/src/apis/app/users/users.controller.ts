@@ -1,29 +1,72 @@
 import { Body, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Put } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { plainToInstance } from 'class-transformer';
+import { validateSync } from 'class-validator';
+
+import { BearerToken } from '../utils/decorators/bearer-token.decorator';
 
 import { CurrentUser, type CurrentUserData } from '@/apis/app/utils/decorators/current-user.decorator';
 import { ApiStandardResponses } from '@/apis/utils/api-default-response';
+import { ApiError } from '@/apis/utils/api.error';
 import { ApiController } from '@/apis/utils/controllers/api.controller';
+import { Public } from '@/apis/utils/decorators/public.decorator';
+import { FirebaseAuthService } from '@/domain/aggregates/firebase-auth/firebase-auth.service';
+import { isProviderAllowed } from '@/domain/aggregates/firebase-auth/utils/constants';
 import { UserCommandService } from '@/domain/aggregates/user/user.command.service';
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 import { CreateUserInputDto, UpdateUserDataDto, UserResponseDto } from '@/domain/aggregates/user/utils/dto';
+import { DeleteUserService } from '@/domain/usecases/user-auth/delete-user.service';
+import { NON_ERROR_LENGTH, transformValidationErrorIntoDetail } from '@/utils/transform-validation-error-into-detail';
 
 @ApiTags('users')
 @ApiController('users')
 export class AppApiUsersController {
   public constructor(
-    private readonly userQuery: UserQueryService,
-    private readonly userCommand: UserCommandService,
+    private readonly firebaseAuthService: FirebaseAuthService,
+    private readonly userQueryService: UserQueryService,
+    private readonly userCommandService: UserCommandService,
+
+    private readonly deleteUserService: DeleteUserService,
   ) {}
 
   @Post()
-  @ApiOperation({ summary: 'Create a new user' })
+  @ApiOperation({ summary: 'Create a new user based on the firebase ID token' })
   @HttpCode(HttpStatus.CREATED)
   @ApiBody({ type: CreateUserInputDto })
   @ApiResponse({ status: 201, description: 'The user has been successfully created.', type: UserResponseDto })
   @ApiStandardResponses()
-  public async createUser(@Body() body: CreateUserInputDto): Promise<UserResponseDto> {
-    return this.userCommand.createUser(body);
+  @Public()
+  public async createUser(
+    @BearerToken() token: string | undefined,
+    @Body() dto: CreateUserInputDto,
+  ): Promise<UserResponseDto> {
+    if (typeof token !== 'string') {
+      throw new ApiError('AP0401', 'Authentication token is required');
+    }
+
+    const {
+      uid,
+      email_verified: emailVerified,
+      firebase: { sign_in_provider: signInProvider },
+    } = await this.firebaseAuthService.verifyIdToken(token);
+
+    if (!(emailVerified === true || isProviderAllowed(signInProvider))) {
+      throw new ApiError('AP0403', 'Email verification required');
+    }
+
+    const existingUser = await this.userQueryService.findUniqueUserByFirebaseUid(uid);
+    if (existingUser !== null) {
+      return existingUser;
+    }
+
+    const createUserInputDto = plainToInstance(CreateUserInputDto, { firebaseUid: uid, name: dto.name });
+    const errors = validateSync(createUserInputDto, { whitelist: true, forbidNonWhitelisted: true });
+    if (errors.length > NON_ERROR_LENGTH) {
+      throw new ApiError('AP0422', transformValidationErrorIntoDetail(errors) || 'Invalid user data');
+    }
+
+    const createdUser = await this.userCommandService.createUser(createUserInputDto);
+    return createdUser;
   }
 
   @Get('me')
@@ -31,7 +74,7 @@ export class AppApiUsersController {
   @ApiResponse({ status: 200, description: 'Current user information', type: UserResponseDto })
   @ApiStandardResponses()
   public me(@CurrentUser() user: CurrentUserData): Promise<UserResponseDto> {
-    return this.userQuery.findUniqueOrThrowUserById({ publicId: user.publicId });
+    return this.userQueryService.findUniqueOrThrowUserById({ publicId: user.publicId });
   }
 
   @Put('me')
@@ -43,16 +86,16 @@ export class AppApiUsersController {
     @CurrentUser() user: CurrentUserData,
     @Body() data: UpdateUserDataDto,
   ): Promise<UserResponseDto> {
-    return this.userCommand.updateUserById({ publicId: user.publicId, data });
+    return this.userCommandService.updateUserById({ publicId: user.publicId, data });
   }
 
   @Delete('me')
-  @ApiOperation({ summary: 'Delete current user' })
+  @ApiOperation({ summary: 'Delete current user (Firebase + DB)' })
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiResponse({ status: 204, description: 'User deleted successfully' })
   @ApiStandardResponses()
   public async deleteUserById(@CurrentUser() user: CurrentUserData): Promise<void> {
-    await this.userCommand.deleteUserById({ publicId: user.publicId });
+    await this.deleteUserService.execute(user.publicId);
   }
 
   @Get(':publicId')
@@ -63,6 +106,6 @@ export class AppApiUsersController {
   public async findUniqueOrThrowUserById(
     @Param('publicId', new ParseUUIDPipe()) publicId: string,
   ): Promise<UserResponseDto> {
-    return this.userQuery.findUniqueOrThrowUserById({ publicId });
+    return this.userQueryService.findUniqueOrThrowUserById({ publicId });
   }
 }
