@@ -15,7 +15,7 @@ import { isProviderAllowed } from '@/domain/aggregates/firebase-auth/utils/const
 import { UserCommandService } from '@/domain/aggregates/user/user.command.service';
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 import { CreateUserInputDto, UpdateUserDataDto, UserResponseDto } from '@/domain/aggregates/user/utils/dto';
-import { DeleteUserService } from '@/domain/usecases/user-auth/delete-user.service';
+import { DeleteUserService } from '@/domain/usecases/user/delete-user.service';
 import { NON_ERROR_LENGTH, transformValidationErrorIntoDetail } from '@/utils/transform-validation-error-into-detail';
 
 @ApiTags('users')
