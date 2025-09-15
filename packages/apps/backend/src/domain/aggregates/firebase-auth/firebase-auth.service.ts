@@ -40,6 +40,10 @@ export class FirebaseAuthService {
     try {
       await this.provider.auth().deleteUser(uid);
     } catch (e) {
+      if (e instanceof Error && 'code' in e && e.code === 'auth/user-not-found') {
+        // Idempotent: already deleted on Firebase side, treat as success
+        return;
+      }
       throw new ApiError('AP0500', 'Failed to delete Firebase user', e);
     }
   }
