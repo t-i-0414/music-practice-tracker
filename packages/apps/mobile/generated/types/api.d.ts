@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-    "/auth/verify": {
+    "/api/auth/verify": {
         parameters: {
             query?: never;
             header?: never;
@@ -13,7 +13,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Verify Firebase ID token and sync user */
+        /** Verify Firebase ID token */
         post: operations["AppApiAuthController_verify"];
         delete?: never;
         options?: never;
@@ -30,7 +30,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Create a new user */
+        /** Create a new user based on the firebase ID token */
         post: operations["AppApiUsersController_createUser"];
         delete?: never;
         options?: never;
@@ -50,7 +50,7 @@ export interface paths {
         /** Update current user profile */
         put: operations["AppApiUsersController_updateCurrentUserProfile"];
         post?: never;
-        /** Delete current user */
+        /** Delete current user (Firebase + DB) */
         delete: operations["AppApiUsersController_deleteUserById"];
         options?: never;
         head?: never;
@@ -85,26 +85,28 @@ export interface components {
              */
             idToken: string;
         };
-        FirebaseAuthUserDto: {
+        VerifiedTokenResponseDto: {
             /**
-             * @description User public ID
-             * @example 123e4567-e89b-12d3-a456-426614174000
+             * @description Firebase UID
+             * @example uid12345
              */
-            publicId: string;
+            uid: string;
             /**
-             * @description User email
+             * Format: email
+             * @description Firebase email
              * @example user@example.com
              */
-            email: string;
+            email?: string;
             /**
-             * @description User name
-             * @example John Doe
+             * @description Whether the Firebase email is verified
+             * @example true
              */
-            name: string;
-        };
-        FirebaseAuthUserResponseDto: {
-            /** @description Authenticated user information */
-            user: components["schemas"]["FirebaseAuthUserDto"];
+            emailVerified: boolean;
+            /**
+             * @description Sign-in provider
+             * @example google.com
+             */
+            signInProvider?: string;
         };
         ErrorResponseDto: {
             /** @example 400 */
@@ -114,21 +116,15 @@ export interface components {
         };
         CreateUserInputDto: {
             /**
-             * Format: email
-             * @description The user email address
-             * @example takuya.iwashiro@takudev.net
+             * @description Firebase UID
+             * @example abc123def456
              */
-            email: string;
+            firebaseUid: string;
             /**
              * @description The user name
              * @example Takuya Iwashiro
              */
             name: string;
-            /**
-             * @description Firebase UID
-             * @example abc123def456
-             */
-            firebaseUid?: string;
         };
         UserResponseDto: {
             /**
@@ -138,27 +134,21 @@ export interface components {
              */
             publicId: string;
             /**
-             * Format: email
-             * @description The user email address
-             * @example takuya.iwashiro@takudev.net
+             * @description Firebase UID
+             * @example abc123def456
              */
-            email: string;
+            firebaseUid: string;
             /**
              * @description The user name
              * @example Takuya Iwashiro
              */
             name: string;
             /**
-             * @description Firebase UID
-             * @example abc123def456
-             */
-            firebaseUid: string | null;
-            /**
              * @description The user status
              * @example ACTIVE
              * @enum {string}
              */
-            status: "ACTIVE" | "INACTIVE" | "SUSPENDED" | "PENDING" | "BANNED";
+            status: "ACTIVE" | "PENDING" | "SUSPENDED" | "BANNED";
             /**
              * Format: date-time
              * @description The user created at timestamp
@@ -174,27 +164,16 @@ export interface components {
         };
         UpdateUserDataDto: {
             /**
-             * Format: email
-             * @description The user email address
-             * @example takuya.iwashiro@takudev.net
-             */
-            email?: string;
-            /**
              * @description The user name
              * @example Takuya Iwashiro
              */
             name?: string;
             /**
-             * @description Firebase UID
-             * @example abc123def456
-             */
-            firebaseUid?: string;
-            /**
              * @description The user status
              * @example ACTIVE
              * @enum {string}
              */
-            status?: "ACTIVE" | "INACTIVE" | "SUSPENDED" | "PENDING" | "BANNED";
+            status?: "ACTIVE" | "PENDING" | "SUSPENDED" | "BANNED";
         };
     };
     responses: never;
@@ -218,13 +197,13 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Token verified and user synced */
-            201: {
+            /** @description Token verification result */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["FirebaseAuthUserResponseDto"];
+                    "application/json": components["schemas"]["VerifiedTokenResponseDto"];
                 };
             };
             /** @description Error Response */

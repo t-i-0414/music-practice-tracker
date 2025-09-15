@@ -126,27 +126,21 @@ export interface components {
              */
             publicId: string;
             /**
-             * Format: email
-             * @description The user email address
-             * @example takuya.iwashiro@takudev.net
+             * @description Firebase UID
+             * @example abc123def456
              */
-            email: string;
+            firebaseUid: string;
             /**
              * @description The user name
              * @example Takuya Iwashiro
              */
             name: string;
             /**
-             * @description Firebase UID
-             * @example abc123def456
-             */
-            firebaseUid: string | null;
-            /**
              * @description The user status
              * @example ACTIVE
              * @enum {string}
              */
-            status: "ACTIVE" | "INACTIVE" | "SUSPENDED" | "PENDING" | "BANNED";
+            status: "ACTIVE" | "PENDING" | "SUSPENDED" | "BANNED";
             /**
              * Format: date-time
              * @description The user created at timestamp
@@ -171,21 +165,15 @@ export interface components {
         };
         CreateUserInputDto: {
             /**
-             * Format: email
-             * @description The user email address
-             * @example takuya.iwashiro@takudev.net
+             * @description Firebase UID
+             * @example abc123def456
              */
-            email: string;
+            firebaseUid: string;
             /**
              * @description The user name
              * @example Takuya Iwashiro
              */
             name: string;
-            /**
-             * @description Firebase UID
-             * @example abc123def456
-             */
-            firebaseUid?: string;
         };
         DeleteManyUsersInputDto: {
             /**
@@ -203,27 +191,16 @@ export interface components {
         };
         UpdateUserDataDto: {
             /**
-             * Format: email
-             * @description The user email address
-             * @example takuya.iwashiro@takudev.net
-             */
-            email?: string;
-            /**
              * @description The user name
              * @example Takuya Iwashiro
              */
             name?: string;
             /**
-             * @description Firebase UID
-             * @example abc123def456
-             */
-            firebaseUid?: string;
-            /**
              * @description The user status
              * @example ACTIVE
              * @enum {string}
              */
-            status?: "ACTIVE" | "INACTIVE" | "SUSPENDED" | "PENDING" | "BANNED";
+            status?: "ACTIVE" | "PENDING" | "SUSPENDED" | "BANNED";
         };
         AdminUserResponseDto: {
             /**
@@ -233,11 +210,10 @@ export interface components {
              */
             publicId: string;
             /**
-             * Format: email
-             * @description The admin user email address
-             * @example admin@example.com
+             * @description The admin user Cognito sub
+             * @example cognito-sub-1234567890
              */
-            email: string;
+            cognitoSub: string;
             /**
              * @description The admin user name
              * @example Admin User
@@ -254,7 +230,7 @@ export interface components {
              * @example ACTIVE
              * @enum {string}
              */
-            status: "ACTIVE" | "INACTIVE" | "SUSPENDED" | "PENDING";
+            status: "ACTIVE" | "PENDING" | "SUSPENDED" | "BANNED";
             /**
              * Format: date-time
              * @description The admin user created at timestamp
@@ -274,11 +250,10 @@ export interface components {
         };
         CreateAdminUserInputDto: {
             /**
-             * Format: email
-             * @description The admin user email address
-             * @example admin@example.com
+             * @description The admin user Cognito sub
+             * @example cognito-sub-1234567890
              */
-            email: string;
+            cognitoSub: string;
             /**
              * @description The admin user name
              * @example Admin User
@@ -295,7 +270,7 @@ export interface components {
              * @example PENDING
              * @enum {string}
              */
-            status?: "ACTIVE" | "INACTIVE" | "SUSPENDED" | "PENDING";
+            status?: "ACTIVE" | "PENDING" | "SUSPENDED" | "BANNED";
         };
         DeleteManyAdminUsersInputDto: {
             /**
@@ -313,12 +288,6 @@ export interface components {
         };
         UpdateAdminUserInputData: {
             /**
-             * Format: email
-             * @description The admin user email address
-             * @example admin@example.com
-             */
-            email?: string;
-            /**
              * @description The admin user name
              * @example Admin User
              */
@@ -334,7 +303,7 @@ export interface components {
              * @example ACTIVE
              * @enum {string}
              */
-            status?: "ACTIVE" | "INACTIVE" | "SUSPENDED" | "PENDING";
+            status?: "ACTIVE" | "PENDING" | "SUSPENDED" | "BANNED";
         };
     };
     responses: never;
