@@ -1,24 +1,31 @@
-import { Body, Controller, Post, HttpCode, HttpStatus } from '@nestjs/common';
+import { Body, Post, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { ApiStandardResponses } from '@/apis/utils/api-default-response';
+import { ApiController } from '@/apis/utils/controllers/api.controller';
 import { Public } from '@/apis/utils/decorators/public.decorator';
-import { FirebaseAuthVerifyTokenDto, FirebaseAuthUserResponseDto } from '@/domain/aggregates/firebase-auth/utils/dto';
-import { UserAuthService } from '@/domain/usecases/user-auth/user-auth.service';
+import { FirebaseAuthService } from '@/domain/aggregates/firebase-auth/firebase-auth.service';
+import { FirebaseAuthVerifyTokenDto, VerifiedTokenResponseDto } from '@/domain/aggregates/firebase-auth/utils/dto';
 
 @ApiTags('auth')
-@Controller('auth')
+@ApiController('auth')
 export class AppApiAuthController {
-  public constructor(private readonly userAuthService: UserAuthService) {}
+  public constructor(private readonly firebaseAuthService: FirebaseAuthService) {}
 
-  @Public()
   @Post('verify')
-  @ApiOperation({ summary: 'Verify Firebase ID token and sync user' })
-  @HttpCode(HttpStatus.CREATED)
+  @Public()
+  @ApiOperation({ summary: 'Verify Firebase ID token' })
+  @HttpCode(HttpStatus.OK)
   @ApiBody({ type: FirebaseAuthVerifyTokenDto })
-  @ApiResponse({ status: 201, description: 'Token verified and user synced', type: FirebaseAuthUserResponseDto })
+  @ApiResponse({ status: 200, description: 'Token verification result', type: VerifiedTokenResponseDto })
   @ApiStandardResponses()
-  public async verify(@Body() dto: FirebaseAuthVerifyTokenDto): Promise<FirebaseAuthUserResponseDto> {
-    return this.userAuthService.execute(dto.idToken);
+  public async verify(@Body() dto: FirebaseAuthVerifyTokenDto): Promise<VerifiedTokenResponseDto> {
+    const result = await this.firebaseAuthService.verifyIdToken(dto.idToken);
+    return {
+      uid: result.uid,
+      email: result.email,
+      emailVerified: result.email_verified === true,
+      signInProvider: result.firebase.sign_in_provider,
+    };
   }
 }
