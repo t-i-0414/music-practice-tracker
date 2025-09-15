@@ -44,14 +44,6 @@ export class FindManyUsersByIdInputDto {
 
 export class CreateUserInputDto {
   @ApiProperty({
-    description: 'Firebase UID',
-    example: 'abc123def456',
-  })
-  @IsString()
-  @IsNotEmpty()
-  public firebaseUid: string;
-
-  @ApiProperty({
     description: 'The user name',
     example: 'Takuya Iwashiro',
     maxLength: MAX_NAME_LENGTH,
