@@ -42,6 +42,10 @@ describe('appApiUsersController', () => {
           provide: UserCommandService,
           useValue: mockCommandService,
         },
+        {
+          provide: require('@/domain/usecases/user/delete-user.service').DeleteUserService,
+          useValue: { execute: jest.fn() },
+        },
       ],
     });
 
@@ -62,7 +66,7 @@ describe('appApiUsersController', () => {
       const mockResponseDto = toUserResponseDto(mockUser);
       queryService.findUniqueOrThrowUserById.mockResolvedValue(mockResponseDto);
 
-      const result = await controller.findUniqueOrThrowUserById(mockUser.publicId);
+      const result = await controller.fetchUserById(mockUser.publicId);
 
       expect(queryService.findUniqueOrThrowUserById).toHaveBeenCalledWith({
         publicId: mockUser.publicId,
@@ -76,7 +80,7 @@ describe('appApiUsersController', () => {
       const publicId = 'non-existent-id';
       queryService.findUniqueOrThrowUserById.mockRejectedValue(new Error('User not found'));
 
-      await expect(controller.findUniqueOrThrowUserById(publicId)).rejects.toThrow('User not found');
+      await expect(controller.fetchUserById(publicId)).rejects.toThrow('User not found');
       expect(queryService.findUniqueOrThrowUserById).toHaveBeenCalledWith({ publicId });
     });
   });
@@ -85,18 +89,20 @@ describe('appApiUsersController', () => {
     it('should create a new user', async () => {
       expect.assertions(2);
 
-      const createDto = {
-        email: 'user@example.com',
-        name: 'New User',
-        firebaseUid: 'uid-user-example',
-      } as const;
-      const mockUser = userFactory.build({ ...createDto });
+      const createDto = { name: 'New User' } as const;
+      const mockUser = userFactory.build({ name: createDto.name, firebaseUid: 'uid-from-token' });
       const mockResponseDto = toUserResponseDto(mockUser);
       commandService.createUser.mockResolvedValue(mockResponseDto);
+      // token verification and uniqueness gate
+      const firebase = { sign_in_provider: 'password' } as const;
 
-      const result = await controller.createUser(createDto);
+      const firebaseService = (controller as any).firebaseAuthService as jest.Mocked<FirebaseAuthService>;
+      firebaseService.verifyIdToken.mockResolvedValue({ uid: 'uid-from-token', email_verified: true, firebase } as any);
+      (queryService as any).findUniqueUserByFirebaseUid = jest.fn().mockResolvedValue(null);
 
-      expect(commandService.createUser).toHaveBeenCalledWith(createDto);
+      const result = await controller.createUser('token', createDto as any);
+
+      expect(commandService.createUser).toHaveBeenCalledWith({ firebaseUid: 'uid-from-token', name: createDto.name });
       expect(result).toStrictEqual(mockResponseDto);
     });
   });

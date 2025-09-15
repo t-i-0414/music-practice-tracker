@@ -46,29 +46,35 @@ describe('e2e AppApiUsersController', () => {
     it('should create a new user', async () => {
       expect.assertions(2);
 
-      const createDto = {
-        email: 'test@example.com',
-        name: 'Test User',
-      };
+      const firebaseMock = { verifyIdToken: jest.fn() } as any;
+      // monkey-patch provider for this controller scope
+      const server = app.getHttpServer();
+      (app.get as any)(require('@/domain/aggregates/firebase-auth/firebase-auth.service').FirebaseAuthService);
 
-      const response = await request(app.getHttpServer()).post('/api/users').send(createDto).expect(201);
+      // token payload
+      (jest.spyOn(require('@/domain/aggregates/firebase-auth/firebase-auth.service'), 'FirebaseAuthService') as any)?.mockImplementation?.(() => firebaseMock);
+      firebaseMock.verifyIdToken.mockResolvedValue({ uid: 'uid-e2e-create', email_verified: true, firebase: { sign_in_provider: 'password' } });
 
-      expect(response.body).toMatchObject({
-        email: createDto.email,
-        name: createDto.name,
-      });
+      const createDto = { name: 'Test User' };
+
+      const response = await request(server)
+        .post('/api/users')
+        .set('Authorization', 'Bearer token')
+        .send(createDto)
+        .expect(201);
+
+      expect(response.body).toMatchObject({ name: createDto.name, firebaseUid: 'uid-e2e-create' });
       expect(response.body.publicId).toBeDefined();
     });
 
     it('should return 400 for invalid data', async () => {
       expect.assertions(1);
 
-      const invalidDto = {
-        email: 'invalid-email',
-        name: '',
-      };
-
-      const response = await request(app.getHttpServer()).post('/api/users').send(invalidDto).expect(400);
+      const response = await request(app.getHttpServer())
+        .post('/api/users')
+        .set('Authorization', 'Bearer token')
+        .send({ name: '' })
+        .expect(400);
 
       expect(response.status).toBe(400);
     });
@@ -78,22 +84,17 @@ describe('e2e AppApiUsersController', () => {
     it('should get a user by public ID', async () => {
       expect.assertions(1);
 
-      const createDto = {
-        email: 'get@example.com',
-        name: 'Get User',
-      };
-
-      const createResponse = await request(app.getHttpServer()).post('/api/users').send(createDto).expect(201);
+      const createResponse = await request(app.getHttpServer())
+        .post('/api/users')
+        .set('Authorization', 'Bearer token')
+        .send({ name: 'Get User' })
+        .expect(201);
 
       const { publicId } = createResponse.body;
 
       const getResponse = await request(app.getHttpServer()).get(`/api/users/${publicId}`).expect(200);
 
-      expect(getResponse.body).toMatchObject({
-        publicId,
-        email: createDto.email,
-        name: createDto.name,
-      });
+      expect(getResponse.body).toMatchObject({ publicId, name: 'Get User' });
     });
 
     it('should return 404 for non-existent user', async () => {
@@ -125,22 +126,7 @@ describe('e2e AppApiUsersController', () => {
         expect(response.body.statusCode).toBe(400);
       });
 
-      it('should return error with statusCode and errorCode for duplicate email', async () => {
-        expect.assertions(3);
-
-        const createDto = {
-          email: 'duplicate@example.com',
-          name: 'Duplicate User',
-        };
-
-        await request(app.getHttpServer()).post('/api/users').send(createDto).expect(201);
-
-        const response = await request(app.getHttpServer()).post('/api/users').send(createDto).expect(409);
-
-        expect(response.body).toHaveProperty('statusCode');
-        expect(response.body).toHaveProperty('errorCode');
-        expect(response.body.statusCode).toBe(409);
-      });
+      // duplicate creation returns existing user for same UID; no 409 asserted
     });
 
     describe('get /users/:publicId', () => {

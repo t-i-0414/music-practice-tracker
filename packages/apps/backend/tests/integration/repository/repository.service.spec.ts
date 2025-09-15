@@ -192,16 +192,15 @@ describe('integration RepositoryService', () => {
       ).rejects.toThrow('Unique constraint failed on the fields');
     });
 
-    it('should handle foreign key constraint violations', async () => {
+    it('should handle constraint violations on invalid enum', async () => {
       expect.assertions(1);
 
       await expect(
         service.$executeRawUnsafe(
-          `INSERT INTO "User" (email, name, "publicId", "createdAt", "updatedAt", status)
-          VALUES ($1, $2, $3, NOW(), NOW(), $4)`,
-          'fk@example.com',
+          `INSERT INTO "users" ("firebase_uid", name, status)
+          VALUES ($1, $2, $3)`,
+          'uid-invalid-enum',
           'FK User',
-          'invalid-uuid',
           'INVALID_STATUS',
         ),
       ).rejects.toBeDefined();

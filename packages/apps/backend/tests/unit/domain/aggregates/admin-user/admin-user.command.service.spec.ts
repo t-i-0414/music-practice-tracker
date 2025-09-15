@@ -53,7 +53,7 @@ describe('unit AdminUserCommandService', () => {
 
       const mockAdminUser = adminUserFactory.build();
       const createDto = {
-        email: mockAdminUser.email,
+        cognitoSub: mockAdminUser.cognitoSub,
         name: mockAdminUser.name,
         role: mockAdminUser.role,
       };
@@ -70,7 +70,7 @@ describe('unit AdminUserCommandService', () => {
       expect.assertions(2);
 
       const createDto = {
-        email: 'test@example.com',
+        cognitoSub: 'sub-test',
         name: 'Test User',
         role: AdminRole.ADMIN,
       };
@@ -90,7 +90,7 @@ describe('unit AdminUserCommandService', () => {
       const mockAdminUsers = adminUserFactory.buildMany(3);
       const createDto = {
         adminUsers: mockAdminUsers.map((user) => ({
-          email: user.email,
+          cognitoSub: user.cognitoSub,
           name: user.name,
           role: user.role,
         })),

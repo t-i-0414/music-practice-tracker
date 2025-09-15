@@ -127,7 +127,7 @@ describe('controller AdminApiAdminUsersController', () => {
       expect.assertions(2);
 
       const createDto: CreateAdminUserInputDto = {
-        email: 'admin@example.com',
+        cognitoSub: 'sub-admin',
         name: 'New Admin',
         role: AdminRole.VIEWER,
       };
@@ -148,16 +148,8 @@ describe('controller AdminApiAdminUsersController', () => {
 
       const createDto = {
         adminUsers: [
-          {
-            email: 'admin1@example.com',
-            name: 'Admin 1',
-            role: AdminRole.VIEWER,
-          },
-          {
-            email: 'admin2@example.com',
-            name: 'Admin 2',
-            role: AdminRole.ADMIN,
-          },
+          { cognitoSub: 'sub-admin1', name: 'Admin 1', role: AdminRole.VIEWER },
+          { cognitoSub: 'sub-admin2', name: 'Admin 2', role: AdminRole.ADMIN },
         ],
       };
       const mockAdminUsers = [

@@ -32,7 +32,7 @@ describe('integration AdminUserQueryService', () => {
 
       const created = await repository.adminUser.create({
         data: {
-          email: 'find@example.com',
+          cognitoSub: 'sub-find',
           name: 'Find Me',
           role: AdminRole.ADMIN,
         },
@@ -40,7 +40,7 @@ describe('integration AdminUserQueryService', () => {
 
       const result = await service.findUniqueOrThrowAdminUser({ publicId: created.publicId });
 
-      expect(result.email).toBe('find@example.com');
+      expect(result.cognitoSub).toBe('sub-find');
       expect(result.name).toBe('Find Me');
       expect(result.role).toBe(AdminRole.ADMIN);
     });
@@ -60,7 +60,7 @@ describe('integration AdminUserQueryService', () => {
 
       const admin1 = await repository.adminUser.create({
         data: {
-          email: 'admin1@example.com',
+          cognitoSub: 'sub-admin1',
           name: 'Admin 1',
           role: AdminRole.VIEWER,
         },
@@ -68,7 +68,7 @@ describe('integration AdminUserQueryService', () => {
 
       const admin2 = await repository.adminUser.create({
         data: {
-          email: 'admin2@example.com',
+          cognitoSub: 'sub-admin2',
           name: 'Admin 2',
           role: AdminRole.ADMIN,
         },
@@ -76,7 +76,7 @@ describe('integration AdminUserQueryService', () => {
 
       await repository.adminUser.create({
         data: {
-          email: 'admin3@example.com',
+          cognitoSub: 'sub-admin3',
           name: 'Admin 3',
           role: AdminRole.SUPER_ADMIN,
         },
@@ -87,9 +87,9 @@ describe('integration AdminUserQueryService', () => {
       });
 
       expect(result.adminUsers).toHaveLength(2);
-      expect(result.adminUsers.some((u) => u.email === 'admin1@example.com')).toBe(true);
-      expect(result.adminUsers.some((u) => u.email === 'admin2@example.com')).toBe(true);
-      expect(result.adminUsers.some((u) => u.email === 'admin3@example.com')).toBe(false);
+      expect(result.adminUsers.some((u) => u.name === 'Admin 1')).toBe(true);
+      expect(result.adminUsers.some((u) => u.name === 'Admin 2')).toBe(true);
+      expect(result.adminUsers.some((u) => u.name === 'Admin 3')).toBe(false);
     });
 
     it('should return empty array for non-existent publicIds', async () => {
@@ -107,7 +107,7 @@ describe('integration AdminUserQueryService', () => {
 
       const admin = await repository.adminUser.create({
         data: {
-          email: 'exists@example.com',
+          cognitoSub: 'sub-exists',
           name: 'Exists',
           role: AdminRole.ADMIN,
         },
@@ -118,7 +118,7 @@ describe('integration AdminUserQueryService', () => {
       });
 
       expect(result.adminUsers).toHaveLength(1);
-      expect(result.adminUsers[0].email).toBe('exists@example.com');
+      expect(result.adminUsers[0].name).toBe('Exists');
     });
 
     it('should handle empty publicIds array', async () => {
@@ -136,7 +136,7 @@ describe('integration AdminUserQueryService', () => {
 
       await repository.adminUser.create({
         data: {
-          email: 'first@example.com',
+          cognitoSub: 'sub-first',
           name: 'First Admin',
           role: AdminRole.VIEWER,
         },
@@ -148,7 +148,7 @@ describe('integration AdminUserQueryService', () => {
 
       await repository.adminUser.create({
         data: {
-          email: 'second@example.com',
+          cognitoSub: 'sub-second',
           name: 'Second Admin',
           role: AdminRole.ADMIN,
         },
@@ -160,7 +160,7 @@ describe('integration AdminUserQueryService', () => {
 
       await repository.adminUser.create({
         data: {
-          email: 'third@example.com',
+          cognitoSub: 'sub-third',
           name: 'Third Admin',
           role: AdminRole.SUPER_ADMIN,
         },
@@ -169,9 +169,9 @@ describe('integration AdminUserQueryService', () => {
       const result = await service.findAllAdminUsers();
 
       expect(result.adminUsers).toHaveLength(3);
-      expect(result.adminUsers[0].email).toBe('third@example.com');
-      expect(result.adminUsers[1].email).toBe('second@example.com');
-      expect(result.adminUsers[2].email).toBe('first@example.com');
+      expect(result.adminUsers[0].name).toBe('Third Admin');
+      expect(result.adminUsers[1].name).toBe('Second Admin');
+      expect(result.adminUsers[2].name).toBe('First Admin');
     });
 
     it('should return empty array when no admin users exist', async () => {
@@ -187,11 +187,11 @@ describe('integration AdminUserQueryService', () => {
     beforeEach(async () => {
       await repository.adminUser.createMany({
         data: [
-          { email: 'viewer1@example.com', name: 'Viewer 1', role: AdminRole.VIEWER },
-          { email: 'viewer2@example.com', name: 'Viewer 2', role: AdminRole.VIEWER },
-          { email: 'admin1@example.com', name: 'Admin 1', role: AdminRole.ADMIN },
-          { email: 'admin2@example.com', name: 'Admin 2', role: AdminRole.ADMIN },
-          { email: 'super1@example.com', name: 'Super 1', role: AdminRole.SUPER_ADMIN },
+          { cognitoSub: 'sub-viewer1', name: 'Viewer 1', role: AdminRole.VIEWER },
+          { cognitoSub: 'sub-viewer2', name: 'Viewer 2', role: AdminRole.VIEWER },
+          { cognitoSub: 'sub-admin1', name: 'Admin 1', role: AdminRole.ADMIN },
+          { cognitoSub: 'sub-admin2', name: 'Admin 2', role: AdminRole.ADMIN },
+          { cognitoSub: 'sub-super1', name: 'Super 1', role: AdminRole.SUPER_ADMIN },
         ],
       });
     });
@@ -213,17 +213,17 @@ describe('integration AdminUserQueryService', () => {
       expect(admins).toHaveLength(2);
     });
 
-    it('should filter admin users by email pattern', async () => {
+    it('should filter admin users by name pattern', async () => {
       expect.assertions(2);
 
       const result = await service.findManyAdminUsersByFilter({
         where: {
-          email: { contains: 'admin' },
+          name: { contains: 'Admin' },
         },
       });
 
       expect(result).toHaveLength(2);
-      expect(result.every((u) => u.email.includes('admin'))).toBe(true);
+      expect(result.every((u) => u.name.includes('Admin'))).toBe(true);
     });
 
     it('should apply pagination with skip and take', async () => {
@@ -232,7 +232,7 @@ describe('integration AdminUserQueryService', () => {
       const firstPage = await service.findManyAdminUsersByFilter({
         skip: 0,
         take: 2,
-        orderBy: { email: 'asc' },
+        orderBy: { name: 'asc' },
       });
 
       expect(firstPage).toHaveLength(2);
@@ -240,7 +240,7 @@ describe('integration AdminUserQueryService', () => {
       const secondPage = await service.findManyAdminUsersByFilter({
         skip: 2,
         take: 2,
-        orderBy: { email: 'asc' },
+        orderBy: { name: 'asc' },
       });
 
       expect(secondPage).toHaveLength(2);
@@ -248,7 +248,7 @@ describe('integration AdminUserQueryService', () => {
       const thirdPage = await service.findManyAdminUsersByFilter({
         skip: 4,
         take: 2,
-        orderBy: { email: 'asc' },
+        orderBy: { name: 'asc' },
       });
 
       expect(thirdPage).toHaveLength(1);
@@ -271,25 +271,25 @@ describe('integration AdminUserQueryService', () => {
 
       const result = await service.findManyAdminUsersByFilter({
         where: {
-          AND: [{ role: { not: AdminRole.SUPER_ADMIN } }, { email: { contains: 'viewer' } }],
+          AND: [{ role: { not: AdminRole.SUPER_ADMIN } }, { name: { contains: 'Viewer' } }],
         },
-        orderBy: { email: 'desc' },
+        orderBy: { name: 'desc' },
       });
 
       expect(result).toHaveLength(2);
-      expect(result[0].email).toBe('viewer2@example.com');
+      expect(result[0].name).toBe('Viewer 2');
     });
 
     it('should handle cursor-based pagination', async () => {
       expect.assertions(3);
 
       await service.findManyAdminUsersByFilter({
-        orderBy: { email: 'asc' },
+        orderBy: { name: 'asc' },
       });
 
       const firstBatch = await service.findManyAdminUsersByFilter({
         take: 2,
-        orderBy: { email: 'asc' },
+        orderBy: { name: 'asc' },
       });
 
       expect(firstBatch).toHaveLength(2);
@@ -298,11 +298,11 @@ describe('integration AdminUserQueryService', () => {
         take: 2,
         cursor: { publicId: firstBatch[1].publicId },
         skip: 1,
-        orderBy: { email: 'asc' },
+        orderBy: { name: 'asc' },
       });
 
       expect(secondBatch).toHaveLength(2);
-      expect(secondBatch[0].email).not.toBe(firstBatch[1].email);
+      expect(secondBatch[0].name).not.toBe(firstBatch[1].name);
     });
   });
 });

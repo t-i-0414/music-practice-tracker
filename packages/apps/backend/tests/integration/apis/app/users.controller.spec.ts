@@ -53,7 +53,7 @@ describe('integration AppApiUsersController', () => {
     it('should return the current user by publicId', async () => {
       expect.assertions(2);
 
-      const result = await controller.findUniqueOrThrowUserById(testUser.publicId);
+      const result = await controller.fetchUserById(testUser.publicId);
 
       expect(result.publicId).toBe(testUser.publicId);
       expect(result.name).toBe('Current User');
@@ -64,7 +64,7 @@ describe('integration AppApiUsersController', () => {
 
       const fakePublicId = '00000000-0000-0000-0000-000000000000';
 
-      await expect(controller.findUniqueOrThrowUserById(fakePublicId)).rejects.toThrow('No record was found');
+      await expect(controller.fetchUserById(fakePublicId)).rejects.toThrow('No record was found');
     });
   });
 });

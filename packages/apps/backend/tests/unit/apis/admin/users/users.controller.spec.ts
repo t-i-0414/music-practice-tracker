@@ -112,7 +112,6 @@ describe('adminApiUsersController', () => {
       expect.assertions(2);
 
       const createDto = {
-        email: 'user@example.com',
         name: 'New User',
         firebaseUid: 'uid-admin-new-user',
       };
@@ -133,16 +132,8 @@ describe('adminApiUsersController', () => {
 
       const createDto = {
         users: [
-          {
-            email: 'user1@example.com',
-            name: 'User 1',
-            firebaseUid: 'uid-admin-bulk-1',
-          },
-          {
-            email: 'user2@example.com',
-            name: 'User 2',
-            firebaseUid: 'uid-admin-bulk-2',
-          },
+          { name: 'User 1', firebaseUid: 'uid-admin-bulk-1' },
+          { name: 'User 2', firebaseUid: 'uid-admin-bulk-2' },
         ],
       };
       const mockUsers = [userFactory.build(createDto.users[0]), userFactory.build(createDto.users[1])];
