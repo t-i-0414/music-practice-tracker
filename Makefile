@@ -50,6 +50,16 @@ firebase-use-dev-project:
 	@echo "🔧 Setting Firebase dev project"
 	firebase use --add music-practice-tracker-dev
 
+.PHONY: firebase-use-stg-project
+firebase-use-stg-project:
+	@echo "🔧 Setting Firebase staging project"
+	firebase use --add music-practice-tracker-stg
+
+.PHONY: firebase-use-prod-project
+firebase-use-prod-project:
+	@echo "🔧 Setting Firebase prod project"
+	firebase use --add music-practice-tracker-prod
+
 .PHONY: start-firebase-auth-emulators
 start-firebase-auth-emulators:
 	@echo "🚀 Starting Firebase emulators..."
