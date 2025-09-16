@@ -79,6 +79,14 @@ docker-restart: docker-compose-down docker-compose-up
 	@echo "✅ Docker services restarted"
 
 # -------------------------------------------------------------
+# firebase management
+# -------------------------------------------------------------
+.PHONY: start-firebase-auth-emulators
+start-firebase-auth-emulators:
+	@make -C ../../../ start-firebase-auth-emulators
+
+
+# -------------------------------------------------------------
 # Utility targets
 # -------------------------------------------------------------
 .PHONY: cd-to-root

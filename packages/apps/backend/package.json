@@ -43,6 +43,7 @@
     "start:dev": "run-p start:dev:*",
     "start:dev:admin-api": "nest start admin-api --watch",
     "start:dev:app-api": "nest start app-api --watch",
+    "start:dev:firebase-auth-emulators": "make start-firebase-auth-emulators",
     "start:prod": "run-p start:prod:*",
     "start:prod:admin-api": "node dist/apis/admin/main",
     "start:prod:app-api": "node dist/apis/app/main",
