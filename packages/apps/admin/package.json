@@ -29,9 +29,9 @@
     "type:check:tests-integration": "tsc --noEmit --project tests/integration/tsconfig.json"
   },
   "dependencies": {
-    "next": "15.5.2"
+    "next": "15.5.3"
   },
   "devDependencies": {
-    "eslint-config-next": "15.5.2"
+    "eslint-config-next": "15.5.3"
   }
 }
