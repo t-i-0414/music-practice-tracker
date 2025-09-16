@@ -12,6 +12,7 @@ export const USER_QUERY_METHODS = [
   'findUniqueOrThrowUserById',
   'findUniqueOrThrowUserByEmail',
   'findUniqueOrThrowUserByFirebaseUid',
+  'findUniqueUserByFirebaseUid',
   'findManyUsersById',
   'findAllUsers',
 ] as const;

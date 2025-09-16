@@ -5,6 +5,7 @@ import { FirebaseAuthProvider } from '@/domain/aggregates/firebase-auth/firebase
 import { FirebaseAuthService } from '@/domain/aggregates/firebase-auth/firebase-auth.service';
 import { UserCommandService } from '@/domain/aggregates/user/user.command.service';
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
+import { DeleteUserService } from '@/domain/usecases/user/delete-user.service';
 import { RepositoryService } from '@/repository/repository.service';
 import { DatabaseHelper } from '@/tests/helpers/database.helper';
 
@@ -28,6 +29,10 @@ describe('integration AppApiUsersController', () => {
         FirebaseAuthService,
         UserCommandService,
         UserQueryService,
+        {
+          provide: DeleteUserService,
+          useValue: { execute: jest.fn() },
+        },
         {
           provide: RepositoryService,
           useValue: databaseHelper.client,

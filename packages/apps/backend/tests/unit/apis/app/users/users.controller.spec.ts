@@ -5,6 +5,7 @@ import { FirebaseAuthService } from '@/domain/aggregates/firebase-auth/firebase-
 import { UserCommandService } from '@/domain/aggregates/user/user.command.service';
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 import { toUserResponseDto } from '@/domain/aggregates/user/utils/dto';
+import { DeleteUserService } from '@/domain/usecases/user/delete-user.service';
 import { UserFactory } from '@/tests/factory';
 import {
   createMockFirebaseAuthService,
@@ -43,7 +44,7 @@ describe('appApiUsersController', () => {
           useValue: mockCommandService,
         },
         {
-          provide: require('@/domain/usecases/user/delete-user.service').DeleteUserService,
+          provide: DeleteUserService,
           useValue: { execute: jest.fn() },
         },
       ],
@@ -98,7 +99,7 @@ describe('appApiUsersController', () => {
 
       const firebaseService = (controller as any).firebaseAuthService as jest.Mocked<FirebaseAuthService>;
       firebaseService.verifyIdToken.mockResolvedValue({ uid: 'uid-from-token', email_verified: true, firebase } as any);
-      (queryService as any).findUniqueUserByFirebaseUid = jest.fn().mockResolvedValue(null);
+      queryService.findUniqueUserByFirebaseUid.mockResolvedValue(null as any);
 
       const result = await controller.createUser('token', createDto as any);
 
