@@ -32,3 +32,20 @@ setup-env:
 .PHONY: setup-dotenv-linter
 setup-dotenv-linter:
 	curl -sSfL https://raw.githubusercontent.com/dotenv-linter/dotenv-linter/master/install.sh | sh -s
+
+.PHONY: firebase-login
+firebase-login:
+	@echo "🔐 Logging into Firebase..."
+	@command -v firebase >/dev/null 2>&1 || \
+		( echo "📦 Installing firebase-tools..." && npm install -g firebase-tools )
+	firebase login
+
+.PHONY: firebase-logout
+firebase-logout:
+	@echo "🔐 Logging out of Firebase..."
+	firebase logout
+
+.PHONY: firebase-use-dev-project
+firebase-use-dev-project:
+	@echo "🔧 Setting Firebase dev project"
+	firebase use --add music-practice-tracker-dev
