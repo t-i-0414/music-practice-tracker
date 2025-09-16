@@ -49,3 +49,8 @@ firebase-logout:
 firebase-use-dev-project:
 	@echo "🔧 Setting Firebase dev project"
 	firebase use --add music-practice-tracker-dev
+
+.PHONY: start-firebase-auth-emulators
+start-firebase-auth-emulators:
+	@echo "🚀 Starting Firebase emulators..."
+	firebase emulators:start --only auth
