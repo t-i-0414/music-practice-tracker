@@ -114,7 +114,7 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
 
       - name: Run dotenv-linter
-        uses: dotenv-linter/action-dotenv-linter@382525b7d91e7b71b52e064b8f1fa5908c4650d2 # v2
+        uses: dotenv-linter/action-dotenv-linter@21287e2624aaf2dc8da5dd8ccfe8e49c63501116 # v2
         with:
           reporter: github-pr-review
           dotenv_linter_flags: --skip UnorderedKey
