@@ -52,8 +52,14 @@ describe('e2e AppApiUsersController', () => {
       (app.get as any)(require('@/domain/aggregates/firebase-auth/firebase-auth.service').FirebaseAuthService);
 
       // token payload
-      (jest.spyOn(require('@/domain/aggregates/firebase-auth/firebase-auth.service'), 'FirebaseAuthService') as any)?.mockImplementation?.(() => firebaseMock);
-      firebaseMock.verifyIdToken.mockResolvedValue({ uid: 'uid-e2e-create', email_verified: true, firebase: { sign_in_provider: 'password' } });
+      (
+        jest.spyOn(require('@/domain/aggregates/firebase-auth/firebase-auth.service'), 'FirebaseAuthService') as any
+      )?.mockImplementation?.(() => firebaseMock);
+      firebaseMock.verifyIdToken.mockResolvedValue({
+        uid: 'uid-e2e-create',
+        email_verified: true,
+        firebase: { sign_in_provider: 'password' },
+      });
 
       const createDto = { name: 'Test User' };
 
