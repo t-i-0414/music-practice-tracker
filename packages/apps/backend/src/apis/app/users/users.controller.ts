@@ -16,7 +16,10 @@ import { UserCommandService } from '@/domain/aggregates/user/user.command.servic
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 import { CreateUserInputDto, UpdateUserDataDto, UserResponseDto } from '@/domain/aggregates/user/utils/dto';
 import { DeleteUserService } from '@/domain/usecases/user/delete-user.service';
-import { NON_ERROR_LENGTH, transformValidationErrorIntoDetail } from '@/utils/transform-validation-error-into-detail';
+import {
+  NON_ERROR_LENGTH,
+  transformValidationErrorIntoDetail,
+} from '@/utils/errors/transform-validation-error-into-detail';
 
 @ApiTags('users')
 @ApiController('users')

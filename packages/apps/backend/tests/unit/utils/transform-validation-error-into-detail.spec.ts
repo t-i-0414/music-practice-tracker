@@ -1,6 +1,6 @@
 import { type ValidationError } from 'class-validator';
 
-import { transformValidationErrorIntoDetail } from '@/utils/transform-validation-error-into-detail';
+import { transformValidationErrorIntoDetail } from '@/utils/errors/transform-validation-error-into-detail';
 
 describe('unit transformValidationErrorIntoDetail', () => {
   it('joins all constraint messages using a semicolon separator', () => {
