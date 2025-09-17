@@ -184,6 +184,8 @@ jobs:
 
       - name: Start Backend Server
         uses: ./.github/actions/start-backend
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
 
       - name: Generate Admin API Types
         run: |

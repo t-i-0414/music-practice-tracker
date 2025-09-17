@@ -45,6 +45,8 @@ jobs:
 
       - name: Start Backend Server
         uses: ./.github/actions/start-backend
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
 
       - name: Setup Admin Project
         uses: ./.github/actions/setup-admin
@@ -79,6 +81,8 @@ jobs:
 
       - name: Start Backend Server
         uses: ./.github/actions/start-backend
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
 
       - name: Run Backend Tests
         run: |
