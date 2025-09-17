@@ -28,7 +28,6 @@ describe('Simple MSW Test', () => {
         .then((data) => {
           expect(data).to.have.property('publicId', '123');
           expect(data).to.have.property('name', 'Test User 123');
-          expect(data).to.have.property('email', 'user123@example.com');
         }),
     );
   });

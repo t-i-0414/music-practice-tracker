@@ -24,12 +24,10 @@ describe('Admin Users API Tests', () => {
           expect(user1).to.include({
             publicId: '1',
             name: 'Test User 1',
-            email: 'user1@example.com',
           });
           expect(user2).to.include({
             publicId: '2',
             name: 'Test User 2',
-            email: 'user2@example.com',
           });
         }),
     );
@@ -49,7 +47,6 @@ describe('Admin Users API Tests', () => {
           expect(data).to.include({
             publicId: userId,
             name: `Test User ${userId}`,
-            email: `user${userId}@example.com`,
           });
           expect(data).to.have.property('createdAt');
           expect(data).to.have.property('updatedAt');
@@ -60,7 +57,6 @@ describe('Admin Users API Tests', () => {
   it('should create a new user', () => {
     const newUser = {
       name: 'New Test User',
-      email: 'newuser@example.com',
     };
 
     cy.window().then((win) =>
@@ -88,10 +84,7 @@ describe('Admin Users API Tests', () => {
 
   it('should create multiple users', () => {
     const newUsers = {
-      users: [
-        { name: 'Bulk User 1', email: 'bulk1@example.com' },
-        { name: 'Bulk User 2', email: 'bulk2@example.com' },
-      ],
+      users: [{ name: 'Bulk User 1' }, { name: 'Bulk User 2' }],
     };
 
     cy.window().then((win) =>
@@ -123,7 +116,6 @@ describe('Admin Users API Tests', () => {
     const userId = '123';
     const updates = {
       name: 'Updated User Name',
-      email: 'updated@example.com',
     };
 
     cy.window().then((win) =>
