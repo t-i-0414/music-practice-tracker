@@ -23,6 +23,7 @@ export const disabledRulesOnTests: FlatConfig.Rules = {
   '@typescript-eslint/restrict-template-expressions': 'off',
   '@typescript-eslint/no-unused-expressions': 'off',
   '@typescript-eslint/consistent-type-imports': 'off',
+  '@typescript-eslint/no-dynamic-delete': 'off',
 };
 
 export const vitestConfig = defineConfig({
