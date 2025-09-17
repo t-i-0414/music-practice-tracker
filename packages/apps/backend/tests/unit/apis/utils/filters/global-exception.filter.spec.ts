@@ -1,6 +1,7 @@
 import { ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
 import { Request, Response } from 'express';
 
+import { ApiError } from '@/apis/utils/api.error';
 import { GlobalExceptionFilter } from '@/apis/utils/filters/global-exception.filter';
 import { DomainError } from '@/domain/utils/domain.error';
 import { PrismaClientKnownRequestError } from '@/generated/prisma/runtime/library';
@@ -60,6 +61,18 @@ describe('globalExceptionFilter', () => {
       expect(mockResponse.json).toHaveBeenCalledWith({
         statusCode: HttpStatus.BAD_REQUEST,
         errorCode: 'DO9999',
+      });
+    });
+
+    it('should handle ApiError correctly', () => {
+      const exception = new ApiError('AP0401', 'Token required');
+
+      filter.catch(exception, mockArgumentsHost as ArgumentsHost);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.UNAUTHORIZED);
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        statusCode: HttpStatus.UNAUTHORIZED,
+        errorCode: 'AP0401',
       });
     });
 

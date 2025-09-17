@@ -1,6 +1,7 @@
 import { type TestingModule } from '@nestjs/testing';
 
 import { AppApiUsersController } from '@/apis/app/users/users.controller';
+import { ApiError } from '@/apis/utils/api.error';
 import { FirebaseAuthService } from '@/domain/aggregates/firebase-auth/firebase-auth.service';
 import { UserCommandService } from '@/domain/aggregates/user/user.command.service';
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
@@ -19,6 +20,8 @@ describe('appApiUsersController', () => {
   let controller: AppApiUsersController;
   let queryService: jest.Mocked<UserQueryService>;
   let commandService: jest.Mocked<UserCommandService>;
+  let firebaseAuthService: jest.Mocked<FirebaseAuthService>;
+  let deleteUserService: { execute: jest.Mock };
   let userFactory: UserFactory;
 
   beforeEach(async () => {
@@ -53,10 +56,12 @@ describe('appApiUsersController', () => {
     controller = module.get<AppApiUsersController>(AppApiUsersController);
     queryService = module.get<jest.Mocked<UserQueryService>>(UserQueryService);
     commandService = module.get<jest.Mocked<UserCommandService>>(UserCommandService);
+    firebaseAuthService = module.get<jest.Mocked<FirebaseAuthService>>(FirebaseAuthService);
+    deleteUserService = module.get(DeleteUserService);
   });
 
   afterEach(() => {
-    resetAllMocks(queryService, commandService);
+    resetAllMocks(queryService, commandService, firebaseAuthService, deleteUserService);
   });
 
   describe('get /users/:publicId', () => {
@@ -97,14 +102,114 @@ describe('appApiUsersController', () => {
       // token verification and uniqueness gate
       const firebase = { sign_in_provider: 'password' } as const;
 
-      const firebaseService = (controller as any).firebaseAuthService as jest.Mocked<FirebaseAuthService>;
-      firebaseService.verifyIdToken.mockResolvedValue({ uid: 'uid-from-token', email_verified: true, firebase } as any);
+      firebaseAuthService.verifyIdToken.mockResolvedValue({
+        uid: 'uid-from-token',
+        email_verified: true,
+        firebase,
+      } as any);
       queryService.findUniqueUserByFirebaseUid.mockResolvedValue(null as any);
 
       const result = await controller.createUser('token', createDto as any);
 
       expect(commandService.createUser).toHaveBeenCalledWith({ firebaseUid: 'uid-from-token', name: createDto.name });
       expect(result).toStrictEqual(mockResponseDto);
+    });
+
+    it('should throw an ApiError when authentication token is missing', async () => {
+      expect.assertions(1);
+
+      await expect(controller.createUser(undefined, { name: 'No Token' } as any)).rejects.toBeInstanceOf(ApiError);
+    });
+
+    it('should throw when the email is not verified and provider is not allowlisted', async () => {
+      expect.assertions(2);
+
+      firebaseAuthService.verifyIdToken.mockResolvedValue({
+        uid: 'uid-from-token',
+        email_verified: false,
+        firebase: { sign_in_provider: 'github.com' },
+      } as any);
+
+      await expect(controller.createUser('token', { name: 'User' } as any)).rejects.toThrow(
+        'Email verification required',
+      );
+      expect(commandService.createUser).not.toHaveBeenCalled();
+    });
+
+    it('should return an existing user without creating a new one', async () => {
+      expect.assertions(2);
+
+      const existingUser = toUserResponseDto(userFactory.build());
+      firebaseAuthService.verifyIdToken.mockResolvedValue({
+        uid: existingUser.firebaseUid,
+        email_verified: true,
+        firebase: { sign_in_provider: 'password' },
+      } as any);
+      queryService.findUniqueUserByFirebaseUid.mockResolvedValue(existingUser as any);
+
+      const result = await controller.createUser('token', { name: 'Ignored' } as any);
+
+      expect(result).toBe(existingUser);
+      expect(commandService.createUser).not.toHaveBeenCalled();
+    });
+
+    it('should validate the payload and throw when invalid data is provided', async () => {
+      expect.assertions(2);
+
+      firebaseAuthService.verifyIdToken.mockResolvedValue({
+        uid: 'new-uid',
+        email_verified: true,
+        firebase: { sign_in_provider: 'password' },
+      } as any);
+      queryService.findUniqueUserByFirebaseUid.mockResolvedValue(null as any);
+
+      await expect(controller.createUser('token', { name: '' } as any)).rejects.toMatchObject({
+        errorCode: 'AP0422',
+      });
+      expect(commandService.createUser).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('get /users/me', () => {
+    it('should return the current user', async () => {
+      expect.assertions(2);
+
+      const currentUser = { publicId: 'public-id' } as const;
+      const response = toUserResponseDto(userFactory.build({ publicId: currentUser.publicId }));
+      queryService.findUniqueOrThrowUserById.mockResolvedValue(response);
+
+      const result = await controller.fetchCurrentUser(currentUser as any);
+
+      expect(queryService.findUniqueOrThrowUserById).toHaveBeenCalledWith({ publicId: currentUser.publicId });
+      expect(result).toBe(response);
+    });
+  });
+
+  describe('put /users/me', () => {
+    it('should update the current user profile', async () => {
+      expect.assertions(2);
+
+      const currentUser = { publicId: 'public-id' } as const;
+      const payload = { name: 'Updated Name' } as const;
+      const response = toUserResponseDto(userFactory.build({ publicId: currentUser.publicId, name: payload.name }));
+      commandService.updateUserById.mockResolvedValue(response);
+
+      const result = await controller.updateCurrentUserProfile(currentUser as any, payload as any);
+
+      expect(commandService.updateUserById).toHaveBeenCalledWith({ publicId: currentUser.publicId, data: payload });
+      expect(result).toBe(response);
+    });
+  });
+
+  describe('delete /users/me', () => {
+    it('should delete the current user via the service', async () => {
+      expect.assertions(1);
+
+      const currentUser = { publicId: 'public-id' } as const;
+
+      await controller.deleteCurrentUser(currentUser as any);
+
+      expect(deleteUserService.execute).toHaveBeenCalledWith(currentUser.publicId);
     });
   });
 });
