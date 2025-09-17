@@ -10,18 +10,20 @@ runs:
         cd packages/apps/backend
         bun run start:dev &
 
-        echo "Waiting for Admin and Mobile API servers to start..."
+        echo "Waiting for Admin, Mobile, and Firebase Auth emulator to start..."
 
         timeout 60 bash -c '
           while true; do
             port_mobile_up=false
             port_admin_up=false
+            firebase_auth_up=false
 
             curl --silent --fail http://localhost:3000/api >/dev/null 2>&1 && port_mobile_up=true
             curl --silent --fail http://localhost:3001/api >/dev/null 2>&1 && port_admin_up=true
+            curl --silent --fail http://localhost:4400/emulators >/dev/null 2>&1 && firebase_auth_up=true
 
-            if [ "$port_mobile_up" = true ] && [ "$port_admin_up" = true ]; then
-              echo "✅ All API servers are up!"
+            if [ "$port_mobile_up" = true ] && [ "$port_admin_up" = true ] && [ "$firebase_auth_up" = true ]; then
+              echo "✅ All services are up!"
               exit 0
             fi
 
@@ -32,8 +34,9 @@ runs:
 
         if [ $? -ne 0 ]; then
           echo ""
-          echo "❌ One or more API servers failed to start within 60 seconds"
+          echo "❌ One or more services failed to start within 60 seconds"
           curl --silent --fail http://localhost:3000/api >/dev/null 2>&1 || echo "Mobile API Server DOWN"
           curl --silent --fail http://localhost:3001/api >/dev/null 2>&1 || echo "Admin API Server DOWN"
+          curl --silent --fail http://localhost:4400/emulators >/dev/null 2>&1 || echo "Firebase Auth Emulator DOWN"
           exit 1
         fi
