@@ -9,13 +9,14 @@ import { GlobalExceptionFilter } from '@/apis/utils/filters/global-exception.fil
 import { FirebaseAuthModule } from '@/domain/aggregates/firebase-auth/firebase-auth.module';
 import { FirebaseAuthService } from '@/domain/aggregates/firebase-auth/firebase-auth.service';
 import { UserModule } from '@/domain/aggregates/user/user.module';
+import { DeleteUserService } from '@/domain/usecases/user/delete-user.service';
 import { RepositoryService } from '@/repository/repository.service';
 import { DatabaseHelper } from '@/tests/helpers/database.helper';
 
 describe('e2e AppApiUsersController', () => {
   let app: INestApplication;
   let databaseHelper: DatabaseHelper;
-  let firebaseAuthService: jest.Mocked<Pick<FirebaseAuthService, 'verifyIdToken'>>;
+  let firebaseAuthService: jest.Mocked<Pick<FirebaseAuthService, 'verifyIdToken' | 'deleteUser'>>;
 
   beforeAll(async () => {
     databaseHelper = new DatabaseHelper();
@@ -23,7 +24,8 @@ describe('e2e AppApiUsersController', () => {
 
     const firebaseAuthServiceMock = {
       verifyIdToken: jest.fn(),
-    } satisfies jest.Mocked<Pick<FirebaseAuthService, 'verifyIdToken'>>;
+      deleteUser: jest.fn(),
+    } satisfies jest.Mocked<Pick<FirebaseAuthService, 'verifyIdToken' | 'deleteUser'>>;
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [UserModule, FirebaseAuthModule],
@@ -31,6 +33,7 @@ describe('e2e AppApiUsersController', () => {
       providers: [
         { provide: APP_FILTER, useClass: GlobalExceptionFilter },
         { provide: RepositoryService, useValue: databaseHelper.client },
+        DeleteUserService,
       ],
     })
       .overrideProvider(FirebaseAuthService)
@@ -47,11 +50,13 @@ describe('e2e AppApiUsersController', () => {
 
   beforeEach(async () => {
     firebaseAuthService.verifyIdToken.mockReset();
+    firebaseAuthService.deleteUser.mockReset();
     firebaseAuthService.verifyIdToken.mockResolvedValue({
       uid: 'uid-default',
       email_verified: true,
       firebase: { sign_in_provider: 'password' },
     } as unknown as DecodedIdToken);
+    firebaseAuthService.deleteUser.mockResolvedValue(undefined);
 
     await databaseHelper.cleanDatabase();
   });
@@ -73,7 +78,7 @@ describe('e2e AppApiUsersController', () => {
 
       const server = app.getHttpServer();
 
-      const createDto = { name: 'Test User' };
+      const createDto = { firebaseUid: 'uid-e2e-create', name: 'Test User' };
 
       const response = await request(server)
         .post('/api/users')
@@ -105,7 +110,7 @@ describe('e2e AppApiUsersController', () => {
       const createResponse = await request(app.getHttpServer())
         .post('/api/users')
         .set('Authorization', 'Bearer token')
-        .send({ name: 'Get User' })
+        .send({ firebaseUid: 'uid-e2e-get', name: 'Get User' })
         .expect(201);
 
       const { publicId } = createResponse.body;

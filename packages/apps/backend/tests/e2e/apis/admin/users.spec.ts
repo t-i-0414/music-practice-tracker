@@ -141,7 +141,7 @@ describe('e2e AdminApiUsersController', () => {
         expect.assertions(3);
 
         const createDto = {
-          email: 'duplicate@example.com',
+          firebaseUid: 'sub-update-user',
           name: 'Duplicate User',
         };
 
@@ -283,8 +283,8 @@ describe('e2e AdminApiUsersController', () => {
 
         const createDto = {
           users: [
-            { email: 'same@example.com', name: 'User 1' },
-            { email: 'same@example.com', name: 'User 2' },
+            { firebaseUid: 'uid-1', name: 'User 1' },
+            { firebaseUid: 'uid-1', name: 'User 2' },
           ],
         };
 

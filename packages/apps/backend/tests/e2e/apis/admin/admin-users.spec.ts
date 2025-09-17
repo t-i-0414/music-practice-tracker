@@ -162,7 +162,7 @@ describe('e2e AdminApiUsersController', () => {
       expect.assertions(1);
 
       const createDto = {
-        email: 'update@example.com',
+        cognitoSub: 'sub-update-user',
         name: 'Original Name',
         role: AdminRole.VIEWER,
       };
@@ -185,7 +185,7 @@ describe('e2e AdminApiUsersController', () => {
 
       expect(updateResponse.body).toMatchObject({
         publicId,
-        email: createDto.email,
+        cognitoSub: createDto.cognitoSub,
         name: updateDto.name,
         role: updateDto.role,
       });
@@ -209,7 +209,7 @@ describe('e2e AdminApiUsersController', () => {
       expect.assertions(2);
 
       const createDto = {
-        email: 'delete@example.com',
+        cognitoSub: 'sub-delete-user',
         name: 'Delete Admin',
         role: AdminRole.VIEWER,
       };
@@ -302,7 +302,7 @@ describe('e2e AdminApiUsersController', () => {
         expect.assertions(3);
 
         const invalidDto = {
-          email: 'invalid-email',
+          cognitoSub: '',
           name: '',
           role: 'INVALID_ROLE',
         };
@@ -314,11 +314,11 @@ describe('e2e AdminApiUsersController', () => {
         expect(response.body.statusCode).toBe(400);
       });
 
-      it('should return error with statusCode and errorCode for duplicate email', async () => {
+      it('should return error with statusCode and errorCode for duplicate cognito sub', async () => {
         expect.assertions(3);
 
         const createDto = {
-          email: 'duplicate@example.com',
+          cognitoSub: 'duplicate-sub',
           name: 'Duplicate User',
           role: AdminRole.ADMIN,
         };
@@ -402,7 +402,7 @@ describe('e2e AdminApiUsersController', () => {
         expect.assertions(3);
 
         const createDto = {
-          email: 'update@example.com',
+          cognitoSub: 'sub-update-invalid',
           name: 'Update User',
           role: AdminRole.VIEWER,
         };
