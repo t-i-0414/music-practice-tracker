@@ -106,7 +106,7 @@ const config = defineConfig(
     files: ['scripts/**/*.ts', 'scripts/**/*.js'],
     rules: baseScriptConfigRules,
   },
-  globalIgnores([...sharedIgnores, '.next/**']),
+  globalIgnores([...sharedIgnores, '.next/**', 'next-env.d.ts']),
   prettierConfig,
 );
 
