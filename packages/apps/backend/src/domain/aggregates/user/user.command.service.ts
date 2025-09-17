@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 
-import { UserQueryService } from './user.query.service';
 import {
   CreateManyUsersInputDto,
   CreateUserInputDto,
@@ -17,10 +16,7 @@ import { RepositoryService } from '@/repository/repository.service';
 
 @Injectable()
 export class UserCommandService {
-  public constructor(
-    private readonly repository: RepositoryService,
-    private readonly queryService: UserQueryService,
-  ) {}
+  public constructor(private readonly repository: RepositoryService) {}
 
   public async createUser(dto: CreateUserInputDto): Promise<UserResponseDto> {
     return toUserResponseDto(await this.repository.user.create({ data: dto }));

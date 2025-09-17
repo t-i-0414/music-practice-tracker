@@ -29,14 +29,14 @@ describe('integration AdminApiAdminUsersController', () => {
       expect.assertions(4);
 
       const createDto = {
-        email: 'admin@example.com',
+        cognitoSub: 'sub-admin',
         name: 'Test Admin',
         role: AdminRole.ADMIN,
       };
 
       const result = await controller.createAdminUser(createDto);
 
-      expect(result.email).toBe(createDto.email);
+      expect(result.cognitoSub).toBe(createDto.cognitoSub);
       expect(result.name).toBe(createDto.name);
       expect(result.role).toBe(createDto.role);
       expect(result.publicId).toBeDefined();
@@ -49,24 +49,16 @@ describe('integration AdminApiAdminUsersController', () => {
 
       const createDto = {
         adminUsers: [
-          {
-            email: 'admin1@example.com',
-            name: 'Admin 1',
-            role: AdminRole.VIEWER,
-          },
-          {
-            email: 'admin2@example.com',
-            name: 'Admin 2',
-            role: AdminRole.ADMIN,
-          },
+          { cognitoSub: 'sub-admin1', name: 'Admin 1', role: AdminRole.VIEWER },
+          { cognitoSub: 'sub-admin2', name: 'Admin 2', role: AdminRole.ADMIN },
         ],
       };
 
       const result = await controller.createManyAdminUsers(createDto);
 
       expect(result.adminUsers).toHaveLength(2);
-      expect(result.adminUsers[0].email).toBe('admin1@example.com');
-      expect(result.adminUsers[1].email).toBe('admin2@example.com');
+      expect(result.adminUsers[0].cognitoSub).toBe('sub-admin1');
+      expect(result.adminUsers[1].cognitoSub).toBe('sub-admin2');
     });
   });
 
@@ -75,13 +67,13 @@ describe('integration AdminApiAdminUsersController', () => {
       expect.assertions(2);
 
       await controller.createAdminUser({
-        email: 'admin1@example.com',
+        cognitoSub: 'sub-admin1',
         name: 'Admin 1',
         role: AdminRole.ADMIN,
       });
 
       await controller.createAdminUser({
-        email: 'admin2@example.com',
+        cognitoSub: 'sub-admin2',
         name: 'Admin 2',
         role: AdminRole.VIEWER,
       });
@@ -90,28 +82,28 @@ describe('integration AdminApiAdminUsersController', () => {
 
       expect(result.adminUsers).toHaveLength(2);
 
-      const emails = result.adminUsers.map((u) => u.email).sort();
+      const names = result.adminUsers.map((u) => u.name).sort((a, b) => a.localeCompare(b));
 
-      expect(emails).toStrictEqual(['admin1@example.com', 'admin2@example.com']);
+      expect(names).toStrictEqual(['Admin 1', 'Admin 2']);
     });
 
     it('should return specific admin users by publicIds', async () => {
       expect.assertions(2);
 
       const admin1 = await controller.createAdminUser({
-        email: 'admin1@example.com',
+        cognitoSub: 'sub-admin1',
         name: 'Admin 1',
         role: AdminRole.ADMIN,
       });
 
       await controller.createAdminUser({
-        email: 'admin2@example.com',
+        cognitoSub: 'sub-admin2',
         name: 'Admin 2',
         role: AdminRole.VIEWER,
       });
 
       const admin3 = await controller.createAdminUser({
-        email: 'admin3@example.com',
+        cognitoSub: 'sub-admin3',
         name: 'Admin 3',
         role: AdminRole.ADMIN,
       });
@@ -119,7 +111,9 @@ describe('integration AdminApiAdminUsersController', () => {
       const result = await controller.findManyAdminUsers([admin1.publicId, admin3.publicId]);
 
       expect(result.adminUsers).toHaveLength(2);
-      expect(result.adminUsers.map((u) => u.publicId).sort()).toStrictEqual([admin1.publicId, admin3.publicId].sort());
+      expect(result.adminUsers.map((u) => u.publicId).sort((a, b) => a.localeCompare(b))).toStrictEqual(
+        [admin1.publicId, admin3.publicId].sort((a, b) => a.localeCompare(b)),
+      );
     });
   });
 
@@ -128,7 +122,7 @@ describe('integration AdminApiAdminUsersController', () => {
       expect.assertions(3);
 
       const created = await controller.createAdminUser({
-        email: 'admin@example.com',
+        cognitoSub: 'sub-admin',
         name: 'Test Admin',
         role: AdminRole.ADMIN,
       });
@@ -136,7 +130,7 @@ describe('integration AdminApiAdminUsersController', () => {
       const result = await controller.findAdminUserById(created.publicId);
 
       expect(result.publicId).toBe(created.publicId);
-      expect(result.email).toBe('admin@example.com');
+      expect(result.cognitoSub).toBe('sub-admin');
       expect(result.name).toBe('Test Admin');
     });
   });
@@ -146,7 +140,7 @@ describe('integration AdminApiAdminUsersController', () => {
       expect.assertions(4);
 
       const created = await controller.createAdminUser({
-        email: 'admin@example.com',
+        cognitoSub: 'sub-admin',
         name: 'Original Name',
         role: AdminRole.VIEWER,
       });
@@ -159,7 +153,7 @@ describe('integration AdminApiAdminUsersController', () => {
       const result = await controller.updateAdminUser(created.publicId, updateData);
 
       expect(result.publicId).toBe(created.publicId);
-      expect(result.email).toBe('admin@example.com');
+      expect(result.cognitoSub).toBe('sub-admin');
       expect(result.name).toBe('Updated Name');
       expect(result.role).toBe(AdminRole.ADMIN);
     });
@@ -170,7 +164,7 @@ describe('integration AdminApiAdminUsersController', () => {
       expect.assertions(1);
 
       const created = await controller.createAdminUser({
-        email: 'admin@example.com',
+        cognitoSub: 'sub-admin-del',
         name: 'To Delete',
         role: AdminRole.ADMIN,
       });
@@ -186,19 +180,19 @@ describe('integration AdminApiAdminUsersController', () => {
       expect.assertions(1);
 
       const admin1 = await controller.createAdminUser({
-        email: 'admin1@example.com',
+        cognitoSub: 'sub-admin1-del',
         name: 'Admin 1',
         role: AdminRole.ADMIN,
       });
 
       const admin2 = await controller.createAdminUser({
-        email: 'admin2@example.com',
+        cognitoSub: 'sub-admin2-del',
         name: 'Admin 2',
         role: AdminRole.VIEWER,
       });
 
       await controller.createAdminUser({
-        email: 'admin3@example.com',
+        cognitoSub: 'sub-admin3-del',
         name: 'Admin 3',
         role: AdminRole.ADMIN,
       });

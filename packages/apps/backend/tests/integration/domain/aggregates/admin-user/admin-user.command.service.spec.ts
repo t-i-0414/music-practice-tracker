@@ -43,7 +43,7 @@ describe('integration AdminUserCommandService', () => {
       expect.assertions(3);
 
       const createDto = {
-        email: 'admin@example.com',
+        cognitoSub: 'sub-admin@example.com',
         name: 'Admin User',
         role: AdminRole.ADMIN,
       };
@@ -51,7 +51,7 @@ describe('integration AdminUserCommandService', () => {
       const result = await service.createAdminUser(createDto);
 
       expect(result).toMatchObject({
-        email: createDto.email,
+        cognitoSub: createDto.cognitoSub,
         name: createDto.name,
         role: createDto.role,
       });
@@ -60,17 +60,17 @@ describe('integration AdminUserCommandService', () => {
       const foundAdminUser = await queryService.findUniqueOrThrowAdminUser({ publicId: result.publicId });
 
       expect(foundAdminUser).toMatchObject({
-        email: createDto.email,
+        cognitoSub: createDto.cognitoSub,
         name: createDto.name,
         role: createDto.role,
       });
     });
 
-    it('should throw error for duplicate email', async () => {
+    it('should throw error for duplicate cognitoSub', async () => {
       expect.assertions(1);
 
       const createDto = {
-        email: 'duplicate@example.com',
+        cognitoSub: 'sub-duplicate',
         name: 'Admin 1',
         role: AdminRole.VIEWER,
       };
@@ -79,7 +79,7 @@ describe('integration AdminUserCommandService', () => {
 
       await expect(
         service.createAdminUser({
-          email: createDto.email,
+          cognitoSub: createDto.cognitoSub,
           name: 'Admin 2',
           role: AdminRole.ADMIN,
         }),
@@ -90,19 +90,19 @@ describe('integration AdminUserCommandService', () => {
       expect.assertions(6);
 
       const viewerDto = {
-        email: 'viewer@example.com',
+        cognitoSub: 'sub-viewer',
         name: 'Viewer Admin',
         role: AdminRole.VIEWER,
       };
 
       const adminDto = {
-        email: 'admin@example.com',
+        cognitoSub: 'sub-admin',
         name: 'Admin Admin',
         role: AdminRole.ADMIN,
       };
 
       const superAdminDto = {
-        email: 'super@example.com',
+        cognitoSub: 'sub-super',
         name: 'Super Admin',
         role: AdminRole.SUPER_ADMIN,
       };
@@ -130,7 +130,7 @@ describe('integration AdminUserCommandService', () => {
       expect.assertions(4);
 
       const createDto = {
-        email: 'update@example.com',
+        cognitoSub: 'sub-update',
         name: 'Original Name',
         role: AdminRole.VIEWER,
       };
@@ -148,7 +148,7 @@ describe('integration AdminUserCommandService', () => {
 
       expect(result.name).toBe(updateData.name);
       expect(result.role).toBe(updateData.role);
-      expect(result.email).toBe(createDto.email);
+      expect(result.cognitoSub).toBe(createDto.cognitoSub);
 
       const foundAdminUser = await queryService.findUniqueOrThrowAdminUser({ publicId: created.publicId });
 
@@ -170,7 +170,7 @@ describe('integration AdminUserCommandService', () => {
       expect.assertions(3);
 
       const createDto = {
-        email: 'partial@example.com',
+        cognitoSub: 'sub-partial',
         name: 'Original Name',
         role: AdminRole.VIEWER,
       };
@@ -183,7 +183,7 @@ describe('integration AdminUserCommandService', () => {
       });
 
       expect(result.name).toBe('Updated Name');
-      expect(result.email).toBe(createDto.email);
+      expect(result.cognitoSub).toBe(createDto.cognitoSub);
       expect(result.role).toBe(createDto.role);
     });
   });
@@ -193,14 +193,14 @@ describe('integration AdminUserCommandService', () => {
       expect.assertions(2);
 
       const createDto = {
-        email: 'delete@example.com',
+        cognitoSub: 'sub-delete',
         name: 'Delete Me',
         role: AdminRole.VIEWER,
       };
 
       const created = await service.createAdminUser(createDto);
 
-      expect(created.email).toBe(createDto.email);
+      expect(created.cognitoSub).toBe(createDto.cognitoSub);
 
       await service.deleteAdminUserById({ publicId: created.publicId });
 
@@ -226,18 +226,18 @@ describe('integration AdminUserCommandService', () => {
 
       const createDto = {
         adminUsers: [
-          { email: 'admin1@example.com', name: 'Admin 1', role: AdminRole.VIEWER },
-          { email: 'admin2@example.com', name: 'Admin 2', role: AdminRole.ADMIN },
-          { email: 'admin3@example.com', name: 'Admin 3', role: AdminRole.SUPER_ADMIN },
+          { cognitoSub: 'sub-admin1', name: 'Admin 1', role: AdminRole.VIEWER },
+          { cognitoSub: 'sub-admin2', name: 'Admin 2', role: AdminRole.ADMIN },
+          { cognitoSub: 'sub-admin3', name: 'Admin 3', role: AdminRole.SUPER_ADMIN },
         ],
       };
 
       const result = await service.createManyAndReturnAdminUsers(createDto);
 
       expect(result.adminUsers).toHaveLength(3);
-      expect(result.adminUsers[0].email).toBe('admin1@example.com');
-      expect(result.adminUsers[1].email).toBe('admin2@example.com');
-      expect(result.adminUsers[2].email).toBe('admin3@example.com');
+      expect(result.adminUsers[0].cognitoSub).toBe('sub-admin1');
+      expect(result.adminUsers[1].cognitoSub).toBe('sub-admin2');
+      expect(result.adminUsers[2].cognitoSub).toBe('sub-admin3');
 
       const allAdminUsers = await queryService.findManyAdminUsersById({
         publicIds: result.adminUsers.map((u) => u.publicId),
@@ -262,9 +262,9 @@ describe('integration AdminUserCommandService', () => {
 
       const adminUsers = await service.createManyAndReturnAdminUsers({
         adminUsers: [
-          { email: 'del1@example.com', name: 'Delete 1', role: AdminRole.VIEWER },
-          { email: 'del2@example.com', name: 'Delete 2', role: AdminRole.ADMIN },
-          { email: 'keep@example.com', name: 'Keep Me', role: AdminRole.ADMIN },
+          { cognitoSub: 'sub-del1', name: 'Delete 1', role: AdminRole.VIEWER },
+          { cognitoSub: 'sub-del2', name: 'Delete 2', role: AdminRole.ADMIN },
+          { cognitoSub: 'sub-keep', name: 'Keep Me', role: AdminRole.ADMIN },
         ],
       });
 
@@ -275,7 +275,7 @@ describe('integration AdminUserCommandService', () => {
         publicId: adminUsers.adminUsers[2].publicId,
       });
 
-      expect(remainingUser.email).toBe('keep@example.com');
+      expect(remainingUser.cognitoSub).toBe('sub-keep');
     });
 
     it('should handle empty array', async () => {
@@ -292,7 +292,7 @@ describe('integration AdminUserCommandService', () => {
       expect.assertions(2);
 
       const adminUser = await service.createAdminUser({
-        email: 'keep@example.com',
+        cognitoSub: 'sub-keep',
         name: 'Keep Me',
         role: AdminRole.ADMIN,
       });
@@ -303,7 +303,7 @@ describe('integration AdminUserCommandService', () => {
 
       const foundUser = await queryService.findUniqueOrThrowAdminUser({ publicId: adminUser.publicId });
 
-      expect(foundUser.email).toBe('keep@example.com');
+      expect(foundUser.cognitoSub).toBe('sub-keep');
       expect(foundUser.publicId).toBe(adminUser.publicId);
     });
   });

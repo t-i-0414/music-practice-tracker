@@ -49,17 +49,17 @@ describe('e2e AdminApiUsersController', () => {
 
       const createResponse1 = await request(app.getHttpServer())
         .post('/admin/api/users')
-        .send({ email: 'user1@example.com', name: 'User 1' })
+        .send({ firebaseUid: 'uid-user1', name: 'User 1' })
         .expect(201);
 
       const createResponse2 = await request(app.getHttpServer())
         .post('/admin/api/users')
-        .send({ email: 'user2@example.com', name: 'User 2' })
+        .send({ firebaseUid: 'uid-user2', name: 'User 2' })
         .expect(201);
 
       await request(app.getHttpServer())
         .post('/admin/api/users')
-        .send({ email: 'user3@example.com', name: 'User 3' })
+        .send({ firebaseUid: 'uid-user3', name: 'User 3' })
         .expect(201);
 
       const publicIds = [createResponse1.body.publicId, createResponse2.body.publicId];
@@ -76,18 +76,18 @@ describe('e2e AdminApiUsersController', () => {
 
       const createDto = {
         users: [
-          { email: 'bulk1@example.com', name: 'Bulk 1' },
-          { email: 'bulk2@example.com', name: 'Bulk 2' },
-          { email: 'bulk3@example.com', name: 'Bulk 3' },
+          { firebaseUid: 'uid-bulk-1', name: 'Bulk 1' },
+          { firebaseUid: 'uid-bulk-2', name: 'Bulk 2' },
+          { firebaseUid: 'uid-bulk-3', name: 'Bulk 3' },
         ],
       };
 
       const response = await request(app.getHttpServer()).post('/admin/api/users/bulk').send(createDto).expect(201);
 
       expect(response.body.users).toHaveLength(3);
-      expect(response.body.users[0].email).toBe('bulk1@example.com');
-      expect(response.body.users[1].email).toBe('bulk2@example.com');
-      expect(response.body.users[2].email).toBe('bulk3@example.com');
+      expect(response.body.users[0].firebaseUid).toBe('uid-bulk-1');
+      expect(response.body.users[1].firebaseUid).toBe('uid-bulk-2');
+      expect(response.body.users[2].firebaseUid).toBe('uid-bulk-3');
     });
   });
 
@@ -99,7 +99,7 @@ describe('e2e AdminApiUsersController', () => {
       const createPromises = Array.from({ length: 3 }, (_, i) =>
         request(app.getHttpServer())
           .post('/admin/api/users')
-          .send({ email: `del${i + 1}@example.com`, name: `Delete ${i + 1}` })
+          .send({ firebaseUid: `uid-del-${i + 1}`, name: `Delete ${i + 1}` })
           .expect(201),
       );
 
@@ -141,7 +141,7 @@ describe('e2e AdminApiUsersController', () => {
         expect.assertions(3);
 
         const createDto = {
-          email: 'duplicate@example.com',
+          firebaseUid: 'sub-update-user',
           name: 'Duplicate User',
         };
 
@@ -222,7 +222,7 @@ describe('e2e AdminApiUsersController', () => {
         expect.assertions(3);
 
         const createDto = {
-          email: 'update@example.com',
+          firebaseUid: 'uid-update',
           name: 'Update User',
         };
 
@@ -283,8 +283,8 @@ describe('e2e AdminApiUsersController', () => {
 
         const createDto = {
           users: [
-            { email: 'same@example.com', name: 'User 1' },
-            { email: 'same@example.com', name: 'User 2' },
+            { firebaseUid: 'uid-1', name: 'User 1' },
+            { firebaseUid: 'uid-1', name: 'User 2' },
           ],
         };
 

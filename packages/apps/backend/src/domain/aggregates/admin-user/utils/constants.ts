@@ -27,8 +27,8 @@ type AdminStatusRecord = {
 };
 export const AdminStatusRecord: AdminStatusRecord = {
   ACTIVE: 'ACTIVE',
-  INACTIVE: 'INACTIVE',
-  SUSPENDED: 'SUSPENDED',
   PENDING: 'PENDING',
+  SUSPENDED: 'SUSPENDED',
+  BANNED: 'BANNED',
 };
 export type AdminStatus = keyof typeof AdminStatusRecord;

@@ -43,17 +43,6 @@ export class AdminApiAdminUsersController {
       : this.adminUserQuery.findManyAdminUsersById({ publicIds: ensurePublicIdsToArray(publicIds) });
   }
 
-  @Get(':publicId')
-  @ApiOperation({ summary: 'Get an admin user by public ID' })
-  @ApiParam({ name: 'publicId', description: 'Admin user public ID', example: '123e4567-e89b-12d3-a456-426614174000' })
-  @ApiResponse({ status: 200, description: 'Admin user found', type: AdminUserResponseDto })
-  @ApiStandardResponses()
-  public async findAdminUserById(
-    @Param('publicId', new ParseUUIDPipe()) publicId: string,
-  ): Promise<AdminUserResponseDto> {
-    return this.adminUserQuery.findUniqueOrThrowAdminUser({ publicId });
-  }
-
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new admin user' })
@@ -68,6 +57,16 @@ export class AdminApiAdminUsersController {
     return this.adminUserCommand.createAdminUser(body);
   }
 
+  @Delete()
+  @ApiOperation({ summary: 'Delete multiple admin users by public IDs' })
+  @ApiBody({ type: DeleteManyAdminUsersInputDto })
+  @ApiResponse({ status: 204, description: 'Admin users deleted' })
+  @ApiStandardResponses()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  public async deleteManyAdminUsers(@Body() body: DeleteManyAdminUsersInputDto): Promise<void> {
+    await this.adminUserCommand.deleteManyAdminUsersByIds(body);
+  }
+
   @Post('bulk')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create multiple admin users' })
@@ -76,6 +75,17 @@ export class AdminApiAdminUsersController {
   @ApiStandardResponses()
   public async createManyAdminUsers(@Body() body: CreateManyAdminUsersInputDto): Promise<AdminUsersResponseDto> {
     return this.adminUserCommand.createManyAndReturnAdminUsers(body);
+  }
+
+  @Get(':publicId')
+  @ApiOperation({ summary: 'Get an admin user by public ID' })
+  @ApiParam({ name: 'publicId', description: 'Admin user public ID', example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiResponse({ status: 200, description: 'Admin user found', type: AdminUserResponseDto })
+  @ApiStandardResponses()
+  public async findAdminUserById(
+    @Param('publicId', new ParseUUIDPipe()) publicId: string,
+  ): Promise<AdminUserResponseDto> {
+    return this.adminUserQuery.findUniqueOrThrowAdminUser({ publicId });
   }
 
   @Put(':publicId')
@@ -89,16 +99,6 @@ export class AdminApiAdminUsersController {
     @Body() data: UpdateAdminUserInputData,
   ): Promise<AdminUserResponseDto> {
     return this.adminUserCommand.updateAdminUserById({ publicId, data });
-  }
-
-  @Delete()
-  @ApiOperation({ summary: 'Delete multiple admin users by public IDs' })
-  @ApiBody({ type: DeleteManyAdminUsersInputDto })
-  @ApiResponse({ status: 204, description: 'Admin users deleted' })
-  @ApiStandardResponses()
-  @HttpCode(HttpStatus.NO_CONTENT)
-  public async deleteManyAdminUsers(@Body() body: DeleteManyAdminUsersInputDto): Promise<void> {
-    await this.adminUserCommand.deleteManyAdminUsersByIds(body);
   }
 
   @Delete(':publicId')

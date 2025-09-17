@@ -45,6 +45,16 @@ const config = defineConfig(
     },
   },
   {
+    files: ['src/domain/aggregates/firebase-auth/firebase-auth.provider.ts'],
+    plugins: {
+      'custom-backend-eslint': pluginBackend,
+    },
+    rules: {
+      ...enabledBackendPluginRules,
+      'custom-backend-eslint/prisma-naming-convention': 'off',
+    },
+  },
+  {
     files: [...testFilePatterns({ prefix: 'tests' }), '**/tests/**/helpers/**/*.ts'],
     extends: [jestConfig],
     rules: {

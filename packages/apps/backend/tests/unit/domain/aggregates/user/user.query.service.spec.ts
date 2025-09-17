@@ -11,6 +11,7 @@ describe('unit UserQueryService', () => {
     user: {
       findUniqueOrThrow: jest.Mock;
       findMany: jest.Mock;
+      findUnique: jest.Mock;
     };
   };
   let userFactory: UserFactory;
@@ -22,6 +23,7 @@ describe('unit UserQueryService', () => {
       user: {
         findUniqueOrThrow: jest.fn(),
         findMany: jest.fn(),
+        findUnique: jest.fn(),
       },
     };
 
@@ -97,6 +99,45 @@ describe('unit UserQueryService', () => {
         where: { publicId: { in: dto.publicIds } },
       });
       expect(result).toStrictEqual(toUsersResponseDto([]));
+    });
+  });
+
+  describe('findUniqueOrThrowUserByFirebaseUid', () => {
+    it('returns the user when found', async () => {
+      expect.assertions(2);
+
+      const mockUser = userFactory.build();
+      repository.user.findUniqueOrThrow.mockResolvedValue(mockUser);
+
+      const result = await service.findUniqueOrThrowUserByFirebaseUid(mockUser.firebaseUid);
+
+      expect(repository.user.findUniqueOrThrow).toHaveBeenCalledWith({ where: { firebaseUid: mockUser.firebaseUid } });
+      expect(result).toStrictEqual(toUserResponseDto(mockUser));
+    });
+  });
+
+  describe('findUniqueUserByFirebaseUid', () => {
+    it('returns the user when the repository finds one', async () => {
+      expect.assertions(2);
+
+      const mockUser = userFactory.build();
+      repository.user.findUnique.mockResolvedValue(mockUser);
+
+      const result = await service.findUniqueUserByFirebaseUid(mockUser.firebaseUid);
+
+      expect(repository.user.findUnique).toHaveBeenCalledWith({ where: { firebaseUid: mockUser.firebaseUid } });
+      expect(result).toStrictEqual(toUserResponseDto(mockUser));
+    });
+
+    it('returns null when the repository does not find a user', async () => {
+      expect.assertions(2);
+
+      repository.user.findUnique.mockResolvedValue(null);
+
+      const result = await service.findUniqueUserByFirebaseUid('missing-uid');
+
+      expect(repository.user.findUnique).toHaveBeenCalledWith({ where: { firebaseUid: 'missing-uid' } });
+      expect(result).toBeNull();
     });
   });
 });

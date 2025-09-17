@@ -86,6 +86,13 @@ describe('aggregate-import-restriction', () => {
         `,
         filename: 'src/modules/aggregates/index.ts',
       },
+      // Valid: Path equals aggregates folder (triggers early return when no aggregate name)
+      {
+        code: `
+          import { Injectable } from '@nestjs/common';
+        `,
+        filename: 'src/modules/aggregates',
+      },
     ],
     invalid: [
       // Invalid: Direct import from another aggregate

@@ -1,9 +1,18 @@
 import { createMockQueryService, createMockCommandService, createMockRepository } from './mock-service.helper';
 
+// Firebase Auth Service Mock
+export function createMockFirebaseAuthService() {
+  return {
+    verifyIdToken: jest.fn(),
+  };
+}
+
 // User Service Mocks
 export const USER_QUERY_METHODS = [
   'findUniqueOrThrowUserById',
   'findUniqueOrThrowUserByEmail',
+  'findUniqueOrThrowUserByFirebaseUid',
+  'findUniqueUserByFirebaseUid',
   'findManyUsersById',
   'findAllUsers',
 ] as const;

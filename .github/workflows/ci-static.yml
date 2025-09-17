@@ -180,9 +180,12 @@ jobs:
         run: |
           cd packages/apps/backend
           bun run prisma:validate
+          bun run prisma:schema:diff:check
 
       - name: Start Backend Server
         uses: ./.github/actions/start-backend
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
 
       - name: Generate Admin API Types
         run: |

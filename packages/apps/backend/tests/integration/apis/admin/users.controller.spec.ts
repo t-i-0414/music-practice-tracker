@@ -28,14 +28,14 @@ describe('integration AdminApiUsersController', () => {
       expect.assertions(3);
 
       const createDto = {
-        email: 'user@example.com',
         name: 'Test User',
+        firebaseUid: 'uid-admin-create',
       };
 
       const result = await controller.createUser(createDto);
 
-      expect(result.email).toBe(createDto.email);
       expect(result.name).toBe(createDto.name);
+      expect(result.firebaseUid).toBe(createDto.firebaseUid);
       expect(result.publicId).toBeDefined();
     });
   });
@@ -46,22 +46,16 @@ describe('integration AdminApiUsersController', () => {
 
       const createDto = {
         users: [
-          {
-            email: 'user1@example.com',
-            name: 'User 1',
-          },
-          {
-            email: 'user2@example.com',
-            name: 'User 2',
-          },
+          { name: 'User 1', firebaseUid: 'uid-admin-bulk-1' },
+          { name: 'User 2', firebaseUid: 'uid-admin-bulk-2' },
         ],
       };
 
       const result = await controller.createManyAndReturnUsers(createDto);
 
       expect(result.users).toHaveLength(2);
-      expect(result.users[0].email).toBe('user1@example.com');
-      expect(result.users[1].email).toBe('user2@example.com');
+      expect(result.users.map((user) => user.name)).toStrictEqual(['User 1', 'User 2']);
+      expect(result.users.map((user) => user.firebaseUid)).toStrictEqual(['uid-admin-bulk-1', 'uid-admin-bulk-2']);
     });
   });
 
@@ -70,18 +64,18 @@ describe('integration AdminApiUsersController', () => {
       expect.assertions(2);
 
       const user1 = await controller.createUser({
-        email: 'user1@example.com',
         name: 'User 1',
+        firebaseUid: 'uid-admin-list-1',
       });
 
       await controller.createUser({
-        email: 'user2@example.com',
         name: 'User 2',
+        firebaseUid: 'uid-admin-list-2',
       });
 
       const user3 = await controller.createUser({
-        email: 'user3@example.com',
         name: 'User 3',
+        firebaseUid: 'uid-admin-list-3',
       });
 
       const result = await controller.findManyUsersById([user1.publicId, user3.publicId]);
@@ -94,8 +88,8 @@ describe('integration AdminApiUsersController', () => {
       expect.assertions(1);
 
       await controller.createUser({
-        email: 'user@example.com',
         name: 'User',
+        firebaseUid: 'uid-admin-empty',
       });
 
       const result = await controller.findManyUsersById([]);
@@ -109,15 +103,15 @@ describe('integration AdminApiUsersController', () => {
       expect.assertions(3);
 
       const created = await controller.createUser({
-        email: 'user@example.com',
         name: 'Test User',
+        firebaseUid: 'uid-admin-get',
       });
 
       const result = await controller.findUniqueOrThrowUserById(created.publicId);
 
       expect(result.publicId).toBe(created.publicId);
-      expect(result.email).toBe('user@example.com');
       expect(result.name).toBe('Test User');
+      expect(result.firebaseUid).toBe('uid-admin-get');
     });
   });
 
@@ -126,8 +120,8 @@ describe('integration AdminApiUsersController', () => {
       expect.assertions(3);
 
       const created = await controller.createUser({
-        email: 'user@example.com',
         name: 'Original Name',
+        firebaseUid: 'uid-admin-update',
       });
 
       const updateData = {
@@ -137,8 +131,8 @@ describe('integration AdminApiUsersController', () => {
       const result = await controller.updateUserById(created.publicId, updateData);
 
       expect(result.publicId).toBe(created.publicId);
-      expect(result.email).toBe('user@example.com');
       expect(result.name).toBe('Updated Name');
+      expect(result.firebaseUid).toBe('uid-admin-update');
     });
   });
 
@@ -146,10 +140,7 @@ describe('integration AdminApiUsersController', () => {
     it('should delete a user', async () => {
       expect.assertions(1);
 
-      const created = await controller.createUser({
-        email: 'user@example.com',
-        name: 'To Delete',
-      });
+      const created = await controller.createUser({ name: 'To Delete', firebaseUid: 'uid-admin-delete' });
 
       await controller.deleteUserById(created.publicId);
 
@@ -161,20 +152,11 @@ describe('integration AdminApiUsersController', () => {
     it('should delete multiple users', async () => {
       expect.assertions(1);
 
-      const user1 = await controller.createUser({
-        email: 'user1@example.com',
-        name: 'User 1',
-      });
+      const user1 = await controller.createUser({ name: 'User 1', firebaseUid: 'uid-admin-del-1' });
 
-      const user2 = await controller.createUser({
-        email: 'user2@example.com',
-        name: 'User 2',
-      });
+      const user2 = await controller.createUser({ name: 'User 2', firebaseUid: 'uid-admin-del-2' });
 
-      const user3 = await controller.createUser({
-        email: 'user3@example.com',
-        name: 'User 3',
-      });
+      const user3 = await controller.createUser({ name: 'User 3', firebaseUid: 'uid-admin-del-3' });
 
       await controller.deleteManyUsersById({ publicIds: [user1.publicId, user2.publicId] });
 

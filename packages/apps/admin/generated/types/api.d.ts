@@ -23,6 +23,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/users/bulk": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create multiple users */
+        post: operations["AdminApiUsersController_createManyAndReturnUsers"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/users/{publicId}": {
         parameters: {
             query?: never;
@@ -37,23 +54,6 @@ export interface paths {
         post?: never;
         /** Delete a user by public ID */
         delete: operations["AdminApiUsersController_deleteUserById"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/users/bulk": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Create multiple users */
-        post: operations["AdminApiUsersController_createManyAndReturnUsers"];
-        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -78,6 +78,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin-users/bulk": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create multiple admin users */
+        post: operations["AdminApiAdminUsersController_createManyAdminUsers"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin-users/{publicId}": {
         parameters: {
             query?: never;
@@ -97,23 +114,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/admin-users/bulk": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Create multiple admin users */
-        post: operations["AdminApiAdminUsersController_createManyAdminUsers"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -126,11 +126,10 @@ export interface components {
              */
             publicId: string;
             /**
-             * Format: email
-             * @description The user email address
-             * @example takuya.iwashiro@takudev.net
+             * @description Firebase UID
+             * @example abc123def456
              */
-            email: string;
+            firebaseUid: string;
             /**
              * @description The user name
              * @example Takuya Iwashiro
@@ -141,7 +140,7 @@ export interface components {
              * @example ACTIVE
              * @enum {string}
              */
-            status: "ACTIVE" | "INACTIVE" | "SUSPENDED" | "PENDING" | "BANNED";
+            status: "ACTIVE" | "PENDING" | "SUSPENDED" | "BANNED";
             /**
              * Format: date-time
              * @description The user created at timestamp
@@ -166,39 +165,15 @@ export interface components {
         };
         CreateUserInputDto: {
             /**
-             * Format: email
-             * @description The user email address
-             * @example takuya.iwashiro@takudev.net
+             * @description Firebase UID
+             * @example abc123def456
              */
-            email: string;
+            firebaseUid: string;
             /**
              * @description The user name
              * @example Takuya Iwashiro
              */
             name: string;
-        };
-        CreateManyUsersInputDto: {
-            /** @description List of users to create */
-            users: components["schemas"]["CreateUserInputDto"][];
-        };
-        UpdateUserDataDto: {
-            /**
-             * Format: email
-             * @description The user email address
-             * @example takuya.iwashiro@takudev.net
-             */
-            email?: string;
-            /**
-             * @description The user name
-             * @example Takuya Iwashiro
-             */
-            name?: string;
-            /**
-             * @description The user status
-             * @example ACTIVE
-             * @enum {string}
-             */
-            status?: "ACTIVE" | "INACTIVE" | "SUSPENDED" | "PENDING" | "BANNED";
         };
         DeleteManyUsersInputDto: {
             /**
@@ -210,6 +185,23 @@ export interface components {
              */
             publicIds: string[];
         };
+        CreateManyUsersInputDto: {
+            /** @description List of users to create */
+            users: components["schemas"]["CreateUserInputDto"][];
+        };
+        UpdateUserDataDto: {
+            /**
+             * @description The user name
+             * @example Takuya Iwashiro
+             */
+            name?: string;
+            /**
+             * @description The user status
+             * @example ACTIVE
+             * @enum {string}
+             */
+            status?: "ACTIVE" | "PENDING" | "SUSPENDED" | "BANNED";
+        };
         AdminUserResponseDto: {
             /**
              * Format: uuid
@@ -218,11 +210,10 @@ export interface components {
              */
             publicId: string;
             /**
-             * Format: email
-             * @description The admin user email address
-             * @example admin@example.com
+             * @description The admin user Cognito sub
+             * @example cognito-sub-1234567890
              */
-            email: string;
+            cognitoSub: string;
             /**
              * @description The admin user name
              * @example Admin User
@@ -239,7 +230,7 @@ export interface components {
              * @example ACTIVE
              * @enum {string}
              */
-            status: "ACTIVE" | "INACTIVE" | "SUSPENDED" | "PENDING";
+            status: "ACTIVE" | "PENDING" | "SUSPENDED" | "BANNED";
             /**
              * Format: date-time
              * @description The admin user created at timestamp
@@ -259,11 +250,10 @@ export interface components {
         };
         CreateAdminUserInputDto: {
             /**
-             * Format: email
-             * @description The admin user email address
-             * @example admin@example.com
+             * @description The admin user Cognito sub
+             * @example cognito-sub-1234567890
              */
-            email: string;
+            cognitoSub: string;
             /**
              * @description The admin user name
              * @example Admin User
@@ -280,19 +270,23 @@ export interface components {
              * @example PENDING
              * @enum {string}
              */
-            status?: "ACTIVE" | "INACTIVE" | "SUSPENDED" | "PENDING";
+            status?: "ACTIVE" | "PENDING" | "SUSPENDED" | "BANNED";
+        };
+        DeleteManyAdminUsersInputDto: {
+            /**
+             * @description List of admin user public IDs to delete
+             * @example [
+             *       "123e4567-e89b-12d3-a456-426614174000",
+             *       "789e1234-e89b-12d3-a456-426614174000"
+             *     ]
+             */
+            publicIds: string[];
         };
         CreateManyAdminUsersInputDto: {
             /** @description Admin users to create */
             adminUsers: components["schemas"]["CreateAdminUserInputDto"][];
         };
         UpdateAdminUserInputData: {
-            /**
-             * Format: email
-             * @description The admin user email address
-             * @example admin@example.com
-             */
-            email?: string;
             /**
              * @description The admin user name
              * @example Admin User
@@ -309,17 +303,7 @@ export interface components {
              * @example ACTIVE
              * @enum {string}
              */
-            status?: "ACTIVE" | "INACTIVE" | "SUSPENDED" | "PENDING";
-        };
-        DeleteManyAdminUsersInputDto: {
-            /**
-             * @description List of admin user public IDs to delete
-             * @example [
-             *       "123e4567-e89b-12d3-a456-426614174000",
-             *       "789e1234-e89b-12d3-a456-426614174000"
-             *     ]
-             */
-            publicIds: string[];
+            status?: "ACTIVE" | "PENDING" | "SUSPENDED" | "BANNED";
         };
     };
     responses: never;
@@ -414,6 +398,39 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Error Response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    AdminApiUsersController_createManyAndReturnUsers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateManyUsersInputDto"];
+            };
+        };
+        responses: {
+            /** @description Users created successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UsersResponseDto"];
+                };
             };
             /** @description Error Response */
             default: {
@@ -524,39 +541,6 @@ export interface operations {
             };
         };
     };
-    AdminApiUsersController_createManyAndReturnUsers: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateManyUsersInputDto"];
-            };
-        };
-        responses: {
-            /** @description Users created successfully */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["UsersResponseDto"];
-                };
-            };
-            /** @description Error Response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-        };
-    };
     AdminApiAdminUsersController_findManyAdminUsers: {
         parameters: {
             query?: {
@@ -641,6 +625,39 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Error Response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    AdminApiAdminUsersController_createManyAdminUsers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateManyAdminUsersInputDto"];
+            };
+        };
+        responses: {
+            /** @description Admin users created successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminUsersResponseDto"];
+                };
             };
             /** @description Error Response */
             default: {
@@ -739,39 +756,6 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-            /** @description Error Response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-        };
-    };
-    AdminApiAdminUsersController_createManyAdminUsers: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateManyAdminUsersInputDto"];
-            };
-        };
-        responses: {
-            /** @description Admin users created successfully */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AdminUsersResponseDto"];
-                };
             };
             /** @description Error Response */
             default: {

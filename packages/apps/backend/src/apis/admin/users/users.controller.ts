@@ -40,17 +40,6 @@ export class AdminApiUsersController {
     return this.userQuery.findManyUsersById({ publicIds: ensurePublicIdsToArray(publicIds) });
   }
 
-  @Get(':publicId')
-  @ApiOperation({ summary: 'Get a user by public ID' })
-  @ApiParam({ name: 'publicId', description: 'User public ID', example: '123e4567-e89b-12d3-a456-426614174000' })
-  @ApiResponse({ status: 200, description: 'User found', type: UserResponseDto })
-  @ApiStandardResponses()
-  public async findUniqueOrThrowUserById(
-    @Param('publicId', new ParseUUIDPipe()) publicId: string,
-  ): Promise<UserResponseDto> {
-    return this.userQuery.findUniqueOrThrowUserById({ publicId });
-  }
-
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new user' })
@@ -61,6 +50,16 @@ export class AdminApiUsersController {
     return this.userCommand.createUser(body);
   }
 
+  @Delete()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete multiple users by public IDs' })
+  @ApiBody({ type: DeleteManyUsersInputDto })
+  @ApiResponse({ status: 204, description: 'Users deleted' })
+  @ApiStandardResponses()
+  public async deleteManyUsersById(@Body() body: DeleteManyUsersInputDto): Promise<void> {
+    await this.userCommand.deleteManyUsersById(body);
+  }
+
   @Post('bulk')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create multiple users' })
@@ -69,6 +68,17 @@ export class AdminApiUsersController {
   @ApiStandardResponses()
   public async createManyAndReturnUsers(@Body() body: CreateManyUsersInputDto): Promise<UsersResponseDto> {
     return this.userCommand.createManyAndReturnUsers(body);
+  }
+
+  @Get(':publicId')
+  @ApiOperation({ summary: 'Get a user by public ID' })
+  @ApiParam({ name: 'publicId', description: 'User public ID', example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiResponse({ status: 200, description: 'User found', type: UserResponseDto })
+  @ApiStandardResponses()
+  public async findUniqueOrThrowUserById(
+    @Param('publicId', new ParseUUIDPipe()) publicId: string,
+  ): Promise<UserResponseDto> {
+    return this.userQuery.findUniqueOrThrowUserById({ publicId });
   }
 
   @Put(':publicId')
@@ -82,16 +92,6 @@ export class AdminApiUsersController {
     @Body() data: UpdateUserDataDto,
   ): Promise<UserResponseDto> {
     return this.userCommand.updateUserById({ publicId, data });
-  }
-
-  @Delete()
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Delete multiple users by public IDs' })
-  @ApiBody({ type: DeleteManyUsersInputDto })
-  @ApiResponse({ status: 204, description: 'Users deleted' })
-  @ApiStandardResponses()
-  public async deleteManyUsersById(@Body() body: DeleteManyUsersInputDto): Promise<void> {
-    await this.userCommand.deleteManyUsersById(body);
   }
 
   @Delete(':publicId')

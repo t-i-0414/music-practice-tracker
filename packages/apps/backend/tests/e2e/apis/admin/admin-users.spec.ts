@@ -40,7 +40,7 @@ describe('e2e AdminApiUsersController', () => {
       expect.assertions(2);
 
       const createDto = {
-        email: 'admin@example.com',
+        cognitoSub: 'sub-admin@example.com',
         name: 'Admin User',
         role: AdminRole.ADMIN,
       };
@@ -48,7 +48,7 @@ describe('e2e AdminApiUsersController', () => {
       const response = await request(app.getHttpServer()).post('/admin/api/admin-users').send(createDto).expect(201);
 
       expect(response.body).toMatchObject({
-        email: createDto.email,
+        cognitoSub: createDto.cognitoSub,
         name: createDto.name,
         role: createDto.role,
       });
@@ -59,7 +59,7 @@ describe('e2e AdminApiUsersController', () => {
       expect.assertions(1);
 
       const invalidDto = {
-        email: 'invalid-email',
+        cognitoSub: '',
         name: '',
         role: 'INVALID_ROLE',
       };
@@ -74,8 +74,8 @@ describe('e2e AdminApiUsersController', () => {
     it('should get all admin users', async () => {
       expect.assertions(3);
 
-      const adminUser1 = { email: 'admin1@example.com', name: 'Admin 1', role: AdminRole.VIEWER };
-      const adminUser2 = { email: 'admin2@example.com', name: 'Admin 2', role: AdminRole.ADMIN };
+      const adminUser1 = { cognitoSub: 'sub-admin1', name: 'Admin 1', role: AdminRole.VIEWER };
+      const adminUser2 = { cognitoSub: 'sub-admin2', name: 'Admin 2', role: AdminRole.ADMIN };
 
       // Create admin users sequentially to ensure predictable order
       await request(app.getHttpServer()).post('/admin/api/admin-users').send(adminUser1).expect(201);
@@ -85,8 +85,8 @@ describe('e2e AdminApiUsersController', () => {
 
       expect(response.body.adminUsers).toHaveLength(2);
       // Results are returned in createdAt desc order (newest first)
-      expect(response.body.adminUsers[0].email).toBe('admin2@example.com');
-      expect(response.body.adminUsers[1].email).toBe('admin1@example.com');
+      expect(response.body.adminUsers[0].name).toBe('Admin 2');
+      expect(response.body.adminUsers[1].name).toBe('Admin 1');
     });
 
     it('should get admin users by public IDs', async () => {
@@ -94,17 +94,17 @@ describe('e2e AdminApiUsersController', () => {
 
       const createResponse1 = await request(app.getHttpServer())
         .post('/admin/api/admin-users')
-        .send({ email: 'admin1@example.com', name: 'Admin 1', role: AdminRole.VIEWER })
+        .send({ cognitoSub: 'sub-admin1', name: 'Admin 1', role: AdminRole.VIEWER })
         .expect(201);
 
       const createResponse2 = await request(app.getHttpServer())
         .post('/admin/api/admin-users')
-        .send({ email: 'admin2@example.com', name: 'Admin 2', role: AdminRole.ADMIN })
+        .send({ cognitoSub: 'sub-admin2', name: 'Admin 2', role: AdminRole.ADMIN })
         .expect(201);
 
       await request(app.getHttpServer())
         .post('/admin/api/admin-users')
-        .send({ email: 'admin3@example.com', name: 'Admin 3', role: AdminRole.VIEWER })
+        .send({ cognitoSub: 'sub-admin3', name: 'Admin 3', role: AdminRole.VIEWER })
         .expect(201);
 
       const publicIds = [createResponse1.body.publicId, createResponse2.body.publicId];
@@ -123,7 +123,7 @@ describe('e2e AdminApiUsersController', () => {
       expect.assertions(1);
 
       const createDto = {
-        email: 'get@example.com',
+        cognitoSub: 'sub-get',
         name: 'Get Admin',
         role: AdminRole.ADMIN,
       };
@@ -139,7 +139,7 @@ describe('e2e AdminApiUsersController', () => {
 
       expect(getResponse.body).toMatchObject({
         publicId,
-        email: createDto.email,
+        cognitoSub: createDto.cognitoSub,
         name: createDto.name,
         role: createDto.role,
       });
@@ -162,7 +162,7 @@ describe('e2e AdminApiUsersController', () => {
       expect.assertions(1);
 
       const createDto = {
-        email: 'update@example.com',
+        cognitoSub: 'sub-update-user',
         name: 'Original Name',
         role: AdminRole.VIEWER,
       };
@@ -185,7 +185,7 @@ describe('e2e AdminApiUsersController', () => {
 
       expect(updateResponse.body).toMatchObject({
         publicId,
-        email: createDto.email,
+        cognitoSub: createDto.cognitoSub,
         name: updateDto.name,
         role: updateDto.role,
       });
@@ -209,7 +209,7 @@ describe('e2e AdminApiUsersController', () => {
       expect.assertions(2);
 
       const createDto = {
-        email: 'delete@example.com',
+        cognitoSub: 'sub-delete-user',
         name: 'Delete Admin',
         role: AdminRole.VIEWER,
       };
@@ -249,9 +249,9 @@ describe('e2e AdminApiUsersController', () => {
 
       const createDto = {
         adminUsers: [
-          { email: 'bulk1@example.com', name: 'Bulk 1', role: AdminRole.VIEWER },
-          { email: 'bulk2@example.com', name: 'Bulk 2', role: AdminRole.ADMIN },
-          { email: 'bulk3@example.com', name: 'Bulk 3', role: AdminRole.VIEWER },
+          { cognitoSub: 'sub-bulk1', name: 'Bulk 1', role: AdminRole.VIEWER },
+          { cognitoSub: 'sub-bulk2', name: 'Bulk 2', role: AdminRole.ADMIN },
+          { cognitoSub: 'sub-bulk3', name: 'Bulk 3', role: AdminRole.VIEWER },
         ],
       };
 
@@ -261,9 +261,9 @@ describe('e2e AdminApiUsersController', () => {
         .expect(201);
 
       expect(response.body.adminUsers).toHaveLength(3);
-      expect(response.body.adminUsers[0].email).toBe('bulk1@example.com');
-      expect(response.body.adminUsers[1].email).toBe('bulk2@example.com');
-      expect(response.body.adminUsers[2].email).toBe('bulk3@example.com');
+      expect(response.body.adminUsers[0].cognitoSub).toBe('sub-bulk1');
+      expect(response.body.adminUsers[1].cognitoSub).toBe('sub-bulk2');
+      expect(response.body.adminUsers[2].cognitoSub).toBe('sub-bulk3');
     });
   });
 
@@ -275,7 +275,7 @@ describe('e2e AdminApiUsersController', () => {
       const createPromises = Array.from({ length: 3 }, (_, i) =>
         request(app.getHttpServer())
           .post('/admin/api/admin-users')
-          .send({ email: `del${i + 1}@example.com`, name: `Delete ${i + 1}`, role: AdminRole.VIEWER })
+          .send({ cognitoSub: `sub-del-${i + 1}`, name: `Delete ${i + 1}`, role: AdminRole.VIEWER })
           .expect(201),
       );
 
@@ -302,7 +302,7 @@ describe('e2e AdminApiUsersController', () => {
         expect.assertions(3);
 
         const invalidDto = {
-          email: 'invalid-email',
+          cognitoSub: '',
           name: '',
           role: 'INVALID_ROLE',
         };
@@ -314,11 +314,11 @@ describe('e2e AdminApiUsersController', () => {
         expect(response.body.statusCode).toBe(400);
       });
 
-      it('should return error with statusCode and errorCode for duplicate email', async () => {
+      it('should return error with statusCode and errorCode for duplicate cognito sub', async () => {
         expect.assertions(3);
 
         const createDto = {
-          email: 'duplicate@example.com',
+          cognitoSub: 'duplicate-sub',
           name: 'Duplicate User',
           role: AdminRole.ADMIN,
         };
@@ -402,7 +402,7 @@ describe('e2e AdminApiUsersController', () => {
         expect.assertions(3);
 
         const createDto = {
-          email: 'update@example.com',
+          cognitoSub: 'sub-update-invalid',
           name: 'Update User',
           role: AdminRole.VIEWER,
         };
@@ -452,7 +452,7 @@ describe('e2e AdminApiUsersController', () => {
         expect.assertions(3);
 
         const invalidDto = {
-          adminUsers: [{ email: 'invalid-email', name: '', role: 'INVALID' }],
+          adminUsers: [{ cognitoSub: '', name: '', role: 'INVALID' }],
         };
 
         const response = await request(app.getHttpServer())
@@ -465,13 +465,13 @@ describe('e2e AdminApiUsersController', () => {
         expect(response.body.statusCode).toBe(400);
       });
 
-      it('should return error with statusCode and errorCode for duplicate emails', async () => {
+      it('should return error with statusCode and errorCode for duplicate cognitoSub', async () => {
         expect.assertions(3);
 
         const createDto = {
           adminUsers: [
-            { email: 'same@example.com', name: 'User 1', role: AdminRole.VIEWER },
-            { email: 'same@example.com', name: 'User 2', role: AdminRole.ADMIN },
+            { cognitoSub: 'same-sub', name: 'User 1', role: AdminRole.VIEWER },
+            { cognitoSub: 'same-sub', name: 'User 2', role: AdminRole.ADMIN },
           ],
         };
 

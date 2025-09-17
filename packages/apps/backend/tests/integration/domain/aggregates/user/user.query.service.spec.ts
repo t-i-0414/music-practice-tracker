@@ -41,15 +41,15 @@ describe('integration UserQueryService', () => {
 
       const created = await repository.user.create({
         data: {
-          email: 'find@example.com',
           name: 'Find Me',
+          firebaseUid: 'uid-int-find-by-id-1',
         },
       });
 
       const result = await service.findUniqueOrThrowUserById({ publicId: created.publicId });
 
-      expect(result.email).toBe('find@example.com');
       expect(result.name).toBe('Find Me');
+      expect(result.firebaseUid).toBe('uid-int-find-by-id-1');
     });
 
     it('should throw NotFoundException for non-existent user', async () => {
@@ -65,106 +65,33 @@ describe('integration UserQueryService', () => {
 
       await repository.user.create({
         data: {
-          email: 'user1@example.com',
           name: 'User 1',
+          firebaseUid: 'uid-int-many-1',
         },
       });
 
       const targetUser = await repository.user.create({
         data: {
-          email: 'target@example.com',
           name: 'Target User',
+          firebaseUid: 'uid-int-many-2',
         },
       });
 
       await repository.user.create({
         data: {
-          email: 'user3@example.com',
           name: 'User 3',
+          firebaseUid: 'uid-int-many-3',
         },
       });
 
       const result = await service.findUniqueOrThrowUserById({ publicId: targetUser.publicId });
 
-      expect(result.email).toBe('target@example.com');
       expect(result.name).toBe('Target User');
+      expect(result.firebaseUid).toBe('uid-int-many-2');
     });
   });
 
-  describe('findUniqueOrThrowUserByEmail', () => {
-    it('should find a user by email', async () => {
-      expect.assertions(2);
-
-      const created = await repository.user.create({
-        data: {
-          email: 'unique@example.com',
-          name: 'Unique User',
-        },
-      });
-
-      const result = await service.findUniqueOrThrowUserByEmail('unique@example.com');
-
-      expect(result.publicId).toBe(created.publicId);
-      expect(result.name).toBe('Unique User');
-    });
-
-    it('should throw NotFoundException for non-existent email', async () => {
-      expect.assertions(1);
-
-      await expect(service.findUniqueOrThrowUserByEmail('nonexistent@example.com')).rejects.toThrow(
-        'No record was found for a query',
-      );
-    });
-
-    it('should be case-sensitive for email', async () => {
-      expect.assertions(2);
-
-      await repository.user.create({
-        data: {
-          email: 'test@example.com',
-          name: 'Test User',
-        },
-      });
-
-      await expect(service.findUniqueOrThrowUserByEmail('TEST@EXAMPLE.COM')).rejects.toThrow(
-        'No record was found for a query',
-      );
-
-      const result = await service.findUniqueOrThrowUserByEmail('test@example.com');
-
-      expect(result.name).toBe('Test User');
-    });
-
-    it('should find correct user when multiple users exist', async () => {
-      expect.assertions(2);
-
-      await repository.user.create({
-        data: {
-          email: 'first@example.com',
-          name: 'First User',
-        },
-      });
-
-      await repository.user.create({
-        data: {
-          email: 'second@example.com',
-          name: 'Second User',
-        },
-      });
-
-      await repository.user.create({
-        data: {
-          email: 'third@example.com',
-          name: 'Third User',
-        },
-      });
-
-      const result = await service.findUniqueOrThrowUserByEmail('second@example.com');
-
-      expect(result.email).toBe('second@example.com');
-      expect(result.name).toBe('Second User');
-    });
-  });
+  // Removed findUniqueOrThrowUserByEmail tests due to email removal from User model
 
   describe('findManyUsersById', () => {
     it('should find multiple users by publicIds', async () => {
@@ -172,22 +99,22 @@ describe('integration UserQueryService', () => {
 
       const user1 = await repository.user.create({
         data: {
-          email: 'user1@example.com',
           name: 'User 1',
+          firebaseUid: 'uid-int-many-list-1',
         },
       });
 
       const user2 = await repository.user.create({
         data: {
-          email: 'user2@example.com',
           name: 'User 2',
+          firebaseUid: 'uid-int-many-list-2',
         },
       });
 
       await repository.user.create({
         data: {
-          email: 'user3@example.com',
           name: 'User 3',
+          firebaseUid: 'uid-int-many-list-3',
         },
       });
 
@@ -196,9 +123,17 @@ describe('integration UserQueryService', () => {
       });
 
       expect(result.users).toHaveLength(2);
-      expect(result.users.some((u) => u.email === 'user1@example.com')).toBe(true);
-      expect(result.users.some((u) => u.email === 'user2@example.com')).toBe(true);
-      expect(result.users.some((u) => u.email === 'user3@example.com')).toBe(false);
+
+      const ids = result.users.map((u) => u.publicId).sort((a, b) => a.localeCompare(b));
+
+      const expected = [user1.publicId, user2.publicId].sort((a, b) => a.localeCompare(b));
+
+      expect(ids).toStrictEqual(expected);
+      expect(result.users.map((u) => u.name).sort()).toStrictEqual(['User 1', 'User 2']);
+      expect(result.users.map((u) => u.firebaseUid).sort()).toStrictEqual([
+        'uid-int-many-list-1',
+        'uid-int-many-list-2',
+      ]);
     });
 
     it('should return empty array for non-existent publicIds', async () => {
@@ -216,8 +151,8 @@ describe('integration UserQueryService', () => {
 
       const user = await repository.user.create({
         data: {
-          email: 'exists@example.com',
           name: 'Exists',
+          firebaseUid: 'uid-int-exists',
         },
       });
 
@@ -226,7 +161,7 @@ describe('integration UserQueryService', () => {
       });
 
       expect(result.users).toHaveLength(1);
-      expect(result.users[0].email).toBe('exists@example.com');
+      expect(result.users[0].publicId).toBe(user.publicId);
     });
 
     it('should handle empty publicIds array', async () => {
@@ -242,8 +177,8 @@ describe('integration UserQueryService', () => {
 
       const user = await repository.user.create({
         data: {
-          email: 'single@example.com',
           name: 'Single User',
+          firebaseUid: 'uid-int-dup-request',
         },
       });
 
@@ -252,25 +187,17 @@ describe('integration UserQueryService', () => {
       });
 
       expect(result.users).toHaveLength(1);
-      expect(result.users[0].email).toBe('single@example.com');
+      expect(result.users[0].publicId).toBe(user.publicId);
     });
 
     it('should find all requested users when they exist', async () => {
       expect.assertions(6);
 
       const users = await Promise.all([
-        repository.user.create({
-          data: { email: 'a@example.com', name: 'User A' },
-        }),
-        repository.user.create({
-          data: { email: 'b@example.com', name: 'User B' },
-        }),
-        repository.user.create({
-          data: { email: 'c@example.com', name: 'User C' },
-        }),
-        repository.user.create({
-          data: { email: 'd@example.com', name: 'User D' },
-        }),
+        repository.user.create({ data: { name: 'User A', firebaseUid: 'uid-int-all-a' } }),
+        repository.user.create({ data: { name: 'User B', firebaseUid: 'uid-int-all-b' } }),
+        repository.user.create({ data: { name: 'User C', firebaseUid: 'uid-int-all-c' } }),
+        repository.user.create({ data: { name: 'User D', firebaseUid: 'uid-int-all-d' } }),
       ]);
 
       const result = await service.findManyUsersById({
@@ -278,14 +205,17 @@ describe('integration UserQueryService', () => {
       });
 
       expect(result.users).toHaveLength(4);
-      expect(result.users.some((u) => u.email === 'a@example.com')).toBe(true);
-      expect(result.users.some((u) => u.email === 'b@example.com')).toBe(true);
-      expect(result.users.some((u) => u.email === 'c@example.com')).toBe(true);
-      expect(result.users.some((u) => u.email === 'd@example.com')).toBe(true);
 
-      const emails = result.users.map((u) => u.email).sort();
+      const resultNames = result.users.map((u) => u.name).sort();
 
-      expect(emails).toStrictEqual(['a@example.com', 'b@example.com', 'c@example.com', 'd@example.com']);
+      expect(resultNames).toContain('User A');
+      expect(resultNames).toContain('User B');
+      expect(resultNames).toContain('User C');
+      expect(resultNames).toContain('User D');
+
+      const names = result.users.map((u) => u.name).sort((a, b) => a.localeCompare(b));
+
+      expect(names).toStrictEqual(['User A', 'User B', 'User C', 'User D']);
     });
   });
 });

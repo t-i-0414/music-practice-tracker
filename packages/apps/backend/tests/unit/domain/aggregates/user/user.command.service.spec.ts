@@ -49,8 +49,8 @@ describe('unit UserCommandService', () => {
 
       const mockUser = userFactory.build();
       const createDto = {
-        email: mockUser.email,
         name: mockUser.name,
+        firebaseUid: 'uid-unit-create',
       };
 
       repository.user.create.mockResolvedValue(mockUser);
@@ -65,8 +65,8 @@ describe('unit UserCommandService', () => {
       expect.assertions(2);
 
       const createDto = {
-        email: 'test@example.com',
         name: 'Test User',
+        firebaseUid: 'uid-unit-db-error',
       };
 
       const prismaError = new Error('Database error');
@@ -83,9 +83,9 @@ describe('unit UserCommandService', () => {
 
       const mockUsers = userFactory.buildMany(3);
       const createDto = {
-        users: mockUsers.map((user) => ({
-          email: user.email,
+        users: mockUsers.map((user, idx) => ({
           name: user.name,
+          firebaseUid: `uid-unit-bulk-${idx + 1}`,
         })),
       };
 

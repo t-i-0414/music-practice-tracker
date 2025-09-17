@@ -1,0 +1,22 @@
+enum UserStatus {
+  ACTIVE
+  PENDING
+  SUSPENDED
+  BANNED
+
+  @@map("user_status")
+}
+
+model User {
+  id          Int        @id @default(autoincrement())
+  publicId    String     @unique @default(dbgenerated("gen_random_uuid()")) @map("public_id") @db.Uuid
+  firebaseUid String     @unique @map("firebase_uid")
+  name        String     @unique
+  status      UserStatus @default(ACTIVE) @map("status")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@index([createdAt])
+  @@map("users")
+}

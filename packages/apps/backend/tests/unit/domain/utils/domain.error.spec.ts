@@ -135,7 +135,7 @@ describe('function isDomainErrorCode', () => {
   });
 
   it('should return false for invalid error codes', () => {
-    expect(isDomainErrorCode('DO0001')).toBe(false);
+    expect(isDomainErrorCode('DO0000')).toBe(false);
     expect(isDomainErrorCode('INVALID')).toBe(false);
     expect(isDomainErrorCode('')).toBe(false);
   });

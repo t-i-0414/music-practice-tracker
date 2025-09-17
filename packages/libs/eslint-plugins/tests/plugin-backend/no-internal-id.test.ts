@@ -331,6 +331,42 @@ describe('no-internal-id', () => {
           },
         ],
       },
+      // Top-level id inside argument object with method names (covers findUnique path)
+      {
+        code: `
+          async function a() {
+            return await prisma.user.findUnique({ id: '123' });
+          }
+        `,
+        errors: [{ messageId: 'noIdInQuery', data: {} }],
+      },
+      // Top-level id with findMany
+      {
+        code: `
+          async function b() {
+            return await prisma.user.findMany({ id: '123' });
+          }
+        `,
+        errors: [{ messageId: 'noIdInQuery', data: {} }],
+      },
+      // Top-level id with update
+      {
+        code: `
+          async function c() {
+            return await prisma.user.update({ id: '123' });
+          }
+        `,
+        errors: [{ messageId: 'noIdInQuery', data: {} }],
+      },
+      // Top-level id with updateMany
+      {
+        code: `
+          async function d() {
+            return await prisma.user.updateMany({ id: '123' });
+          }
+        `,
+        errors: [{ messageId: 'noIdInQuery', data: {} }],
+      },
       // updateMany with id
       {
         code: `

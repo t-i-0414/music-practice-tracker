@@ -17,7 +17,6 @@ describe('unit AdminUser DTOs', () => {
         publicId: '123e4567-e89b-12d3-a456-426614174000',
         data: {
           name: 'Updated Admin',
-          email: 'admin@example.com',
           role: AdminRole.ADMIN,
         },
       };
@@ -68,7 +67,7 @@ describe('unit AdminUser DTOs', () => {
         adminUsers: [
           {
             publicId: '123e4567-e89b-12d3-a456-426614174000',
-            email: 'admin1@example.com',
+            cognitoSub: 'sub-admin1',
             name: 'Admin 1',
             role: AdminRole.ADMIN,
             createdAt: '2024-01-01T00:00:00.000Z',
@@ -76,7 +75,7 @@ describe('unit AdminUser DTOs', () => {
           },
           {
             publicId: '223e4567-e89b-12d3-a456-426614174000',
-            email: 'admin2@example.com',
+            cognitoSub: 'sub-admin2',
             name: 'Admin 2',
             role: AdminRole.VIEWER,
             createdAt: '2024-01-01T00:00:00.000Z',
@@ -89,7 +88,7 @@ describe('unit AdminUser DTOs', () => {
 
       expect(dto.adminUsers).toHaveLength(2);
       expect(dto.adminUsers[0]).toBeInstanceOf(AdminUserResponseDto);
-      expect(dto.adminUsers[0].email).toBe('admin1@example.com');
+      expect(dto.adminUsers[0].cognitoSub).toBe('sub-admin1');
     });
 
     it('should handle empty admin users array', () => {

@@ -10,9 +10,8 @@ type UserStatusRecord = {
 };
 export const UserStatusRecord: UserStatusRecord = {
   ACTIVE: 'ACTIVE',
-  INACTIVE: 'INACTIVE',
-  SUSPENDED: 'SUSPENDED',
   PENDING: 'PENDING',
+  SUSPENDED: 'SUSPENDED',
   BANNED: 'BANNED',
 };
 export type UserStatusType = keyof typeof UserStatusRecord;

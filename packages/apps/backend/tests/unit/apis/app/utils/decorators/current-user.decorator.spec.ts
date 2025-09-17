@@ -1,7 +1,7 @@
 import { ExecutionContext } from '@nestjs/common';
 import { ROUTE_ARGS_METADATA } from '@nestjs/common/constants';
 
-import { CurrentUser, CurrentUserData } from '@/apis/utils/decorators/current-user.decorator';
+import { CurrentUser, CurrentUserData } from '@/apis/app/utils/decorators/current-user.decorator';
 
 type ParamDecorator = (data?: any, ctx?: any) => ParameterDecorator;
 
@@ -23,7 +23,6 @@ describe('currentUser decorator', () => {
 
   const mockUser: CurrentUserData = {
     publicId: 'user-123',
-    email: 'test@example.com',
     name: 'Test User',
   };
 
@@ -61,9 +60,9 @@ describe('currentUser decorator', () => {
   it('should return specific user property when data parameter is provided', () => {
     mockRequest.user = mockUser;
 
-    const result = decoratorFactory('email', mockExecutionContext);
+    const result = decoratorFactory('name', mockExecutionContext);
 
-    expect(result).toBe('test@example.com');
+    expect(result).toBe('Test User');
   });
 
   it('should return publicId when data parameter is publicId', () => {
@@ -89,7 +88,7 @@ describe('currentUser decorator', () => {
   });
 
   it('should return undefined when user is not present and data parameter is provided', () => {
-    const result = decoratorFactory('email', mockExecutionContext);
+    const result = decoratorFactory('name', mockExecutionContext);
 
     expect(result).toBeUndefined();
   });
@@ -97,7 +96,7 @@ describe('currentUser decorator', () => {
   it('should handle user with missing properties gracefully', () => {
     mockRequest.user = { publicId: 'user-123' } as CurrentUserData;
 
-    const result = decoratorFactory('email', mockExecutionContext);
+    const result = decoratorFactory('name', mockExecutionContext);
 
     expect(result).toBeUndefined();
   });

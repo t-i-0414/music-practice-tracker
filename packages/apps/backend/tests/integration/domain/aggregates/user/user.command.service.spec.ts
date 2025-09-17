@@ -31,14 +31,13 @@ describe('integration UserCommandService', () => {
       expect.assertions(3);
 
       const createDto = {
-        email: 'test@example.com',
         name: 'Test User',
+        firebaseUid: 'uid-int-create',
       };
 
       const result = await service.createUser(createDto);
 
       expect(result).toMatchObject({
-        email: createDto.email,
         name: createDto.name,
       });
       expect(result.publicId).toBeDefined();
@@ -46,27 +45,23 @@ describe('integration UserCommandService', () => {
       const foundUser = await queryService.findUniqueOrThrowUserById({ publicId: result.publicId });
 
       expect(foundUser).toMatchObject({
-        email: createDto.email,
         name: createDto.name,
       });
     });
 
-    it('should throw error for duplicate email', async () => {
+    it('should throw error for duplicate firebaseUid', async () => {
       expect.assertions(1);
 
       const createDto = {
-        email: 'duplicate@example.com',
         name: 'User 1',
+        firebaseUid: 'uid-int-dup',
       };
 
       await service.createUser(createDto);
 
-      await expect(
-        service.createUser({
-          email: createDto.email,
-          name: 'User 2',
-        }),
-      ).rejects.toThrow('Unique constraint failed');
+      await expect(service.createUser({ name: 'User 2', firebaseUid: 'uid-int-dup' })).rejects.toThrow(
+        'Unique constraint failed',
+      );
     });
   });
 
@@ -75,8 +70,8 @@ describe('integration UserCommandService', () => {
       expect.assertions(3);
 
       const createDto = {
-        email: 'update@example.com',
         name: 'Original Name',
+        firebaseUid: 'uid-int-update',
       };
 
       const created = await service.createUser(createDto);
@@ -88,7 +83,7 @@ describe('integration UserCommandService', () => {
       });
 
       expect(result.name).toBe(updateData.name);
-      expect(result.email).toBe(createDto.email);
+      expect(result.publicId).toBe(created.publicId);
 
       const foundUser = await queryService.findUniqueOrThrowUserById({ publicId: created.publicId });
 
@@ -112,8 +107,8 @@ describe('integration UserCommandService', () => {
       expect.assertions(1);
 
       const createDto = {
-        email: 'delete@example.com',
         name: 'Delete Me',
+        firebaseUid: 'uid-int-delete',
       };
 
       const created = await service.createUser(createDto);
@@ -141,24 +136,28 @@ describe('integration UserCommandService', () => {
 
       const createDto = {
         users: [
-          { email: 'user1@example.com', name: 'User 1' },
-          { email: 'user2@example.com', name: 'User 2' },
-          { email: 'user3@example.com', name: 'User 3' },
+          { name: 'User 1', firebaseUid: 'uid-int-bulk-1' },
+          { name: 'User 2', firebaseUid: 'uid-int-bulk-2' },
+          { name: 'User 3', firebaseUid: 'uid-int-bulk-3' },
         ],
       };
 
       const result = await service.createManyAndReturnUsers(createDto);
 
       expect(result.users).toHaveLength(3);
-      expect(result.users[0].email).toBe('user1@example.com');
-      expect(result.users[1].email).toBe('user2@example.com');
-      expect(result.users[2].email).toBe('user3@example.com');
+      expect(result.users.map((u) => u.name)).toStrictEqual(['User 1', 'User 2', 'User 3']);
+      expect(result.users.map((u) => u.firebaseUid)).toStrictEqual([
+        'uid-int-bulk-1',
+        'uid-int-bulk-2',
+        'uid-int-bulk-3',
+      ]);
 
       const allUsers = await queryService.findManyUsersById({
         publicIds: result.users.map((u) => u.publicId),
       });
 
       expect(allUsers.users).toHaveLength(3);
+      expect(new Set(allUsers.users.map((u) => u.publicId)).size).toBe(3);
     });
   });
 
@@ -168,9 +167,9 @@ describe('integration UserCommandService', () => {
 
       const users = await service.createManyAndReturnUsers({
         users: [
-          { email: 'del1@example.com', name: 'Delete 1' },
-          { email: 'del2@example.com', name: 'Delete 2' },
-          { email: 'keep@example.com', name: 'Keep Me' },
+          { name: 'Delete 1', firebaseUid: 'uid-int-del-1' },
+          { name: 'Delete 2', firebaseUid: 'uid-int-del-2' },
+          { name: 'Keep Me', firebaseUid: 'uid-int-keep' },
         ],
       });
 
@@ -179,7 +178,7 @@ describe('integration UserCommandService', () => {
 
       const remainingUser = await queryService.findUniqueOrThrowUserById({ publicId: users.users[2].publicId });
 
-      expect(remainingUser.email).toBe('keep@example.com');
+      expect(remainingUser.name).toBe('Keep Me');
     });
   });
 });

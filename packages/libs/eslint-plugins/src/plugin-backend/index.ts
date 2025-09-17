@@ -2,6 +2,7 @@ import aggregateImportRestriction from './aggregate-import-restriction';
 import noInternalId from './no-internal-id';
 import prismaNamingConvention from './prisma-naming-convention';
 import repositoryModelAccessRestriction from './repository-model-access-restriction';
+import throwNewCommonErrorOnly from './throw-new-common-error-only';
 
 const plugin = {
   meta: {
@@ -13,6 +14,7 @@ const plugin = {
     'no-internal-id': noInternalId,
     'prisma-naming-convention': prismaNamingConvention,
     'repository-model-access-restriction': repositoryModelAccessRestriction,
+    'throw-new-common-error-only': throwNewCommonErrorOnly,
   },
 };
 
