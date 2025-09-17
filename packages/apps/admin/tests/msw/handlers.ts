@@ -29,7 +29,6 @@ export const handlers = [
   http.get(`http://${host}:${adminApiPort}/api/users/:publicId`, ({ params }) => {
     const response: components['schemas']['UserResponseDto'] = {
       publicId: params.publicId as string,
-      email: `user${params.publicId}@example.com`,
       name: `Test User ${params.publicId}`,
       status: 'ACTIVE',
       firebaseUid: `firebase-uid-${params.publicId}`,
@@ -42,12 +41,12 @@ export const handlers = [
 
   // Create operations
   http.post(`http://${host}:${adminApiPort}/api/users`, async ({ request }) => {
-    const body = (await request.json()) as components['schemas']['CreateUserInputDto'];
+    const body = (await request.json()) as unknown as components['schemas']['CreateUserInputDto'];
     const response: components['schemas']['UserResponseDto'] = {
       publicId: crypto.randomUUID(),
       ...body,
       status: 'ACTIVE',
-      firebaseUid: body.firebaseUid ?? null,
+      firebaseUid: body.firebaseUid,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -56,13 +55,13 @@ export const handlers = [
   }),
 
   http.post(`http://${host}:${adminApiPort}/api/users/bulk`, async ({ request }) => {
-    const body = (await request.json()) as components['schemas']['CreateManyUsersInputDto'];
+    const body = (await request.json()) as unknown as components['schemas']['CreateManyUsersInputDto'];
     const response: components['schemas']['UsersResponseDto'] = {
       users: body.users.map((user) => ({
         publicId: crypto.randomUUID(),
         ...user,
         status: 'ACTIVE',
-        firebaseUid: user.firebaseUid ?? null,
+        firebaseUid: user.firebaseUid,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       })),
@@ -73,13 +72,12 @@ export const handlers = [
 
   // Update operations
   http.put(`http://${host}:${adminApiPort}/api/users/:publicId`, async ({ params, request }) => {
-    const body = (await request.json()) as components['schemas']['UpdateUserDataDto'];
+    const body = (await request.json()) as unknown as components['schemas']['UpdateUserDataDto'];
     const response: components['schemas']['UserResponseDto'] = {
       publicId: params.publicId as string,
-      email: body.email ?? `updated${params.publicId}@example.com`,
       name: body.name ?? `Updated User ${params.publicId}`,
-      status: 'ACTIVE',
-      firebaseUid: body.firebaseUid ?? `updated-firebase-uid-${params.publicId}`,
+      status: body.status ?? 'ACTIVE',
+      firebaseUid: `updated-firebase-uid-${params.publicId}`,
       createdAt: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
       updatedAt: new Date().toISOString(),
     };

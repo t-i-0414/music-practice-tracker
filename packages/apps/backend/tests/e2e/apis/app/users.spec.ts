@@ -1,11 +1,13 @@
 import { ClassSerializerInterceptor, INestApplication, ValidationPipe } from '@nestjs/common';
 import { APP_FILTER, Reflector } from '@nestjs/core';
 import { Test, TestingModule } from '@nestjs/testing';
+import type { DecodedIdToken } from 'firebase-admin/auth';
 import * as request from 'supertest';
 
 import { AppApiUsersController } from '@/apis/app/users/users.controller';
 import { GlobalExceptionFilter } from '@/apis/utils/filters/global-exception.filter';
 import { FirebaseAuthModule } from '@/domain/aggregates/firebase-auth/firebase-auth.module';
+import { FirebaseAuthService } from '@/domain/aggregates/firebase-auth/firebase-auth.service';
 import { UserModule } from '@/domain/aggregates/user/user.module';
 import { RepositoryService } from '@/repository/repository.service';
 import { DatabaseHelper } from '@/tests/helpers/database.helper';
@@ -13,10 +15,15 @@ import { DatabaseHelper } from '@/tests/helpers/database.helper';
 describe('e2e AppApiUsersController', () => {
   let app: INestApplication;
   let databaseHelper: DatabaseHelper;
+  let firebaseAuthService: jest.Mocked<Pick<FirebaseAuthService, 'verifyIdToken'>>;
 
   beforeAll(async () => {
     databaseHelper = new DatabaseHelper();
     await databaseHelper.connect();
+
+    const firebaseAuthServiceMock = {
+      verifyIdToken: jest.fn(),
+    } satisfies jest.Mocked<Pick<FirebaseAuthService, 'verifyIdToken'>>;
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [UserModule, FirebaseAuthModule],
@@ -25,7 +32,12 @@ describe('e2e AppApiUsersController', () => {
         { provide: APP_FILTER, useClass: GlobalExceptionFilter },
         { provide: RepositoryService, useValue: databaseHelper.client },
       ],
-    }).compile();
+    })
+      .overrideProvider(FirebaseAuthService)
+      .useValue(firebaseAuthServiceMock)
+      .compile();
+
+    firebaseAuthService = firebaseAuthServiceMock;
 
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
@@ -34,6 +46,13 @@ describe('e2e AppApiUsersController', () => {
   });
 
   beforeEach(async () => {
+    firebaseAuthService.verifyIdToken.mockReset();
+    firebaseAuthService.verifyIdToken.mockResolvedValue({
+      uid: 'uid-default',
+      email_verified: true,
+      firebase: { sign_in_provider: 'password' },
+    } as unknown as DecodedIdToken);
+
     await databaseHelper.cleanDatabase();
   });
 
@@ -46,20 +65,13 @@ describe('e2e AppApiUsersController', () => {
     it('should create a new user', async () => {
       expect.assertions(2);
 
-      const firebaseMock = { verifyIdToken: jest.fn() } as any;
-      // monkey-patch provider for this controller scope
-      const server = app.getHttpServer();
-      (app.get as any)(require('@/domain/aggregates/firebase-auth/firebase-auth.service').FirebaseAuthService);
-
-      // token payload
-      (
-        jest.spyOn(require('@/domain/aggregates/firebase-auth/firebase-auth.service'), 'FirebaseAuthService') as any
-      )?.mockImplementation?.(() => firebaseMock);
-      firebaseMock.verifyIdToken.mockResolvedValue({
+      firebaseAuthService.verifyIdToken.mockResolvedValueOnce({
         uid: 'uid-e2e-create',
         email_verified: true,
         firebase: { sign_in_provider: 'password' },
-      });
+      } as unknown as DecodedIdToken);
+
+      const server = app.getHttpServer();
 
       const createDto = { name: 'Test User' };
 
