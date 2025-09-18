@@ -15,7 +15,6 @@ import {
   FindManyAdminUsersByIdInputDto,
 } from '@/domain/aggregates/admin-user/utils/dto';
 import { ensurePublicIdsToArray } from '@/utils/ensure-public-ids-to-array';
-import { isEmptyArray } from '@/utils/is-empty-array';
 
 @ApiTags('admin-users')
 @ApiController('admin-users')
@@ -26,10 +25,10 @@ export class AdminApiAdminUsersController {
   ) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get admin users by public IDs or all admin users' })
+  @ApiOperation({ summary: 'Get admin users by public IDs' })
   @ApiQuery({
     name: 'publicIds',
-    description: 'List of admin user public IDs (optional. if provided, only these users will be returned)',
+    description: 'List of admin user public IDs',
     type: String,
     isArray: true,
     style: 'form',
@@ -40,9 +39,7 @@ export class AdminApiAdminUsersController {
   @ApiResponse({ status: 200, description: 'Admin users found', type: AdminUsersResponseDto })
   @ApiStandardResponses()
   public findManyAdminUsers(@Query() { publicIds }: FindManyAdminUsersByIdInputDto): Promise<AdminUsersResponseDto> {
-    return isEmptyArray(publicIds)
-      ? this.adminUserQuery.findAllAdminUsers()
-      : this.adminUserQuery.findManyAdminUsersById({ publicIds: ensurePublicIdsToArray(publicIds) });
+    return this.adminUserQuery.findManyAdminUsersById({ publicIds: ensurePublicIdsToArray(publicIds) });
   }
 
   @Post()
