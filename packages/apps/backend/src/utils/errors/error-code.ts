@@ -82,6 +82,7 @@ export const ERROR_CODE_RECORDS = {
   DO0001: 'Firebase Admin credential not configured.',
   DO0002: 'Invalid FIREBASE_SERVICE_ACCOUNT JSON.',
   DO0003: 'Failed to initialize Firebase Admin SDK.',
+  DO0004: 'Invalid public IDs format.',
   DO9999: 'Unknown domain error.',
 
   // Repository Errors - Data Validation (RE00xx)
