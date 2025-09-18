@@ -2,6 +2,7 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import * as firebaseAdmin from 'firebase-admin';
 
 import { DomainError } from '@/domain/utils/domain.error';
+import { ERROR_CODE_RECORDS } from '@/utils/errors/error-code';
 
 @Injectable()
 export class FirebaseAuthProvider implements OnModuleInit {
@@ -28,21 +29,21 @@ export class FirebaseAuthProvider implements OnModuleInit {
 
       const serviceAccountJsonString = process.env.FIREBASE_SERVICE_ACCOUNT;
       if (serviceAccountJsonString === undefined || serviceAccountJsonString.trim() === '') {
-        throw new DomainError(
-          'DO0001',
-          'FIREBASE_SERVICE_ACCOUNT is not set and Application Default Credentials are not available.',
-          adcCause,
-        );
+        throw new DomainError('DO0001', ERROR_CODE_RECORDS.DO0001, adcCause);
       }
       try {
         JSON.parse(serviceAccountJsonString);
       } catch (e) {
-        throw new DomainError('DO0002', 'Invalid FIREBASE_SERVICE_ACCOUNT: JSON parse failed.', e);
+        throw new DomainError('DO0002', ERROR_CODE_RECORDS.DO0002, e);
       }
 
       const serviceAccount: unknown = JSON.parse(serviceAccountJsonString);
       if (!this.isServiceAccount(serviceAccount)) {
-        throw new DomainError('DO0002', 'Invalid FIREBASE_SERVICE_ACCOUNT format. Expecting JSON object.');
+        throw new DomainError(
+          'DO0002',
+          ERROR_CODE_RECORDS.DO0002,
+          'Invalid FIREBASE_SERVICE_ACCOUNT format. Expecting JSON object.',
+        );
       }
       const normalizedServiceAccount: firebaseAdmin.ServiceAccount = {
         projectId: serviceAccount.projectId,
@@ -55,7 +56,7 @@ export class FirebaseAuthProvider implements OnModuleInit {
           credential: firebaseAdmin.credential.cert(normalizedServiceAccount),
         });
       } catch (cause) {
-        throw new DomainError('DO0003', 'Failed to initialize Firebase Admin SDK with service account.', cause);
+        throw new DomainError('DO0003', ERROR_CODE_RECORDS.DO0003, cause);
       }
     }
   }
