@@ -3,13 +3,13 @@ import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from 
 
 import { ApiStandardResponses } from '@/apis/utils/api-default-response';
 import { ApiController } from '@/apis/utils/controllers/api.controller';
-import { ensurePublicIdsToArray } from '@/apis/utils/ensure-public-ids-to-array';
 import { UserCommandService } from '@/domain/aggregates/user/user.command.service';
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 import {
   CreateManyUsersInputDto,
   CreateUserInputDto,
   DeleteManyUsersInputDto,
+  FindManyUsersByIdInputDto,
   UpdateUserDataDto,
   UserResponseDto,
   UsersResponseDto,
@@ -36,8 +36,8 @@ export class AdminApiUsersController {
   })
   @ApiResponse({ status: 200, description: 'Users found', type: UsersResponseDto })
   @ApiStandardResponses()
-  public async findManyUsersById(@Query('publicIds') publicIds: string | string[]): Promise<UsersResponseDto> {
-    return this.userQuery.findManyUsersById({ publicIds: ensurePublicIdsToArray(publicIds) });
+  public async findManyUsersById(@Query() query: FindManyUsersByIdInputDto): Promise<UsersResponseDto> {
+    return this.userQuery.findManyUsersById({ publicIds: query.publicIds });
   }
 
   @Post()

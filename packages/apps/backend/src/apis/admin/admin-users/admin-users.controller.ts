@@ -3,7 +3,6 @@ import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from 
 
 import { ApiStandardResponses } from '@/apis/utils/api-default-response';
 import { ApiController } from '@/apis/utils/controllers/api.controller';
-import { ensurePublicIdsToArray } from '@/apis/utils/ensure-public-ids-to-array';
 import { AdminUserCommandService } from '@/domain/aggregates/admin-user/admin-user.command.service';
 import { AdminUserQueryService } from '@/domain/aggregates/admin-user/admin-user.query.service';
 import {
@@ -13,7 +12,10 @@ import {
   UpdateAdminUserInputData,
   AdminUserResponseDto,
   AdminUsersResponseDto,
+  FindManyAdminUsersByIdInputDto,
 } from '@/domain/aggregates/admin-user/utils/dto';
+import { ensurePublicIdsToArray } from '@/utils/ensure-public-ids-to-array';
+import { isEmptyArray } from '@/utils/is-empty-array';
 
 @ApiTags('admin-users')
 @ApiController('admin-users')
@@ -37,8 +39,8 @@ export class AdminApiAdminUsersController {
   })
   @ApiResponse({ status: 200, description: 'Admin users found', type: AdminUsersResponseDto })
   @ApiStandardResponses()
-  public async findManyAdminUsers(@Query('publicIds') publicIds?: string | string[]): Promise<AdminUsersResponseDto> {
-    return publicIds === undefined
+  public findManyAdminUsers(@Query() { publicIds }: FindManyAdminUsersByIdInputDto): Promise<AdminUsersResponseDto> {
+    return isEmptyArray(publicIds)
       ? this.adminUserQuery.findAllAdminUsers()
       : this.adminUserQuery.findManyAdminUsersById({ publicIds: ensurePublicIdsToArray(publicIds) });
   }
