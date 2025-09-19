@@ -181,12 +181,44 @@ describe('unit FirebaseAuthProvider', () => {
     expect(firebaseAdmin.apps[firebaseAdmin.apps.length - 1]).toBe(emulatorApp);
   });
 
+  it('uses FIREBASE_PROJECT_ID when other project vars are missing', () => {
+    expect.assertions(3);
+
+    firebaseAdmin.initializeApp.mockImplementationOnce(() => {
+      throw new Error('adc unavailable');
+    });
+    const emulatorApp = createFirebaseApp();
+    emulatorApp.auth.mockReturnValue('firebase-project-auth');
+    firebaseAdmin.initializeApp.mockImplementationOnce(() => {
+      firebaseAdmin.apps.push(emulatorApp);
+      return emulatorApp;
+    });
+
+    delete process.env.GOOGLE_CLOUD_PROJECT;
+    delete process.env.GCLOUD_PROJECT;
+    process.env.FIREBASE_PROJECT_ID = 'firebase-project';
+    process.env.FIREBASE_AUTH_EMULATOR_HOST = 'localhost:9099';
+
+    const provider = new FirebaseAuthProvider();
+
+    provider.onModuleInit();
+
+    expect(firebaseAdmin.initializeApp).toHaveBeenNthCalledWith(2, {
+      projectId: 'firebase-project',
+    });
+    expect(provider.auth()).toBe('firebase-project-auth');
+    expect(firebaseAdmin.apps[firebaseAdmin.apps.length - 1]).toBe(emulatorApp);
+  });
+
   it('throws DO0001 when service account is missing after ADC failure', () => {
     expect.assertions(2);
 
     firebaseAdmin.initializeApp.mockImplementation(() => {
       throw new Error('adc unavailable');
     });
+
+    process.env.FIREBASE_AUTH_EMULATOR_HOST = 'localhost:9099';
+    process.env.FIREBASE_PROJECT_ID = '   ';
 
     const provider = new FirebaseAuthProvider();
 
@@ -199,7 +231,7 @@ describe('unit FirebaseAuthProvider', () => {
     }
 
     expect(caught).toBeInstanceOf(DomainError);
-    expect((caught as DomainError).detail).toContain('FIREBASE_SERVICE_ACCOUNT is not set');
+    expect((caught as DomainError).detail).toContain('Firebase Admin credential not configured.');
   });
 
   it('throws DO0002 when service account JSON is invalid', () => {
@@ -221,7 +253,7 @@ describe('unit FirebaseAuthProvider', () => {
     }
 
     expect(caught).toBeInstanceOf(DomainError);
-    expect((caught as DomainError).detail).toBe('Invalid FIREBASE_SERVICE_ACCOUNT: JSON parse failed.');
+    expect((caught as DomainError).detail).toBe('Invalid FIREBASE_SERVICE_ACCOUNT JSON.');
   });
 
   it('throws DO0002 when service account JSON is missing required properties', () => {
@@ -236,7 +268,7 @@ describe('unit FirebaseAuthProvider', () => {
 
     expect(() => {
       provider.onModuleInit();
-    }).toThrow('Invalid FIREBASE_SERVICE_ACCOUNT format. Expecting JSON object.');
+    }).toThrow('Invalid FIREBASE_SERVICE_ACCOUNT JSON.');
   });
 
   it('initializes firebase with service account credentials when provided', () => {
@@ -303,7 +335,7 @@ describe('unit FirebaseAuthProvider', () => {
     }
 
     expect(caught).toBeInstanceOf(DomainError);
-    expect((caught as DomainError).detail).toBe('Failed to initialize Firebase Admin SDK with service account.');
+    expect((caught as DomainError).detail).toBe('Failed to initialize Firebase Admin SDK.');
   });
 
   it('resolves even when deleting the firebase app fails during shutdown', async () => {

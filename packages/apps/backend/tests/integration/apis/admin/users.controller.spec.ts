@@ -78,23 +78,10 @@ describe('integration AdminApiUsersController', () => {
         firebaseUid: 'uid-admin-list-3',
       });
 
-      const result = await controller.findManyUsersById([user1.publicId, user3.publicId]);
+      const result = await controller.findManyUsersById({ publicIds: [user1.publicId, user3.publicId] });
 
       expect(result.users).toHaveLength(2);
       expect(result.users.map((u) => u.publicId).sort()).toStrictEqual([user1.publicId, user3.publicId].sort());
-    });
-
-    it('should return empty array when publicIds is empty', async () => {
-      expect.assertions(1);
-
-      await controller.createUser({
-        name: 'User',
-        firebaseUid: 'uid-admin-empty',
-      });
-
-      const result = await controller.findManyUsersById([]);
-
-      expect(result.users).toHaveLength(0);
     });
   });
 

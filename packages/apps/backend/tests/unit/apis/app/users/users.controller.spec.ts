@@ -115,6 +115,30 @@ describe('appApiUsersController', () => {
       expect(result).toStrictEqual(mockResponseDto);
     });
 
+    it('should allow allowlisted providers even when email is unverified', async () => {
+      expect.assertions(2);
+
+      const createDto = { name: 'Allowlisted Provider User' } as const;
+      const mockUser = userFactory.build({ name: createDto.name, firebaseUid: 'allowlisted-uid' });
+      const responseDto = toUserResponseDto(mockUser);
+
+      firebaseAuthService.verifyIdToken.mockResolvedValue({
+        uid: mockUser.firebaseUid,
+        email_verified: false,
+        firebase: { sign_in_provider: 'google.com' },
+      } as any);
+      queryService.findUniqueUserByFirebaseUid.mockResolvedValue(null as any);
+      commandService.createUser.mockResolvedValue(responseDto);
+
+      const result = await controller.createUser('token', createDto as any);
+
+      expect(commandService.createUser).toHaveBeenCalledWith({
+        firebaseUid: mockUser.firebaseUid,
+        name: createDto.name,
+      });
+      expect(result).toBe(responseDto);
+    });
+
     it('should throw an ApiError when authentication token is missing', async () => {
       expect.assertions(1);
 

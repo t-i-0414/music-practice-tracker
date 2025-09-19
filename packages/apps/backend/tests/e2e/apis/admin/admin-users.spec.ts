@@ -71,24 +71,6 @@ describe('e2e AdminApiUsersController', () => {
   });
 
   describe('get /admin/api/admin-users', () => {
-    it('should get all admin users', async () => {
-      expect.assertions(3);
-
-      const adminUser1 = { cognitoSub: 'sub-admin1', name: 'Admin 1', role: AdminRole.VIEWER };
-      const adminUser2 = { cognitoSub: 'sub-admin2', name: 'Admin 2', role: AdminRole.ADMIN };
-
-      // Create admin users sequentially to ensure predictable order
-      await request(app.getHttpServer()).post('/admin/api/admin-users').send(adminUser1).expect(201);
-      await request(app.getHttpServer()).post('/admin/api/admin-users').send(adminUser2).expect(201);
-
-      const response = await request(app.getHttpServer()).get('/admin/api/admin-users').expect(200);
-
-      expect(response.body.adminUsers).toHaveLength(2);
-      // Results are returned in createdAt desc order (newest first)
-      expect(response.body.adminUsers[0].name).toBe('Admin 2');
-      expect(response.body.adminUsers[1].name).toBe('Admin 1');
-    });
-
     it('should get admin users by public IDs', async () => {
       expect.assertions(2);
 
@@ -289,7 +271,9 @@ describe('e2e AdminApiUsersController', () => {
         .send({ publicIds: publicIdsToDelete })
         .expect(204);
 
-      const remainingAdminUsers = await request(app.getHttpServer()).get('/admin/api/admin-users').expect(200);
+      const remainingAdminUsers = await request(app.getHttpServer())
+        .get(`/admin/api/admin-users?publicIds=${adminUsers[2].publicId}`)
+        .expect(200);
 
       expect(remainingAdminUsers.body.adminUsers).toHaveLength(1);
       expect(remainingAdminUsers.body.adminUsers[0].publicId).toBe(adminUsers[2].publicId);
@@ -339,11 +323,11 @@ describe('e2e AdminApiUsersController', () => {
 
         const response = await request(app.getHttpServer())
           .get('/admin/api/admin-users?publicIds=invalid-uuid')
-          .expect(500);
+          .expect(400);
 
         expect(response.body).toHaveProperty('statusCode');
         expect(response.body).toHaveProperty('errorCode');
-        expect(response.body.statusCode).toBe(500);
+        expect(response.body.statusCode).toBe(400);
       });
     });
 

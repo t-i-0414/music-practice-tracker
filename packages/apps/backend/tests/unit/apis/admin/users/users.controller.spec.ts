@@ -48,19 +48,6 @@ describe('adminApiUsersController', () => {
   });
 
   describe('get /admin/users', () => {
-    it('should return users when publicIds not provided', async () => {
-      expect.assertions(2);
-
-      const mockUsers = userFactory.buildMany(3);
-      const mockResponse = toUsersResponseDto(mockUsers);
-      queryService.findManyUsersById.mockResolvedValue(mockResponse);
-
-      const result = await controller.findManyUsersById([]);
-
-      expect(queryService.findManyUsersById).toHaveBeenCalledWith({ publicIds: [] });
-      expect(result).toStrictEqual(mockResponse);
-    });
-
     it('should return users by public IDs when provided', async () => {
       expect.assertions(2);
 
@@ -69,7 +56,7 @@ describe('adminApiUsersController', () => {
       const mockResponse = toUsersResponseDto(mockUsers);
       queryService.findManyUsersById.mockResolvedValue(mockResponse);
 
-      const result = await controller.findManyUsersById(publicIds);
+      const result = await controller.findManyUsersById({ publicIds });
 
       expect(queryService.findManyUsersById).toHaveBeenCalledWith({ publicIds });
       expect(result).toStrictEqual(mockResponse);
@@ -83,7 +70,7 @@ describe('adminApiUsersController', () => {
       const mockResponse = toUsersResponseDto([mockUser]);
       queryService.findManyUsersById.mockResolvedValue(mockResponse);
 
-      const result = await controller.findManyUsersById(publicId);
+      const result = await controller.findManyUsersById({ publicIds: [publicId] });
 
       expect(queryService.findManyUsersById).toHaveBeenCalledWith({ publicIds: [publicId] });
       expect(result).toStrictEqual(mockResponse);

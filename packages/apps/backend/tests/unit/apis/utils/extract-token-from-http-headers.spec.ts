@@ -1,3 +1,5 @@
+import { IncomingHttpHeaders } from 'node:http';
+
 import { extractTokenFromHttpHeaders } from '@/apis/utils/extract-token-from-http-headers';
 
 describe('unit extractTokenFromHttpHeaders', () => {
@@ -54,6 +56,26 @@ describe('unit extractTokenFromHttpHeaders', () => {
       extractTokenFromHttpHeaders({
         authorization: 'Bearer \t   \t',
       }),
+    ).toBeUndefined();
+  });
+
+  it('returns undefined when only the scheme is provided without token', () => {
+    expect.assertions(1);
+
+    expect(
+      extractTokenFromHttpHeaders({
+        authorization: 'Bearer',
+      }),
+    ).toBeUndefined();
+  });
+
+  it('returns undefined when authorization header is an array of values', () => {
+    expect.assertions(1);
+
+    expect(
+      extractTokenFromHttpHeaders({
+        authorization: ['Bearer token-value', 'Bearer another'],
+      } as unknown as IncomingHttpHeaders),
     ).toBeUndefined();
   });
 

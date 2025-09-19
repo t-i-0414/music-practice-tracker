@@ -63,30 +63,6 @@ describe('integration AdminApiAdminUsersController', () => {
   });
 
   describe('get /admin/admin-users', () => {
-    it('should return all admin users when no publicIds provided', async () => {
-      expect.assertions(2);
-
-      await controller.createAdminUser({
-        cognitoSub: 'sub-admin1',
-        name: 'Admin 1',
-        role: AdminRole.ADMIN,
-      });
-
-      await controller.createAdminUser({
-        cognitoSub: 'sub-admin2',
-        name: 'Admin 2',
-        role: AdminRole.VIEWER,
-      });
-
-      const result = await controller.findManyAdminUsers(undefined);
-
-      expect(result.adminUsers).toHaveLength(2);
-
-      const names = result.adminUsers.map((u) => u.name).sort((a, b) => a.localeCompare(b));
-
-      expect(names).toStrictEqual(['Admin 1', 'Admin 2']);
-    });
-
     it('should return specific admin users by publicIds', async () => {
       expect.assertions(2);
 
@@ -108,7 +84,7 @@ describe('integration AdminApiAdminUsersController', () => {
         role: AdminRole.ADMIN,
       });
 
-      const result = await controller.findManyAdminUsers([admin1.publicId, admin3.publicId]);
+      const result = await controller.findManyAdminUsers({ publicIds: [admin1.publicId, admin3.publicId] });
 
       expect(result.adminUsers).toHaveLength(2);
       expect(result.adminUsers.map((u) => u.publicId).sort((a, b) => a.localeCompare(b))).toStrictEqual(
@@ -191,7 +167,7 @@ describe('integration AdminApiAdminUsersController', () => {
         role: AdminRole.VIEWER,
       });
 
-      await controller.createAdminUser({
+      const admin3 = await controller.createAdminUser({
         cognitoSub: 'sub-admin3-del',
         name: 'Admin 3',
         role: AdminRole.ADMIN,
@@ -199,7 +175,7 @@ describe('integration AdminApiAdminUsersController', () => {
 
       await controller.deleteManyAdminUsers({ publicIds: [admin1.publicId, admin2.publicId] });
 
-      const remaining = await controller.findManyAdminUsers(undefined);
+      const remaining = await controller.findManyAdminUsers({ publicIds: [admin3.publicId] });
 
       expect(remaining.adminUsers).toHaveLength(1);
     });

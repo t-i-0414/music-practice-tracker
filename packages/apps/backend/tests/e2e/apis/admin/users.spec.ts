@@ -35,13 +35,15 @@ describe('e2e AdminApiUsersController', () => {
   });
 
   describe('get /admin/api/users', () => {
-    it('should get users when no publicIds provided', async () => {
-      expect.assertions(1);
+    it('should return 400 when no publicIds are provided', async () => {
+      expect.assertions(3);
 
       // When no publicIds are provided, the endpoint returns an empty array
-      const response = await request(app.getHttpServer()).get('/admin/api/users').expect(200);
+      const response = await request(app.getHttpServer()).get('/admin/api/users').expect(400);
 
-      expect(response.body.users).toHaveLength(0);
+      expect(response.body).toHaveProperty('statusCode');
+      expect(response.body).toHaveProperty('errorCode');
+      expect(response.body.statusCode).toBe(400);
     });
 
     it('should get users by public IDs', async () => {
@@ -159,11 +161,11 @@ describe('e2e AdminApiUsersController', () => {
       it('should return error with statusCode and errorCode for invalid query params', async () => {
         expect.assertions(3);
 
-        const response = await request(app.getHttpServer()).get('/admin/api/users?publicIds=invalid-uuid').expect(500);
+        const response = await request(app.getHttpServer()).get('/admin/api/users?publicIds=invalid-uuid').expect(400);
 
         expect(response.body).toHaveProperty('statusCode');
         expect(response.body).toHaveProperty('errorCode');
-        expect(response.body.statusCode).toBe(500);
+        expect(response.body.statusCode).toBe(400);
       });
     });
 
