@@ -51,10 +51,7 @@ describe('unit user dto utilities', () => {
       users[0].name = 'First User';
       users[0].firebaseUid = 'firebase-1';
       users[0].status = 'ACTIVE';
-      users[1].publicId = 'id-2';
-      users[1].name = 'Second User';
-      users[1].firebaseUid = 'firebase-2';
-      users[1].status = 'PENDING';
+
       const { users: dto } = toUsersResponseDto(users);
 
       expect(dto).toBeInstanceOf(Array);

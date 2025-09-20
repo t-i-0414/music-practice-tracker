@@ -117,4 +117,22 @@ describe('unit AdminUserQueryService', () => {
       expect(result).toStrictEqual(toAdminUsersResponseDto(mockAdminUsers));
     });
   });
+
+  describe('findManyAdminUsersByFilter', () => {
+    it('should return admin users based on filter', async () => {
+      expect.assertions(2);
+
+      const mockAdminUsers = adminUserFactory.buildMany(2);
+      const filter: Parameters<typeof service.findManyAdminUsersByFilter>[0] = {
+        where: { role: 'SUPER_ADMIN' },
+        orderBy: { createdAt: 'asc' },
+      };
+      repository.adminUser.findMany.mockResolvedValue(mockAdminUsers);
+
+      const result = await service.findManyAdminUsersByFilter(filter);
+
+      expect(repository.adminUser.findMany).toHaveBeenCalledWith(filter);
+      expect(result).toStrictEqual(mockAdminUsers);
+    });
+  });
 });

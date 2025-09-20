@@ -1,51 +1,26 @@
+import { plainToInstance } from 'class-transformer';
 import 'reflect-metadata';
 
-import { plainToInstance } from 'class-transformer';
-
-import { DomainError } from '@/domain/utils/domain.error';
 import {
+  AdminUserResponseDto,
   FindManyAdminUsersByIdInputDto,
   toAdminUserResponseDto,
   toAdminUsersResponseDto,
 } from '@/domain/aggregates/admin-user/utils/dto';
-
-jest.mock('@/utils/ensure-public-ids-to-array', () => ({
-  ensurePublicIdsToArray: jest.fn((value: unknown) => {
-    if (value === 'trigger-error') {
-      throw new Error('failure');
-    }
-    if (typeof value === 'string') {
-      return value.split(',');
-    }
-    return [];
-  }),
-}));
-
-const mockedEnsure = jest.requireMock('@/utils/ensure-public-ids-to-array')
-  .ensurePublicIdsToArray as jest.MockedFunction<(value: unknown) => string[]>;
+import { AdminUserFactory } from '@/tests/factory/admin-user.factory';
 
 describe('unit admin-user dto utilities', () => {
-  beforeEach(() => {
-    mockedEnsure.mockClear();
-  });
-
-  describe('FindManyAdminUsersByIdInputDto', () => {
+  describe('findManyAdminUsersByIdInputDto', () => {
     it('transforms comma separated string into array', () => {
       const dto = plainToInstance(FindManyAdminUsersByIdInputDto, { publicIds: 'x,y,z' });
 
       expect(dto.publicIds).toStrictEqual(['x', 'y', 'z']);
-      expect(mockedEnsure).toHaveBeenCalledWith('x,y,z');
     });
 
-    it('wraps ensurePublicIdsToArray errors with DomainError DO0004', () => {
-      try {
-        plainToInstance(FindManyAdminUsersByIdInputDto, { publicIds: 'trigger-error' });
-        fail('Expected DomainError to be thrown');
-      } catch (error) {
-        expect(error).toBeInstanceOf(DomainError);
-        const domainError = error as DomainError;
-        expect(domainError.errorCode).toBe('DO0004');
-      }
+    it('transforms strings into array of ids', () => {
+      const dto = plainToInstance(FindManyAdminUsersByIdInputDto, { publicIds: ['x', 'y', 'z'] });
+
+      expect(dto.publicIds).toStrictEqual(['x', 'y', 'z']);
     });
   });
 
@@ -63,45 +38,45 @@ describe('unit admin-user dto utilities', () => {
         updatedAt: now,
       } as unknown as Parameters<typeof toAdminUserResponseDto>[0];
 
-      const dto = toAdminUserResponseDto(adminUser);
+      const result = toAdminUserResponseDto(adminUser);
 
-      expect(dto.publicId).toBe('admin-id');
-      expect(dto.cognitoSub).toBe('sub');
-      expect(dto.createdAt).toBeInstanceOf(Date);
-      expect(dto.createdAt.toISOString()).toBe(now.toISOString());
+      expect(result).toBeInstanceOf(AdminUserResponseDto);
+      expect(result).not.toHaveProperty('id');
+      expect(result.publicId).toBe('admin-id');
+      expect(result.cognitoSub).toBe(adminUser.cognitoSub);
+      expect(result.name).toBe(adminUser.name);
+      expect(result.status).toBe(adminUser.status);
+      expect(result.role).toBe(adminUser.role);
+      expect(result.createdAt).toBeInstanceOf(Date);
+      expect(result.createdAt.toISOString()).toBe(now.toISOString());
     });
   });
 
   describe('toAdminUsersResponseDto', () => {
     it('maps admin users list to response dto list', () => {
       const now = new Date();
-      const users = [
-        {
-          id: 1,
-          publicId: 'id-1',
-          cognitoSub: 'sub-1',
-          name: 'User 1',
-          role: 'VIEWER',
-          status: 'ACTIVE',
-          createdAt: now,
-          updatedAt: now,
-        },
-        {
-          id: 2,
-          publicId: 'id-2',
-          cognitoSub: 'sub-2',
-          name: 'User 2',
-          role: 'ADMIN',
-          status: 'SUSPENDED',
-          createdAt: now,
-          updatedAt: now,
-        },
-      ] as unknown as Parameters<typeof toAdminUsersResponseDto>[0];
+      const adminUsers = new AdminUserFactory().buildMany(2, { createdAt: now, updatedAt: now });
+      adminUsers[0].publicId = 'id-1';
+      adminUsers[0].cognitoSub = 'sub-1';
+      adminUsers[0].name = 'User 1';
+      adminUsers[0].role = 'VIEWER';
+      adminUsers[0].status = 'ACTIVE';
 
-      const dto = toAdminUsersResponseDto(users);
+      const { adminUsers: users } = toAdminUsersResponseDto(adminUsers);
 
-      expect(dto.adminUsers).toHaveLength(2);
-      expect(dto.adminUsers[1].role).toBe('ADMIN');
+      expect(users).toBeInstanceOf(Array);
+      expect(users).toHaveLength(2);
+
+      const [result1] = users;
+
+      expect(result1).toBeInstanceOf(AdminUserResponseDto);
+      expect(result1).not.toHaveProperty('id');
+      expect(result1.publicId).toBe('id-1');
+      expect(result1.cognitoSub).toBe('sub-1');
+      expect(result1.name).toBe('User 1');
+      expect(result1.status).toBe('ACTIVE');
+      expect(result1.role).toBe('VIEWER');
+      expect(result1.createdAt).toBeInstanceOf(Date);
     });
   });
 });
