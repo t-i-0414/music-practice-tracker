@@ -1,42 +1,48 @@
-import { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 
 import { UserCommandService } from '@/domain/aggregates/user/user.command.service';
-import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 import { toUserResponseDto, toUsersResponseDto } from '@/domain/aggregates/user/utils/dto';
 import { RepositoryService } from '@/repository/repository.service';
 import { UserFactory } from '@/tests/factory';
-import { createMockUserQueryService, createMockUserRepository } from '@/tests/unit/domain/helpers/domain-service-mocks';
 
 describe('unit UserCommandService', () => {
   let service: UserCommandService;
-  let repository: ReturnType<typeof createMockUserRepository>;
-  let _queryService: jest.Mocked<UserQueryService>;
+  let repository: {
+    user: {
+      create: jest.Mock;
+      createManyAndReturn: jest.Mock;
+      update: jest.Mock;
+      delete: jest.Mock;
+      deleteMany: jest.Mock;
+    };
+  };
   let userFactory: UserFactory;
-  let module: TestingModule;
 
   beforeEach(async () => {
     userFactory = new UserFactory();
 
-    repository = createMockUserRepository();
-    const mockQueryService = createMockUserQueryService();
+    const mockRepository = {
+      user: {
+        create: jest.fn(),
+        createManyAndReturn: jest.fn(),
+        update: jest.fn(),
+        delete: jest.fn(),
+        deleteMany: jest.fn(),
+      },
+    };
 
-    const { Test } = await import('@nestjs/testing');
-    module = await Test.createTestingModule({
+    const module = await Test.createTestingModule({
       providers: [
         UserCommandService,
         {
           provide: RepositoryService,
-          useValue: repository,
-        },
-        {
-          provide: UserQueryService,
-          useValue: mockQueryService,
+          useValue: mockRepository,
         },
       ],
     }).compile();
 
     service = module.get<UserCommandService>(UserCommandService);
-    _queryService = module.get(UserQueryService);
+    repository = module.get(RepositoryService);
   });
 
   afterEach(() => {
@@ -48,13 +54,12 @@ describe('unit UserCommandService', () => {
       expect.assertions(2);
 
       const mockUser = userFactory.build();
-      const createDto = {
-        name: mockUser.name,
-        firebaseUid: 'uid-unit-create',
-      };
-
       repository.user.create.mockResolvedValue(mockUser);
 
+      const createDto = {
+        name: mockUser.name,
+        firebaseUid: mockUser.firebaseUid,
+      };
       const result = await service.createUser(createDto);
 
       expect(repository.user.create).toHaveBeenCalledWith({ data: createDto });
@@ -82,19 +87,35 @@ describe('unit UserCommandService', () => {
       expect.assertions(2);
 
       const mockUsers = userFactory.buildMany(3);
+      repository.user.createManyAndReturn.mockResolvedValue(mockUsers);
+
       const createDto = {
         users: mockUsers.map((user, idx) => ({
           name: user.name,
           firebaseUid: `uid-unit-bulk-${idx + 1}`,
         })),
       };
-
-      repository.user.createManyAndReturn.mockResolvedValue(mockUsers);
-
       const result = await service.createManyAndReturnUsers(createDto);
 
       expect(repository.user.createManyAndReturn).toHaveBeenCalledWith({ data: createDto.users });
       expect(result).toStrictEqual(toUsersResponseDto(mockUsers));
+    });
+
+    it('should throw error on database failure', async () => {
+      expect.assertions(2);
+
+      const createDto = {
+        users: [
+          { name: 'User 1', firebaseUid: 'uid-unit-bulk-1' },
+          { name: 'User 2', firebaseUid: 'uid-unit-bulk-2' },
+        ],
+      };
+
+      const prismaError = new Error('Database error');
+      repository.user.createManyAndReturn.mockRejectedValue(prismaError);
+
+      await expect(service.createManyAndReturnUsers(createDto)).rejects.toThrow(prismaError);
+      expect(repository.user.createManyAndReturn).toHaveBeenCalledWith({ data: createDto.users });
     });
   });
 
@@ -105,7 +126,6 @@ describe('unit UserCommandService', () => {
       const mockUser = userFactory.build();
       const { publicId } = mockUser;
       const updateData = { name: 'Updated Name' };
-
       const updatedUser = { ...mockUser, ...updateData };
       repository.user.update.mockResolvedValue(updatedUser);
 
@@ -171,6 +191,20 @@ describe('unit UserCommandService', () => {
 
       await service.deleteManyUsersById({ publicIds });
 
+      expect(repository.user.deleteMany).toHaveBeenCalledWith({
+        where: { publicId: { in: publicIds } },
+      });
+    });
+
+    it('should throw error on database failure', async () => {
+      expect.assertions(2);
+
+      const publicIds = ['id1', 'id2', 'id3'];
+
+      const prismaError = new Error('Database error');
+      repository.user.deleteMany.mockRejectedValue(prismaError);
+
+      await expect(service.deleteManyUsersById({ publicIds })).rejects.toThrow(prismaError);
       expect(repository.user.deleteMany).toHaveBeenCalledWith({
         where: { publicId: { in: publicIds } },
       });

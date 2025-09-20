@@ -13,10 +13,6 @@ export function createMockQueryService<T extends readonly string[]>(methods: T):
   return service as Record<T[number], MockFunction>;
 }
 
-export function createMockCommandService<T extends readonly string[]>(methods: T): Record<T[number], MockFunction> {
-  return createMockQueryService(methods);
-}
-
 export function createMockRepository<T extends Record<string, readonly string[]>>(
   models: T,
 ): { [K in keyof T]: Record<T[K][number], MockFunction> } {
