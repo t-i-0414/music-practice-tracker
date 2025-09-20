@@ -1,8 +1,4 @@
-import {
-  createMockQueryService,
-  createMockCommandService,
-  createMockRepository,
-} from '@/tests/unit/helpers/mock-service.helper';
+import { createMockQueryService, createMockCommandService, createMockRepository } from './mock-service.helper';
 
 // User Service Mocks
 export const USER_QUERY_METHODS = [

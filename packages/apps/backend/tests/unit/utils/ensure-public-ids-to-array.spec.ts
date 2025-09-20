@@ -15,6 +15,26 @@ describe('unit ensurePublicIdsToArray', () => {
     });
   });
 
+  describe('non-string inputs', () => {
+    it('should return empty array for number', () => {
+      const result = ensurePublicIdsToArray(123);
+
+      expect(result).toStrictEqual([]);
+    });
+
+    it('should return empty array for object', () => {
+      const result = ensurePublicIdsToArray({});
+
+      expect(result).toStrictEqual([]);
+    });
+
+    it('should return empty array for boolean', () => {
+      const result = ensurePublicIdsToArray(true);
+
+      expect(result).toStrictEqual([]);
+    });
+  });
+
   describe('string inputs', () => {
     it('should handle single string value', () => {
       const result = ensurePublicIdsToArray('id1');

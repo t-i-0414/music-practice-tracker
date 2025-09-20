@@ -114,6 +114,16 @@ describe('unit UserQueryService', () => {
       expect(repository.user.findUniqueOrThrow).toHaveBeenCalledWith({ where: { firebaseUid: mockUser.firebaseUid } });
       expect(result).toStrictEqual(toUserResponseDto(mockUser));
     });
+
+    it('throws an error when the user is not found', async () => {
+      expect.assertions(2);
+
+      const error = new Error('No User found');
+      repository.user.findUniqueOrThrow.mockRejectedValue(error);
+
+      await expect(service.findUniqueOrThrowUserByFirebaseUid('missing-uid')).rejects.toThrow(error);
+      expect(repository.user.findUniqueOrThrow).toHaveBeenCalledWith({ where: { firebaseUid: 'missing-uid' } });
+    });
   });
 
   describe('findUniqueUserByFirebaseUid', () => {
