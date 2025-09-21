@@ -21,6 +21,7 @@ const config: Config = {
     '!<rootDir>/src/**/*.spec.ts',
     '!<rootDir>/src/**/*.test.ts',
     '!<rootDir>/src/**/main.ts',
+    '!<rootDir>/src/**/*.module.ts',
     '!<rootDir>/src/**/constants.ts',
     '!<rootDir>/src/**/dto.ts',
     '!<rootDir>/src/generated/**',
