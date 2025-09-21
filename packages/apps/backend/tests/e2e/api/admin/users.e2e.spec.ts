@@ -136,6 +136,15 @@ describe('e2e Admin API /api/users', () => {
       expect(userInDb).not.toBeNull();
     });
 
+    it('should return 400 when payload validation fails', async () => {
+      expect.assertions(2);
+
+      const response = await server().post('/api/users').send({ firebaseUid: '', name: '' }).expect(400);
+
+      expect(response.body.statusCode).toBe(400);
+      expect(response.body.errorCode).toBe('AP0400');
+    });
+
     it('should return 409 on unique constraint violation', async () => {
       expect.assertions(2);
 
@@ -155,13 +164,16 @@ describe('e2e Admin API /api/users', () => {
 
   describe('delete /api/users', () => {
     it('should delete multiple users', async () => {
-      expect.assertions(2);
+      expect.assertions(4);
 
       const userA = await databaseHelper.client.user.create({
         data: userFactory.build({ name: 'Delete A' }),
       });
       const userB = await databaseHelper.client.user.create({
         data: userFactory.build({ name: 'Delete B' }),
+      });
+      const userC = await databaseHelper.client.user.create({
+        data: userFactory.build({ name: 'Keep C' }),
       });
 
       await server()
@@ -171,7 +183,8 @@ describe('e2e Admin API /api/users', () => {
 
       const remaining = await databaseHelper.client.user.findMany();
 
-      expect(remaining).toHaveLength(0);
+      expect(remaining).toHaveLength(1);
+      expect(remaining[0].publicId).toBe(userC.publicId);
 
       // Deleting non-existent IDs should still succeed
       await server()
@@ -180,13 +193,23 @@ describe('e2e Admin API /api/users', () => {
         .expect(204);
       const after = await databaseHelper.client.user.findMany();
 
-      expect(after).toHaveLength(0);
+      expect(after).toHaveLength(1);
+      expect(after[0].publicId).toBe(userC.publicId);
     });
 
     it('should validate request body', async () => {
       expect.assertions(2);
 
       const response = await server().delete('/api/users').send({ publicIds: [] }).expect(400);
+
+      expect(response.body.statusCode).toBe(400);
+      expect(response.body.errorCode).toBe('AP0400');
+    });
+
+    it('should return 400 when publicIds contain invalid UUIDs', async () => {
+      expect.assertions(2);
+
+      const response = await server().delete('/api/users').send({ publicIds: ['not-a-uuid'] }).expect(400);
 
       expect(response.body.statusCode).toBe(400);
       expect(response.body.errorCode).toBe('AP0400');
@@ -212,6 +235,18 @@ describe('e2e Admin API /api/users', () => {
       const count = await databaseHelper.client.user.count();
 
       expect(count).toBe(2);
+    });
+
+    it('should return 400 when bulk payload is invalid', async () => {
+      expect.assertions(2);
+
+      const response = await server()
+        .post('/api/users/bulk')
+        .send({ users: [{ firebaseUid: '', name: '' }] })
+        .expect(400);
+
+      expect(response.body.statusCode).toBe(400);
+      expect(response.body.errorCode).toBe('AP0400');
     });
 
     it('should fail entire batch on duplicate entry', async () => {
@@ -287,6 +322,43 @@ describe('e2e Admin API /api/users', () => {
       expect(userInDb?.status).toBe(UserStatus.SUSPENDED);
     });
 
+    it('should return 404 when updating a non-existent user', async () => {
+      expect.assertions(2);
+
+      const response = await server()
+        .put(`/api/users/${randomUUID()}`)
+        .send({ name: 'Missing User' })
+        .expect(404);
+
+      expect(response.body.statusCode).toBe(404);
+      expect(response.body.errorCode).toBe('RE0002');
+    });
+
+    it('should return 400 when update payload is invalid', async () => {
+      expect.assertions(2);
+
+      const user = await databaseHelper.client.user.create({
+        data: userFactory.build({ name: 'Validate Me' }),
+      });
+
+      const response = await server()
+        .put(`/api/users/${user.publicId}`)
+        .send({ status: 'INVALID_STATUS' })
+        .expect(400);
+
+      expect(response.body.statusCode).toBe(400);
+      expect(response.body.errorCode).toBe('AP0400');
+    });
+
+    it('should return 400 for invalid uuid on update', async () => {
+      expect.assertions(2);
+
+      const response = await server().put('/api/users/not-a-uuid').send({ name: 'Invalid' }).expect(400);
+
+      expect(response.body.statusCode).toBe(400);
+      expect(response.body.errorCode).toBe('AP0400');
+    });
+
     it('should delete a user', async () => {
       expect.assertions(1);
 
@@ -299,6 +371,24 @@ describe('e2e Admin API /api/users', () => {
       const remaining = await databaseHelper.client.user.findUnique({ where: { publicId: user.publicId } });
 
       expect(remaining).toBeNull();
+    });
+
+    it('should return 404 when deleting a non-existent user', async () => {
+      expect.assertions(2);
+
+      const response = await server().delete(`/api/users/${randomUUID()}`).expect(404);
+
+      expect(response.body.statusCode).toBe(404);
+      expect(response.body.errorCode).toBe('RE0002');
+    });
+
+    it('should return 400 for invalid uuid on delete', async () => {
+      expect.assertions(2);
+
+      const response = await server().delete('/api/users/not-a-uuid').expect(400);
+
+      expect(response.body.statusCode).toBe(400);
+      expect(response.body.errorCode).toBe('AP0400');
     });
   });
 });

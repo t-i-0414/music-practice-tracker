@@ -77,6 +77,18 @@ describe('e2e Admin API /api/admin-users', () => {
       expect(adminInDb).not.toBeNull();
     });
 
+    it('should return 400 when payload validation fails', async () => {
+      expect.assertions(2);
+
+      const response = await server()
+        .post('/api/admin-users')
+        .send({ cognitoSub: '', name: '', role: 'NOT_A_ROLE' })
+        .expect(400);
+
+      expect(response.body.statusCode).toBe(400);
+      expect(response.body.errorCode).toBe('AP0400');
+    });
+
     it('should return 409 on duplicate cognitoSub', async () => {
       expect.assertions(2);
 
@@ -96,7 +108,7 @@ describe('e2e Admin API /api/admin-users', () => {
 
   describe('delete /api/admin-users', () => {
     it('should delete requested admin users', async () => {
-      expect.assertions(1);
+      expect.assertions(2);
 
       const admin1 = await databaseHelper.client.adminUser.create({
         data: adminUserFactory.build({ name: 'Delete Admin 1' }),
@@ -104,15 +116,31 @@ describe('e2e Admin API /api/admin-users', () => {
       const admin2 = await databaseHelper.client.adminUser.create({
         data: adminUserFactory.build({ name: 'Delete Admin 2' }),
       });
+      const admin3 = await databaseHelper.client.adminUser.create({
+        data: adminUserFactory.build({ name: 'Keep Admin 3' }),
+      });
 
       await server()
         .delete('/api/admin-users')
         .send({ publicIds: [admin1.publicId, admin2.publicId] })
         .expect(204);
 
-      const remaining = await databaseHelper.client.adminUser.count();
+      const remainingAdmins = await databaseHelper.client.adminUser.findMany();
 
-      expect(remaining).toBe(0);
+      expect(remainingAdmins).toHaveLength(1);
+      expect(remainingAdmins[0].publicId).toBe(admin3.publicId);
+    });
+
+    it('should return 400 when publicIds payload is invalid', async () => {
+      expect.assertions(2);
+
+      const response = await server()
+        .delete('/api/admin-users')
+        .send({ publicIds: ['not-a-uuid'] })
+        .expect(400);
+
+      expect(response.body.statusCode).toBe(400);
+      expect(response.body.errorCode).toBe('AP0400');
     });
   });
 
@@ -133,6 +161,18 @@ describe('e2e Admin API /api/admin-users', () => {
       const count = await databaseHelper.client.adminUser.count();
 
       expect(count).toBe(2);
+    });
+
+    it('should return 400 when bulk payload is invalid', async () => {
+      expect.assertions(2);
+
+      const response = await server()
+        .post('/api/admin-users/bulk')
+        .send({ adminUsers: [{ cognitoSub: '', name: '', role: 'NOT_A_ROLE' }] })
+        .expect(400);
+
+      expect(response.body.statusCode).toBe(400);
+      expect(response.body.errorCode).toBe('AP0400');
     });
 
     it('should fail the batch on duplicate entries', async () => {
@@ -221,6 +261,27 @@ describe('e2e Admin API /api/admin-users', () => {
       expect(response.body.errorCode).toBe('AP0400');
     });
 
+    it('should return 404 when updating a non-existent admin user', async () => {
+      expect.assertions(2);
+
+      const response = await server()
+        .put('/api/admin-users/11111111-1111-1111-1111-111111111111')
+        .send({ name: 'Missing User' })
+        .expect(404);
+
+      expect(response.body.statusCode).toBe(404);
+      expect(response.body.errorCode).toBe('RE0002');
+    });
+
+    it('should return 400 for invalid uuid on update', async () => {
+      expect.assertions(2);
+
+      const response = await server().put('/api/admin-users/not-a-uuid').send({ name: 'Invalid' }).expect(400);
+
+      expect(response.body.statusCode).toBe(400);
+      expect(response.body.errorCode).toBe('AP0400');
+    });
+
     it('should delete an admin user', async () => {
       expect.assertions(1);
 
@@ -233,6 +294,26 @@ describe('e2e Admin API /api/admin-users', () => {
       const inDb = await databaseHelper.client.adminUser.findUnique({ where: { publicId: adminUser.publicId } });
 
       expect(inDb).toBeNull();
+    });
+
+    it('should return 404 when deleting a non-existent admin user', async () => {
+      expect.assertions(2);
+
+      const response = await server()
+        .delete('/api/admin-users/22222222-2222-2222-2222-222222222222')
+        .expect(404);
+
+      expect(response.body.statusCode).toBe(404);
+      expect(response.body.errorCode).toBe('RE0002');
+    });
+
+    it('should return 400 for invalid uuid on delete', async () => {
+      expect.assertions(2);
+
+      const response = await server().delete('/api/admin-users/not-a-uuid').expect(400);
+
+      expect(response.body.statusCode).toBe(400);
+      expect(response.body.errorCode).toBe('AP0400');
     });
   });
 });
