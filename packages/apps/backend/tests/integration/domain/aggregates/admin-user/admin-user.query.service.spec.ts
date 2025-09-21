@@ -1,11 +1,12 @@
-import { setupAdminUserQueryServiceIntegration } from '../../helpers/domain-integration.helper';
+import { Test, TestingModule } from '@nestjs/testing';
 
 import { AdminUserQueryService } from '@/domain/aggregates/admin-user/admin-user.query.service';
 import { AdminRole } from '@/generated/prisma';
+import { RepositoryService } from '@/repository/repository.service';
 import { DatabaseHelper } from '@/tests/helpers/database.helper';
 
 describe('integration AdminUserQueryService', () => {
-  let service: AdminUserQueryService;
+  let adminUserQueryService: AdminUserQueryService;
   let databaseHelper: DatabaseHelper;
   let repository: any;
 
@@ -17,8 +18,17 @@ describe('integration AdminUserQueryService', () => {
   beforeEach(async () => {
     await databaseHelper.cleanDatabase();
 
-    const { service: svc } = await setupAdminUserQueryServiceIntegration(databaseHelper);
-    service = svc;
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        AdminUserQueryService,
+        {
+          provide: RepositoryService,
+          useValue: databaseHelper.client,
+        },
+      ],
+    }).compile();
+
+    adminUserQueryService = module.get<AdminUserQueryService>(AdminUserQueryService);
     repository = databaseHelper.client;
   });
 
@@ -38,7 +48,7 @@ describe('integration AdminUserQueryService', () => {
         },
       });
 
-      const result = await service.findUniqueOrThrowAdminUser({ publicId: created.publicId });
+      const result = await adminUserQueryService.findUniqueOrThrowAdminUser({ publicId: created.publicId });
 
       expect(result.cognitoSub).toBe('sub-find');
       expect(result.name).toBe('Find Me');
@@ -49,7 +59,7 @@ describe('integration AdminUserQueryService', () => {
       expect.assertions(1);
 
       await expect(
-        service.findUniqueOrThrowAdminUser({ publicId: '00000000-0000-0000-0000-000000000000' }),
+        adminUserQueryService.findUniqueOrThrowAdminUser({ publicId: '00000000-0000-0000-0000-000000000000' }),
       ).rejects.toThrow('No record was found for a query');
     });
   });
@@ -82,7 +92,7 @@ describe('integration AdminUserQueryService', () => {
         },
       });
 
-      const result = await service.findManyAdminUsersById({
+      const result = await adminUserQueryService.findManyAdminUsersById({
         publicIds: [admin1.publicId, admin2.publicId],
       });
 
@@ -95,7 +105,7 @@ describe('integration AdminUserQueryService', () => {
     it('should return empty array for non-existent publicIds', async () => {
       expect.assertions(1);
 
-      const result = await service.findManyAdminUsersById({
+      const result = await adminUserQueryService.findManyAdminUsersById({
         publicIds: ['00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002'],
       });
 
@@ -113,7 +123,7 @@ describe('integration AdminUserQueryService', () => {
         },
       });
 
-      const result = await service.findManyAdminUsersById({
+      const result = await adminUserQueryService.findManyAdminUsersById({
         publicIds: [admin.publicId, '00000000-0000-0000-0000-000000000000'],
       });
 
@@ -124,7 +134,7 @@ describe('integration AdminUserQueryService', () => {
     it('should handle empty publicIds array', async () => {
       expect.assertions(1);
 
-      const result = await service.findManyAdminUsersById({ publicIds: [] });
+      const result = await adminUserQueryService.findManyAdminUsersById({ publicIds: [] });
 
       expect(result.adminUsers).toHaveLength(0);
     });
@@ -166,7 +176,7 @@ describe('integration AdminUserQueryService', () => {
         },
       });
 
-      const result = await service.findAllAdminUsers();
+      const result = await adminUserQueryService.findAllAdminUsers();
 
       expect(result.adminUsers).toHaveLength(3);
       expect(result.adminUsers[0].name).toBe('Third Admin');
@@ -177,7 +187,7 @@ describe('integration AdminUserQueryService', () => {
     it('should return empty array when no admin users exist', async () => {
       expect.assertions(1);
 
-      const result = await service.findAllAdminUsers();
+      const result = await adminUserQueryService.findAllAdminUsers();
 
       expect(result.adminUsers).toHaveLength(0);
     });
@@ -199,14 +209,14 @@ describe('integration AdminUserQueryService', () => {
     it('should filter admin users by role', async () => {
       expect.assertions(3);
 
-      const viewers = await service.findManyAdminUsersByFilter({
+      const viewers = await adminUserQueryService.findManyAdminUsersByFilter({
         where: { role: AdminRole.VIEWER },
       });
 
       expect(viewers).toHaveLength(2);
       expect(viewers.every((u) => u.role === AdminRole.VIEWER)).toBe(true);
 
-      const admins = await service.findManyAdminUsersByFilter({
+      const admins = await adminUserQueryService.findManyAdminUsersByFilter({
         where: { role: AdminRole.ADMIN },
       });
 
@@ -216,7 +226,7 @@ describe('integration AdminUserQueryService', () => {
     it('should filter admin users by name pattern', async () => {
       expect.assertions(2);
 
-      const result = await service.findManyAdminUsersByFilter({
+      const result = await adminUserQueryService.findManyAdminUsersByFilter({
         where: {
           name: { contains: 'Admin' },
         },
@@ -229,7 +239,7 @@ describe('integration AdminUserQueryService', () => {
     it('should apply pagination with skip and take', async () => {
       expect.assertions(3);
 
-      const firstPage = await service.findManyAdminUsersByFilter({
+      const firstPage = await adminUserQueryService.findManyAdminUsersByFilter({
         skip: 0,
         take: 2,
         orderBy: { name: 'asc' },
@@ -237,7 +247,7 @@ describe('integration AdminUserQueryService', () => {
 
       expect(firstPage).toHaveLength(2);
 
-      const secondPage = await service.findManyAdminUsersByFilter({
+      const secondPage = await adminUserQueryService.findManyAdminUsersByFilter({
         skip: 2,
         take: 2,
         orderBy: { name: 'asc' },
@@ -245,7 +255,7 @@ describe('integration AdminUserQueryService', () => {
 
       expect(secondPage).toHaveLength(2);
 
-      const thirdPage = await service.findManyAdminUsersByFilter({
+      const thirdPage = await adminUserQueryService.findManyAdminUsersByFilter({
         skip: 4,
         take: 2,
         orderBy: { name: 'asc' },
@@ -257,7 +267,7 @@ describe('integration AdminUserQueryService', () => {
     it('should order admin users by name', async () => {
       expect.assertions(3);
 
-      const result = await service.findManyAdminUsersByFilter({
+      const result = await adminUserQueryService.findManyAdminUsersByFilter({
         orderBy: { name: 'asc' },
       });
 
@@ -269,7 +279,7 @@ describe('integration AdminUserQueryService', () => {
     it('should combine multiple filters', async () => {
       expect.assertions(2);
 
-      const result = await service.findManyAdminUsersByFilter({
+      const result = await adminUserQueryService.findManyAdminUsersByFilter({
         where: {
           AND: [{ role: { not: AdminRole.SUPER_ADMIN } }, { name: { contains: 'Viewer' } }],
         },
@@ -283,18 +293,18 @@ describe('integration AdminUserQueryService', () => {
     it('should handle cursor-based pagination', async () => {
       expect.assertions(3);
 
-      await service.findManyAdminUsersByFilter({
+      await adminUserQueryService.findManyAdminUsersByFilter({
         orderBy: { name: 'asc' },
       });
 
-      const firstBatch = await service.findManyAdminUsersByFilter({
+      const firstBatch = await adminUserQueryService.findManyAdminUsersByFilter({
         take: 2,
         orderBy: { name: 'asc' },
       });
 
       expect(firstBatch).toHaveLength(2);
 
-      const secondBatch = await service.findManyAdminUsersByFilter({
+      const secondBatch = await adminUserQueryService.findManyAdminUsersByFilter({
         take: 2,
         cursor: { publicId: firstBatch[1].publicId },
         skip: 1,
