@@ -24,7 +24,7 @@ describe('e2e App API /api/users', () => {
   beforeAll(async () => {
     databaseHelper = new DatabaseHelper();
     await databaseHelper.connect();
-    await resetFirebaseAuthEmulator();
+    resetFirebaseAuthEmulator();
 
     app = await createAppApiNestApplication(databaseHelper);
     firebaseAuthService = app.get(FirebaseAuthService);
@@ -32,7 +32,7 @@ describe('e2e App API /api/users', () => {
 
   beforeEach(async () => {
     await databaseHelper.cleanDatabase();
-    await resetFirebaseAuthEmulator();
+    resetFirebaseAuthEmulator();
     jest.restoreAllMocks();
   });
 
@@ -45,7 +45,7 @@ describe('e2e App API /api/users', () => {
     it('should create a user when firebase email is verified', async () => {
       expect.assertions(5);
 
-      const firebaseUser = await createVerifiedFirebaseUser();
+      const firebaseUser = createVerifiedFirebaseUser();
 
       const response = await server()
         .post('/api/users')
@@ -68,7 +68,7 @@ describe('e2e App API /api/users', () => {
     it('should be idempotent for the same firebase UID', async () => {
       expect.assertions(2);
 
-      const firebaseUser = await createVerifiedFirebaseUser();
+      const firebaseUser = createVerifiedFirebaseUser();
 
       const payload = buildCreateUserPayload(firebaseUser.localId, 'Duplicated User');
       const first = await server()
@@ -102,7 +102,7 @@ describe('e2e App API /api/users', () => {
     it('should return 403 when email is not verified and provider is not allowlisted', async () => {
       expect.assertions(2);
 
-      const firebaseUser = await createFirebaseEmailUser({ emailVerified: false });
+      const firebaseUser = createFirebaseEmailUser({ emailVerified: false });
 
       const response = await server()
         .post('/api/users')
@@ -117,7 +117,7 @@ describe('e2e App API /api/users', () => {
     it('should allow creation when provider is in allowlist even if email is not verified', async () => {
       expect.assertions(2);
 
-      const firebaseUser = await createFirebaseEmailUser({ emailVerified: false });
+      const firebaseUser = createFirebaseEmailUser({ emailVerified: false });
 
       jest.spyOn(firebaseAuthService, 'verifyIdToken').mockResolvedValueOnce({
         uid: firebaseUser.localId,
@@ -144,7 +144,7 @@ describe('e2e App API /api/users', () => {
     it('should return 400 when body validation fails', async () => {
       expect.assertions(2);
 
-      const firebaseUser = await createVerifiedFirebaseUser();
+      const firebaseUser = createVerifiedFirebaseUser();
 
       const response = await server()
         .post('/api/users')
@@ -161,7 +161,7 @@ describe('e2e App API /api/users', () => {
     it('should return the current user', async () => {
       expect.assertions(3);
 
-      const firebaseUser = await createVerifiedFirebaseUser();
+      const firebaseUser = createVerifiedFirebaseUser();
       const user = userFactory.build({
         firebaseUid: firebaseUser.localId,
         name: 'Current User',
@@ -196,7 +196,7 @@ describe('e2e App API /api/users', () => {
     it('should return 404 when user does not exist in DB', async () => {
       expect.assertions(2);
 
-      const firebaseUser = await createVerifiedFirebaseUser();
+      const firebaseUser = createVerifiedFirebaseUser();
 
       const response = await server()
         .get('/api/users/me')
@@ -212,7 +212,7 @@ describe('e2e App API /api/users', () => {
     it('should update user name and status', async () => {
       expect.assertions(3);
 
-      const firebaseUser = await createVerifiedFirebaseUser();
+      const firebaseUser = createVerifiedFirebaseUser();
       const user = await databaseHelper.client.user.create({
         data: {
           firebaseUid: firebaseUser.localId,
@@ -235,7 +235,7 @@ describe('e2e App API /api/users', () => {
     it('should reject payload with additional properties', async () => {
       expect.assertions(2);
 
-      const firebaseUser = await createVerifiedFirebaseUser();
+      const firebaseUser = createVerifiedFirebaseUser();
       await databaseHelper.client.user.create({
         data: {
           firebaseUid: firebaseUser.localId,
@@ -259,7 +259,7 @@ describe('e2e App API /api/users', () => {
     it('should delete user and call Firebase delete', async () => {
       expect.assertions(3);
 
-      const firebaseUser = await createVerifiedFirebaseUser();
+      const firebaseUser = createVerifiedFirebaseUser();
       await databaseHelper.client.user.create({
         data: {
           firebaseUid: firebaseUser.localId,
@@ -286,7 +286,7 @@ describe('e2e App API /api/users', () => {
     it('should still return 204 when Firebase reports user-not-found', async () => {
       expect.assertions(3);
 
-      const firebaseUser = await createVerifiedFirebaseUser();
+      const firebaseUser = createVerifiedFirebaseUser();
       await databaseHelper.client.user.create({
         data: {
           firebaseUid: firebaseUser.localId,
@@ -316,7 +316,7 @@ describe('e2e App API /api/users', () => {
     it('should fetch another user by publicId', async () => {
       expect.assertions(2);
 
-      const currentFirebaseUser = await createVerifiedFirebaseUser();
+      const currentFirebaseUser = createVerifiedFirebaseUser();
       await databaseHelper.client.user.create({
         data: {
           firebaseUid: currentFirebaseUser.localId,
@@ -345,7 +345,7 @@ describe('e2e App API /api/users', () => {
     it('should return 400 for invalid uuid path parameter', async () => {
       expect.assertions(2);
 
-      const firebaseUser = await createVerifiedFirebaseUser();
+      const firebaseUser = createVerifiedFirebaseUser();
       await databaseHelper.client.user.create({
         data: {
           firebaseUid: firebaseUser.localId,
@@ -366,7 +366,7 @@ describe('e2e App API /api/users', () => {
     it('should return 404 when user does not exist', async () => {
       expect.assertions(2);
 
-      const firebaseUser = await createVerifiedFirebaseUser();
+      const firebaseUser = createVerifiedFirebaseUser();
       await databaseHelper.client.user.create({
         data: {
           firebaseUid: firebaseUser.localId,

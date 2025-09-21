@@ -1,6 +1,6 @@
 import { createFirebaseEmailUser, FirebaseEmulatorUser } from './firebase-emulator.helper';
 
-export async function createVerifiedFirebaseUser(): Promise<FirebaseEmulatorUser> {
+export function createVerifiedFirebaseUser(): FirebaseEmulatorUser {
   return createFirebaseEmailUser({ emailVerified: true });
 }
 

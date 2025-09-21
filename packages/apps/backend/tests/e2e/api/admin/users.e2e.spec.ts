@@ -19,14 +19,14 @@ describe('e2e Admin API /api/users', () => {
   beforeAll(async () => {
     databaseHelper = new DatabaseHelper();
     await databaseHelper.connect();
-    await resetFirebaseAuthEmulator();
+    resetFirebaseAuthEmulator();
 
     app = await createAdminApiNestApplication(databaseHelper);
   });
 
   beforeEach(async () => {
     await databaseHelper.cleanDatabase();
-    await resetFirebaseAuthEmulator();
+    resetFirebaseAuthEmulator();
     jest.restoreAllMocks();
   });
 
