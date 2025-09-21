@@ -10,7 +10,7 @@ import {
 } from '@/domain/aggregates/admin-user/utils/dto';
 import { AdminRole } from '@/generated/prisma';
 import { AdminUserFactory } from '@/tests/factory';
-import { resetAllMocks } from '@/tests/unit/apis/helpers';
+import { resetAllMocks } from '@/tests/helpers/mock-service.helper';
 
 describe('controller AdminApiAdminUsersController', () => {
   let controller: AdminApiAdminUsersController;
