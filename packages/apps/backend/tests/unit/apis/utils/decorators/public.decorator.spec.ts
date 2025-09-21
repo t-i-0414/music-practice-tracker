@@ -1,4 +1,3 @@
-/* eslint-disable jest/unbound-method */
 import { SetMetadata } from '@nestjs/common';
 
 import { IS_PUBLIC_KEY, Public } from '@/apis/utils/decorators/public.decorator';
