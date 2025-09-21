@@ -8,7 +8,6 @@ import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 import { toUserResponseDto } from '@/domain/aggregates/user/utils/dto';
 import { DeleteUserService } from '@/domain/usecases/user/delete-user.service';
 import { UserFactory } from '@/tests/factory';
-import { resetAllMocks } from '@/tests/helpers/mock-service.helper';
 
 describe('appApiUsersController', () => {
   let controller: AppApiUsersController;
@@ -70,7 +69,7 @@ describe('appApiUsersController', () => {
   });
 
   afterEach(() => {
-    resetAllMocks(queryService, commandService, firebaseAuthService, deleteUserService);
+    jest.clearAllMocks();
   });
 
   describe('post /users', () => {

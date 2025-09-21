@@ -5,7 +5,6 @@ import { UserCommandService } from '@/domain/aggregates/user/user.command.servic
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 import { toUserResponseDto, toUsersResponseDto } from '@/domain/aggregates/user/utils/dto';
 import { UserFactory } from '@/tests/factory';
-import { resetAllMocks } from '@/tests/helpers/mock-service.helper';
 
 describe('adminApiUsersController', () => {
   let controller: AdminApiUsersController;
@@ -52,7 +51,7 @@ describe('adminApiUsersController', () => {
   });
 
   afterEach(() => {
-    resetAllMocks(queryService, commandService);
+    jest.clearAllMocks();
   });
 
   describe('get /admin/users', () => {
