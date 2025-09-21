@@ -27,29 +27,6 @@ export async function createIntegrationTestingModule(
   }).compile();
 }
 
-interface CreateDomainIntegrationModuleOptions {
-  commandServiceClass?: Type<unknown>;
-  queryServiceClass?: Type<unknown>;
-  databaseHelper: DatabaseHelper;
-  additionalProviders?: Provider[];
-}
-
-export async function createDomainIntegrationModule(
-  options: CreateDomainIntegrationModuleOptions,
-): Promise<TestingModule> {
-  const { commandServiceClass, queryServiceClass, databaseHelper, additionalProviders = [] } = options;
-
-  const providers: Type<unknown>[] = [];
-  if (commandServiceClass) providers.push(commandServiceClass);
-  if (queryServiceClass) providers.push(queryServiceClass);
-
-  return createIntegrationTestingModule({
-    providers,
-    databaseHelper,
-    additionalProviders,
-  });
-}
-
 interface CreateApiIntegrationModuleOptions {
   controllerClass: Type<unknown>;
   serviceClasses: Type<unknown>[];

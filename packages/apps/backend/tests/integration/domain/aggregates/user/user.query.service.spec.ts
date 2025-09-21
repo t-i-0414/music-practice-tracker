@@ -5,7 +5,7 @@ import { RepositoryService } from '@/repository/repository.service';
 import { DatabaseHelper } from '@/tests/helpers/database.helper';
 
 describe('integration UserQueryService', () => {
-  let service: UserQueryService;
+  let userQueryService: UserQueryService;
   let databaseHelper: DatabaseHelper;
   let repository: any;
 
@@ -27,7 +27,7 @@ describe('integration UserQueryService', () => {
       ],
     }).compile();
 
-    service = module.get<UserQueryService>(UserQueryService);
+    userQueryService = module.get<UserQueryService>(UserQueryService);
     repository = databaseHelper.client;
   });
 
@@ -46,7 +46,7 @@ describe('integration UserQueryService', () => {
         },
       });
 
-      const result = await service.findUniqueOrThrowUserById({ publicId: created.publicId });
+      const result = await userQueryService.findUniqueOrThrowUserById({ publicId: created.publicId });
 
       expect(result.name).toBe('Find Me');
       expect(result.firebaseUid).toBe('uid-int-find-by-id-1');
@@ -56,7 +56,7 @@ describe('integration UserQueryService', () => {
       expect.assertions(1);
 
       await expect(
-        service.findUniqueOrThrowUserById({ publicId: '00000000-0000-0000-0000-000000000000' }),
+        userQueryService.findUniqueOrThrowUserById({ publicId: '00000000-0000-0000-0000-000000000000' }),
       ).rejects.toThrow('No record was found for a query');
     });
 
@@ -84,14 +84,12 @@ describe('integration UserQueryService', () => {
         },
       });
 
-      const result = await service.findUniqueOrThrowUserById({ publicId: targetUser.publicId });
+      const result = await userQueryService.findUniqueOrThrowUserById({ publicId: targetUser.publicId });
 
       expect(result.name).toBe('Target User');
       expect(result.firebaseUid).toBe('uid-int-many-2');
     });
   });
-
-  // Removed findUniqueOrThrowUserByEmail tests due to email removal from User model
 
   describe('findManyUsersById', () => {
     it('should find multiple users by publicIds', async () => {
@@ -118,7 +116,7 @@ describe('integration UserQueryService', () => {
         },
       });
 
-      const result = await service.findManyUsersById({
+      const result = await userQueryService.findManyUsersById({
         publicIds: [user1.publicId, user2.publicId],
       });
 
@@ -139,7 +137,7 @@ describe('integration UserQueryService', () => {
     it('should return empty array for non-existent publicIds', async () => {
       expect.assertions(1);
 
-      const result = await service.findManyUsersById({
+      const result = await userQueryService.findManyUsersById({
         publicIds: ['00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002'],
       });
 
@@ -156,7 +154,7 @@ describe('integration UserQueryService', () => {
         },
       });
 
-      const result = await service.findManyUsersById({
+      const result = await userQueryService.findManyUsersById({
         publicIds: [user.publicId, '00000000-0000-0000-0000-000000000000'],
       });
 
@@ -167,7 +165,7 @@ describe('integration UserQueryService', () => {
     it('should handle empty publicIds array', async () => {
       expect.assertions(1);
 
-      const result = await service.findManyUsersById({ publicIds: [] });
+      const result = await userQueryService.findManyUsersById({ publicIds: [] });
 
       expect(result.users).toHaveLength(0);
     });
@@ -182,7 +180,7 @@ describe('integration UserQueryService', () => {
         },
       });
 
-      const result = await service.findManyUsersById({
+      const result = await userQueryService.findManyUsersById({
         publicIds: [user.publicId, user.publicId, user.publicId],
       });
 
@@ -200,7 +198,7 @@ describe('integration UserQueryService', () => {
         repository.user.create({ data: { name: 'User D', firebaseUid: 'uid-int-all-d' } }),
       ]);
 
-      const result = await service.findManyUsersById({
+      const result = await userQueryService.findManyUsersById({
         publicIds: users.map((u) => u.publicId),
       });
 

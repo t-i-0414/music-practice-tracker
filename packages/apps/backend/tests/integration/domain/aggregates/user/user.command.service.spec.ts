@@ -1,12 +1,13 @@
-import { setupUserServicesIntegration } from '../../helpers/domain-integration.helper';
+import { Test, TestingModule } from '@nestjs/testing';
 
 import { UserCommandService } from '@/domain/aggregates/user/user.command.service';
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
+import { RepositoryService } from '@/repository/repository.service';
 import { DatabaseHelper } from '@/tests/helpers/database.helper';
 
 describe('integration UserCommandService', () => {
-  let service: UserCommandService;
-  let queryService: UserQueryService;
+  let userCommandService: UserCommandService;
+  let userQueryService: UserQueryService;
   let databaseHelper: DatabaseHelper;
 
   beforeAll(async () => {
@@ -17,9 +18,19 @@ describe('integration UserCommandService', () => {
   beforeEach(async () => {
     await databaseHelper.cleanDatabase();
 
-    const { commandService, queryService: qService } = await setupUserServicesIntegration(databaseHelper);
-    service = commandService;
-    queryService = qService;
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        UserCommandService,
+        UserQueryService,
+        {
+          provide: RepositoryService,
+          useValue: databaseHelper.client,
+        },
+      ],
+    }).compile();
+
+    userCommandService = module.get<UserCommandService>(UserCommandService);
+    userQueryService = module.get<UserQueryService>(UserQueryService);
   });
 
   afterAll(async () => {
@@ -35,14 +46,14 @@ describe('integration UserCommandService', () => {
         firebaseUid: 'uid-int-create',
       };
 
-      const result = await service.createUser(createDto);
+      const result = await userCommandService.createUser(createDto);
 
       expect(result).toMatchObject({
         name: createDto.name,
       });
       expect(result.publicId).toBeDefined();
 
-      const foundUser = await queryService.findUniqueOrThrowUserById({ publicId: result.publicId });
+      const foundUser = await userQueryService.findUniqueOrThrowUserById({ publicId: result.publicId });
 
       expect(foundUser).toMatchObject({
         name: createDto.name,
@@ -57,9 +68,9 @@ describe('integration UserCommandService', () => {
         firebaseUid: 'uid-int-dup',
       };
 
-      await service.createUser(createDto);
+      await userCommandService.createUser(createDto);
 
-      await expect(service.createUser({ name: 'User 2', firebaseUid: 'uid-int-dup' })).rejects.toThrow(
+      await expect(userCommandService.createUser({ name: 'User 2', firebaseUid: 'uid-int-dup' })).rejects.toThrow(
         'Unique constraint failed',
       );
     });
@@ -74,10 +85,10 @@ describe('integration UserCommandService', () => {
         firebaseUid: 'uid-int-update',
       };
 
-      const created = await service.createUser(createDto);
+      const created = await userCommandService.createUser(createDto);
       const updateData = { name: 'Updated Name' };
 
-      const result = await service.updateUserById({
+      const result = await userCommandService.updateUserById({
         publicId: created.publicId,
         data: updateData,
       });
@@ -85,7 +96,7 @@ describe('integration UserCommandService', () => {
       expect(result.name).toBe(updateData.name);
       expect(result.publicId).toBe(created.publicId);
 
-      const foundUser = await queryService.findUniqueOrThrowUserById({ publicId: created.publicId });
+      const foundUser = await userQueryService.findUniqueOrThrowUserById({ publicId: created.publicId });
 
       expect(foundUser.name).toBe(updateData.name);
     });
@@ -94,7 +105,7 @@ describe('integration UserCommandService', () => {
       expect.assertions(1);
 
       await expect(
-        service.updateUserById({
+        userCommandService.updateUserById({
           publicId: '00000000-0000-0000-0000-000000000000',
           data: { name: 'New Name' },
         }),
@@ -111,10 +122,10 @@ describe('integration UserCommandService', () => {
         firebaseUid: 'uid-int-delete',
       };
 
-      const created = await service.createUser(createDto);
-      await service.deleteUserById({ publicId: created.publicId });
+      const created = await userCommandService.createUser(createDto);
+      await userCommandService.deleteUserById({ publicId: created.publicId });
 
-      await expect(queryService.findUniqueOrThrowUserById({ publicId: created.publicId })).rejects.toThrow(
+      await expect(userQueryService.findUniqueOrThrowUserById({ publicId: created.publicId })).rejects.toThrow(
         'No record was found for a query',
       );
     });
@@ -123,7 +134,7 @@ describe('integration UserCommandService', () => {
       expect.assertions(1);
 
       await expect(
-        service.deleteUserById({
+        userCommandService.deleteUserById({
           publicId: '00000000-0000-0000-0000-000000000000',
         }),
       ).rejects.toThrow('No record was found for a delete');
@@ -142,7 +153,7 @@ describe('integration UserCommandService', () => {
         ],
       };
 
-      const result = await service.createManyAndReturnUsers(createDto);
+      const result = await userCommandService.createManyAndReturnUsers(createDto);
 
       expect(result.users).toHaveLength(3);
       expect(result.users.map((u) => u.name)).toStrictEqual(['User 1', 'User 2', 'User 3']);
@@ -152,7 +163,7 @@ describe('integration UserCommandService', () => {
         'uid-int-bulk-3',
       ]);
 
-      const allUsers = await queryService.findManyUsersById({
+      const allUsers = await userQueryService.findManyUsersById({
         publicIds: result.users.map((u) => u.publicId),
       });
 
@@ -165,7 +176,7 @@ describe('integration UserCommandService', () => {
     it('should delete multiple users from the database', async () => {
       expect.assertions(1);
 
-      const users = await service.createManyAndReturnUsers({
+      const users = await userCommandService.createManyAndReturnUsers({
         users: [
           { name: 'Delete 1', firebaseUid: 'uid-int-del-1' },
           { name: 'Delete 2', firebaseUid: 'uid-int-del-2' },
@@ -174,9 +185,9 @@ describe('integration UserCommandService', () => {
       });
 
       const publicIdsToDelete = [users.users[0].publicId, users.users[1].publicId];
-      await service.deleteManyUsersById({ publicIds: publicIdsToDelete });
+      await userCommandService.deleteManyUsersById({ publicIds: publicIdsToDelete });
 
-      const remainingUser = await queryService.findUniqueOrThrowUserById({ publicId: users.users[2].publicId });
+      const remainingUser = await userQueryService.findUniqueOrThrowUserById({ publicId: users.users[2].publicId });
 
       expect(remainingUser.name).toBe('Keep Me');
     });
