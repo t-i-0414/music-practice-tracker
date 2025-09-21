@@ -5,8 +5,6 @@ import { IS_PUBLIC_KEY, Public } from '@/apis/utils/decorators/public.decorator'
 describe('public Decorator', () => {
   describe('basic functionality', () => {
     it('should set IS_PUBLIC_KEY metadata to true', () => {
-      expect.assertions(2);
-
       class TestController {
         @Public()
         publicMethod() {
@@ -28,8 +26,6 @@ describe('public Decorator', () => {
 
   describe('decorator composition', () => {
     it('should work with multiple decorators', () => {
-      expect.assertions(2);
-
       const CustomDecorator = () => SetMetadata('custom', 'value');
 
       class TestController {
@@ -50,8 +46,6 @@ describe('public Decorator', () => {
 
   describe('class-level usage', () => {
     it('should apply to class', () => {
-      expect.assertions(1);
-
       @Public()
       class PublicController {
         method1() {
@@ -71,8 +65,6 @@ describe('public Decorator', () => {
 
   describe('inheritance', () => {
     it('should work with inherited methods', () => {
-      expect.assertions(3);
-
       class BaseController {
         @Public()
         publicBase() {
@@ -103,8 +95,6 @@ describe('public Decorator', () => {
 
   describe('route handler usage', () => {
     it('should mark GET routes as public', () => {
-      expect.assertions(3);
-
       class AuthController {
         @Public()
         login() {
