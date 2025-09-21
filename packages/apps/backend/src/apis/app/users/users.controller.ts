@@ -65,7 +65,7 @@ export class AppApiUsersController {
     const createUserInputDto = plainToInstance(CreateUserInputDto, { firebaseUid: uid, name: dto.name });
     const errors = validateSync(createUserInputDto, { whitelist: true, forbidNonWhitelisted: true });
     if (errors.length > NON_ERROR_LENGTH) {
-      throw new ApiError('AP0422', transformValidationErrorIntoDetail(errors) || 'Invalid user data');
+      throw new ApiError('AP0422', transformValidationErrorIntoDetail(errors));
     }
 
     const createdUser = await this.userCommandService.createUser(createUserInputDto);
