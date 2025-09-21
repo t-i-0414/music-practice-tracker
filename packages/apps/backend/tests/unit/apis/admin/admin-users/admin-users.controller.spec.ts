@@ -1,4 +1,4 @@
-import { type TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 
 import { AdminApiAdminUsersController } from '@/apis/admin/admin-users/admin-users.controller';
 import { AdminUserCommandService } from '@/domain/aggregates/admin-user/admin-user.command.service';
@@ -10,7 +10,7 @@ import {
 } from '@/domain/aggregates/admin-user/utils/dto';
 import { AdminRole } from '@/generated/prisma';
 import { AdminUserFactory } from '@/tests/factory';
-import { createTestModule, resetAllMocks } from '@/tests/unit/apis/helpers';
+import { resetAllMocks } from '@/tests/unit/apis/helpers';
 
 describe('controller AdminApiAdminUsersController', () => {
   let controller: AdminApiAdminUsersController;
@@ -34,8 +34,8 @@ describe('controller AdminApiAdminUsersController', () => {
       deleteManyAdminUsersByIds: jest.fn(),
     });
 
-    const module: TestingModule = await createTestModule({
-      controller: AdminApiAdminUsersController,
+    const module = await Test.createTestingModule({
+      controllers: [AdminApiAdminUsersController],
       providers: [
         {
           provide: AdminUserQueryService,
@@ -46,7 +46,7 @@ describe('controller AdminApiAdminUsersController', () => {
           useValue: mockCommandService,
         },
       ],
-    });
+    }).compile();
 
     controller = module.get<AdminApiAdminUsersController>(AdminApiAdminUsersController);
     queryService = module.get<jest.Mocked<AdminUserQueryService>>(AdminUserQueryService);

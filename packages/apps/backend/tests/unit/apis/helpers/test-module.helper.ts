@@ -22,16 +22,3 @@ export async function createTestModule(config: TestModuleConfig): Promise<Testin
 
   return moduleBuilder.compile();
 }
-
-export function getServicesFromModule<T extends Record<string, Type>>(
-  module: TestingModule,
-  services: T,
-): { [K in keyof T]: T[K] extends Type<infer U> ? U : never } {
-  const result = {} as { [K in keyof T]: T[K] extends Type<infer U> ? U : never };
-
-  for (const [key, ServiceClass] of Object.entries(services) as [keyof T, Type][]) {
-    result[key] = module.get(ServiceClass);
-  }
-
-  return result;
-}
