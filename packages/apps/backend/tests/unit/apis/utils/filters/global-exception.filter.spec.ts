@@ -52,15 +52,15 @@ describe('unit GlobalExceptionFilter', () => {
       });
     });
 
-    it('should handle DomainError correctly', () => {
-      const exception = new DomainError('DO9999', 'Test domain error');
+    it('should handle HttpException with non-standard status code', () => {
+      const exception = new HttpException('Test error', 499);
 
       filter.catch(exception, mockArgumentsHost as ArgumentsHost);
 
-      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+      expect(mockResponse.status).toHaveBeenCalledWith(499);
       expect(mockResponse.json).toHaveBeenCalledWith({
-        statusCode: HttpStatus.BAD_REQUEST,
-        errorCode: 'DO9999',
+        statusCode: 499,
+        errorCode: 'AP9999',
       });
     });
 
@@ -73,6 +73,30 @@ describe('unit GlobalExceptionFilter', () => {
       expect(mockResponse.json).toHaveBeenCalledWith({
         statusCode: HttpStatus.UNAUTHORIZED,
         errorCode: 'AP0401',
+      });
+    });
+
+    it('should handle ApiError with non-standard code as 500', () => {
+      const exception = new ApiError('AP9999', 'Unknown api error');
+
+      filter.catch(exception, mockArgumentsHost as ArgumentsHost);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        errorCode: 'AP9999',
+      });
+    });
+
+    it('should handle DomainError correctly', () => {
+      const exception = new DomainError('DO9999', 'Test domain error');
+
+      filter.catch(exception, mockArgumentsHost as ArgumentsHost);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        statusCode: HttpStatus.BAD_REQUEST,
+        errorCode: 'DO9999',
       });
     });
 
