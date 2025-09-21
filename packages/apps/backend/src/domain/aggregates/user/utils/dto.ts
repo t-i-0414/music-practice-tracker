@@ -15,10 +15,8 @@ import {
 
 import { MAX_NAME_LENGTH, UserStatusRecord, User } from './constants';
 
-import { DomainError } from '@/domain/utils/domain.error';
 import { Publicize } from '@/domain/utils/publicize';
 import { ensurePublicIdsToArray } from '@/utils/ensure-public-ids-to-array';
-import { ERROR_CODE_RECORDS } from '@/utils/errors/error-code';
 
 export class FindUserByIdInputDto {
   @ApiProperty({
@@ -42,18 +40,9 @@ export class FindManyUsersByIdInputDto {
   @IsArray()
   @IsUUID('all', { each: true })
   @ArrayNotEmpty()
-  @Transform(
-    ({ value }: TransformFnParams) => {
-      try {
-        return ensurePublicIdsToArray(value);
-      } catch (error) {
-        throw new DomainError('DO0004', ERROR_CODE_RECORDS.DO0004, error);
-      }
-    },
-    {
-      toClassOnly: true,
-    },
-  )
+  @Transform(({ value }: TransformFnParams) => ensurePublicIdsToArray(value), {
+    toClassOnly: true,
+  })
   public publicIds: string[];
 }
 
@@ -128,7 +117,7 @@ export class UpdateUserInputDto {
     type: UpdateUserDataDto,
   })
   @ValidateNested()
-  @Type(() => UpdateUserDataDto)
+  // @Type(() => UpdateUserDataDto)
   @IsNotEmpty()
   @IsNotEmptyObject()
   public data: UpdateUserDataDto;
