@@ -6,7 +6,7 @@ import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 import { toUserResponseDto, toUsersResponseDto } from '@/domain/aggregates/user/utils/dto';
 import { UserFactory } from '@/tests/factory';
 
-describe('adminApiUsersController', () => {
+describe('unit AdminApiUsersController', () => {
   let controller: AdminApiUsersController;
   let queryService: jest.Mocked<UserQueryService>;
   let commandService: jest.Mocked<UserCommandService>;

@@ -9,7 +9,7 @@ import { toUserResponseDto } from '@/domain/aggregates/user/utils/dto';
 import { DeleteUserService } from '@/domain/usecases/user/delete-user.service';
 import { UserFactory } from '@/tests/factory';
 
-describe('appApiUsersController', () => {
+describe('unit AppApiUsersController', () => {
   let controller: AppApiUsersController;
   let queryService: jest.Mocked<UserQueryService>;
   let commandService: jest.Mocked<UserCommandService>;

@@ -1,6 +1,6 @@
 import { ApiController } from '@/apis/utils/controllers/api.controller';
 
-describe('apiController Decorator', () => {
+describe('unit ApiController', () => {
   it('should apply Controller decorator with prefix', () => {
     @ApiController('test')
     class TestController {}

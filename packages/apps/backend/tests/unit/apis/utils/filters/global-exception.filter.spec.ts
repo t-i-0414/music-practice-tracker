@@ -7,7 +7,7 @@ import { DomainError } from '@/domain/utils/domain.error';
 import { PrismaClientKnownRequestError } from '@/generated/prisma/runtime/library';
 import { UnknownError } from '@/utils/errors/unknown.error';
 
-describe('globalExceptionFilter', () => {
+describe('unit GlobalExceptionFilter', () => {
   let filter: GlobalExceptionFilter;
   let mockResponse: Partial<Response>;
   let mockRequest: Partial<Request>;

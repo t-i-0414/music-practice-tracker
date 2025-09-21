@@ -11,7 +11,7 @@ import {
 import { AdminRole } from '@/generated/prisma';
 import { AdminUserFactory } from '@/tests/factory';
 
-describe('controller AdminApiAdminUsersController', () => {
+describe('unit AdminApiAdminUsersController', () => {
   let controller: AdminApiAdminUsersController;
   let queryService: jest.Mocked<AdminUserQueryService>;
   let commandService: jest.Mocked<AdminUserCommandService>;

@@ -3,7 +3,7 @@ import { ROUTE_ARGS_METADATA } from '@nestjs/common/constants';
 
 import { CurrentUser, CurrentUserData } from '@/apis/app/utils/decorators/current-user.decorator';
 
-describe('currentUser decorator', () => {
+describe('unit CurrentUser', () => {
   let mockRequest: { user?: CurrentUserData };
   let mockExecutionContext: ExecutionContext;
   let getCurrentUser: (key?: string) => CurrentUserData | CurrentUserData[keyof CurrentUserData] | undefined;

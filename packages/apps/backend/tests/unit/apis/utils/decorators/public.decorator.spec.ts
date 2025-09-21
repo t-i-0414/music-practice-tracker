@@ -2,7 +2,7 @@ import { SetMetadata } from '@nestjs/common';
 
 import { IS_PUBLIC_KEY, Public } from '@/apis/utils/decorators/public.decorator';
 
-describe('public Decorator', () => {
+describe('unit Public', () => {
   describe('basic functionality', () => {
     it('should set IS_PUBLIC_KEY metadata to true', () => {
       class TestController {
