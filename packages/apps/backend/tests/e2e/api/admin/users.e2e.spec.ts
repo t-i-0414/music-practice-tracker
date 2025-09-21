@@ -209,7 +209,10 @@ describe('e2e Admin API /api/users', () => {
     it('should return 400 when publicIds contain invalid UUIDs', async () => {
       expect.assertions(2);
 
-      const response = await server().delete('/api/users').send({ publicIds: ['not-a-uuid'] }).expect(400);
+      const response = await server()
+        .delete('/api/users')
+        .send({ publicIds: ['not-a-uuid'] })
+        .expect(400);
 
       expect(response.body.statusCode).toBe(400);
       expect(response.body.errorCode).toBe('AP0400');
@@ -325,10 +328,7 @@ describe('e2e Admin API /api/users', () => {
     it('should return 404 when updating a non-existent user', async () => {
       expect.assertions(2);
 
-      const response = await server()
-        .put(`/api/users/${randomUUID()}`)
-        .send({ name: 'Missing User' })
-        .expect(404);
+      const response = await server().put(`/api/users/${randomUUID()}`).send({ name: 'Missing User' }).expect(404);
 
       expect(response.body.statusCode).toBe(404);
       expect(response.body.errorCode).toBe('RE0002');
@@ -341,10 +341,7 @@ describe('e2e Admin API /api/users', () => {
         data: userFactory.build({ name: 'Validate Me' }),
       });
 
-      const response = await server()
-        .put(`/api/users/${user.publicId}`)
-        .send({ status: 'INVALID_STATUS' })
-        .expect(400);
+      const response = await server().put(`/api/users/${user.publicId}`).send({ status: 'INVALID_STATUS' }).expect(400);
 
       expect(response.body.statusCode).toBe(400);
       expect(response.body.errorCode).toBe('AP0400');

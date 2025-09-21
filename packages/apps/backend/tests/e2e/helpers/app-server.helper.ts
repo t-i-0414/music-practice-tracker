@@ -21,7 +21,8 @@ async function bootstrapApp(
 
   let builder = Test.createTestingModule({
     imports: [module],
-  }).overrideProvider(RepositoryService)
+  })
+    .overrideProvider(RepositoryService)
     .useValue(databaseHelper.client);
 
   if (options.overrideFirebaseAuth === true) {

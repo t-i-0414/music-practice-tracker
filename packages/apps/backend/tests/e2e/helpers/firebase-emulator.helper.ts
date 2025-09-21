@@ -94,8 +94,7 @@ class FirebaseAuthServiceFake {
     };
   }
 
-  public async getUser(uid: string): Promise<{ uid: string; email: string; displayName: string }>
-  {
+  public async getUser(uid: string): Promise<{ uid: string; email: string; displayName: string }> {
     const record = uidStore.get(uid);
     if (record === undefined) {
       throw new ApiError('AP0404', 'Firebase user not found');

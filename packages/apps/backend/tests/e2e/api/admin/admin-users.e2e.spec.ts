@@ -299,9 +299,7 @@ describe('e2e Admin API /api/admin-users', () => {
     it('should return 404 when deleting a non-existent admin user', async () => {
       expect.assertions(2);
 
-      const response = await server()
-        .delete('/api/admin-users/22222222-2222-2222-2222-222222222222')
-        .expect(404);
+      const response = await server().delete('/api/admin-users/22222222-2222-2222-2222-222222222222').expect(404);
 
       expect(response.body.statusCode).toBe(404);
       expect(response.body.errorCode).toBe('RE0002');
