@@ -3,9 +3,7 @@ import { ROUTE_ARGS_METADATA } from '@nestjs/common/constants';
 
 import { CurrentUser, CurrentUserData } from '@/apis/app/utils/decorators/current-user.decorator';
 
-type ParamDecorator = (data?: any, ctx?: any) => ParameterDecorator;
-
-const getParamDecoratorFactory = (decorator: ParamDecorator) => {
+const getParamDecoratorFactory = (decorator: (data?: any, ctx?: any) => ParameterDecorator) => {
   class Test {
     public test(@decorator() user: any) {
       return user;
