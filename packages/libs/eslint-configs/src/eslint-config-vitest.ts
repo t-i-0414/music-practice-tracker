@@ -26,18 +26,20 @@ export const disabledRulesOnTests: FlatConfig.Rules = {
   '@typescript-eslint/no-dynamic-delete': 'off',
 };
 
-export const vitestConfig = defineConfig({
-  extends: [vitestPlugin.configs.all],
-  rules: {
-    ...disabledRulesOnTests,
-    'vitest/prefer-importing-vitest-globals': 'off',
-    'vitest/prefer-expect-assertions': [
-      'error',
-      {
-        onlyFunctionsWithAsyncKeyword: true,
-        onlyFunctionsWithExpectInLoop: true,
-        onlyFunctionsWithExpectInCallback: true,
-      },
-    ],
+export const vitestConfig = defineConfig(
+  ...(Array.isArray(vitestPlugin.configs.all) ? vitestPlugin.configs.all : [vitestPlugin.configs.all]),
+  {
+    rules: {
+      ...disabledRulesOnTests,
+      'vitest/prefer-importing-vitest-globals': 'off',
+      'vitest/prefer-expect-assertions': [
+        'error',
+        {
+          onlyFunctionsWithAsyncKeyword: true,
+          onlyFunctionsWithExpectInLoop: true,
+          onlyFunctionsWithExpectInCallback: true,
+        },
+      ],
+    },
   },
-});
+);
