@@ -1,14 +1,12 @@
 import { type FirebaseAuthProvider } from '@/domain/aggregates/firebase-auth/firebase-auth.provider';
 import { FirebaseAuthService } from '@/domain/aggregates/firebase-auth/firebase-auth.service';
 
-type AuthMock = {
-  verifyIdToken: jest.Mock;
-  getUser: jest.Mock;
-  deleteUser: jest.Mock;
-};
-
 describe('unit FirebaseAuthService', () => {
-  let auth: AuthMock;
+  let auth: jest.Mocked<{
+    verifyIdToken: jest.Mock;
+    getUser: jest.Mock;
+    deleteUser: jest.Mock;
+  }>;
   let provider: jest.Mocked<Pick<FirebaseAuthProvider, 'auth'>>;
   let service: FirebaseAuthService;
 
@@ -34,7 +32,7 @@ describe('unit FirebaseAuthService', () => {
     it('returns the decoded token when verification succeeds', async () => {
       expect.assertions(3);
 
-      const decoded = { uid: 'uid-123' } as unknown;
+      const decoded = { uid: 'uid-123' };
       auth.verifyIdToken.mockResolvedValue(decoded);
 
       const result = await service.verifyIdToken('token');
@@ -54,42 +52,51 @@ describe('unit FirebaseAuthService', () => {
       expect(auth.verifyIdToken).toHaveBeenCalledWith('token', true);
     });
 
-    it('throws ApiError with token expired detail when firebase reports expiration', async () => {
+    it('throws DomainError with token expired detail when firebase reports expiration', async () => {
       expect.assertions(1);
 
       const error = Object.assign(new Error('expired'), { code: 'auth/id-token-expired' });
       auth.verifyIdToken.mockRejectedValue(error);
 
       await expect(service.verifyIdToken('token')).rejects.toMatchObject({
-        errorCode: 'AP0401',
-        detail: 'Firebase token expired',
+        errorCode: 'DO0005',
+        detail: 'Firebase token expired.',
       });
     });
 
-    it('throws ApiError with token revoked detail when firebase reports revocation', async () => {
+    it('throws DomainError with token revoked detail when firebase reports revocation', async () => {
       expect.assertions(1);
 
       const error = Object.assign(new Error('revoked'), { code: 'auth/id-token-revoked' });
       auth.verifyIdToken.mockRejectedValue(error);
 
-      await expect(service.verifyIdToken('token')).rejects.toThrow('Firebase token revoked');
+      await expect(service.verifyIdToken('token')).rejects.toMatchObject({
+        errorCode: 'DO0006',
+        detail: 'Firebase token revoked.',
+      });
     });
 
-    it('throws ApiError with invalid token detail when firebase returns other error codes', async () => {
+    it('throws DomainError with invalid token detail when firebase returns other error codes', async () => {
       expect.assertions(1);
 
       const error = Object.assign(new Error('other'), { code: 'auth/unknown-error' });
       auth.verifyIdToken.mockRejectedValue(error);
 
-      await expect(service.verifyIdToken('token')).rejects.toThrow('Firebase invalid token');
+      await expect(service.verifyIdToken('token')).rejects.toMatchObject({
+        errorCode: 'DO0007',
+        detail: 'Firebase invalid token.',
+      });
     });
 
-    it('throws ApiError with invalid token detail when firebase throws a non-error value', async () => {
+    it('throws DomainError with invalid token detail when firebase throws a non-error value', async () => {
       expect.assertions(1);
 
       auth.verifyIdToken.mockRejectedValue('something unexpected');
 
-      await expect(service.verifyIdToken('token')).rejects.toThrow('Firebase invalid token');
+      await expect(service.verifyIdToken('token')).rejects.toMatchObject({
+        errorCode: 'DO0007',
+        detail: 'Firebase invalid token.',
+      });
     });
   });
 
@@ -107,12 +114,15 @@ describe('unit FirebaseAuthService', () => {
       expect(result).toBe(user);
     });
 
-    it('throws ApiError with not found detail when firebase cannot find the user', async () => {
+    it('throws DomainError with not found detail when firebase cannot find the user', async () => {
       expect.assertions(1);
 
       auth.getUser.mockRejectedValue(new Error('not found'));
 
-      await expect(service.getUser('uid-missing')).rejects.toThrow('Firebase user not found');
+      await expect(service.getUser('uid-missing')).rejects.toMatchObject({
+        errorCode: 'DO0008',
+        detail: 'Firebase user not found.',
+      });
     });
   });
 
@@ -137,12 +147,15 @@ describe('unit FirebaseAuthService', () => {
       await expect(service.deleteUser('uid-missing')).resolves.toBeUndefined();
     });
 
-    it('throws ApiError when firebase deletion fails for other reasons', async () => {
+    it('throws DomainError when firebase deletion fails for other reasons', async () => {
       expect.assertions(1);
 
       auth.deleteUser.mockRejectedValue(new Error('internal error'));
 
-      await expect(service.deleteUser('uid-err')).rejects.toThrow('Failed to delete Firebase user');
+      await expect(service.deleteUser('uid-err')).rejects.toMatchObject({
+        errorCode: 'DO0009',
+        detail: 'Failed to delete Firebase user.',
+      });
     });
   });
 });

@@ -83,6 +83,11 @@ export const ERROR_CODE_RECORDS = {
   DO0002: 'Invalid FIREBASE_SERVICE_ACCOUNT JSON.',
   DO0003: 'Failed to initialize Firebase Admin SDK.',
   DO0004: 'Invalid public IDs format.',
+  DO0005: 'Firebase token expired.',
+  DO0006: 'Firebase token revoked.',
+  DO0007: 'Firebase invalid token.',
+  DO0008: 'Firebase user not found.',
+  DO0009: 'Failed to delete Firebase user.',
   DO9999: 'Unknown domain error.',
 
   // Repository Errors - Data Validation (RE00xx)
