@@ -1,7 +1,7 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiResponse } from '@nestjs/swagger';
 
-import { ApiStandardResponses } from '@/apis/utils/api-default-response';
+import { ApiStandardResponses } from '@/apis/utils/api-standard-response';
 import { ErrorResponseDto } from '@/apis/utils/api.error';
 
 jest.mock<typeof import('@nestjs/common')>('@nestjs/common', () => {

@@ -6,7 +6,7 @@ import { validateSync } from 'class-validator';
 import { BearerToken } from '../utils/decorators/bearer-token.decorator';
 
 import { CurrentUser, type CurrentUserData } from '@/apis/app/utils/decorators/current-user.decorator';
-import { ApiStandardResponses } from '@/apis/utils/api-default-response';
+import { ApiStandardResponses } from '@/apis/utils/api-standard-response';
 import { ApiError } from '@/apis/utils/api.error';
 import { ApiController } from '@/apis/utils/controllers/api.controller';
 import { Public } from '@/apis/utils/decorators/public.decorator';
