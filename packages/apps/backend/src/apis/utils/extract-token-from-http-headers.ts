@@ -8,6 +8,5 @@ export const extractTokenFromHttpHeaders = (headers: IncomingHttpHeaders): strin
   const m = /^Bearer\s+(?<token>.+)$/iu.exec(raw.trim());
   if (!m) return undefined;
 
-  const token = m.groups?.token.trim();
-  return token !== '' ? token : undefined;
+  return m.groups?.token.trim();
 };
