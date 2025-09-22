@@ -1,7 +1,6 @@
 import { Body, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Put } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
-import { validateSync } from 'class-validator';
 
 import { BearerToken } from '../utils/decorators/bearer-token.decorator';
 
@@ -16,10 +15,6 @@ import { UserCommandService } from '@/domain/aggregates/user/user.command.servic
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 import { CreateUserInputDto, UpdateUserDataDto, UserResponseDto } from '@/domain/aggregates/user/utils/dto';
 import { DeleteUserService } from '@/domain/usecases/user/delete-user.service';
-import {
-  NON_ERROR_LENGTH,
-  transformValidationErrorIntoDetail,
-} from '@/utils/errors/transform-validation-error-into-detail';
 
 @ApiTags('users')
 @ApiController('users')
@@ -61,14 +56,9 @@ export class AppApiUsersController {
       return existingUser;
     }
 
-    const createUserInputDto = plainToInstance(CreateUserInputDto, { firebaseUid: uid, name: dto.name });
-    const errors = validateSync(createUserInputDto, { whitelist: true, forbidNonWhitelisted: true });
-    if (errors.length > NON_ERROR_LENGTH) {
-      throw new ApiError('AP0422', transformValidationErrorIntoDetail(errors));
-    }
-
-    const createdUser = await this.userCommandService.createUser(createUserInputDto);
-    return createdUser;
+    return this.userCommandService.createUser(
+      plainToInstance(CreateUserInputDto, { firebaseUid: uid, name: dto.name }),
+    );
   }
 
   @Get('me')
