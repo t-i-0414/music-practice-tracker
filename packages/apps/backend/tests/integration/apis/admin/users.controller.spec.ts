@@ -1,6 +1,9 @@
-import { setupAdminUsersControllerIntegration } from '../helpers/api-integration.helper';
+import { Test } from '@nestjs/testing';
 
 import { AdminApiUsersController } from '@/apis/admin/users/users.controller';
+import { UserCommandService } from '@/domain/aggregates/user/user.command.service';
+import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
+import { RepositoryService } from '@/repository/repository.service';
 import { DatabaseHelper } from '@/tests/helpers/database.helper';
 
 describe('integration AdminApiUsersController', () => {
@@ -15,48 +18,20 @@ describe('integration AdminApiUsersController', () => {
   beforeEach(async () => {
     await databaseHelper.cleanDatabase();
 
-    const { controller: ctrl } = await setupAdminUsersControllerIntegration(databaseHelper);
-    controller = ctrl;
+    const module = await Test.createTestingModule({
+      controllers: [AdminApiUsersController],
+      providers: [
+        UserCommandService,
+        UserQueryService,
+        { provide: RepositoryService, useValue: databaseHelper.client },
+      ],
+    }).compile();
+
+    controller = module.get<AdminApiUsersController>(AdminApiUsersController);
   });
 
   afterAll(async () => {
     await databaseHelper.disconnect();
-  });
-
-  describe('post /admin/users', () => {
-    it('should create a user and return response', async () => {
-      expect.assertions(3);
-
-      const createDto = {
-        name: 'Test User',
-        firebaseUid: 'uid-admin-create',
-      };
-
-      const result = await controller.createUser(createDto);
-
-      expect(result.name).toBe(createDto.name);
-      expect(result.firebaseUid).toBe(createDto.firebaseUid);
-      expect(result.publicId).toBeDefined();
-    });
-  });
-
-  describe('post /admin/users/bulk', () => {
-    it('should create multiple users', async () => {
-      expect.assertions(3);
-
-      const createDto = {
-        users: [
-          { name: 'User 1', firebaseUid: 'uid-admin-bulk-1' },
-          { name: 'User 2', firebaseUid: 'uid-admin-bulk-2' },
-        ],
-      };
-
-      const result = await controller.createManyAndReturnUsers(createDto);
-
-      expect(result.users).toHaveLength(2);
-      expect(result.users.map((user) => user.name)).toStrictEqual(['User 1', 'User 2']);
-      expect(result.users.map((user) => user.firebaseUid)).toStrictEqual(['uid-admin-bulk-1', 'uid-admin-bulk-2']);
-    });
   });
 
   describe('get /admin/users', () => {
@@ -82,6 +57,60 @@ describe('integration AdminApiUsersController', () => {
 
       expect(result.users).toHaveLength(2);
       expect(result.users.map((u) => u.publicId).sort()).toStrictEqual([user1.publicId, user3.publicId].sort());
+    });
+  });
+
+  describe('post /admin/users', () => {
+    it('should create a user and return response', async () => {
+      expect.assertions(3);
+
+      const createDto = {
+        name: 'Test User',
+        firebaseUid: 'uid-admin-create',
+      };
+
+      const result = await controller.createUser(createDto);
+
+      expect(result.name).toBe(createDto.name);
+      expect(result.firebaseUid).toBe(createDto.firebaseUid);
+      expect(result.publicId).toBeDefined();
+    });
+  });
+
+  describe('delete /admin/users', () => {
+    it('should delete multiple users', async () => {
+      expect.assertions(1);
+
+      const user1 = await controller.createUser({ name: 'User 1', firebaseUid: 'uid-admin-del-1' });
+
+      const user2 = await controller.createUser({ name: 'User 2', firebaseUid: 'uid-admin-del-2' });
+
+      const user3 = await controller.createUser({ name: 'User 3', firebaseUid: 'uid-admin-del-3' });
+
+      await controller.deleteManyUsersById({ publicIds: [user1.publicId, user2.publicId] });
+
+      const allUsers = await Promise.all([controller.findUniqueOrThrowUserById(user3.publicId).catch(() => null)]);
+
+      expect(allUsers.filter((u: any) => u !== null)).toHaveLength(1);
+    });
+  });
+
+  describe('post /admin/users/bulk', () => {
+    it('should create multiple users', async () => {
+      expect.assertions(3);
+
+      const createDto = {
+        users: [
+          { name: 'User 1', firebaseUid: 'uid-admin-bulk-1' },
+          { name: 'User 2', firebaseUid: 'uid-admin-bulk-2' },
+        ],
+      };
+
+      const result = await controller.createManyAndReturnUsers(createDto);
+
+      expect(result.users).toHaveLength(2);
+      expect(result.users.map((user) => user.name)).toStrictEqual(['User 1', 'User 2']);
+      expect(result.users.map((user) => user.firebaseUid)).toStrictEqual(['uid-admin-bulk-1', 'uid-admin-bulk-2']);
     });
   });
 
@@ -132,24 +161,6 @@ describe('integration AdminApiUsersController', () => {
       await controller.deleteUserById(created.publicId);
 
       await expect(controller.findUniqueOrThrowUserById(created.publicId)).rejects.toThrow('No record was found');
-    });
-  });
-
-  describe('delete /admin/users', () => {
-    it('should delete multiple users', async () => {
-      expect.assertions(1);
-
-      const user1 = await controller.createUser({ name: 'User 1', firebaseUid: 'uid-admin-del-1' });
-
-      const user2 = await controller.createUser({ name: 'User 2', firebaseUid: 'uid-admin-del-2' });
-
-      const user3 = await controller.createUser({ name: 'User 3', firebaseUid: 'uid-admin-del-3' });
-
-      await controller.deleteManyUsersById({ publicIds: [user1.publicId, user2.publicId] });
-
-      const allUsers = await Promise.all([controller.findUniqueOrThrowUserById(user3.publicId).catch(() => null)]);
-
-      expect(allUsers.filter((u: any) => u !== null)).toHaveLength(1);
     });
   });
 });

@@ -1,7 +1,10 @@
-import { setupAdminAdminUsersControllerIntegration } from '../helpers/api-integration.helper';
+import { Test } from '@nestjs/testing';
 
 import { AdminApiAdminUsersController } from '@/apis/admin/admin-users/admin-users.controller';
+import { AdminUserCommandService } from '@/domain/aggregates/admin-user/admin-user.command.service';
+import { AdminUserQueryService } from '@/domain/aggregates/admin-user/admin-user.query.service';
 import { AdminRole } from '@/generated/prisma';
+import { RepositoryService } from '@/repository/repository.service';
 import { DatabaseHelper } from '@/tests/helpers/database.helper';
 
 describe('integration AdminApiAdminUsersController', () => {
@@ -16,50 +19,20 @@ describe('integration AdminApiAdminUsersController', () => {
   beforeEach(async () => {
     await databaseHelper.cleanDatabase();
 
-    const { controller: ctrl } = await setupAdminAdminUsersControllerIntegration(databaseHelper);
-    controller = ctrl;
+    const module = await Test.createTestingModule({
+      controllers: [AdminApiAdminUsersController],
+      providers: [
+        AdminUserCommandService,
+        AdminUserQueryService,
+        { provide: RepositoryService, useValue: databaseHelper.client },
+      ],
+    }).compile();
+
+    controller = module.get<AdminApiAdminUsersController>(AdminApiAdminUsersController);
   });
 
   afterAll(async () => {
     await databaseHelper.disconnect();
-  });
-
-  describe('post /admin/admin-users', () => {
-    it('should create an admin user and return response', async () => {
-      expect.assertions(4);
-
-      const createDto = {
-        cognitoSub: 'sub-admin',
-        name: 'Test Admin',
-        role: AdminRole.ADMIN,
-      };
-
-      const result = await controller.createAdminUser(createDto);
-
-      expect(result.cognitoSub).toBe(createDto.cognitoSub);
-      expect(result.name).toBe(createDto.name);
-      expect(result.role).toBe(createDto.role);
-      expect(result.publicId).toBeDefined();
-    });
-  });
-
-  describe('post /admin/admin-users/bulk', () => {
-    it('should create multiple admin users', async () => {
-      expect.assertions(3);
-
-      const createDto = {
-        adminUsers: [
-          { cognitoSub: 'sub-admin1', name: 'Admin 1', role: AdminRole.VIEWER },
-          { cognitoSub: 'sub-admin2', name: 'Admin 2', role: AdminRole.ADMIN },
-        ],
-      };
-
-      const result = await controller.createManyAdminUsers(createDto);
-
-      expect(result.adminUsers).toHaveLength(2);
-      expect(result.adminUsers[0].cognitoSub).toBe('sub-admin1');
-      expect(result.adminUsers[1].cognitoSub).toBe('sub-admin2');
-    });
   });
 
   describe('get /admin/admin-users', () => {
@@ -90,6 +63,74 @@ describe('integration AdminApiAdminUsersController', () => {
       expect(result.adminUsers.map((u) => u.publicId).sort((a, b) => a.localeCompare(b))).toStrictEqual(
         [admin1.publicId, admin3.publicId].sort((a, b) => a.localeCompare(b)),
       );
+    });
+  });
+
+  describe('post /admin/admin-users', () => {
+    it('should create an admin user and return response', async () => {
+      expect.assertions(4);
+
+      const createDto = {
+        cognitoSub: 'sub-admin',
+        name: 'Test Admin',
+        role: AdminRole.ADMIN,
+      };
+
+      const result = await controller.createAdminUser(createDto);
+
+      expect(result.cognitoSub).toBe(createDto.cognitoSub);
+      expect(result.name).toBe(createDto.name);
+      expect(result.role).toBe(createDto.role);
+      expect(result.publicId).toBeDefined();
+    });
+  });
+
+  describe('delete /admin/admin-users', () => {
+    it('should delete multiple admin users', async () => {
+      expect.assertions(1);
+
+      const admin1 = await controller.createAdminUser({
+        cognitoSub: 'sub-admin1-del',
+        name: 'Admin 1',
+        role: AdminRole.ADMIN,
+      });
+
+      const admin2 = await controller.createAdminUser({
+        cognitoSub: 'sub-admin2-del',
+        name: 'Admin 2',
+        role: AdminRole.VIEWER,
+      });
+
+      const admin3 = await controller.createAdminUser({
+        cognitoSub: 'sub-admin3-del',
+        name: 'Admin 3',
+        role: AdminRole.ADMIN,
+      });
+
+      await controller.deleteManyAdminUsers({ publicIds: [admin1.publicId, admin2.publicId] });
+
+      const remaining = await controller.findManyAdminUsers({ publicIds: [admin3.publicId] });
+
+      expect(remaining.adminUsers).toHaveLength(1);
+    });
+  });
+
+  describe('post /admin/admin-users/bulk', () => {
+    it('should create multiple admin users', async () => {
+      expect.assertions(3);
+
+      const createDto = {
+        adminUsers: [
+          { cognitoSub: 'sub-admin1', name: 'Admin 1', role: AdminRole.VIEWER },
+          { cognitoSub: 'sub-admin2', name: 'Admin 2', role: AdminRole.ADMIN },
+        ],
+      };
+
+      const result = await controller.createManyAdminUsers(createDto);
+
+      expect(result.adminUsers).toHaveLength(2);
+      expect(result.adminUsers[0].cognitoSub).toBe('sub-admin1');
+      expect(result.adminUsers[1].cognitoSub).toBe('sub-admin2');
     });
   });
 
@@ -148,36 +189,6 @@ describe('integration AdminApiAdminUsersController', () => {
       await controller.deleteAdminUser(created.publicId);
 
       await expect(controller.findAdminUserById(created.publicId)).rejects.toThrow('No record was found');
-    });
-  });
-
-  describe('delete /admin/admin-users', () => {
-    it('should delete multiple admin users', async () => {
-      expect.assertions(1);
-
-      const admin1 = await controller.createAdminUser({
-        cognitoSub: 'sub-admin1-del',
-        name: 'Admin 1',
-        role: AdminRole.ADMIN,
-      });
-
-      const admin2 = await controller.createAdminUser({
-        cognitoSub: 'sub-admin2-del',
-        name: 'Admin 2',
-        role: AdminRole.VIEWER,
-      });
-
-      const admin3 = await controller.createAdminUser({
-        cognitoSub: 'sub-admin3-del',
-        name: 'Admin 3',
-        role: AdminRole.ADMIN,
-      });
-
-      await controller.deleteManyAdminUsers({ publicIds: [admin1.publicId, admin2.publicId] });
-
-      const remaining = await controller.findManyAdminUsers({ publicIds: [admin3.publicId] });
-
-      expect(remaining.adminUsers).toHaveLength(1);
     });
   });
 });

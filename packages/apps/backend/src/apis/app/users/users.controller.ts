@@ -28,7 +28,6 @@ export class AppApiUsersController {
     private readonly firebaseAuthService: FirebaseAuthService,
     private readonly userQueryService: UserQueryService,
     private readonly userCommandService: UserCommandService,
-
     private readonly deleteUserService: DeleteUserService,
   ) {}
 
