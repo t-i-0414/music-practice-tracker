@@ -8,7 +8,7 @@ import { AdminApiModule } from '@/apis/admin/admin.module';
 import { AppApiModule } from '@/apis/app/app.module';
 import { FirebaseAuthService } from '@/domain/aggregates/firebase-auth/firebase-auth.service';
 import { RepositoryService } from '@/repository/repository.service';
-import { DatabaseHelper } from '@/tests/helpers/database.helper';
+import { DatabaseHelper } from '@/tests/_helpers/database.helper';
 
 type NestModule = Type<unknown> | DynamicModule;
 

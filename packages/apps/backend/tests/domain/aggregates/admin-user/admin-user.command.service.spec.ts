@@ -4,7 +4,7 @@ import { AdminUserCommandService } from '@/domain/aggregates/admin-user/admin-us
 import { AdminUserQueryService } from '@/domain/aggregates/admin-user/admin-user.query.service';
 import { AdminRole } from '@/generated/prisma';
 import { RepositoryService } from '@/repository/repository.service';
-import { DatabaseHelper } from '@/tests/helpers/database.helper';
+import { DatabaseHelper } from '@/tests/_helpers/database.helper';
 
 describe('integration AdminUserCommandService', () => {
   let adminUserCommandService: AdminUserCommandService;

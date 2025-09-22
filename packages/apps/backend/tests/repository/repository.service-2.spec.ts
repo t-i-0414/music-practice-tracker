@@ -2,7 +2,7 @@ import { Test, type TestingModule } from '@nestjs/testing';
 
 import { UserStatusRecord } from '@/domain/aggregates/user/utils/constants';
 import { RepositoryService } from '@/repository/repository.service';
-import { DatabaseHelper } from '@/tests/helpers/database.helper';
+import { DatabaseHelper } from '@/tests/_helpers/database.helper';
 
 describe('unit RepositoryService', () => {
   let service: RepositoryService;

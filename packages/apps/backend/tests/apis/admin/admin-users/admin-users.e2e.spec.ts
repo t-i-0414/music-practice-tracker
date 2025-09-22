@@ -2,10 +2,10 @@ import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 
 import { AdminRole, AdminStatus } from '@/generated/prisma';
-import { AdminUserFactory } from '@/tests/factory';
-import { createAdminApiNestApplication } from '@/tests/helpers/app-server.helper';
-import { DatabaseHelper } from '@/tests/helpers/database.helper';
-import { resetFirebaseAuthEmulator } from '@/tests/helpers/firebase-emulator.helper';
+import { AdminUserFactory } from '@/tests/_factory';
+import { createAdminApiNestApplication } from '@/tests/_helpers/app-server.helper';
+import { DatabaseHelper } from '@/tests/_helpers/database.helper';
+import { resetFirebaseAuthEmulator } from '@/tests/_helpers/firebase-emulator.helper';
 
 describe('e2e Admin API /api/admin-users', () => {
   let app: INestApplication;

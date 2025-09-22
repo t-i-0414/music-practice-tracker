@@ -7,7 +7,7 @@ import { UserCommandService } from '@/domain/aggregates/user/user.command.servic
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 import { DeleteUserService } from '@/domain/usecases/user/delete-user.service';
 import { RepositoryService } from '@/repository/repository.service';
-import { DatabaseHelper } from '@/tests/helpers/database.helper';
+import { DatabaseHelper } from '@/tests/_helpers/database.helper';
 
 describe('integration AppApiUsersController', () => {
   let controller: AppApiUsersController;

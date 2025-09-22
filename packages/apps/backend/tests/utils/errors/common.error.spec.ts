@@ -1,4 +1,4 @@
-import { setupDateMock, restoreDateMocks } from '@/tests/helpers/date-mock.helper';
+import { setupDateMock, restoreDateMocks } from '@/tests/_helpers/date-mock.helper';
 import { CommonError } from '@/utils/errors/common.error';
 import { ERROR_CODE_RECORDS, type ErrorCode } from '@/utils/errors/error-code';
 

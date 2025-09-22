@@ -4,7 +4,7 @@ import { AdminApiUsersController } from '@/apis/admin/users/users.controller';
 import { UserCommandService } from '@/domain/aggregates/user/user.command.service';
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 import { RepositoryService } from '@/repository/repository.service';
-import { DatabaseHelper } from '@/tests/helpers/database.helper';
+import { DatabaseHelper } from '@/tests/_helpers/database.helper';
 
 describe('integration AdminApiUsersController', () => {
   let controller: AdminApiUsersController;

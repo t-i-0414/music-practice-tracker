@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 import { RepositoryService } from '@/repository/repository.service';
-import { DatabaseHelper } from '@/tests/helpers/database.helper';
+import { DatabaseHelper } from '@/tests/_helpers/database.helper';
 
 describe('integration UserQueryService', () => {
   let userQueryService: UserQueryService;
