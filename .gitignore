@@ -185,3 +185,4 @@ bin/dotenv-linter
 
 # firebase
 firepit-log.txt
+.firebase-emulator-data/

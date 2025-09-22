@@ -63,7 +63,7 @@ firebase-use-prod-project:
 .PHONY: start-firebase-dev-emulators
 start-firebase-dev-emulators:
 	@echo "🚀 Starting Firebase emulators..."
-	firebase emulators:start --config firebase.dev.json --project dev
+	firebase emulators:start --config firebase.dev.json --project dev --import ./.firebase-emulator-data/dev --export-on-exit
 
 .PHONY: start-firebase-test-emulators
 start-firebase-test-emulators:
