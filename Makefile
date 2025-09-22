@@ -60,7 +60,12 @@ firebase-use-prod-project:
 	@echo "🔧 Setting Firebase prod project"
 	firebase use --add music-practice-tracker-prod
 
-.PHONY: start-firebase-auth-emulators
-start-firebase-auth-emulators:
+.PHONY: start-firebase-dev-emulators
+start-firebase-dev-emulators:
 	@echo "🚀 Starting Firebase emulators..."
-	firebase emulators:start --only auth
+	firebase emulators:start --config firebase.dev.json --project dev
+
+.PHONY: start-firebase-test-emulators
+start-firebase-test-emulators:
+	@echo "🚀 Starting Firebase emulators..."
+	firebase emulators:start --config firebase.test.json --project test

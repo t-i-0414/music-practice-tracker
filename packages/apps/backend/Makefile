@@ -81,9 +81,13 @@ docker-restart: docker-compose-down docker-compose-up
 # -------------------------------------------------------------
 # firebase management
 # -------------------------------------------------------------
-.PHONY: start-firebase-auth-emulators
-start-firebase-auth-emulators:
-	@make -C ../../../ start-firebase-auth-emulators
+.PHONY: start-firebase-dev-emulators
+start-firebase-dev-emulators:
+	@make -C ../../../ start-firebase-dev-emulators
+
+.PHONY: start-firebase-test-emulators
+start-firebase-test-emulators:
+	@make -C ../../../ start-firebase-test-emulators
 
 
 # -------------------------------------------------------------

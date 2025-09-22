@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "music-practice-tracker-dev"
+    "dev": "music-practice-tracker-dev",
+    "stg": "music-practice-tracker-stg",
+    "prod": "music-practice-tracker-prod"
   }
 }
