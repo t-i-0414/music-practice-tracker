@@ -4,8 +4,8 @@ import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 
 import { UserStatus } from '@/generated/prisma';
-import { createAdminApiNestApplication } from '@/tests/e2e/helpers/app-server.helper';
-import { resetFirebaseAuthEmulator } from '@/tests/e2e/helpers/firebase-emulator.helper';
+import { createAdminApiNestApplication } from '@/tests/helpers/app-server.helper';
+import { resetFirebaseAuthEmulator } from '@/tests/helpers/firebase-emulator.helper';
 import { UserFactory } from '@/tests/factory';
 import { DatabaseHelper } from '@/tests/helpers/database.helper';
 

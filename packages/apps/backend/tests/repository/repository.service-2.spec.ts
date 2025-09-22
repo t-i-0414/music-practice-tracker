@@ -1,10 +1,10 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test, type TestingModule } from '@nestjs/testing';
 
 import { UserStatusRecord } from '@/domain/aggregates/user/utils/constants';
 import { RepositoryService } from '@/repository/repository.service';
 import { DatabaseHelper } from '@/tests/helpers/database.helper';
 
-describe('integration RepositoryService', () => {
+describe('unit RepositoryService', () => {
   let service: RepositoryService;
   let databaseHelper: DatabaseHelper;
 
@@ -15,14 +15,10 @@ describe('integration RepositoryService', () => {
 
   beforeEach(async () => {
     await databaseHelper.cleanDatabase();
+    jest.clearAllMocks();
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        {
-          provide: RepositoryService,
-          useValue: databaseHelper.client,
-        },
-      ],
+      providers: [RepositoryService],
     }).compile();
 
     service = module.get<RepositoryService>(RepositoryService);
@@ -30,6 +26,57 @@ describe('integration RepositoryService', () => {
 
   afterAll(async () => {
     await databaseHelper.disconnect();
+  });
+
+  describe('initialization', () => {
+    it('should be defined', () => {
+      expect.assertions(1);
+
+      expect(service).toBeDefined();
+    });
+
+    it('should have PrismaClient properties', () => {
+      expect.assertions(3);
+
+      expect(service.$connect).toBeDefined();
+      expect(service.$disconnect).toBeDefined();
+      expect(service.$transaction).toBeDefined();
+    });
+  });
+
+  describe('when module is initialized', () => {
+    it('should connect to database on module init', async () => {
+      expect.assertions(1);
+
+      const connectSpy = jest.spyOn(service, '$connect').mockResolvedValue();
+
+      await service.onModuleInit();
+
+      expect(connectSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should handle connection error', async () => {
+      expect.assertions(1);
+
+      const error = new Error('Connection failed');
+      jest.spyOn(service, '$connect').mockRejectedValue(error);
+
+      await expect(service.onModuleInit()).rejects.toThrow('Connection failed');
+    });
+  });
+
+  describe('database models', () => {
+    it('should have user model', () => {
+      expect.assertions(1);
+
+      expect(service.user).toBeDefined();
+    });
+
+    it('should have adminUser model', () => {
+      expect.assertions(1);
+
+      expect(service.adminUser).toBeDefined();
+    });
   });
 
   describe('transaction handling', () => {

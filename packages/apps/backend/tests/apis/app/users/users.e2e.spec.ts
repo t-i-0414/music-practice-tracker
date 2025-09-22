@@ -5,11 +5,11 @@ import * as request from 'supertest';
 
 import { FirebaseAuthService } from '@/domain/aggregates/firebase-auth/firebase-auth.service';
 import { UserStatus } from '@/generated/prisma';
-import { createAppApiNestApplication } from '@/tests/e2e/helpers/app-server.helper';
-import { createFirebaseEmailUser, resetFirebaseAuthEmulator } from '@/tests/e2e/helpers/firebase-emulator.helper';
-import { buildAuthHeader, createVerifiedFirebaseUser } from '@/tests/e2e/helpers/tokens.helper';
 import { UserFactory } from '@/tests/factory';
+import { createAppApiNestApplication } from '@/tests/helpers/app-server.helper';
 import { DatabaseHelper } from '@/tests/helpers/database.helper';
+import { createFirebaseEmailUser, resetFirebaseAuthEmulator } from '@/tests/helpers/firebase-emulator.helper';
+import { buildAuthHeader, createVerifiedFirebaseUser } from '@/tests/helpers/tokens.helper';
 
 describe('e2e App API /api/users', () => {
   let app: INestApplication;
