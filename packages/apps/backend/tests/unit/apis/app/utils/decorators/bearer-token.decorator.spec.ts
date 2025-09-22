@@ -3,16 +3,15 @@ import { ROUTE_ARGS_METADATA } from '@nestjs/common/constants';
 
 import { BearerToken } from '@/apis/app/utils/decorators/bearer-token.decorator';
 
-type ParamFactory = (data: unknown, ctx: ExecutionContext) => unknown;
-
 type ParamConfig = {
-  factory: ParamFactory;
+  factory(data: unknown, ctx: ExecutionContext): unknown;
   data: unknown;
 };
 
 class TestController {
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  public handler(@BearerToken() _token: string | undefined): void {}
+  public handler(@BearerToken() _token: string | undefined): void {
+    // No implementation needed for testing
+  }
 }
 
 const resolveFactory = (): ParamConfig => {

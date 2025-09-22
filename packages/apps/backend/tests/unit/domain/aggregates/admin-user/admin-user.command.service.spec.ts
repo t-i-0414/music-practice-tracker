@@ -1,46 +1,49 @@
-import { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 
 import { AdminUserCommandService } from '@/domain/aggregates/admin-user/admin-user.command.service';
-import { AdminUserQueryService } from '@/domain/aggregates/admin-user/admin-user.query.service';
 import { toAdminUserResponseDto, toAdminUsersResponseDto } from '@/domain/aggregates/admin-user/utils/dto';
 import { AdminRole } from '@/generated/prisma';
 import { RepositoryService } from '@/repository/repository.service';
 import { AdminUserFactory } from '@/tests/factory';
-import {
-  createMockAdminUserQueryService,
-  createMockAdminUserRepository,
-} from '@/tests/unit/domain/helpers/domain-service-mocks';
 
 describe('unit AdminUserCommandService', () => {
   let service: AdminUserCommandService;
-  let repository: ReturnType<typeof createMockAdminUserRepository>;
-  let _queryService: jest.Mocked<AdminUserQueryService>;
+  let repository: {
+    adminUser: {
+      create: jest.Mock;
+      createManyAndReturn: jest.Mock;
+      update: jest.Mock;
+      delete: jest.Mock;
+      deleteMany: jest.Mock;
+    };
+  };
   let adminUserFactory: AdminUserFactory;
-  let module: TestingModule;
 
   beforeEach(async () => {
     adminUserFactory = new AdminUserFactory();
 
-    repository = createMockAdminUserRepository();
-    const mockQueryService = createMockAdminUserQueryService();
+    const mockRepository = {
+      adminUser: {
+        create: jest.fn(),
+        createManyAndReturn: jest.fn(),
+        update: jest.fn(),
+        delete: jest.fn(),
+        deleteMany: jest.fn(),
+      },
+    };
 
-    const { Test } = await import('@nestjs/testing');
-    module = await Test.createTestingModule({
+    const module = await Test.createTestingModule({
       providers: [
         AdminUserCommandService,
         {
           provide: RepositoryService,
-          useValue: repository,
-        },
-        {
-          provide: AdminUserQueryService,
-          useValue: mockQueryService,
+          useValue: mockRepository,
         },
       ],
     }).compile();
 
     service = module.get<AdminUserCommandService>(AdminUserCommandService);
-    _queryService = module.get(AdminUserQueryService);
+    repository = module.get(RepositoryService);
   });
 
   afterEach(() => {
@@ -102,6 +105,23 @@ describe('unit AdminUserCommandService', () => {
 
       expect(repository.adminUser.createManyAndReturn).toHaveBeenCalledWith({ data: createDto.adminUsers });
       expect(result).toStrictEqual(toAdminUsersResponseDto(mockAdminUsers));
+    });
+
+    it('should throw error on database failure', async () => {
+      expect.assertions(2);
+
+      const createDto = {
+        adminUsers: [
+          { cognitoSub: 'sub-1', name: 'Admin 1', role: AdminRole.ADMIN },
+          { cognitoSub: 'sub-2', name: 'Admin 2', role: AdminRole.SUPER_ADMIN },
+        ],
+      };
+
+      const prismaError = new Error('Database error');
+      repository.adminUser.createManyAndReturn.mockRejectedValue(prismaError);
+
+      await expect(service.createManyAndReturnAdminUsers(createDto)).rejects.toThrow(prismaError);
+      expect(repository.adminUser.createManyAndReturn).toHaveBeenCalledWith({ data: createDto.adminUsers });
     });
   });
 
@@ -178,6 +198,20 @@ describe('unit AdminUserCommandService', () => {
 
       await service.deleteManyAdminUsersByIds({ publicIds });
 
+      expect(repository.adminUser.deleteMany).toHaveBeenCalledWith({
+        where: { publicId: { in: publicIds } },
+      });
+    });
+
+    it('should throw error on database failure', async () => {
+      expect.assertions(2);
+
+      const publicIds = ['id1', 'id2', 'id3'];
+
+      const prismaError = new Error('Database error');
+      repository.adminUser.deleteMany.mockRejectedValue(prismaError);
+
+      await expect(service.deleteManyAdminUsersByIds({ publicIds })).rejects.toThrow(prismaError);
       expect(repository.adminUser.deleteMany).toHaveBeenCalledWith({
         where: { publicId: { in: publicIds } },
       });

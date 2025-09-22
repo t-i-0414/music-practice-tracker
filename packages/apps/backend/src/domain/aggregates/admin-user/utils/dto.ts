@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Type, Exclude, Expose, plainToInstance } from 'class-transformer';
+import { Type, Exclude, Expose, plainToInstance, Transform, TransformFnParams } from 'class-transformer';
 import {
   ArrayNotEmpty,
   IsArray,
@@ -16,6 +16,7 @@ import {
 import { MAX_NAME_LENGTH, AdminRoleRecord, AdminStatusRecord, AdminUser } from './constants';
 
 import { Publicize } from '@/domain/utils/publicize';
+import { ensurePublicIdsToArray } from '@/utils/ensure-public-ids-to-array';
 
 export class FindAdminUserByIdInputDto {
   @ApiProperty({
@@ -39,6 +40,9 @@ export class FindManyAdminUsersByIdInputDto {
   @IsArray()
   @IsUUID('all', { each: true })
   @ArrayNotEmpty()
+  @Transform(({ value }: TransformFnParams) => ensurePublicIdsToArray(value), {
+    toClassOnly: true,
+  })
   public publicIds: string[];
 }
 

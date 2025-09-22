@@ -1,18 +1,12 @@
-import { type TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 
 import { AdminApiUsersController } from '@/apis/admin/users/users.controller';
 import { UserCommandService } from '@/domain/aggregates/user/user.command.service';
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 import { toUserResponseDto, toUsersResponseDto } from '@/domain/aggregates/user/utils/dto';
 import { UserFactory } from '@/tests/factory';
-import {
-  createTestModule,
-  createMockUserQueryService,
-  createMockUserCommandService,
-  resetAllMocks,
-} from '@/tests/unit/apis/helpers';
 
-describe('adminApiUsersController', () => {
+describe('unit AdminApiUsersController', () => {
   let controller: AdminApiUsersController;
   let queryService: jest.Mocked<UserQueryService>;
   let commandService: jest.Mocked<UserCommandService>;
@@ -21,11 +15,24 @@ describe('adminApiUsersController', () => {
   beforeEach(async () => {
     userFactory = new UserFactory();
 
-    const mockQueryService = createMockUserQueryService();
-    const mockCommandService = createMockUserCommandService();
+    const mockQueryService = jest.mocked({
+      findUniqueOrThrowUserById: jest.fn(),
+      findUniqueOrThrowUserByEmail: jest.fn(),
+      findUniqueOrThrowUserByFirebaseUid: jest.fn(),
+      findUniqueUserByFirebaseUid: jest.fn(),
+      findManyUsersById: jest.fn(),
+      findAllUsers: jest.fn(),
+    });
+    const mockCommandService = jest.mocked({
+      createUser: jest.fn(),
+      createManyAndReturnUsers: jest.fn(),
+      updateUserById: jest.fn(),
+      deleteUserById: jest.fn(),
+      deleteManyUsersById: jest.fn(),
+    });
 
-    const module: TestingModule = await createTestModule({
-      controller: AdminApiUsersController,
+    const module = await Test.createTestingModule({
+      controllers: [AdminApiUsersController],
       providers: [
         {
           provide: UserQueryService,
@@ -36,7 +43,7 @@ describe('adminApiUsersController', () => {
           useValue: mockCommandService,
         },
       ],
-    });
+    }).compile();
 
     controller = module.get<AdminApiUsersController>(AdminApiUsersController);
     queryService = module.get<jest.Mocked<UserQueryService>>(UserQueryService);
@@ -44,24 +51,11 @@ describe('adminApiUsersController', () => {
   });
 
   afterEach(() => {
-    resetAllMocks(queryService, commandService);
+    jest.clearAllMocks();
   });
 
   describe('get /admin/users', () => {
-    it('should return users when publicIds not provided', async () => {
-      expect.assertions(2);
-
-      const mockUsers = userFactory.buildMany(3);
-      const mockResponse = toUsersResponseDto(mockUsers);
-      queryService.findManyUsersById.mockResolvedValue(mockResponse);
-
-      const result = await controller.findManyUsersById([]);
-
-      expect(queryService.findManyUsersById).toHaveBeenCalledWith({ publicIds: [] });
-      expect(result).toStrictEqual(mockResponse);
-    });
-
-    it('should return users by public IDs when provided', async () => {
+    it('should return users by public IDs', async () => {
       expect.assertions(2);
 
       const mockUsers = userFactory.buildMany(2);
@@ -69,7 +63,7 @@ describe('adminApiUsersController', () => {
       const mockResponse = toUsersResponseDto(mockUsers);
       queryService.findManyUsersById.mockResolvedValue(mockResponse);
 
-      const result = await controller.findManyUsersById(publicIds);
+      const result = await controller.findManyUsersById({ publicIds });
 
       expect(queryService.findManyUsersById).toHaveBeenCalledWith({ publicIds });
       expect(result).toStrictEqual(mockResponse);
@@ -83,27 +77,10 @@ describe('adminApiUsersController', () => {
       const mockResponse = toUsersResponseDto([mockUser]);
       queryService.findManyUsersById.mockResolvedValue(mockResponse);
 
-      const result = await controller.findManyUsersById(publicId);
+      const result = await controller.findManyUsersById({ publicIds: [publicId] });
 
       expect(queryService.findManyUsersById).toHaveBeenCalledWith({ publicIds: [publicId] });
       expect(result).toStrictEqual(mockResponse);
-    });
-  });
-
-  describe('get /admin/users/:publicId', () => {
-    it('should return user by public ID', async () => {
-      expect.assertions(2);
-
-      const mockUser = userFactory.build();
-      const mockResponseDto = toUserResponseDto(mockUser);
-      queryService.findUniqueOrThrowUserById.mockResolvedValue(mockResponseDto);
-
-      const result = await controller.findUniqueOrThrowUserById(mockUser.publicId);
-
-      expect(queryService.findUniqueOrThrowUserById).toHaveBeenCalledWith({
-        publicId: mockUser.publicId,
-      });
-      expect(result).toStrictEqual(mockResponseDto);
     });
   });
 
@@ -123,6 +100,21 @@ describe('adminApiUsersController', () => {
 
       expect(commandService.createUser).toHaveBeenCalledWith(createDto);
       expect(result).toStrictEqual(mockResponseDto);
+    });
+  });
+
+  describe('delete /admin/users', () => {
+    it('should delete multiple users', async () => {
+      expect.assertions(2);
+
+      const publicIds = ['id1', 'id2', 'id3'];
+      const deleteDto = { publicIds };
+      commandService.deleteManyUsersById.mockResolvedValue(undefined);
+
+      await controller.deleteManyUsersById(deleteDto);
+
+      expect(commandService.deleteManyUsersById).toHaveBeenCalledWith(deleteDto);
+      expect(commandService.deleteManyUsersById).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -147,6 +139,23 @@ describe('adminApiUsersController', () => {
     });
   });
 
+  describe('get /admin/users/:publicId', () => {
+    it('should return user by public ID', async () => {
+      expect.assertions(2);
+
+      const mockUser = userFactory.build();
+      const mockResponseDto = toUserResponseDto(mockUser);
+      queryService.findUniqueOrThrowUserById.mockResolvedValue(mockResponseDto);
+
+      const result = await controller.findUniqueOrThrowUserById(mockUser.publicId);
+
+      expect(queryService.findUniqueOrThrowUserById).toHaveBeenCalledWith({
+        publicId: mockUser.publicId,
+      });
+      expect(result).toStrictEqual(mockResponseDto);
+    });
+  });
+
   describe('put /admin/users/:publicId', () => {
     it('should update a user', async () => {
       expect.assertions(2);
@@ -166,21 +175,6 @@ describe('adminApiUsersController', () => {
 
       expect(commandService.updateUserById).toHaveBeenCalledWith({ publicId, data: updateDto });
       expect(result).toStrictEqual(mockResponseDto);
-    });
-  });
-
-  describe('delete /admin/users', () => {
-    it('should delete multiple users', async () => {
-      expect.assertions(2);
-
-      const publicIds = ['id1', 'id2', 'id3'];
-      const deleteDto = { publicIds };
-      commandService.deleteManyUsersById.mockResolvedValue(undefined);
-
-      await controller.deleteManyUsersById(deleteDto);
-
-      expect(commandService.deleteManyUsersById).toHaveBeenCalledWith(deleteDto);
-      expect(commandService.deleteManyUsersById).toHaveBeenCalledTimes(1);
     });
   });
 

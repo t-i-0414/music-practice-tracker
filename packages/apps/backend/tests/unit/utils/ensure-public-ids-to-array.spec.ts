@@ -1,4 +1,4 @@
-import { ensurePublicIdsToArray } from '@/apis/utils/ensure-public-ids-to-array';
+import { ensurePublicIdsToArray } from '@/utils/ensure-public-ids-to-array';
 
 describe('unit ensurePublicIdsToArray', () => {
   describe('null and undefined inputs', () => {
@@ -10,6 +10,26 @@ describe('unit ensurePublicIdsToArray', () => {
 
     it('should return empty array for undefined', () => {
       const result = ensurePublicIdsToArray(undefined);
+
+      expect(result).toStrictEqual([]);
+    });
+  });
+
+  describe('non-string inputs', () => {
+    it('should return empty array for number', () => {
+      const result = ensurePublicIdsToArray(123);
+
+      expect(result).toStrictEqual([]);
+    });
+
+    it('should return empty array for object', () => {
+      const result = ensurePublicIdsToArray({});
+
+      expect(result).toStrictEqual([]);
+    });
+
+    it('should return empty array for boolean', () => {
+      const result = ensurePublicIdsToArray(true);
 
       expect(result).toStrictEqual([]);
     });
@@ -84,6 +104,12 @@ describe('unit ensurePublicIdsToArray', () => {
       expect(result).toStrictEqual(['id1', 'id2', 'id3', 'id4', 'id5']);
     });
 
+    it('should handle array with newline characters gracefully', () => {
+      const result = ensurePublicIdsToArray(['id1\n', 'id2,\nid3', '\n id4']);
+
+      expect(result).toStrictEqual(['id1', 'id2', 'id3', 'id4']);
+    });
+
     it('should handle array with empty strings', () => {
       const result = ensurePublicIdsToArray(['id1', '', 'id2']);
 
@@ -100,6 +126,12 @@ describe('unit ensurePublicIdsToArray', () => {
       const result = ensurePublicIdsToArray(['  id1 , id2  ', 'id3,  id4  ']);
 
       expect(result).toStrictEqual(['id1', 'id2', 'id3', 'id4']);
+    });
+
+    it('should ignore non-string array elements', () => {
+      const result = ensurePublicIdsToArray(['id1', 123 as unknown as string, 'id2']);
+
+      expect(result).toStrictEqual(['id1', 'id2']);
     });
   });
 
@@ -122,6 +154,12 @@ describe('unit ensurePublicIdsToArray', () => {
       );
 
       expect(result).toStrictEqual(['123e4567-e89b-12d3-a456-426614174000', '987fcdeb-51a2-43d7-8f9e-123456789abc']);
+    });
+
+    it('should return empty array for non-string, non-array values', () => {
+      expect(ensurePublicIdsToArray(123)).toStrictEqual([]);
+      expect(ensurePublicIdsToArray({})).toStrictEqual([]);
+      expect(ensurePublicIdsToArray(true)).toStrictEqual([]);
     });
   });
 });

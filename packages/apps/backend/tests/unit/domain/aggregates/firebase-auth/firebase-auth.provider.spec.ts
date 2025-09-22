@@ -19,7 +19,7 @@ jest.mock<typeof import('firebase-admin')>('firebase-admin', () => {
   } as unknown as typeof import('firebase-admin');
 });
 
-type FirebaseAdminMock = {
+const firebaseAdmin = jest.requireMock('firebase-admin') as unknown as {
   apps: {
     auth: jest.Mock;
     delete: jest.Mock;
@@ -32,7 +32,21 @@ type FirebaseAdminMock = {
   };
 };
 
-const firebaseAdmin = jest.requireMock('firebase-admin') as unknown as FirebaseAdminMock;
+const resetFirebaseAdmin = () => {
+  firebaseAdmin.apps.splice(0, firebaseAdmin.apps.length);
+  firebaseAdmin.initializeApp.mockReset();
+  firebaseAdmin.app.mockReset();
+  firebaseAdmin.credential.applicationDefault.mockReset();
+  firebaseAdmin.credential.cert.mockReset();
+
+  firebaseAdmin.credential.applicationDefault.mockReturnValue('application-default-credential');
+  firebaseAdmin.credential.cert.mockImplementation((serviceAccount: unknown) => ({ cert: serviceAccount }));
+};
+
+const createFirebaseApp = () => ({
+  auth: jest.fn(() => 'mock-auth'),
+  delete: jest.fn().mockResolvedValue(undefined),
+});
 
 const SERVICE_ACCOUNT_KEYS = [
   'FIREBASE_AUTH_EMULATOR_HOST',
@@ -42,43 +56,28 @@ const SERVICE_ACCOUNT_KEYS = [
   'FIREBASE_SERVICE_ACCOUNT',
 ] as const;
 
-const createFirebaseApp = () => ({
-  auth: jest.fn(() => 'mock-auth'),
-  delete: jest.fn().mockResolvedValue(undefined),
-});
-
-const restoreEnv: Record<(typeof SERVICE_ACCOUNT_KEYS)[number], string | undefined> = Object.fromEntries(
+const envVarRecordForRestore: Record<(typeof SERVICE_ACCOUNT_KEYS)[number], string | undefined> = Object.fromEntries(
   SERVICE_ACCOUNT_KEYS.map((key) => [key, process.env[key]]),
 ) as Record<(typeof SERVICE_ACCOUNT_KEYS)[number], string | undefined>;
 
+const resetEnvVars = () => {
+  SERVICE_ACCOUNT_KEYS.forEach((key) => {
+    if (envVarRecordForRestore[key] === undefined) {
+      delete process.env[key];
+    } else {
+      process.env[key] = envVarRecordForRestore[key];
+    }
+  });
+};
+
 describe('unit FirebaseAuthProvider', () => {
   beforeEach(() => {
-    firebaseAdmin.apps.splice(0, firebaseAdmin.apps.length);
-    firebaseAdmin.initializeApp.mockReset();
-    firebaseAdmin.app.mockReset();
-    firebaseAdmin.credential.applicationDefault.mockReset();
-    firebaseAdmin.credential.cert.mockReset();
-
-    firebaseAdmin.credential.applicationDefault.mockReturnValue('application-default-credential');
-    firebaseAdmin.credential.cert.mockImplementation((serviceAccount: unknown) => ({ cert: serviceAccount }));
-
-    SERVICE_ACCOUNT_KEYS.forEach((key) => {
-      if (restoreEnv[key] === undefined) {
-        delete process.env[key];
-      } else {
-        process.env[key] = restoreEnv[key];
-      }
-    });
+    resetFirebaseAdmin();
+    resetEnvVars();
   });
 
   afterAll(() => {
-    SERVICE_ACCOUNT_KEYS.forEach((key) => {
-      if (restoreEnv[key] === undefined) {
-        delete process.env[key];
-      } else {
-        process.env[key] = restoreEnv[key];
-      }
-    });
+    resetEnvVars();
   });
 
   it('reuses an already initialized firebase app', () => {
@@ -181,12 +180,44 @@ describe('unit FirebaseAuthProvider', () => {
     expect(firebaseAdmin.apps[firebaseAdmin.apps.length - 1]).toBe(emulatorApp);
   });
 
+  it('uses FIREBASE_PROJECT_ID when other project vars are missing', () => {
+    expect.assertions(3);
+
+    firebaseAdmin.initializeApp.mockImplementationOnce(() => {
+      throw new Error('adc unavailable');
+    });
+    const emulatorApp = createFirebaseApp();
+    emulatorApp.auth.mockReturnValue('firebase-project-auth');
+    firebaseAdmin.initializeApp.mockImplementationOnce(() => {
+      firebaseAdmin.apps.push(emulatorApp);
+      return emulatorApp;
+    });
+
+    delete process.env.GOOGLE_CLOUD_PROJECT;
+    delete process.env.GCLOUD_PROJECT;
+    process.env.FIREBASE_PROJECT_ID = 'firebase-project';
+    process.env.FIREBASE_AUTH_EMULATOR_HOST = 'localhost:9099';
+
+    const provider = new FirebaseAuthProvider();
+
+    provider.onModuleInit();
+
+    expect(firebaseAdmin.initializeApp).toHaveBeenNthCalledWith(2, {
+      projectId: 'firebase-project',
+    });
+    expect(provider.auth()).toBe('firebase-project-auth');
+    expect(firebaseAdmin.apps[firebaseAdmin.apps.length - 1]).toBe(emulatorApp);
+  });
+
   it('throws DO0001 when service account is missing after ADC failure', () => {
-    expect.assertions(2);
+    expect.assertions(3);
 
     firebaseAdmin.initializeApp.mockImplementation(() => {
       throw new Error('adc unavailable');
     });
+
+    process.env.FIREBASE_AUTH_EMULATOR_HOST = 'localhost:9099';
+    process.env.FIREBASE_PROJECT_ID = '   ';
 
     const provider = new FirebaseAuthProvider();
 
@@ -199,11 +230,12 @@ describe('unit FirebaseAuthProvider', () => {
     }
 
     expect(caught).toBeInstanceOf(DomainError);
-    expect((caught as DomainError).detail).toContain('FIREBASE_SERVICE_ACCOUNT is not set');
+    expect(caught).toHaveProperty('errorCode', 'DO0001');
+    expect((caught as DomainError).detail).toContain('Firebase Admin credential not configured.');
   });
 
   it('throws DO0002 when service account JSON is invalid', () => {
-    expect.assertions(2);
+    expect.assertions(3);
 
     firebaseAdmin.initializeApp.mockImplementation(() => {
       throw new Error('adc unavailable');
@@ -221,11 +253,12 @@ describe('unit FirebaseAuthProvider', () => {
     }
 
     expect(caught).toBeInstanceOf(DomainError);
-    expect((caught as DomainError).detail).toBe('Invalid FIREBASE_SERVICE_ACCOUNT: JSON parse failed.');
+    expect(caught).toHaveProperty('errorCode', 'DO0002');
+    expect((caught as DomainError).detail).toBe('Invalid FIREBASE_SERVICE_ACCOUNT JSON.');
   });
 
   it('throws DO0002 when service account JSON is missing required properties', () => {
-    expect.assertions(1);
+    expect.assertions(3);
 
     firebaseAdmin.initializeApp.mockImplementation(() => {
       throw new Error('adc unavailable');
@@ -234,9 +267,17 @@ describe('unit FirebaseAuthProvider', () => {
 
     const provider = new FirebaseAuthProvider();
 
-    expect(() => {
+    let caught: unknown;
+
+    try {
       provider.onModuleInit();
-    }).toThrow('Invalid FIREBASE_SERVICE_ACCOUNT format. Expecting JSON object.');
+    } catch (error) {
+      caught = error;
+    }
+
+    expect(caught).toBeInstanceOf(DomainError);
+    expect(caught).toHaveProperty('errorCode', 'DO0002');
+    expect((caught as DomainError).detail).toBe('Invalid FIREBASE_SERVICE_ACCOUNT JSON.');
   });
 
   it('initializes firebase with service account credentials when provided', () => {
@@ -277,7 +318,7 @@ describe('unit FirebaseAuthProvider', () => {
   });
 
   it('wraps errors when firebase initialization with service account fails', () => {
-    expect.assertions(2);
+    expect.assertions(3);
 
     firebaseAdmin.initializeApp.mockImplementationOnce(() => {
       throw new Error('adc unavailable');
@@ -303,7 +344,8 @@ describe('unit FirebaseAuthProvider', () => {
     }
 
     expect(caught).toBeInstanceOf(DomainError);
-    expect((caught as DomainError).detail).toBe('Failed to initialize Firebase Admin SDK with service account.');
+    expect(caught).toHaveProperty('errorCode', 'DO0003');
+    expect((caught as DomainError).detail).toBe('Failed to initialize Firebase Admin SDK.');
   });
 
   it('resolves even when deleting the firebase app fails during shutdown', async () => {

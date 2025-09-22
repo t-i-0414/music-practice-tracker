@@ -3,14 +3,10 @@ import { UserCommandService } from '@/domain/aggregates/user/user.command.servic
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 import { DeleteUserService } from '@/domain/usecases/user/delete-user.service';
 
-type FirebaseAuthServiceMock = jest.Mocked<Pick<FirebaseAuthService, 'deleteUser'>>;
-type UserQueryServiceMock = jest.Mocked<Pick<UserQueryService, 'findUniqueOrThrowUserById'>>;
-type UserCommandServiceMock = jest.Mocked<Pick<UserCommandService, 'deleteUserById'>>;
-
 describe('unit DeleteUserService', () => {
-  let firebaseAuthService: FirebaseAuthServiceMock;
-  let usersQueryService: UserQueryServiceMock;
-  let usersCommandService: UserCommandServiceMock;
+  let firebaseAuthService: jest.Mocked<Pick<FirebaseAuthService, 'deleteUser'>>;
+  let usersQueryService: jest.Mocked<Pick<UserQueryService, 'findUniqueOrThrowUserById'>>;
+  let usersCommandService: jest.Mocked<Pick<UserCommandService, 'deleteUserById'>>;
   let service: DeleteUserService;
 
   beforeEach(() => {

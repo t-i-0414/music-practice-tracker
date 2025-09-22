@@ -7,6 +7,7 @@ export const jestConfig = defineConfig({
   extends: [jestPlugin.configs['flat/all']],
   rules: {
     ...disabledRulesOnTests,
+    'jest/unbound-method': 'off',
     'jest/prefer-importing-jest-globals': 'off',
     'jest/no-hooks': 'off',
     'jest/prefer-expect-assertions': [

@@ -3,7 +3,8 @@ import type { DecodedIdToken, UserRecord } from 'firebase-admin/auth';
 
 import { FirebaseAuthProvider } from './firebase-auth.provider';
 
-import { ApiError } from '@/apis/utils/api.error';
+import { DomainError } from '@/domain/utils/domain.error';
+import { ERROR_CODE_RECORDS } from '@/utils/errors/error-code';
 
 @Injectable()
 export class FirebaseAuthService {
@@ -16,15 +17,15 @@ export class FirebaseAuthService {
       if (e instanceof Error && 'code' in e) {
         switch (e.code) {
           case 'auth/id-token-expired':
-            throw new ApiError('AP0401', 'Firebase token expired', e);
+            throw new DomainError('DO0005', ERROR_CODE_RECORDS.DO0005, e);
           case 'auth/id-token-revoked':
-            throw new ApiError('AP0401', 'Firebase token revoked', e);
+            throw new DomainError('DO0006', ERROR_CODE_RECORDS.DO0006, e);
           default:
-            throw new ApiError('AP0401', 'Firebase invalid token', e);
+            throw new DomainError('DO0007', ERROR_CODE_RECORDS.DO0007, e);
         }
       }
 
-      throw new ApiError('AP0401', 'Firebase invalid token', e);
+      throw new DomainError('DO0007', ERROR_CODE_RECORDS.DO0007, e);
     }
   }
 
@@ -32,7 +33,7 @@ export class FirebaseAuthService {
     try {
       return await this.provider.auth().getUser(uid);
     } catch (e) {
-      throw new ApiError('AP0404', 'Firebase user not found', e);
+      throw new DomainError('DO0008', ERROR_CODE_RECORDS.DO0008, e);
     }
   }
 
@@ -44,7 +45,7 @@ export class FirebaseAuthService {
         // Idempotent: already deleted on Firebase side, treat as success
         return;
       }
-      throw new ApiError('AP0500', 'Failed to delete Firebase user', e);
+      throw new DomainError('DO0009', ERROR_CODE_RECORDS.DO0009, e);
     }
   }
 }

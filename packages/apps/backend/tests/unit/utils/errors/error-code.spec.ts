@@ -34,7 +34,7 @@ describe('unit ErrorPrefixes', () => {
   });
 });
 
-describe('constant ERROR_CODE_RECORDS', () => {
+describe('unit ERROR_CODE_RECORDS', () => {
   describe('api error codes', () => {
     describe('http 4xx client error codes', () => {
       it.each([
@@ -195,7 +195,7 @@ describe('constant ERROR_CODE_RECORDS', () => {
   });
 });
 
-describe('function isErrorCode', () => {
+describe('unit isErrorCode', () => {
   describe('valid error codes', () => {
     it.each(['AP0400', 'DO9999', 'RE0001', 'UN9999'])('should return true for "%s"', (code) => {
       expect(isErrorCode(code)).toBe(true);

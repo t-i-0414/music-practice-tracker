@@ -66,7 +66,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get admin users by public IDs or all admin users */
+        /** Get admin users by public IDs */
         get: operations["AdminApiAdminUsersController_findManyAdminUsers"];
         put?: never;
         /** Create a new admin user */
@@ -544,7 +544,7 @@ export interface operations {
     AdminApiAdminUsersController_findManyAdminUsers: {
         parameters: {
             query?: {
-                /** @description List of admin user public IDs (optional. if provided, only these users will be returned) */
+                /** @description List of admin user public IDs */
                 publicIds?: string[];
             };
             header?: never;

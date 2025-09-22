@@ -1,6 +1,28 @@
+import { IncomingHttpHeaders } from 'node:http';
+
 import { extractTokenFromHttpHeaders } from '@/apis/utils/extract-token-from-http-headers';
 
 describe('unit extractTokenFromHttpHeaders', () => {
+  it('returns the bearer token when authorization header is valid', () => {
+    expect.assertions(1);
+
+    expect(
+      extractTokenFromHttpHeaders({
+        authorization: '   Bearer   token-value   ',
+      }),
+    ).toBe('token-value');
+  });
+
+  it('supports case-insensitive bearer token parsing', () => {
+    expect.assertions(1);
+
+    expect(
+      extractTokenFromHttpHeaders({
+        authorization: 'bearer AnotherToken',
+      }),
+    ).toBe('AnotherToken');
+  });
+
   it('returns undefined when the authorization header is missing', () => {
     expect.assertions(1);
 
@@ -27,16 +49,6 @@ describe('unit extractTokenFromHttpHeaders', () => {
     ).toBeUndefined();
   });
 
-  it('returns the bearer token when authorization header is valid', () => {
-    expect.assertions(1);
-
-    expect(
-      extractTokenFromHttpHeaders({
-        authorization: '   Bearer   token-value   ',
-      }),
-    ).toBe('token-value');
-  });
-
   it('returns undefined when the bearer token is blank after trimming', () => {
     expect.assertions(1);
 
@@ -57,14 +69,24 @@ describe('unit extractTokenFromHttpHeaders', () => {
     ).toBeUndefined();
   });
 
-  it('supports case-insensitive bearer token parsing', () => {
+  it('returns undefined when only the scheme is provided without token', () => {
     expect.assertions(1);
 
     expect(
       extractTokenFromHttpHeaders({
-        authorization: 'bearer AnotherToken',
+        authorization: 'Bearer',
       }),
-    ).toBe('AnotherToken');
+    ).toBeUndefined();
+  });
+
+  it('returns undefined when authorization header is an array of values', () => {
+    expect.assertions(1);
+
+    expect(
+      extractTokenFromHttpHeaders({
+        authorization: ['Bearer token-value', 'Bearer another'],
+      } as unknown as IncomingHttpHeaders),
+    ).toBeUndefined();
   });
 
   it('returns undefined when regex groups are unavailable', () => {

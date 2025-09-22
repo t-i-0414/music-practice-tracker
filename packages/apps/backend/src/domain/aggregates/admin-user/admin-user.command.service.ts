@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 
-import { AdminUserQueryService } from './admin-user.query.service';
 import {
   CreateManyAdminUsersInputDto,
   CreateAdminUserInputDto,
@@ -17,10 +16,7 @@ import { RepositoryService } from '@/repository/repository.service';
 
 @Injectable()
 export class AdminUserCommandService {
-  public constructor(
-    private readonly repository: RepositoryService,
-    private readonly queryService: AdminUserQueryService,
-  ) {}
+  public constructor(private readonly repository: RepositoryService) {}
 
   public async createAdminUser(dto: CreateAdminUserInputDto): Promise<AdminUserResponseDto> {
     return toAdminUserResponseDto(

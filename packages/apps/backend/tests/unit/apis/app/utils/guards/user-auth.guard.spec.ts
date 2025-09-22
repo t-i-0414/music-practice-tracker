@@ -8,10 +8,6 @@ import { IS_PUBLIC_KEY } from '@/apis/utils/decorators/public.decorator';
 import { FirebaseAuthService } from '@/domain/aggregates/firebase-auth/firebase-auth.service';
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 
-type ReflectorMock = jest.Mocked<Pick<Reflector, 'getAllAndOverride'>>;
-type FirebaseAuthServiceMock = jest.Mocked<Pick<FirebaseAuthService, 'verifyIdToken'>>;
-type UserQueryServiceMock = jest.Mocked<Pick<UserQueryService, 'findUniqueOrThrowUserByFirebaseUid'>>;
-
 const createExecutionContext = (request: Request): ExecutionContext =>
   ({
     getHandler: jest.fn(),
@@ -22,9 +18,9 @@ const createExecutionContext = (request: Request): ExecutionContext =>
   }) as unknown as ExecutionContext;
 
 describe('unit UserAuthGuard', () => {
-  let reflector: ReflectorMock;
-  let firebaseAuthService: FirebaseAuthServiceMock;
-  let usersQueryService: UserQueryServiceMock;
+  let reflector: jest.Mocked<Pick<Reflector, 'getAllAndOverride'>>;
+  let firebaseAuthService: jest.Mocked<Pick<FirebaseAuthService, 'verifyIdToken'>>;
+  let usersQueryService: jest.Mocked<Pick<UserQueryService, 'findUniqueOrThrowUserByFirebaseUid'>>;
   let guard: UserAuthGuard;
   const originalCheckRevoked = process.env.FIREBASE_CHECK_REVOKED;
 

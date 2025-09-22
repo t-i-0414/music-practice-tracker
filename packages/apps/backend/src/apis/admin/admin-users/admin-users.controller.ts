@@ -1,9 +1,8 @@
 import { Body, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Put, Query } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-import { ApiStandardResponses } from '@/apis/utils/api-default-response';
+import { ApiStandardResponses } from '@/apis/utils/api-standard-response';
 import { ApiController } from '@/apis/utils/controllers/api.controller';
-import { ensurePublicIdsToArray } from '@/apis/utils/ensure-public-ids-to-array';
 import { AdminUserCommandService } from '@/domain/aggregates/admin-user/admin-user.command.service';
 import { AdminUserQueryService } from '@/domain/aggregates/admin-user/admin-user.query.service';
 import {
@@ -13,7 +12,9 @@ import {
   UpdateAdminUserInputData,
   AdminUserResponseDto,
   AdminUsersResponseDto,
+  FindManyAdminUsersByIdInputDto,
 } from '@/domain/aggregates/admin-user/utils/dto';
+import { ensurePublicIdsToArray } from '@/utils/ensure-public-ids-to-array';
 
 @ApiTags('admin-users')
 @ApiController('admin-users')
@@ -24,10 +25,10 @@ export class AdminApiAdminUsersController {
   ) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get admin users by public IDs or all admin users' })
+  @ApiOperation({ summary: 'Get admin users by public IDs' })
   @ApiQuery({
     name: 'publicIds',
-    description: 'List of admin user public IDs (optional. if provided, only these users will be returned)',
+    description: 'List of admin user public IDs',
     type: String,
     isArray: true,
     style: 'form',
@@ -37,10 +38,8 @@ export class AdminApiAdminUsersController {
   })
   @ApiResponse({ status: 200, description: 'Admin users found', type: AdminUsersResponseDto })
   @ApiStandardResponses()
-  public async findManyAdminUsers(@Query('publicIds') publicIds?: string | string[]): Promise<AdminUsersResponseDto> {
-    return publicIds === undefined
-      ? this.adminUserQuery.findAllAdminUsers()
-      : this.adminUserQuery.findManyAdminUsersById({ publicIds: ensurePublicIdsToArray(publicIds) });
+  public findManyAdminUsers(@Query() { publicIds }: FindManyAdminUsersByIdInputDto): Promise<AdminUsersResponseDto> {
+    return this.adminUserQuery.findManyAdminUsersById({ publicIds: ensurePublicIdsToArray(publicIds) });
   }
 
   @Post()

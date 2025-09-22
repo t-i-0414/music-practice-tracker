@@ -1,4 +1,4 @@
-export const ensurePublicIdsToArray = (value: string | string[] | undefined | null): string[] => {
+export const ensurePublicIdsToArray = (value: unknown): string[] => {
   if (value === null || value === undefined) {
     return [];
   }
@@ -10,8 +10,13 @@ export const ensurePublicIdsToArray = (value: string | string[] | undefined | nu
   return splitCommaString(value);
 };
 
-const splitCommaString = (input: string): string[] =>
-  input
+const splitCommaString = (input: unknown): string[] => {
+  if (typeof input !== 'string') {
+    return [];
+  }
+
+  return input
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean);
+};

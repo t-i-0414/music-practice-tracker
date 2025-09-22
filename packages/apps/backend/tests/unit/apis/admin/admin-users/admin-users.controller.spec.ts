@@ -1,4 +1,4 @@
-import { type TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 
 import { AdminApiAdminUsersController } from '@/apis/admin/admin-users/admin-users.controller';
 import { AdminUserCommandService } from '@/domain/aggregates/admin-user/admin-user.command.service';
@@ -10,14 +10,8 @@ import {
 } from '@/domain/aggregates/admin-user/utils/dto';
 import { AdminRole } from '@/generated/prisma';
 import { AdminUserFactory } from '@/tests/factory';
-import {
-  createTestModule,
-  createMockAdminUserQueryService,
-  createMockAdminUserCommandService,
-  resetAllMocks,
-} from '@/tests/unit/apis/helpers';
 
-describe('controller AdminApiAdminUsersController', () => {
+describe('unit AdminApiAdminUsersController', () => {
   let controller: AdminApiAdminUsersController;
   let queryService: jest.Mocked<AdminUserQueryService>;
   let commandService: jest.Mocked<AdminUserCommandService>;
@@ -26,11 +20,21 @@ describe('controller AdminApiAdminUsersController', () => {
   beforeEach(async () => {
     adminUserFactory = new AdminUserFactory();
 
-    const mockQueryService = createMockAdminUserQueryService();
-    const mockCommandService = createMockAdminUserCommandService();
+    const mockQueryService = jest.mocked({
+      findUniqueOrThrowAdminUser: jest.fn(),
+      findManyAdminUsersById: jest.fn(),
+      findAllAdminUsers: jest.fn(),
+    });
+    const mockCommandService = jest.mocked({
+      createAdminUser: jest.fn(),
+      createManyAndReturnAdminUsers: jest.fn(),
+      updateAdminUserById: jest.fn(),
+      deleteAdminUserById: jest.fn(),
+      deleteManyAdminUsersByIds: jest.fn(),
+    });
 
-    const module: TestingModule = await createTestModule({
-      controller: AdminApiAdminUsersController,
+    const module = await Test.createTestingModule({
+      controllers: [AdminApiAdminUsersController],
       providers: [
         {
           provide: AdminUserQueryService,
@@ -41,7 +45,7 @@ describe('controller AdminApiAdminUsersController', () => {
           useValue: mockCommandService,
         },
       ],
-    });
+    }).compile();
 
     controller = module.get<AdminApiAdminUsersController>(AdminApiAdminUsersController);
     queryService = module.get<jest.Mocked<AdminUserQueryService>>(AdminUserQueryService);
@@ -49,24 +53,11 @@ describe('controller AdminApiAdminUsersController', () => {
   });
 
   afterEach(() => {
-    resetAllMocks(queryService, commandService);
+    jest.clearAllMocks();
   });
 
   describe('get /admin/admin-users', () => {
-    it('should return all admin users when no publicIds provided', async () => {
-      expect.assertions(2);
-
-      const mockAdminUsers = adminUserFactory.buildMany(2);
-      const mockResponse = toAdminUsersResponseDto(mockAdminUsers);
-      queryService.findAllAdminUsers.mockResolvedValue(mockResponse);
-
-      const result = await controller.findManyAdminUsers(undefined);
-
-      expect(queryService.findAllAdminUsers).toHaveBeenCalledWith();
-      expect(result).toStrictEqual(mockResponse);
-    });
-
-    it('should return admin users by public IDs when provided', async () => {
+    it('should return admin users by public IDs', async () => {
       expect.assertions(2);
 
       const mockAdminUsers = adminUserFactory.buildMany(2);
@@ -74,7 +65,7 @@ describe('controller AdminApiAdminUsersController', () => {
       const mockResponse = toAdminUsersResponseDto(mockAdminUsers);
       queryService.findManyAdminUsersById.mockResolvedValue(mockResponse);
 
-      const result = await controller.findManyAdminUsers(publicIds);
+      const result = await controller.findManyAdminUsers({ publicIds });
 
       expect(queryService.findManyAdminUsersById).toHaveBeenCalledWith({ publicIds });
       expect(result).toStrictEqual(mockResponse);
@@ -88,9 +79,68 @@ describe('controller AdminApiAdminUsersController', () => {
       const mockResponse = toAdminUsersResponseDto([mockAdminUser]);
       queryService.findManyAdminUsersById.mockResolvedValue(mockResponse);
 
-      const result = await controller.findManyAdminUsers(publicId);
+      const result = await controller.findManyAdminUsers({ publicIds: [publicId] });
 
       expect(queryService.findManyAdminUsersById).toHaveBeenCalledWith({ publicIds: [publicId] });
+      expect(result).toStrictEqual(mockResponse);
+    });
+  });
+
+  describe('post /admin/admin-users', () => {
+    it('should create a new admin user', async () => {
+      expect.assertions(2);
+
+      const createDto: CreateAdminUserInputDto = {
+        cognitoSub: 'sub-admin',
+        name: 'New Admin',
+        role: AdminRole.VIEWER,
+      };
+      const mockAdminUser = adminUserFactory.build(createDto);
+      const mockResponseDto = toAdminUserResponseDto(mockAdminUser);
+      commandService.createAdminUser.mockResolvedValue(mockResponseDto);
+
+      const result = await controller.createAdminUser(createDto);
+
+      expect(commandService.createAdminUser).toHaveBeenCalledWith(createDto);
+      expect(result).toStrictEqual(mockResponseDto);
+    });
+  });
+
+  describe('delete /admin/admin-users', () => {
+    it('should delete multiple admin users', async () => {
+      expect.assertions(2);
+
+      const publicIds = ['id1', 'id2', 'id3'];
+      const deleteDto = { publicIds };
+      commandService.deleteManyAdminUsersByIds.mockResolvedValue(undefined);
+
+      await controller.deleteManyAdminUsers(deleteDto);
+
+      expect(commandService.deleteManyAdminUsersByIds).toHaveBeenCalledWith(deleteDto);
+      expect(commandService.deleteManyAdminUsersByIds).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('post /admin/admin-users/bulk', () => {
+    it('should create multiple admin users', async () => {
+      expect.assertions(2);
+
+      const createDto = {
+        adminUsers: [
+          { cognitoSub: 'sub-admin1', name: 'Admin 1', role: AdminRole.VIEWER },
+          { cognitoSub: 'sub-admin2', name: 'Admin 2', role: AdminRole.ADMIN },
+        ],
+      };
+      const mockAdminUsers = [
+        adminUserFactory.build(createDto.adminUsers[0]),
+        adminUserFactory.build(createDto.adminUsers[1]),
+      ];
+      const mockResponse = toAdminUsersResponseDto(mockAdminUsers);
+      commandService.createManyAndReturnAdminUsers.mockResolvedValue(mockResponse);
+
+      const result = await controller.createManyAdminUsers(createDto);
+
+      expect(commandService.createManyAndReturnAdminUsers).toHaveBeenCalledWith(createDto);
       expect(result).toStrictEqual(mockResponse);
     });
   });
@@ -117,52 +167,8 @@ describe('controller AdminApiAdminUsersController', () => {
       const publicId = 'non-existent-id';
       queryService.findUniqueOrThrowAdminUser.mockRejectedValue(new Error('Admin user not found'));
 
-      await expect(controller.findAdminUserById(publicId)).rejects.toThrow('Admin user not found');
+      await expect(controller.findAdminUserById(publicId)).rejects.toMatchObject({ message: 'Admin user not found' });
       expect(queryService.findUniqueOrThrowAdminUser).toHaveBeenCalledWith({ publicId });
-    });
-  });
-
-  describe('post /admin/admin-users', () => {
-    it('should create a new admin user', async () => {
-      expect.assertions(2);
-
-      const createDto: CreateAdminUserInputDto = {
-        cognitoSub: 'sub-admin',
-        name: 'New Admin',
-        role: AdminRole.VIEWER,
-      };
-      const mockAdminUser = adminUserFactory.build(createDto);
-      const mockResponseDto = toAdminUserResponseDto(mockAdminUser);
-      commandService.createAdminUser.mockResolvedValue(mockResponseDto);
-
-      const result = await controller.createAdminUser(createDto);
-
-      expect(commandService.createAdminUser).toHaveBeenCalledWith(createDto);
-      expect(result).toStrictEqual(mockResponseDto);
-    });
-  });
-
-  describe('post /admin/admin-users/bulk', () => {
-    it('should create multiple admin users', async () => {
-      expect.assertions(2);
-
-      const createDto = {
-        adminUsers: [
-          { cognitoSub: 'sub-admin1', name: 'Admin 1', role: AdminRole.VIEWER },
-          { cognitoSub: 'sub-admin2', name: 'Admin 2', role: AdminRole.ADMIN },
-        ],
-      };
-      const mockAdminUsers = [
-        adminUserFactory.build(createDto.adminUsers[0]),
-        adminUserFactory.build(createDto.adminUsers[1]),
-      ];
-      const mockResponse = toAdminUsersResponseDto(mockAdminUsers);
-      commandService.createManyAndReturnAdminUsers.mockResolvedValue(mockResponse);
-
-      const result = await controller.createManyAdminUsers(createDto);
-
-      expect(commandService.createManyAndReturnAdminUsers).toHaveBeenCalledWith(createDto);
-      expect(result).toStrictEqual(mockResponse);
     });
   });
 
@@ -200,21 +206,6 @@ describe('controller AdminApiAdminUsersController', () => {
 
       expect(commandService.deleteAdminUserById).toHaveBeenCalledWith({ publicId });
       expect(commandService.deleteAdminUserById).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('delete /admin/admin-users', () => {
-    it('should delete multiple admin users', async () => {
-      expect.assertions(2);
-
-      const publicIds = ['id1', 'id2', 'id3'];
-      const deleteDto = { publicIds };
-      commandService.deleteManyAdminUsersByIds.mockResolvedValue(undefined);
-
-      await controller.deleteManyAdminUsers(deleteDto);
-
-      expect(commandService.deleteManyAdminUsersByIds).toHaveBeenCalledWith(deleteDto);
-      expect(commandService.deleteManyAdminUsersByIds).toHaveBeenCalledTimes(1);
     });
   });
 });

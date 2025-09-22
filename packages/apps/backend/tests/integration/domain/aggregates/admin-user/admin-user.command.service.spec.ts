@@ -7,8 +7,8 @@ import { RepositoryService } from '@/repository/repository.service';
 import { DatabaseHelper } from '@/tests/helpers/database.helper';
 
 describe('integration AdminUserCommandService', () => {
-  let service: AdminUserCommandService;
-  let queryService: AdminUserQueryService;
+  let adminUserCommandService: AdminUserCommandService;
+  let adminUserQueryService: AdminUserQueryService;
   let databaseHelper: DatabaseHelper;
 
   beforeAll(async () => {
@@ -30,8 +30,8 @@ describe('integration AdminUserCommandService', () => {
       ],
     }).compile();
 
-    service = module.get<AdminUserCommandService>(AdminUserCommandService);
-    queryService = module.get<AdminUserQueryService>(AdminUserQueryService);
+    adminUserCommandService = module.get<AdminUserCommandService>(AdminUserCommandService);
+    adminUserQueryService = module.get<AdminUserQueryService>(AdminUserQueryService);
   });
 
   afterAll(async () => {
@@ -48,7 +48,7 @@ describe('integration AdminUserCommandService', () => {
         role: AdminRole.ADMIN,
       };
 
-      const result = await service.createAdminUser(createDto);
+      const result = await adminUserCommandService.createAdminUser(createDto);
 
       expect(result).toMatchObject({
         cognitoSub: createDto.cognitoSub,
@@ -57,7 +57,7 @@ describe('integration AdminUserCommandService', () => {
       });
       expect(result.publicId).toBeDefined();
 
-      const foundAdminUser = await queryService.findUniqueOrThrowAdminUser({ publicId: result.publicId });
+      const foundAdminUser = await adminUserQueryService.findUniqueOrThrowAdminUser({ publicId: result.publicId });
 
       expect(foundAdminUser).toMatchObject({
         cognitoSub: createDto.cognitoSub,
@@ -75,10 +75,10 @@ describe('integration AdminUserCommandService', () => {
         role: AdminRole.VIEWER,
       };
 
-      await service.createAdminUser(createDto);
+      await adminUserCommandService.createAdminUser(createDto);
 
       await expect(
-        service.createAdminUser({
+        adminUserCommandService.createAdminUser({
           cognitoSub: createDto.cognitoSub,
           name: 'Admin 2',
           role: AdminRole.ADMIN,
@@ -107,17 +107,17 @@ describe('integration AdminUserCommandService', () => {
         role: AdminRole.SUPER_ADMIN,
       };
 
-      const viewer = await service.createAdminUser(viewerDto);
-      const admin = await service.createAdminUser(adminDto);
-      const superAdmin = await service.createAdminUser(superAdminDto);
+      const viewer = await adminUserCommandService.createAdminUser(viewerDto);
+      const admin = await adminUserCommandService.createAdminUser(adminDto);
+      const superAdmin = await adminUserCommandService.createAdminUser(superAdminDto);
 
       expect(viewer.role).toBe(AdminRole.VIEWER);
       expect(admin.role).toBe(AdminRole.ADMIN);
       expect(superAdmin.role).toBe(AdminRole.SUPER_ADMIN);
 
-      const foundViewer = await queryService.findUniqueOrThrowAdminUser({ publicId: viewer.publicId });
-      const foundAdmin = await queryService.findUniqueOrThrowAdminUser({ publicId: admin.publicId });
-      const foundSuper = await queryService.findUniqueOrThrowAdminUser({ publicId: superAdmin.publicId });
+      const foundViewer = await adminUserQueryService.findUniqueOrThrowAdminUser({ publicId: viewer.publicId });
+      const foundAdmin = await adminUserQueryService.findUniqueOrThrowAdminUser({ publicId: admin.publicId });
+      const foundSuper = await adminUserQueryService.findUniqueOrThrowAdminUser({ publicId: superAdmin.publicId });
 
       expect(foundViewer.role).toBe(AdminRole.VIEWER);
       expect(foundAdmin.role).toBe(AdminRole.ADMIN);
@@ -135,13 +135,13 @@ describe('integration AdminUserCommandService', () => {
         role: AdminRole.VIEWER,
       };
 
-      const created = await service.createAdminUser(createDto);
+      const created = await adminUserCommandService.createAdminUser(createDto);
       const updateData = {
         name: 'Updated Name',
         role: AdminRole.ADMIN,
       };
 
-      const result = await service.updateAdminUserById({
+      const result = await adminUserCommandService.updateAdminUserById({
         publicId: created.publicId,
         data: updateData,
       });
@@ -150,7 +150,7 @@ describe('integration AdminUserCommandService', () => {
       expect(result.role).toBe(updateData.role);
       expect(result.cognitoSub).toBe(createDto.cognitoSub);
 
-      const foundAdminUser = await queryService.findUniqueOrThrowAdminUser({ publicId: created.publicId });
+      const foundAdminUser = await adminUserQueryService.findUniqueOrThrowAdminUser({ publicId: created.publicId });
 
       expect(foundAdminUser.name).toBe(updateData.name);
     });
@@ -159,7 +159,7 @@ describe('integration AdminUserCommandService', () => {
       expect.assertions(1);
 
       await expect(
-        service.updateAdminUserById({
+        adminUserCommandService.updateAdminUserById({
           publicId: '00000000-0000-0000-0000-000000000000',
           data: { name: 'New Name' },
         }),
@@ -175,9 +175,9 @@ describe('integration AdminUserCommandService', () => {
         role: AdminRole.VIEWER,
       };
 
-      const created = await service.createAdminUser(createDto);
+      const created = await adminUserCommandService.createAdminUser(createDto);
 
-      const result = await service.updateAdminUserById({
+      const result = await adminUserCommandService.updateAdminUserById({
         publicId: created.publicId,
         data: { name: 'Updated Name' },
       });
@@ -198,13 +198,13 @@ describe('integration AdminUserCommandService', () => {
         role: AdminRole.VIEWER,
       };
 
-      const created = await service.createAdminUser(createDto);
+      const created = await adminUserCommandService.createAdminUser(createDto);
 
       expect(created.cognitoSub).toBe(createDto.cognitoSub);
 
-      await service.deleteAdminUserById({ publicId: created.publicId });
+      await adminUserCommandService.deleteAdminUserById({ publicId: created.publicId });
 
-      await expect(queryService.findUniqueOrThrowAdminUser({ publicId: created.publicId })).rejects.toThrow(
+      await expect(adminUserQueryService.findUniqueOrThrowAdminUser({ publicId: created.publicId })).rejects.toThrow(
         'No record was found for a query',
       );
     });
@@ -213,7 +213,7 @@ describe('integration AdminUserCommandService', () => {
       expect.assertions(1);
 
       await expect(
-        service.deleteAdminUserById({
+        adminUserCommandService.deleteAdminUserById({
           publicId: '00000000-0000-0000-0000-000000000000',
         }),
       ).rejects.toThrow('No record was found for a delete');
@@ -232,14 +232,14 @@ describe('integration AdminUserCommandService', () => {
         ],
       };
 
-      const result = await service.createManyAndReturnAdminUsers(createDto);
+      const result = await adminUserCommandService.createManyAndReturnAdminUsers(createDto);
 
       expect(result.adminUsers).toHaveLength(3);
       expect(result.adminUsers[0].cognitoSub).toBe('sub-admin1');
       expect(result.adminUsers[1].cognitoSub).toBe('sub-admin2');
       expect(result.adminUsers[2].cognitoSub).toBe('sub-admin3');
 
-      const allAdminUsers = await queryService.findManyAdminUsersById({
+      const allAdminUsers = await adminUserQueryService.findManyAdminUsersById({
         publicIds: result.adminUsers.map((u) => u.publicId),
       });
 
@@ -250,7 +250,7 @@ describe('integration AdminUserCommandService', () => {
     it('should handle empty array', async () => {
       expect.assertions(1);
 
-      const result = await service.createManyAndReturnAdminUsers({ adminUsers: [] });
+      const result = await adminUserCommandService.createManyAndReturnAdminUsers({ adminUsers: [] });
 
       expect(result.adminUsers).toHaveLength(0);
     });
@@ -260,7 +260,7 @@ describe('integration AdminUserCommandService', () => {
     it('should delete multiple admin users from the database', async () => {
       expect.assertions(1);
 
-      const adminUsers = await service.createManyAndReturnAdminUsers({
+      const adminUsers = await adminUserCommandService.createManyAndReturnAdminUsers({
         adminUsers: [
           { cognitoSub: 'sub-del1', name: 'Delete 1', role: AdminRole.VIEWER },
           { cognitoSub: 'sub-del2', name: 'Delete 2', role: AdminRole.ADMIN },
@@ -269,9 +269,9 @@ describe('integration AdminUserCommandService', () => {
       });
 
       const publicIdsToDelete = [adminUsers.adminUsers[0].publicId, adminUsers.adminUsers[1].publicId];
-      await service.deleteManyAdminUsersByIds({ publicIds: publicIdsToDelete });
+      await adminUserCommandService.deleteManyAdminUsersByIds({ publicIds: publicIdsToDelete });
 
-      const remainingUser = await queryService.findUniqueOrThrowAdminUser({
+      const remainingUser = await adminUserQueryService.findUniqueOrThrowAdminUser({
         publicId: adminUsers.adminUsers[2].publicId,
       });
 
@@ -281,9 +281,9 @@ describe('integration AdminUserCommandService', () => {
     it('should handle empty array', async () => {
       expect.assertions(1);
 
-      await service.deleteManyAdminUsersByIds({ publicIds: [] });
+      await adminUserCommandService.deleteManyAdminUsersByIds({ publicIds: [] });
 
-      const allAdminUsers = await queryService.findAllAdminUsers();
+      const allAdminUsers = await adminUserQueryService.findAllAdminUsers();
 
       expect(allAdminUsers.adminUsers).toHaveLength(0);
     });
@@ -291,17 +291,17 @@ describe('integration AdminUserCommandService', () => {
     it('should ignore non-existent IDs', async () => {
       expect.assertions(2);
 
-      const adminUser = await service.createAdminUser({
+      const adminUser = await adminUserCommandService.createAdminUser({
         cognitoSub: 'sub-keep',
         name: 'Keep Me',
         role: AdminRole.ADMIN,
       });
 
-      await service.deleteManyAdminUsersByIds({
+      await adminUserCommandService.deleteManyAdminUsersByIds({
         publicIds: ['00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002'],
       });
 
-      const foundUser = await queryService.findUniqueOrThrowAdminUser({ publicId: adminUser.publicId });
+      const foundUser = await adminUserQueryService.findUniqueOrThrowAdminUser({ publicId: adminUser.publicId });
 
       expect(foundUser.cognitoSub).toBe('sub-keep');
       expect(foundUser.publicId).toBe(adminUser.publicId);

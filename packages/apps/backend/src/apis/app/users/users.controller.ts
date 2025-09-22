@@ -6,7 +6,7 @@ import { validateSync } from 'class-validator';
 import { BearerToken } from '../utils/decorators/bearer-token.decorator';
 
 import { CurrentUser, type CurrentUserData } from '@/apis/app/utils/decorators/current-user.decorator';
-import { ApiStandardResponses } from '@/apis/utils/api-default-response';
+import { ApiStandardResponses } from '@/apis/utils/api-standard-response';
 import { ApiError } from '@/apis/utils/api.error';
 import { ApiController } from '@/apis/utils/controllers/api.controller';
 import { Public } from '@/apis/utils/decorators/public.decorator';
@@ -16,7 +16,10 @@ import { UserCommandService } from '@/domain/aggregates/user/user.command.servic
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 import { CreateUserInputDto, UpdateUserDataDto, UserResponseDto } from '@/domain/aggregates/user/utils/dto';
 import { DeleteUserService } from '@/domain/usecases/user/delete-user.service';
-import { NON_ERROR_LENGTH, transformValidationErrorIntoDetail } from '@/utils/transform-validation-error-into-detail';
+import {
+  NON_ERROR_LENGTH,
+  transformValidationErrorIntoDetail,
+} from '@/utils/errors/transform-validation-error-into-detail';
 
 @ApiTags('users')
 @ApiController('users')
@@ -62,7 +65,7 @@ export class AppApiUsersController {
     const createUserInputDto = plainToInstance(CreateUserInputDto, { firebaseUid: uid, name: dto.name });
     const errors = validateSync(createUserInputDto, { whitelist: true, forbidNonWhitelisted: true });
     if (errors.length > NON_ERROR_LENGTH) {
-      throw new ApiError('AP0422', transformValidationErrorIntoDetail(errors) || 'Invalid user data');
+      throw new ApiError('AP0422', transformValidationErrorIntoDetail(errors));
     }
 
     const createdUser = await this.userCommandService.createUser(createUserInputDto);

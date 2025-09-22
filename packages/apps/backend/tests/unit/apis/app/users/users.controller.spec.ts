@@ -1,4 +1,4 @@
-import { type TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 
 import { AppApiUsersController } from '@/apis/app/users/users.controller';
 import { ApiError } from '@/apis/utils/api.error';
@@ -8,15 +8,8 @@ import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 import { toUserResponseDto } from '@/domain/aggregates/user/utils/dto';
 import { DeleteUserService } from '@/domain/usecases/user/delete-user.service';
 import { UserFactory } from '@/tests/factory';
-import {
-  createMockFirebaseAuthService,
-  createMockUserCommandService,
-  createMockUserQueryService,
-  createTestModule,
-  resetAllMocks,
-} from '@/tests/unit/apis/helpers';
 
-describe('appApiUsersController', () => {
+describe('unit AppApiUsersController', () => {
   let controller: AppApiUsersController;
   let queryService: jest.Mocked<UserQueryService>;
   let commandService: jest.Mocked<UserCommandService>;
@@ -27,12 +20,27 @@ describe('appApiUsersController', () => {
   beforeEach(async () => {
     userFactory = new UserFactory();
 
-    const mockQueryService = createMockUserQueryService();
-    const mockCommandService = createMockUserCommandService();
-    const mockFirebaseAuthService = createMockFirebaseAuthService();
+    const mockQueryService = jest.mocked({
+      findUniqueOrThrowUserById: jest.fn(),
+      findUniqueOrThrowUserByEmail: jest.fn(),
+      findUniqueOrThrowUserByFirebaseUid: jest.fn(),
+      findUniqueUserByFirebaseUid: jest.fn(),
+      findManyUsersById: jest.fn(),
+      findAllUsers: jest.fn(),
+    });
+    const mockCommandService = jest.mocked({
+      createUser: jest.fn(),
+      createManyAndReturnUsers: jest.fn(),
+      updateUserById: jest.fn(),
+      deleteUserById: jest.fn(),
+      deleteManyUsersById: jest.fn(),
+    });
+    const mockFirebaseAuthService = jest.mocked({
+      verifyIdToken: jest.fn(),
+    });
 
-    const module: TestingModule = await createTestModule({
-      controller: AppApiUsersController,
+    const module = await Test.createTestingModule({
+      controllers: [AppApiUsersController],
       providers: [
         {
           provide: FirebaseAuthService,
@@ -51,7 +59,7 @@ describe('appApiUsersController', () => {
           useValue: { execute: jest.fn() },
         },
       ],
-    });
+    }).compile();
 
     controller = module.get<AppApiUsersController>(AppApiUsersController);
     queryService = module.get<jest.Mocked<UserQueryService>>(UserQueryService);
@@ -61,34 +69,7 @@ describe('appApiUsersController', () => {
   });
 
   afterEach(() => {
-    resetAllMocks(queryService, commandService, firebaseAuthService, deleteUserService);
-  });
-
-  describe('get /users/:publicId', () => {
-    it('should return user by public ID', async () => {
-      expect.assertions(2);
-
-      const mockUser = userFactory.build();
-      const mockResponseDto = toUserResponseDto(mockUser);
-      queryService.findUniqueOrThrowUserById.mockResolvedValue(mockResponseDto);
-
-      const result = await controller.fetchUserById(mockUser.publicId);
-
-      expect(queryService.findUniqueOrThrowUserById).toHaveBeenCalledWith({
-        publicId: mockUser.publicId,
-      });
-      expect(result).toStrictEqual(mockResponseDto);
-    });
-
-    it('should throw error when user not found', async () => {
-      expect.assertions(2);
-
-      const publicId = 'non-existent-id';
-      queryService.findUniqueOrThrowUserById.mockRejectedValue(new Error('User not found'));
-
-      await expect(controller.fetchUserById(publicId)).rejects.toThrow('User not found');
-      expect(queryService.findUniqueOrThrowUserById).toHaveBeenCalledWith({ publicId });
-    });
+    jest.clearAllMocks();
   });
 
   describe('post /users', () => {
@@ -113,6 +94,30 @@ describe('appApiUsersController', () => {
 
       expect(commandService.createUser).toHaveBeenCalledWith({ firebaseUid: 'uid-from-token', name: createDto.name });
       expect(result).toStrictEqual(mockResponseDto);
+    });
+
+    it('should allow allowlisted providers even when email is unverified', async () => {
+      expect.assertions(2);
+
+      const createDto = { name: 'Allowlisted Provider User' } as const;
+      const mockUser = userFactory.build({ name: createDto.name, firebaseUid: 'allowlisted-uid' });
+      const responseDto = toUserResponseDto(mockUser);
+
+      firebaseAuthService.verifyIdToken.mockResolvedValue({
+        uid: mockUser.firebaseUid,
+        email_verified: false,
+        firebase: { sign_in_provider: 'google.com' },
+      } as any);
+      queryService.findUniqueUserByFirebaseUid.mockResolvedValue(null as any);
+      commandService.createUser.mockResolvedValue(responseDto);
+
+      const result = await controller.createUser('token', createDto as any);
+
+      expect(commandService.createUser).toHaveBeenCalledWith({
+        firebaseUid: mockUser.firebaseUid,
+        name: createDto.name,
+      });
+      expect(result).toBe(responseDto);
     });
 
     it('should throw an ApiError when authentication token is missing', async () => {
@@ -210,6 +215,33 @@ describe('appApiUsersController', () => {
       await controller.deleteCurrentUser(currentUser as any);
 
       expect(deleteUserService.execute).toHaveBeenCalledWith(currentUser.publicId);
+    });
+  });
+
+  describe('get /users/:publicId', () => {
+    it('should return user by public ID', async () => {
+      expect.assertions(2);
+
+      const mockUser = userFactory.build();
+      const mockResponseDto = toUserResponseDto(mockUser);
+      queryService.findUniqueOrThrowUserById.mockResolvedValue(mockResponseDto);
+
+      const result = await controller.fetchUserById(mockUser.publicId);
+
+      expect(queryService.findUniqueOrThrowUserById).toHaveBeenCalledWith({
+        publicId: mockUser.publicId,
+      });
+      expect(result).toStrictEqual(mockResponseDto);
+    });
+
+    it('should throw error when user not found', async () => {
+      expect.assertions(2);
+
+      const publicId = 'non-existent-id';
+      queryService.findUniqueOrThrowUserById.mockRejectedValue(new Error('User not found'));
+
+      await expect(controller.fetchUserById(publicId)).rejects.toThrow('User not found');
+      expect(queryService.findUniqueOrThrowUserById).toHaveBeenCalledWith({ publicId });
     });
   });
 });
