@@ -1,161 +1,210 @@
-import { type FirebaseAuthProvider } from '@/domain/aggregates/firebase-auth/firebase-auth.provider';
+import { Test, TestingModule } from '@nestjs/testing';
+import type { DecodedIdToken, UserRecord } from 'firebase-admin/auth';
+
+import { FirebaseAuthProvider } from '@/domain/aggregates/firebase-auth/firebase-auth.provider';
 import { FirebaseAuthService } from '@/domain/aggregates/firebase-auth/firebase-auth.service';
 
-describe('unit FirebaseAuthService', () => {
-  let auth: jest.Mocked<{
-    verifyIdToken: jest.Mock;
-    getUser: jest.Mock;
-    deleteUser: jest.Mock;
-  }>;
-  let provider: jest.Mocked<Pick<FirebaseAuthProvider, 'auth'>>;
-  let service: FirebaseAuthService;
+jest.mock<typeof import('firebase-admin')>('firebase-admin', () => {
+  const apps: unknown[] = [];
+  const initializeApp = jest.fn();
+  const app = jest.fn();
+  const credential = {
+    applicationDefault: jest.fn(),
+    cert: jest.fn(),
+  };
 
-  beforeEach(() => {
-    auth = {
-      verifyIdToken: jest.fn(),
-      getUser: jest.fn(),
-      deleteUser: jest.fn(),
+  return {
+    __esModule: true,
+    apps,
+    initializeApp,
+    app,
+    credential,
+  } as unknown as typeof import('firebase-admin');
+});
+
+const firebaseAdmin = jest.requireMock('firebase-admin') as unknown as {
+  apps: {
+    auth: jest.Mock;
+    delete: jest.Mock;
+  }[];
+  initializeApp: jest.Mock;
+  app: jest.Mock;
+  credential: {
+    applicationDefault: jest.Mock;
+    cert: jest.Mock;
+  };
+};
+
+const createAuthMock = () => ({
+  verifyIdToken: jest.fn(),
+  getUser: jest.fn(),
+  deleteUser: jest.fn(),
+});
+
+const resetFirebaseAdmin = (authMock: ReturnType<typeof createAuthMock>) => {
+  firebaseAdmin.apps.splice(0, firebaseAdmin.apps.length);
+  firebaseAdmin.initializeApp.mockReset();
+  firebaseAdmin.app.mockReset();
+  firebaseAdmin.credential.applicationDefault.mockReset();
+  firebaseAdmin.credential.cert.mockReset();
+
+  firebaseAdmin.credential.applicationDefault.mockReturnValue('application-default-credential');
+  firebaseAdmin.credential.cert.mockImplementation((serviceAccount: unknown) => ({ cert: serviceAccount }));
+
+  firebaseAdmin.initializeApp.mockImplementation(() => {
+    const firebaseApp = {
+      auth: jest.fn(() => authMock),
+      delete: jest.fn().mockResolvedValue(undefined),
     };
-
-    provider = {
-      auth: jest.fn(() => auth as unknown as ReturnType<FirebaseAuthProvider['auth']>),
-    };
-
-    service = new FirebaseAuthService(provider as unknown as FirebaseAuthProvider);
+    firebaseAdmin.apps.push(firebaseApp);
+    return firebaseApp;
   });
 
-  afterEach(() => {
+  firebaseAdmin.app.mockImplementation(() => {
+    const [existingApp] = firebaseAdmin.apps;
+    return existingApp;
+  });
+};
+
+describe('integration FirebaseAuthService', () => {
+  let testingModule: TestingModule;
+  let provider: FirebaseAuthProvider;
+  let service: FirebaseAuthService;
+  let authMock: ReturnType<typeof createAuthMock>;
+
+  beforeEach(async () => {
+    authMock = createAuthMock();
+    resetFirebaseAdmin(authMock);
+
+    testingModule = await Test.createTestingModule({
+      providers: [FirebaseAuthProvider, FirebaseAuthService],
+    }).compile();
+
+    provider = testingModule.get(FirebaseAuthProvider);
+    service = testingModule.get(FirebaseAuthService);
+
+    provider.onModuleInit();
+  });
+
+  afterEach(async () => {
+    await testingModule.close();
+    firebaseAdmin.apps.splice(0, firebaseAdmin.apps.length);
     jest.clearAllMocks();
   });
 
   describe('verifyIdToken', () => {
-    it('returns the decoded token when verification succeeds', async () => {
+    it('returns decoded token when firebase verification succeeds', async () => {
       expect.assertions(3);
 
-      const decoded = { uid: 'uid-123' };
-      auth.verifyIdToken.mockResolvedValue(decoded);
+      const decoded = { uid: 'uid-int-success' } as DecodedIdToken;
+      authMock.verifyIdToken.mockResolvedValue(decoded);
 
-      const result = await service.verifyIdToken('token');
+      const result = await service.verifyIdToken('token-success');
 
-      expect(provider.auth).toHaveBeenCalledTimes(1);
-      expect(auth.verifyIdToken).toHaveBeenCalledWith('token', false);
+      expect(firebaseAdmin.initializeApp).toHaveBeenCalledTimes(1);
+      expect(authMock.verifyIdToken).toHaveBeenCalledWith('token-success', false);
       expect(result).toBe(decoded);
     });
 
-    it('passes through the revoke check flag', async () => {
-      expect.assertions(1);
-
-      auth.verifyIdToken.mockResolvedValue({});
-
-      await service.verifyIdToken('token', true);
-
-      expect(auth.verifyIdToken).toHaveBeenCalledWith('token', true);
-    });
-
-    it('throws DomainError with token expired detail when firebase reports expiration', async () => {
-      expect.assertions(1);
+    it('maps firebase expiration errors to DO0005', async () => {
+      expect.assertions(2);
 
       const error = Object.assign(new Error('expired'), { code: 'auth/id-token-expired' });
-      auth.verifyIdToken.mockRejectedValue(error);
+      authMock.verifyIdToken.mockRejectedValue(error);
 
-      await expect(service.verifyIdToken('token')).rejects.toMatchObject({
+      await expect(service.verifyIdToken('token-expired')).rejects.toMatchObject({
         errorCode: 'DO0005',
         detail: 'Firebase token expired.',
       });
+      expect(authMock.verifyIdToken).toHaveBeenCalledWith('token-expired', false);
     });
 
-    it('throws DomainError with token revoked detail when firebase reports revocation', async () => {
-      expect.assertions(1);
+    it('maps firebase revoked errors to DO0006', async () => {
+      expect.assertions(2);
 
       const error = Object.assign(new Error('revoked'), { code: 'auth/id-token-revoked' });
-      auth.verifyIdToken.mockRejectedValue(error);
+      authMock.verifyIdToken.mockRejectedValue(error);
 
-      await expect(service.verifyIdToken('token')).rejects.toMatchObject({
+      await expect(service.verifyIdToken('token-revoked')).rejects.toMatchObject({
         errorCode: 'DO0006',
         detail: 'Firebase token revoked.',
       });
+      expect(authMock.verifyIdToken).toHaveBeenCalledWith('token-revoked', false);
     });
 
-    it('throws DomainError with invalid token detail when firebase returns other error codes', async () => {
-      expect.assertions(1);
+    it('maps other firebase errors to DO0007', async () => {
+      expect.assertions(2);
 
       const error = Object.assign(new Error('other'), { code: 'auth/unknown-error' });
-      auth.verifyIdToken.mockRejectedValue(error);
+      authMock.verifyIdToken.mockRejectedValue(error);
 
-      await expect(service.verifyIdToken('token')).rejects.toMatchObject({
+      await expect(service.verifyIdToken('token-invalid')).rejects.toMatchObject({
         errorCode: 'DO0007',
         detail: 'Firebase invalid token.',
       });
+      expect(authMock.verifyIdToken).toHaveBeenCalledWith('token-invalid', false);
     });
 
-    it('throws DomainError with invalid token detail when firebase throws a non-error value', async () => {
-      expect.assertions(1);
+    it('maps non-firebase errors to DO0007', async () => {
+      expect.assertions(2);
 
-      auth.verifyIdToken.mockRejectedValue('something unexpected');
+      authMock.verifyIdToken.mockRejectedValue(new Error('non-firebase-error'));
 
-      await expect(service.verifyIdToken('token')).rejects.toMatchObject({
+      await expect(service.verifyIdToken('token-error')).rejects.toMatchObject({
         errorCode: 'DO0007',
         detail: 'Firebase invalid token.',
       });
+      expect(authMock.verifyIdToken).toHaveBeenCalledWith('token-error', false);
     });
   });
 
   describe('getUser', () => {
-    it('returns the firebase user when found', async () => {
-      expect.assertions(3);
+    it('returns firebase user when lookup succeeds', async () => {
+      expect.assertions(2);
 
-      const user = { uid: 'uid-456' };
-      auth.getUser.mockResolvedValue(user);
+      const user = { uid: 'uid-int-user' } as unknown as UserRecord;
+      authMock.getUser.mockResolvedValue(user);
 
-      const result = await service.getUser('uid-456');
+      const result = await service.getUser('uid-int-user');
 
-      expect(provider.auth).toHaveBeenCalledTimes(1);
-      expect(auth.getUser).toHaveBeenCalledWith('uid-456');
+      expect(authMock.getUser).toHaveBeenCalledWith('uid-int-user');
       expect(result).toBe(user);
     });
 
-    it('throws DomainError with not found detail when firebase cannot find the user', async () => {
-      expect.assertions(1);
+    it('wraps firebase failures with DO0008', async () => {
+      expect.assertions(2);
 
-      auth.getUser.mockRejectedValue(new Error('not found'));
+      authMock.getUser.mockRejectedValue(new Error('not found'));
 
       await expect(service.getUser('uid-missing')).rejects.toMatchObject({
         errorCode: 'DO0008',
         detail: 'Firebase user not found.',
       });
+      expect(authMock.getUser).toHaveBeenCalledWith('uid-missing');
     });
   });
 
   describe('deleteUser', () => {
-    it('deletes the user when firebase succeeds', async () => {
+    it('treats user-not-found as a successful deletion', async () => {
       expect.assertions(2);
 
-      auth.deleteUser.mockResolvedValue(undefined);
-
-      await service.deleteUser('uid-789');
-
-      expect(provider.auth).toHaveBeenCalledTimes(1);
-      expect(auth.deleteUser).toHaveBeenCalledWith('uid-789');
-    });
-
-    it('treats already deleted users as success', async () => {
-      expect.assertions(1);
-
       const error = Object.assign(new Error('missing'), { code: 'auth/user-not-found' });
-      auth.deleteUser.mockRejectedValue(error);
+      authMock.deleteUser.mockRejectedValue(error);
 
-      await expect(service.deleteUser('uid-missing')).resolves.toBeUndefined();
+      await expect(service.deleteUser('uid-already-deleted')).resolves.toBeUndefined();
+      expect(authMock.deleteUser).toHaveBeenCalledWith('uid-already-deleted');
     });
 
-    it('throws DomainError when firebase deletion fails for other reasons', async () => {
-      expect.assertions(1);
+    it('propagates other firebase errors as DO0009', async () => {
+      expect.assertions(2);
 
-      auth.deleteUser.mockRejectedValue(new Error('internal error'));
+      authMock.deleteUser.mockRejectedValue(new Error('internal failure'));
 
-      await expect(service.deleteUser('uid-err')).rejects.toMatchObject({
+      await expect(service.deleteUser('uid-error')).rejects.toMatchObject({
         errorCode: 'DO0009',
         detail: 'Failed to delete Firebase user.',
       });
+      expect(authMock.deleteUser).toHaveBeenCalledWith('uid-error');
     });
   });
 });

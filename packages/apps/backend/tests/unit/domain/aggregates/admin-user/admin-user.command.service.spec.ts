@@ -1,220 +1,310 @@
-import { Test } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 
 import { AdminUserCommandService } from '@/domain/aggregates/admin-user/admin-user.command.service';
-import { toAdminUserResponseDto, toAdminUsersResponseDto } from '@/domain/aggregates/admin-user/utils/dto';
+import { AdminUserQueryService } from '@/domain/aggregates/admin-user/admin-user.query.service';
 import { AdminRole } from '@/generated/prisma';
 import { RepositoryService } from '@/repository/repository.service';
-import { AdminUserFactory } from '@/tests/factory';
+import { DatabaseHelper } from '@/tests/helpers/database.helper';
 
-describe('unit AdminUserCommandService', () => {
-  let service: AdminUserCommandService;
-  let repository: {
-    adminUser: {
-      create: jest.Mock;
-      createManyAndReturn: jest.Mock;
-      update: jest.Mock;
-      delete: jest.Mock;
-      deleteMany: jest.Mock;
-    };
-  };
-  let adminUserFactory: AdminUserFactory;
+describe('integration AdminUserCommandService', () => {
+  let adminUserCommandService: AdminUserCommandService;
+  let adminUserQueryService: AdminUserQueryService;
+  let databaseHelper: DatabaseHelper;
+
+  beforeAll(async () => {
+    databaseHelper = new DatabaseHelper();
+    await databaseHelper.connect();
+  });
 
   beforeEach(async () => {
-    adminUserFactory = new AdminUserFactory();
+    await databaseHelper.cleanDatabase();
 
-    const mockRepository = {
-      adminUser: {
-        create: jest.fn(),
-        createManyAndReturn: jest.fn(),
-        update: jest.fn(),
-        delete: jest.fn(),
-        deleteMany: jest.fn(),
-      },
-    };
-
-    const module = await Test.createTestingModule({
+    const module: TestingModule = await Test.createTestingModule({
       providers: [
         AdminUserCommandService,
+        AdminUserQueryService,
         {
           provide: RepositoryService,
-          useValue: mockRepository,
+          useValue: databaseHelper.client,
         },
       ],
     }).compile();
 
-    service = module.get<AdminUserCommandService>(AdminUserCommandService);
-    repository = module.get(RepositoryService);
+    adminUserCommandService = module.get<AdminUserCommandService>(AdminUserCommandService);
+    adminUserQueryService = module.get<AdminUserQueryService>(AdminUserQueryService);
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
+  afterAll(async () => {
+    await databaseHelper.disconnect();
   });
 
   describe('createAdminUser', () => {
-    it('should successfully create an admin user', async () => {
-      expect.assertions(2);
-
-      const mockAdminUser = adminUserFactory.build();
-      const createDto = {
-        cognitoSub: mockAdminUser.cognitoSub,
-        name: mockAdminUser.name,
-        role: mockAdminUser.role,
-      };
-
-      repository.adminUser.create.mockResolvedValue(mockAdminUser);
-
-      const result = await service.createAdminUser(createDto);
-
-      expect(repository.adminUser.create).toHaveBeenCalledWith({ data: createDto });
-      expect(result).toStrictEqual(toAdminUserResponseDto(mockAdminUser));
-    });
-
-    it('should throw error on database failure', async () => {
-      expect.assertions(2);
+    it('should create an admin user in the database', async () => {
+      expect.assertions(3);
 
       const createDto = {
-        cognitoSub: 'sub-test',
-        name: 'Test User',
+        cognitoSub: 'sub-admin@example.com',
+        name: 'Admin User',
         role: AdminRole.ADMIN,
       };
 
-      const prismaError = new Error('Database error');
-      repository.adminUser.create.mockRejectedValue(prismaError);
+      const result = await adminUserCommandService.createAdminUser(createDto);
 
-      await expect(service.createAdminUser(createDto)).rejects.toThrow(prismaError);
-      expect(repository.adminUser.create).toHaveBeenCalledWith({ data: createDto });
-    });
-  });
+      expect(result).toMatchObject({
+        cognitoSub: createDto.cognitoSub,
+        name: createDto.name,
+        role: createDto.role,
+      });
+      expect(result.publicId).toBeDefined();
 
-  describe('createManyAndReturnAdminUsers', () => {
-    it('should successfully create multiple admin users', async () => {
-      expect.assertions(2);
+      const foundAdminUser = await adminUserQueryService.findUniqueOrThrowAdminUser({ publicId: result.publicId });
 
-      const mockAdminUsers = adminUserFactory.buildMany(3);
-      const createDto = {
-        adminUsers: mockAdminUsers.map((user) => ({
-          cognitoSub: user.cognitoSub,
-          name: user.name,
-          role: user.role,
-        })),
-      };
-
-      repository.adminUser.createManyAndReturn.mockResolvedValue(mockAdminUsers);
-
-      const result = await service.createManyAndReturnAdminUsers(createDto);
-
-      expect(repository.adminUser.createManyAndReturn).toHaveBeenCalledWith({ data: createDto.adminUsers });
-      expect(result).toStrictEqual(toAdminUsersResponseDto(mockAdminUsers));
+      expect(foundAdminUser).toMatchObject({
+        cognitoSub: createDto.cognitoSub,
+        name: createDto.name,
+        role: createDto.role,
+      });
     });
 
-    it('should throw error on database failure', async () => {
-      expect.assertions(2);
+    it('should throw error for duplicate cognitoSub', async () => {
+      expect.assertions(1);
 
       const createDto = {
-        adminUsers: [
-          { cognitoSub: 'sub-1', name: 'Admin 1', role: AdminRole.ADMIN },
-          { cognitoSub: 'sub-2', name: 'Admin 2', role: AdminRole.SUPER_ADMIN },
-        ],
+        cognitoSub: 'sub-duplicate',
+        name: 'Admin 1',
+        role: AdminRole.VIEWER,
       };
 
-      const prismaError = new Error('Database error');
-      repository.adminUser.createManyAndReturn.mockRejectedValue(prismaError);
+      await adminUserCommandService.createAdminUser(createDto);
 
-      await expect(service.createManyAndReturnAdminUsers(createDto)).rejects.toThrow(prismaError);
-      expect(repository.adminUser.createManyAndReturn).toHaveBeenCalledWith({ data: createDto.adminUsers });
+      await expect(
+        adminUserCommandService.createAdminUser({
+          cognitoSub: createDto.cognitoSub,
+          name: 'Admin 2',
+          role: AdminRole.ADMIN,
+        }),
+      ).rejects.toThrow('Unique constraint failed');
+    });
+
+    it('should create admin users with different roles', async () => {
+      expect.assertions(6);
+
+      const viewerDto = {
+        cognitoSub: 'sub-viewer',
+        name: 'Viewer Admin',
+        role: AdminRole.VIEWER,
+      };
+
+      const adminDto = {
+        cognitoSub: 'sub-admin',
+        name: 'Admin Admin',
+        role: AdminRole.ADMIN,
+      };
+
+      const superAdminDto = {
+        cognitoSub: 'sub-super',
+        name: 'Super Admin',
+        role: AdminRole.SUPER_ADMIN,
+      };
+
+      const viewer = await adminUserCommandService.createAdminUser(viewerDto);
+      const admin = await adminUserCommandService.createAdminUser(adminDto);
+      const superAdmin = await adminUserCommandService.createAdminUser(superAdminDto);
+
+      expect(viewer.role).toBe(AdminRole.VIEWER);
+      expect(admin.role).toBe(AdminRole.ADMIN);
+      expect(superAdmin.role).toBe(AdminRole.SUPER_ADMIN);
+
+      const foundViewer = await adminUserQueryService.findUniqueOrThrowAdminUser({ publicId: viewer.publicId });
+      const foundAdmin = await adminUserQueryService.findUniqueOrThrowAdminUser({ publicId: admin.publicId });
+      const foundSuper = await adminUserQueryService.findUniqueOrThrowAdminUser({ publicId: superAdmin.publicId });
+
+      expect(foundViewer.role).toBe(AdminRole.VIEWER);
+      expect(foundAdmin.role).toBe(AdminRole.ADMIN);
+      expect(foundSuper.role).toBe(AdminRole.SUPER_ADMIN);
     });
   });
 
   describe('updateAdminUserById', () => {
-    it('should successfully update an admin user', async () => {
-      expect.assertions(2);
+    it('should update an admin user in the database', async () => {
+      expect.assertions(4);
 
-      const mockAdminUser = adminUserFactory.build();
-      const { publicId } = mockAdminUser;
-      const updateData = { name: 'Updated Name' };
+      const createDto = {
+        cognitoSub: 'sub-update',
+        name: 'Original Name',
+        role: AdminRole.VIEWER,
+      };
 
-      const updatedAdminUser = { ...mockAdminUser, ...updateData };
-      repository.adminUser.update.mockResolvedValue(updatedAdminUser);
+      const created = await adminUserCommandService.createAdminUser(createDto);
+      const updateData = {
+        name: 'Updated Name',
+        role: AdminRole.ADMIN,
+      };
 
-      const result = await service.updateAdminUserById({ publicId, data: updateData });
-
-      expect(repository.adminUser.update).toHaveBeenCalledWith({
-        where: { publicId },
+      const result = await adminUserCommandService.updateAdminUserById({
+        publicId: created.publicId,
         data: updateData,
       });
-      expect(result).toStrictEqual(toAdminUserResponseDto(updatedAdminUser));
+
+      expect(result.name).toBe(updateData.name);
+      expect(result.role).toBe(updateData.role);
+      expect(result.cognitoSub).toBe(createDto.cognitoSub);
+
+      const foundAdminUser = await adminUserQueryService.findUniqueOrThrowAdminUser({ publicId: created.publicId });
+
+      expect(foundAdminUser.name).toBe(updateData.name);
     });
 
-    it('should throw error on database failure', async () => {
-      expect.assertions(2);
+    it('should throw error for non-existent admin user', async () => {
+      expect.assertions(1);
 
-      const publicId = 'test-id';
-      const updateData = { name: 'Updated Name' };
+      await expect(
+        adminUserCommandService.updateAdminUserById({
+          publicId: '00000000-0000-0000-0000-000000000000',
+          data: { name: 'New Name' },
+        }),
+      ).rejects.toThrow('No record was found for an update');
+    });
 
-      const prismaError = new Error('Database error');
-      repository.adminUser.update.mockRejectedValue(prismaError);
+    it('should update only specified fields', async () => {
+      expect.assertions(3);
 
-      await expect(service.updateAdminUserById({ publicId, data: updateData })).rejects.toThrow(prismaError);
-      expect(repository.adminUser.update).toHaveBeenCalledWith({
-        where: { publicId },
-        data: updateData,
+      const createDto = {
+        cognitoSub: 'sub-partial',
+        name: 'Original Name',
+        role: AdminRole.VIEWER,
+      };
+
+      const created = await adminUserCommandService.createAdminUser(createDto);
+
+      const result = await adminUserCommandService.updateAdminUserById({
+        publicId: created.publicId,
+        data: { name: 'Updated Name' },
       });
+
+      expect(result.name).toBe('Updated Name');
+      expect(result.cognitoSub).toBe(createDto.cognitoSub);
+      expect(result.role).toBe(createDto.role);
     });
   });
 
   describe('deleteAdminUserById', () => {
-    it('should successfully delete an admin user', async () => {
-      expect.assertions(1);
-
-      const mockAdminUser = adminUserFactory.build();
-      const { publicId } = mockAdminUser;
-
-      repository.adminUser.delete.mockResolvedValue(mockAdminUser);
-
-      await service.deleteAdminUserById({ publicId });
-
-      expect(repository.adminUser.delete).toHaveBeenCalledWith({ where: { publicId } });
-    });
-
-    it('should throw error on database failure', async () => {
+    it('should delete an admin user from the database', async () => {
       expect.assertions(2);
 
-      const publicId = 'test-id';
+      const createDto = {
+        cognitoSub: 'sub-delete',
+        name: 'Delete Me',
+        role: AdminRole.VIEWER,
+      };
 
-      const prismaError = new Error('Database error');
-      repository.adminUser.delete.mockRejectedValue(prismaError);
+      const created = await adminUserCommandService.createAdminUser(createDto);
 
-      await expect(service.deleteAdminUserById({ publicId })).rejects.toThrow(prismaError);
-      expect(repository.adminUser.delete).toHaveBeenCalledWith({ where: { publicId } });
+      expect(created.cognitoSub).toBe(createDto.cognitoSub);
+
+      await adminUserCommandService.deleteAdminUserById({ publicId: created.publicId });
+
+      await expect(adminUserQueryService.findUniqueOrThrowAdminUser({ publicId: created.publicId })).rejects.toThrow(
+        'No record was found for a query',
+      );
+    });
+
+    it('should throw error for non-existent admin user', async () => {
+      expect.assertions(1);
+
+      await expect(
+        adminUserCommandService.deleteAdminUserById({
+          publicId: '00000000-0000-0000-0000-000000000000',
+        }),
+      ).rejects.toThrow('No record was found for a delete');
+    });
+  });
+
+  describe('createManyAndReturnAdminUsers', () => {
+    it('should create multiple admin users in the database', async () => {
+      expect.assertions(6);
+
+      const createDto = {
+        adminUsers: [
+          { cognitoSub: 'sub-admin1', name: 'Admin 1', role: AdminRole.VIEWER },
+          { cognitoSub: 'sub-admin2', name: 'Admin 2', role: AdminRole.ADMIN },
+          { cognitoSub: 'sub-admin3', name: 'Admin 3', role: AdminRole.SUPER_ADMIN },
+        ],
+      };
+
+      const result = await adminUserCommandService.createManyAndReturnAdminUsers(createDto);
+
+      expect(result.adminUsers).toHaveLength(3);
+      expect(result.adminUsers[0].cognitoSub).toBe('sub-admin1');
+      expect(result.adminUsers[1].cognitoSub).toBe('sub-admin2');
+      expect(result.adminUsers[2].cognitoSub).toBe('sub-admin3');
+
+      const allAdminUsers = await adminUserQueryService.findManyAdminUsersById({
+        publicIds: result.adminUsers.map((u) => u.publicId),
+      });
+
+      expect(allAdminUsers.adminUsers).toHaveLength(3);
+      expect(allAdminUsers.adminUsers.some((u) => u.role === AdminRole.SUPER_ADMIN)).toBe(true);
+    });
+
+    it('should handle empty array', async () => {
+      expect.assertions(1);
+
+      const result = await adminUserCommandService.createManyAndReturnAdminUsers({ adminUsers: [] });
+
+      expect(result.adminUsers).toHaveLength(0);
     });
   });
 
   describe('deleteManyAdminUsersByIds', () => {
-    it('should successfully delete multiple admin users', async () => {
+    it('should delete multiple admin users from the database', async () => {
       expect.assertions(1);
 
-      const publicIds = ['id1', 'id2', 'id3'];
-      repository.adminUser.deleteMany.mockResolvedValue({ count: publicIds.length });
-
-      await service.deleteManyAdminUsersByIds({ publicIds });
-
-      expect(repository.adminUser.deleteMany).toHaveBeenCalledWith({
-        where: { publicId: { in: publicIds } },
+      const adminUsers = await adminUserCommandService.createManyAndReturnAdminUsers({
+        adminUsers: [
+          { cognitoSub: 'sub-del1', name: 'Delete 1', role: AdminRole.VIEWER },
+          { cognitoSub: 'sub-del2', name: 'Delete 2', role: AdminRole.ADMIN },
+          { cognitoSub: 'sub-keep', name: 'Keep Me', role: AdminRole.ADMIN },
+        ],
       });
+
+      const publicIdsToDelete = [adminUsers.adminUsers[0].publicId, adminUsers.adminUsers[1].publicId];
+      await adminUserCommandService.deleteManyAdminUsersByIds({ publicIds: publicIdsToDelete });
+
+      const remainingUser = await adminUserQueryService.findUniqueOrThrowAdminUser({
+        publicId: adminUsers.adminUsers[2].publicId,
+      });
+
+      expect(remainingUser.cognitoSub).toBe('sub-keep');
     });
 
-    it('should throw error on database failure', async () => {
+    it('should handle empty array', async () => {
+      expect.assertions(1);
+
+      await adminUserCommandService.deleteManyAdminUsersByIds({ publicIds: [] });
+
+      const allAdminUsers = await adminUserQueryService.findAllAdminUsers();
+
+      expect(allAdminUsers.adminUsers).toHaveLength(0);
+    });
+
+    it('should ignore non-existent IDs', async () => {
       expect.assertions(2);
 
-      const publicIds = ['id1', 'id2', 'id3'];
-
-      const prismaError = new Error('Database error');
-      repository.adminUser.deleteMany.mockRejectedValue(prismaError);
-
-      await expect(service.deleteManyAdminUsersByIds({ publicIds })).rejects.toThrow(prismaError);
-      expect(repository.adminUser.deleteMany).toHaveBeenCalledWith({
-        where: { publicId: { in: publicIds } },
+      const adminUser = await adminUserCommandService.createAdminUser({
+        cognitoSub: 'sub-keep',
+        name: 'Keep Me',
+        role: AdminRole.ADMIN,
       });
+
+      await adminUserCommandService.deleteManyAdminUsersByIds({
+        publicIds: ['00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002'],
+      });
+
+      const foundUser = await adminUserQueryService.findUniqueOrThrowAdminUser({ publicId: adminUser.publicId });
+
+      expect(foundUser.cognitoSub).toBe('sub-keep');
+      expect(foundUser.publicId).toBe(adminUser.publicId);
     });
   });
 });

@@ -1,138 +1,318 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { AdminUserQueryService } from '@/domain/aggregates/admin-user/admin-user.query.service';
-import { toAdminUserResponseDto, toAdminUsersResponseDto } from '@/domain/aggregates/admin-user/utils/dto';
+import { AdminRole } from '@/generated/prisma';
 import { RepositoryService } from '@/repository/repository.service';
-import { AdminUserFactory } from '@/tests/factory';
+import { DatabaseHelper } from '@/tests/helpers/database.helper';
 
-describe('unit AdminUserQueryService', () => {
-  let service: AdminUserQueryService;
-  let repository: {
-    adminUser: {
-      findUniqueOrThrow: jest.Mock;
-      findMany: jest.Mock;
-    };
-  };
-  let adminUserFactory: AdminUserFactory;
+describe('integration AdminUserQueryService', () => {
+  let adminUserQueryService: AdminUserQueryService;
+  let databaseHelper: DatabaseHelper;
+  let repository: any;
+
+  beforeAll(async () => {
+    databaseHelper = new DatabaseHelper();
+    await databaseHelper.connect();
+  });
 
   beforeEach(async () => {
-    adminUserFactory = new AdminUserFactory();
-
-    const mockRepository = {
-      adminUser: {
-        findUniqueOrThrow: jest.fn(),
-        findMany: jest.fn(),
-      },
-    };
+    await databaseHelper.cleanDatabase();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AdminUserQueryService,
         {
           provide: RepositoryService,
-          useValue: mockRepository,
+          useValue: databaseHelper.client,
         },
       ],
     }).compile();
 
-    service = module.get<AdminUserQueryService>(AdminUserQueryService);
-    repository = module.get(RepositoryService);
+    adminUserQueryService = module.get<AdminUserQueryService>(AdminUserQueryService);
+    repository = databaseHelper.client;
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
+  afterAll(async () => {
+    await databaseHelper.disconnect();
   });
 
   describe('findUniqueOrThrowAdminUser', () => {
-    it('should return admin user when found', async () => {
-      expect.assertions(2);
+    it('should find an admin user by publicId', async () => {
+      expect.assertions(3);
 
-      const mockAdminUser = adminUserFactory.build();
-      repository.adminUser.findUniqueOrThrow.mockResolvedValue(mockAdminUser);
-      const dto = { publicId: mockAdminUser.publicId };
+      const created = await repository.adminUser.create({
+        data: {
+          cognitoSub: 'sub-find',
+          name: 'Find Me',
+          role: AdminRole.ADMIN,
+        },
+      });
 
-      const result = await service.findUniqueOrThrowAdminUser(dto);
+      const result = await adminUserQueryService.findUniqueOrThrowAdminUser({ publicId: created.publicId });
 
-      expect(repository.adminUser.findUniqueOrThrow).toHaveBeenCalledWith({ where: { publicId: dto.publicId } });
-      expect(result).toStrictEqual(toAdminUserResponseDto(mockAdminUser));
+      expect(result.cognitoSub).toBe('sub-find');
+      expect(result.name).toBe('Find Me');
+      expect(result.role).toBe(AdminRole.ADMIN);
     });
 
-    it('should throw error when admin user not found', async () => {
-      expect.assertions(2);
+    it('should throw NotFoundException for non-existent admin user', async () => {
+      expect.assertions(1);
 
-      const dto = { publicId: 'non-existent-id' };
-      const error = new Error('No AdminUser found');
-      repository.adminUser.findUniqueOrThrow.mockRejectedValue(error);
-
-      await expect(service.findUniqueOrThrowAdminUser(dto)).rejects.toThrow(error);
-      expect(repository.adminUser.findUniqueOrThrow).toHaveBeenCalledWith({ where: { publicId: dto.publicId } });
+      await expect(
+        adminUserQueryService.findUniqueOrThrowAdminUser({ publicId: '00000000-0000-0000-0000-000000000000' }),
+      ).rejects.toThrow('No record was found for a query');
     });
   });
 
   describe('findManyAdminUsersById', () => {
-    it('should return admin users when found', async () => {
-      expect.assertions(2);
+    it('should find multiple admin users by publicIds', async () => {
+      expect.assertions(4);
 
-      const mockAdminUsers = adminUserFactory.buildMany(3);
-      repository.adminUser.findMany.mockResolvedValue(mockAdminUsers);
-      const dto = { publicIds: mockAdminUsers.map((u) => u.publicId) };
-
-      const result = await service.findManyAdminUsersById(dto);
-
-      expect(repository.adminUser.findMany).toHaveBeenCalledWith({
-        where: { publicId: { in: dto.publicIds } },
+      const admin1 = await repository.adminUser.create({
+        data: {
+          cognitoSub: 'sub-admin1',
+          name: 'Admin 1',
+          role: AdminRole.VIEWER,
+        },
       });
-      expect(result).toStrictEqual(toAdminUsersResponseDto(mockAdminUsers));
+
+      const admin2 = await repository.adminUser.create({
+        data: {
+          cognitoSub: 'sub-admin2',
+          name: 'Admin 2',
+          role: AdminRole.ADMIN,
+        },
+      });
+
+      await repository.adminUser.create({
+        data: {
+          cognitoSub: 'sub-admin3',
+          name: 'Admin 3',
+          role: AdminRole.SUPER_ADMIN,
+        },
+      });
+
+      const result = await adminUserQueryService.findManyAdminUsersById({
+        publicIds: [admin1.publicId, admin2.publicId],
+      });
+
+      expect(result.adminUsers).toHaveLength(2);
+      expect(result.adminUsers.some((u) => u.name === 'Admin 1')).toBe(true);
+      expect(result.adminUsers.some((u) => u.name === 'Admin 2')).toBe(true);
+      expect(result.adminUsers.some((u) => u.name === 'Admin 3')).toBe(false);
     });
 
-    it('should return empty array when no admin users found', async () => {
+    it('should return empty array for non-existent publicIds', async () => {
+      expect.assertions(1);
+
+      const result = await adminUserQueryService.findManyAdminUsersById({
+        publicIds: ['00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002'],
+      });
+
+      expect(result.adminUsers).toHaveLength(0);
+    });
+
+    it('should handle mixed existent and non-existent publicIds', async () => {
       expect.assertions(2);
 
-      repository.adminUser.findMany.mockResolvedValue([]);
-      const dto = { publicIds: ['non-existent-id'] };
-
-      const result = await service.findManyAdminUsersById(dto);
-
-      expect(repository.adminUser.findMany).toHaveBeenCalledWith({
-        where: { publicId: { in: dto.publicIds } },
+      const admin = await repository.adminUser.create({
+        data: {
+          cognitoSub: 'sub-exists',
+          name: 'Exists',
+          role: AdminRole.ADMIN,
+        },
       });
-      expect(result).toStrictEqual(toAdminUsersResponseDto([]));
+
+      const result = await adminUserQueryService.findManyAdminUsersById({
+        publicIds: [admin.publicId, '00000000-0000-0000-0000-000000000000'],
+      });
+
+      expect(result.adminUsers).toHaveLength(1);
+      expect(result.adminUsers[0].name).toBe('Exists');
+    });
+
+    it('should handle empty publicIds array', async () => {
+      expect.assertions(1);
+
+      const result = await adminUserQueryService.findManyAdminUsersById({ publicIds: [] });
+
+      expect(result.adminUsers).toHaveLength(0);
     });
   });
 
   describe('findAllAdminUsers', () => {
-    it('should return all admin users', async () => {
-      expect.assertions(2);
+    it('should return all admin users ordered by createdAt desc', async () => {
+      expect.assertions(4);
 
-      const mockAdminUsers = adminUserFactory.buildMany(5);
-      repository.adminUser.findMany.mockResolvedValue(mockAdminUsers);
-
-      const result = await service.findAllAdminUsers();
-
-      expect(repository.adminUser.findMany).toHaveBeenCalledWith({
-        orderBy: {
-          createdAt: 'desc',
+      await repository.adminUser.create({
+        data: {
+          cognitoSub: 'sub-first',
+          name: 'First Admin',
+          role: AdminRole.VIEWER,
         },
       });
-      expect(result).toStrictEqual(toAdminUsersResponseDto(mockAdminUsers));
+
+      await new Promise((resolve) => {
+        setTimeout(resolve, 10);
+      });
+
+      await repository.adminUser.create({
+        data: {
+          cognitoSub: 'sub-second',
+          name: 'Second Admin',
+          role: AdminRole.ADMIN,
+        },
+      });
+
+      await new Promise((resolve) => {
+        setTimeout(resolve, 10);
+      });
+
+      await repository.adminUser.create({
+        data: {
+          cognitoSub: 'sub-third',
+          name: 'Third Admin',
+          role: AdminRole.SUPER_ADMIN,
+        },
+      });
+
+      const result = await adminUserQueryService.findAllAdminUsers();
+
+      expect(result.adminUsers).toHaveLength(3);
+      expect(result.adminUsers[0].name).toBe('Third Admin');
+      expect(result.adminUsers[1].name).toBe('Second Admin');
+      expect(result.adminUsers[2].name).toBe('First Admin');
+    });
+
+    it('should return empty array when no admin users exist', async () => {
+      expect.assertions(1);
+
+      const result = await adminUserQueryService.findAllAdminUsers();
+
+      expect(result.adminUsers).toHaveLength(0);
     });
   });
 
   describe('findManyAdminUsersByFilter', () => {
-    it('should return admin users based on filter', async () => {
+    beforeEach(async () => {
+      await repository.adminUser.createMany({
+        data: [
+          { cognitoSub: 'sub-viewer1', name: 'Viewer 1', role: AdminRole.VIEWER },
+          { cognitoSub: 'sub-viewer2', name: 'Viewer 2', role: AdminRole.VIEWER },
+          { cognitoSub: 'sub-admin1', name: 'Admin 1', role: AdminRole.ADMIN },
+          { cognitoSub: 'sub-admin2', name: 'Admin 2', role: AdminRole.ADMIN },
+          { cognitoSub: 'sub-super1', name: 'Super 1', role: AdminRole.SUPER_ADMIN },
+        ],
+      });
+    });
+
+    it('should filter admin users by role', async () => {
+      expect.assertions(3);
+
+      const viewers = await adminUserQueryService.findManyAdminUsersByFilter({
+        where: { role: AdminRole.VIEWER },
+      });
+
+      expect(viewers).toHaveLength(2);
+      expect(viewers.every((u) => u.role === AdminRole.VIEWER)).toBe(true);
+
+      const admins = await adminUserQueryService.findManyAdminUsersByFilter({
+        where: { role: AdminRole.ADMIN },
+      });
+
+      expect(admins).toHaveLength(2);
+    });
+
+    it('should filter admin users by name pattern', async () => {
       expect.assertions(2);
 
-      const mockAdminUsers = adminUserFactory.buildMany(2);
-      const filter: Parameters<typeof service.findManyAdminUsersByFilter>[0] = {
-        where: { role: 'SUPER_ADMIN' },
-        orderBy: { createdAt: 'asc' },
-      };
-      repository.adminUser.findMany.mockResolvedValue(mockAdminUsers);
+      const result = await adminUserQueryService.findManyAdminUsersByFilter({
+        where: {
+          name: { contains: 'Admin' },
+        },
+      });
 
-      const result = await service.findManyAdminUsersByFilter(filter);
+      expect(result).toHaveLength(2);
+      expect(result.every((u) => u.name.includes('Admin'))).toBe(true);
+    });
 
-      expect(repository.adminUser.findMany).toHaveBeenCalledWith(filter);
-      expect(result).toStrictEqual(mockAdminUsers);
+    it('should apply pagination with skip and take', async () => {
+      expect.assertions(3);
+
+      const firstPage = await adminUserQueryService.findManyAdminUsersByFilter({
+        skip: 0,
+        take: 2,
+        orderBy: { name: 'asc' },
+      });
+
+      expect(firstPage).toHaveLength(2);
+
+      const secondPage = await adminUserQueryService.findManyAdminUsersByFilter({
+        skip: 2,
+        take: 2,
+        orderBy: { name: 'asc' },
+      });
+
+      expect(secondPage).toHaveLength(2);
+
+      const thirdPage = await adminUserQueryService.findManyAdminUsersByFilter({
+        skip: 4,
+        take: 2,
+        orderBy: { name: 'asc' },
+      });
+
+      expect(thirdPage).toHaveLength(1);
+    });
+
+    it('should order admin users by name', async () => {
+      expect.assertions(3);
+
+      const result = await adminUserQueryService.findManyAdminUsersByFilter({
+        orderBy: { name: 'asc' },
+      });
+
+      expect(result[0].name).toBe('Admin 1');
+      expect(result[1].name).toBe('Admin 2');
+      expect(result[result.length - 1].name).toBe('Viewer 2');
+    });
+
+    it('should combine multiple filters', async () => {
+      expect.assertions(2);
+
+      const result = await adminUserQueryService.findManyAdminUsersByFilter({
+        where: {
+          AND: [{ role: { not: AdminRole.SUPER_ADMIN } }, { name: { contains: 'Viewer' } }],
+        },
+        orderBy: { name: 'desc' },
+      });
+
+      expect(result).toHaveLength(2);
+      expect(result[0].name).toBe('Viewer 2');
+    });
+
+    it('should handle cursor-based pagination', async () => {
+      expect.assertions(3);
+
+      await adminUserQueryService.findManyAdminUsersByFilter({
+        orderBy: { name: 'asc' },
+      });
+
+      const firstBatch = await adminUserQueryService.findManyAdminUsersByFilter({
+        take: 2,
+        orderBy: { name: 'asc' },
+      });
+
+      expect(firstBatch).toHaveLength(2);
+
+      const secondBatch = await adminUserQueryService.findManyAdminUsersByFilter({
+        take: 2,
+        cursor: { publicId: firstBatch[1].publicId },
+        skip: 1,
+        orderBy: { name: 'asc' },
+      });
+
+      expect(secondBatch).toHaveLength(2);
+      expect(secondBatch[0].name).not.toBe(firstBatch[1].name);
     });
   });
 });

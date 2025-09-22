@@ -1,153 +1,219 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
-import { toUserResponseDto, toUsersResponseDto } from '@/domain/aggregates/user/utils/dto';
 import { RepositoryService } from '@/repository/repository.service';
-import { UserFactory } from '@/tests/factory';
+import { DatabaseHelper } from '@/tests/helpers/database.helper';
 
-describe('unit UserQueryService', () => {
-  let service: UserQueryService;
-  let repository: {
-    user: {
-      findUniqueOrThrow: jest.Mock;
-      findMany: jest.Mock;
-      findUnique: jest.Mock;
-    };
-  };
-  let userFactory: UserFactory;
+describe('integration UserQueryService', () => {
+  let userQueryService: UserQueryService;
+  let databaseHelper: DatabaseHelper;
+  let repository: any;
+
+  beforeAll(async () => {
+    databaseHelper = new DatabaseHelper();
+    await databaseHelper.connect();
+  });
 
   beforeEach(async () => {
-    userFactory = new UserFactory();
-
-    const mockRepository = {
-      user: {
-        findUniqueOrThrow: jest.fn(),
-        findMany: jest.fn(),
-        findUnique: jest.fn(),
-      },
-    };
+    await databaseHelper.cleanDatabase();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UserQueryService,
         {
           provide: RepositoryService,
-          useValue: mockRepository,
+          useValue: databaseHelper.client,
         },
       ],
     }).compile();
 
-    service = module.get<UserQueryService>(UserQueryService);
-    repository = module.get(RepositoryService);
+    userQueryService = module.get<UserQueryService>(UserQueryService);
+    repository = databaseHelper.client;
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
+  afterAll(async () => {
+    await databaseHelper.disconnect();
   });
 
   describe('findUniqueOrThrowUserById', () => {
-    it('should return user when found', async () => {
+    it('should find a user by publicId', async () => {
       expect.assertions(2);
 
-      const mockUser = userFactory.build();
-      repository.user.findUniqueOrThrow.mockResolvedValue(mockUser);
-      const dto = { publicId: mockUser.publicId };
+      const created = await repository.user.create({
+        data: {
+          name: 'Find Me',
+          firebaseUid: 'uid-int-find-by-id-1',
+        },
+      });
 
-      const result = await service.findUniqueOrThrowUserById(dto);
+      const result = await userQueryService.findUniqueOrThrowUserById({ publicId: created.publicId });
 
-      expect(repository.user.findUniqueOrThrow).toHaveBeenCalledWith({ where: { publicId: dto.publicId } });
-      expect(result).toStrictEqual(toUserResponseDto(mockUser));
+      expect(result.name).toBe('Find Me');
+      expect(result.firebaseUid).toBe('uid-int-find-by-id-1');
     });
 
-    it('should throw error when user not found', async () => {
+    it('should throw NotFoundException for non-existent user', async () => {
+      expect.assertions(1);
+
+      await expect(
+        userQueryService.findUniqueOrThrowUserById({ publicId: '00000000-0000-0000-0000-000000000000' }),
+      ).rejects.toThrow('No record was found for a query');
+    });
+
+    it('should return correct user when multiple users exist', async () => {
       expect.assertions(2);
 
-      const dto = { publicId: 'non-existent-id' };
-      const error = new Error('No User found');
-      repository.user.findUniqueOrThrow.mockRejectedValue(error);
+      await repository.user.create({
+        data: {
+          name: 'User 1',
+          firebaseUid: 'uid-int-many-1',
+        },
+      });
 
-      await expect(service.findUniqueOrThrowUserById(dto)).rejects.toThrow(error);
-      expect(repository.user.findUniqueOrThrow).toHaveBeenCalledWith({ where: { publicId: dto.publicId } });
+      const targetUser = await repository.user.create({
+        data: {
+          name: 'Target User',
+          firebaseUid: 'uid-int-many-2',
+        },
+      });
+
+      await repository.user.create({
+        data: {
+          name: 'User 3',
+          firebaseUid: 'uid-int-many-3',
+        },
+      });
+
+      const result = await userQueryService.findUniqueOrThrowUserById({ publicId: targetUser.publicId });
+
+      expect(result.name).toBe('Target User');
+      expect(result.firebaseUid).toBe('uid-int-many-2');
     });
   });
 
   describe('findManyUsersById', () => {
-    it('should return users when found', async () => {
-      expect.assertions(2);
+    it('should find multiple users by publicIds', async () => {
+      expect.assertions(4);
 
-      const mockUsers = userFactory.buildMany(3);
-      repository.user.findMany.mockResolvedValue(mockUsers);
-      const dto = { publicIds: mockUsers.map((u) => u.publicId) };
-
-      const result = await service.findManyUsersById(dto);
-
-      expect(repository.user.findMany).toHaveBeenCalledWith({
-        where: { publicId: { in: dto.publicIds } },
+      const user1 = await repository.user.create({
+        data: {
+          name: 'User 1',
+          firebaseUid: 'uid-int-many-list-1',
+        },
       });
-      expect(result).toStrictEqual(toUsersResponseDto(mockUsers));
-    });
 
-    it('should return empty array when no users found', async () => {
-      expect.assertions(2);
-
-      repository.user.findMany.mockResolvedValue([]);
-      const dto = { publicIds: ['non-existent-id'] };
-
-      const result = await service.findManyUsersById(dto);
-
-      expect(repository.user.findMany).toHaveBeenCalledWith({
-        where: { publicId: { in: dto.publicIds } },
+      const user2 = await repository.user.create({
+        data: {
+          name: 'User 2',
+          firebaseUid: 'uid-int-many-list-2',
+        },
       });
-      expect(result).toStrictEqual(toUsersResponseDto([]));
-    });
-  });
 
-  describe('findUniqueOrThrowUserByFirebaseUid', () => {
-    it('returns the user when found', async () => {
-      expect.assertions(2);
+      await repository.user.create({
+        data: {
+          name: 'User 3',
+          firebaseUid: 'uid-int-many-list-3',
+        },
+      });
 
-      const mockUser = userFactory.build();
-      repository.user.findUniqueOrThrow.mockResolvedValue(mockUser);
+      const result = await userQueryService.findManyUsersById({
+        publicIds: [user1.publicId, user2.publicId],
+      });
 
-      const result = await service.findUniqueOrThrowUserByFirebaseUid(mockUser.firebaseUid);
+      expect(result.users).toHaveLength(2);
 
-      expect(repository.user.findUniqueOrThrow).toHaveBeenCalledWith({ where: { firebaseUid: mockUser.firebaseUid } });
-      expect(result).toStrictEqual(toUserResponseDto(mockUser));
-    });
+      const ids = result.users.map((u) => u.publicId).sort((a, b) => a.localeCompare(b));
 
-    it('throws an error when the user is not found', async () => {
-      expect.assertions(2);
+      const expected = [user1.publicId, user2.publicId].sort((a, b) => a.localeCompare(b));
 
-      const error = new Error('No User found');
-      repository.user.findUniqueOrThrow.mockRejectedValue(error);
-
-      await expect(service.findUniqueOrThrowUserByFirebaseUid('missing-uid')).rejects.toThrow(error);
-      expect(repository.user.findUniqueOrThrow).toHaveBeenCalledWith({ where: { firebaseUid: 'missing-uid' } });
-    });
-  });
-
-  describe('findUniqueUserByFirebaseUid', () => {
-    it('returns the user when the repository finds one', async () => {
-      expect.assertions(2);
-
-      const mockUser = userFactory.build();
-      repository.user.findUnique.mockResolvedValue(mockUser);
-
-      const result = await service.findUniqueUserByFirebaseUid(mockUser.firebaseUid);
-
-      expect(repository.user.findUnique).toHaveBeenCalledWith({ where: { firebaseUid: mockUser.firebaseUid } });
-      expect(result).toStrictEqual(toUserResponseDto(mockUser));
+      expect(ids).toStrictEqual(expected);
+      expect(result.users.map((u) => u.name).sort()).toStrictEqual(['User 1', 'User 2']);
+      expect(result.users.map((u) => u.firebaseUid).sort()).toStrictEqual([
+        'uid-int-many-list-1',
+        'uid-int-many-list-2',
+      ]);
     });
 
-    it('returns null when the repository does not find a user', async () => {
+    it('should return empty array for non-existent publicIds', async () => {
+      expect.assertions(1);
+
+      const result = await userQueryService.findManyUsersById({
+        publicIds: ['00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002'],
+      });
+
+      expect(result.users).toHaveLength(0);
+    });
+
+    it('should handle mixed existent and non-existent publicIds', async () => {
       expect.assertions(2);
 
-      repository.user.findUnique.mockResolvedValue(null);
+      const user = await repository.user.create({
+        data: {
+          name: 'Exists',
+          firebaseUid: 'uid-int-exists',
+        },
+      });
 
-      const result = await service.findUniqueUserByFirebaseUid('missing-uid');
+      const result = await userQueryService.findManyUsersById({
+        publicIds: [user.publicId, '00000000-0000-0000-0000-000000000000'],
+      });
 
-      expect(repository.user.findUnique).toHaveBeenCalledWith({ where: { firebaseUid: 'missing-uid' } });
-      expect(result).toBeNull();
+      expect(result.users).toHaveLength(1);
+      expect(result.users[0].publicId).toBe(user.publicId);
+    });
+
+    it('should handle empty publicIds array', async () => {
+      expect.assertions(1);
+
+      const result = await userQueryService.findManyUsersById({ publicIds: [] });
+
+      expect(result.users).toHaveLength(0);
+    });
+
+    it('should handle duplicate publicIds in request', async () => {
+      expect.assertions(2);
+
+      const user = await repository.user.create({
+        data: {
+          name: 'Single User',
+          firebaseUid: 'uid-int-dup-request',
+        },
+      });
+
+      const result = await userQueryService.findManyUsersById({
+        publicIds: [user.publicId, user.publicId, user.publicId],
+      });
+
+      expect(result.users).toHaveLength(1);
+      expect(result.users[0].publicId).toBe(user.publicId);
+    });
+
+    it('should find all requested users when they exist', async () => {
+      expect.assertions(6);
+
+      const users = await Promise.all([
+        repository.user.create({ data: { name: 'User A', firebaseUid: 'uid-int-all-a' } }),
+        repository.user.create({ data: { name: 'User B', firebaseUid: 'uid-int-all-b' } }),
+        repository.user.create({ data: { name: 'User C', firebaseUid: 'uid-int-all-c' } }),
+        repository.user.create({ data: { name: 'User D', firebaseUid: 'uid-int-all-d' } }),
+      ]);
+
+      const result = await userQueryService.findManyUsersById({
+        publicIds: users.map((u) => u.publicId),
+      });
+
+      expect(result.users).toHaveLength(4);
+
+      const resultNames = result.users.map((u) => u.name).sort();
+
+      expect(resultNames).toContain('User A');
+      expect(resultNames).toContain('User B');
+      expect(resultNames).toContain('User C');
+      expect(resultNames).toContain('User D');
+
+      const names = result.users.map((u) => u.name).sort((a, b) => a.localeCompare(b));
+
+      expect(names).toStrictEqual(['User A', 'User B', 'User C', 'User D']);
     });
   });
 });

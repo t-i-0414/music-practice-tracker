@@ -1,213 +1,195 @@
-import { Test } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 
 import { UserCommandService } from '@/domain/aggregates/user/user.command.service';
-import { toUserResponseDto, toUsersResponseDto } from '@/domain/aggregates/user/utils/dto';
+import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 import { RepositoryService } from '@/repository/repository.service';
-import { UserFactory } from '@/tests/factory';
+import { DatabaseHelper } from '@/tests/helpers/database.helper';
 
-describe('unit UserCommandService', () => {
-  let service: UserCommandService;
-  let repository: {
-    user: {
-      create: jest.Mock;
-      createManyAndReturn: jest.Mock;
-      update: jest.Mock;
-      delete: jest.Mock;
-      deleteMany: jest.Mock;
-    };
-  };
-  let userFactory: UserFactory;
+describe('integration UserCommandService', () => {
+  let userCommandService: UserCommandService;
+  let userQueryService: UserQueryService;
+  let databaseHelper: DatabaseHelper;
+
+  beforeAll(async () => {
+    databaseHelper = new DatabaseHelper();
+    await databaseHelper.connect();
+  });
 
   beforeEach(async () => {
-    userFactory = new UserFactory();
+    await databaseHelper.cleanDatabase();
 
-    const mockRepository = {
-      user: {
-        create: jest.fn(),
-        createManyAndReturn: jest.fn(),
-        update: jest.fn(),
-        delete: jest.fn(),
-        deleteMany: jest.fn(),
-      },
-    };
-
-    const module = await Test.createTestingModule({
+    const module: TestingModule = await Test.createTestingModule({
       providers: [
         UserCommandService,
+        UserQueryService,
         {
           provide: RepositoryService,
-          useValue: mockRepository,
+          useValue: databaseHelper.client,
         },
       ],
     }).compile();
 
-    service = module.get<UserCommandService>(UserCommandService);
-    repository = module.get(RepositoryService);
+    userCommandService = module.get<UserCommandService>(UserCommandService);
+    userQueryService = module.get<UserQueryService>(UserQueryService);
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
+  afterAll(async () => {
+    await databaseHelper.disconnect();
   });
 
   describe('createUser', () => {
-    it('should successfully create a user', async () => {
-      expect.assertions(2);
-
-      const mockUser = userFactory.build();
-      repository.user.create.mockResolvedValue(mockUser);
-
-      const createDto = {
-        name: mockUser.name,
-        firebaseUid: mockUser.firebaseUid,
-      };
-      const result = await service.createUser(createDto);
-
-      expect(repository.user.create).toHaveBeenCalledWith({ data: createDto });
-      expect(result).toStrictEqual(toUserResponseDto(mockUser));
-    });
-
-    it('should throw error on database failure', async () => {
-      expect.assertions(2);
+    it('should create a user in the database', async () => {
+      expect.assertions(3);
 
       const createDto = {
         name: 'Test User',
-        firebaseUid: 'uid-unit-db-error',
+        firebaseUid: 'uid-int-create',
       };
 
-      const prismaError = new Error('Database error');
-      repository.user.create.mockRejectedValue(prismaError);
+      const result = await userCommandService.createUser(createDto);
 
-      await expect(service.createUser(createDto)).rejects.toThrow(prismaError);
-      expect(repository.user.create).toHaveBeenCalledWith({ data: createDto });
-    });
-  });
+      expect(result).toMatchObject({
+        name: createDto.name,
+      });
+      expect(result.publicId).toBeDefined();
 
-  describe('createManyAndReturnUsers', () => {
-    it('should successfully create multiple users', async () => {
-      expect.assertions(2);
+      const foundUser = await userQueryService.findUniqueOrThrowUserById({ publicId: result.publicId });
 
-      const mockUsers = userFactory.buildMany(3);
-      repository.user.createManyAndReturn.mockResolvedValue(mockUsers);
-
-      const createDto = {
-        users: mockUsers.map((user, idx) => ({
-          name: user.name,
-          firebaseUid: `uid-unit-bulk-${idx + 1}`,
-        })),
-      };
-      const result = await service.createManyAndReturnUsers(createDto);
-
-      expect(repository.user.createManyAndReturn).toHaveBeenCalledWith({ data: createDto.users });
-      expect(result).toStrictEqual(toUsersResponseDto(mockUsers));
+      expect(foundUser).toMatchObject({
+        name: createDto.name,
+      });
     });
 
-    it('should throw error on database failure', async () => {
-      expect.assertions(2);
+    it('should throw error for duplicate firebaseUid', async () => {
+      expect.assertions(1);
 
       const createDto = {
-        users: [
-          { name: 'User 1', firebaseUid: 'uid-unit-bulk-1' },
-          { name: 'User 2', firebaseUid: 'uid-unit-bulk-2' },
-        ],
+        name: 'User 1',
+        firebaseUid: 'uid-int-dup',
       };
 
-      const prismaError = new Error('Database error');
-      repository.user.createManyAndReturn.mockRejectedValue(prismaError);
+      await userCommandService.createUser(createDto);
 
-      await expect(service.createManyAndReturnUsers(createDto)).rejects.toThrow(prismaError);
-      expect(repository.user.createManyAndReturn).toHaveBeenCalledWith({ data: createDto.users });
+      await expect(userCommandService.createUser({ name: 'User 2', firebaseUid: 'uid-int-dup' })).rejects.toThrow(
+        'Unique constraint failed',
+      );
     });
   });
 
   describe('updateUserById', () => {
-    it('should successfully update a user', async () => {
-      expect.assertions(2);
+    it('should update a user in the database', async () => {
+      expect.assertions(3);
 
-      const mockUser = userFactory.build();
-      const { publicId } = mockUser;
+      const createDto = {
+        name: 'Original Name',
+        firebaseUid: 'uid-int-update',
+      };
+
+      const created = await userCommandService.createUser(createDto);
       const updateData = { name: 'Updated Name' };
-      const updatedUser = { ...mockUser, ...updateData };
-      repository.user.update.mockResolvedValue(updatedUser);
 
-      const result = await service.updateUserById({ publicId, data: updateData });
-
-      expect(repository.user.update).toHaveBeenCalledWith({
-        where: { publicId },
+      const result = await userCommandService.updateUserById({
+        publicId: created.publicId,
         data: updateData,
       });
-      expect(result).toStrictEqual(toUserResponseDto(updatedUser));
+
+      expect(result.name).toBe(updateData.name);
+      expect(result.publicId).toBe(created.publicId);
+
+      const foundUser = await userQueryService.findUniqueOrThrowUserById({ publicId: created.publicId });
+
+      expect(foundUser.name).toBe(updateData.name);
     });
 
-    it('should throw error on database failure', async () => {
-      expect.assertions(2);
+    it('should throw error for non-existent user', async () => {
+      expect.assertions(1);
 
-      const publicId = 'test-id';
-      const updateData = { name: 'Updated Name' };
-
-      const prismaError = new Error('Database error');
-      repository.user.update.mockRejectedValue(prismaError);
-
-      await expect(service.updateUserById({ publicId, data: updateData })).rejects.toThrow(prismaError);
-      expect(repository.user.update).toHaveBeenCalledWith({
-        where: { publicId },
-        data: updateData,
-      });
+      await expect(
+        userCommandService.updateUserById({
+          publicId: '00000000-0000-0000-0000-000000000000',
+          data: { name: 'New Name' },
+        }),
+      ).rejects.toThrow('No record was found for an update');
     });
   });
 
   describe('deleteUserById', () => {
-    it('should successfully delete a user', async () => {
+    it('should delete a user from the database', async () => {
       expect.assertions(1);
 
-      const mockUser = userFactory.build();
-      const { publicId } = mockUser;
+      const createDto = {
+        name: 'Delete Me',
+        firebaseUid: 'uid-int-delete',
+      };
 
-      repository.user.delete.mockResolvedValue(mockUser);
+      const created = await userCommandService.createUser(createDto);
+      await userCommandService.deleteUserById({ publicId: created.publicId });
 
-      await service.deleteUserById({ publicId });
-
-      expect(repository.user.delete).toHaveBeenCalledWith({ where: { publicId } });
+      await expect(userQueryService.findUniqueOrThrowUserById({ publicId: created.publicId })).rejects.toThrow(
+        'No record was found for a query',
+      );
     });
 
-    it('should throw error on database failure', async () => {
-      expect.assertions(2);
+    it('should throw error for non-existent user', async () => {
+      expect.assertions(1);
 
-      const publicId = 'test-id';
-
-      const prismaError = new Error('Database error');
-      repository.user.delete.mockRejectedValue(prismaError);
-
-      await expect(service.deleteUserById({ publicId })).rejects.toThrow(prismaError);
-      expect(repository.user.delete).toHaveBeenCalledWith({ where: { publicId } });
+      await expect(
+        userCommandService.deleteUserById({
+          publicId: '00000000-0000-0000-0000-000000000000',
+        }),
+      ).rejects.toThrow('No record was found for a delete');
     });
   });
 
-  describe('deleteManyUsersById', () => {
-    it('should successfully delete multiple users', async () => {
+  describe('createManyAndReturnUsers', () => {
+    it('should create multiple users in the database', async () => {
+      expect.assertions(5);
+
+      const createDto = {
+        users: [
+          { name: 'User 1', firebaseUid: 'uid-int-bulk-1' },
+          { name: 'User 2', firebaseUid: 'uid-int-bulk-2' },
+          { name: 'User 3', firebaseUid: 'uid-int-bulk-3' },
+        ],
+      };
+
+      const result = await userCommandService.createManyAndReturnUsers(createDto);
+
+      expect(result.users).toHaveLength(3);
+      expect(result.users.map((u) => u.name)).toStrictEqual(['User 1', 'User 2', 'User 3']);
+      expect(result.users.map((u) => u.firebaseUid)).toStrictEqual([
+        'uid-int-bulk-1',
+        'uid-int-bulk-2',
+        'uid-int-bulk-3',
+      ]);
+
+      const allUsers = await userQueryService.findManyUsersById({
+        publicIds: result.users.map((u) => u.publicId),
+      });
+
+      expect(allUsers.users).toHaveLength(3);
+      expect(new Set(allUsers.users.map((u) => u.publicId)).size).toBe(3);
+    });
+  });
+
+  describe('deleteManyUsersByIds', () => {
+    it('should delete multiple users from the database', async () => {
       expect.assertions(1);
 
-      const publicIds = ['id1', 'id2', 'id3'];
-      repository.user.deleteMany.mockResolvedValue({ count: publicIds.length });
-
-      await service.deleteManyUsersById({ publicIds });
-
-      expect(repository.user.deleteMany).toHaveBeenCalledWith({
-        where: { publicId: { in: publicIds } },
+      const users = await userCommandService.createManyAndReturnUsers({
+        users: [
+          { name: 'Delete 1', firebaseUid: 'uid-int-del-1' },
+          { name: 'Delete 2', firebaseUid: 'uid-int-del-2' },
+          { name: 'Keep Me', firebaseUid: 'uid-int-keep' },
+        ],
       });
-    });
 
-    it('should throw error on database failure', async () => {
-      expect.assertions(2);
+      const publicIdsToDelete = [users.users[0].publicId, users.users[1].publicId];
+      await userCommandService.deleteManyUsersById({ publicIds: publicIdsToDelete });
 
-      const publicIds = ['id1', 'id2', 'id3'];
+      const remainingUser = await userQueryService.findUniqueOrThrowUserById({ publicId: users.users[2].publicId });
 
-      const prismaError = new Error('Database error');
-      repository.user.deleteMany.mockRejectedValue(prismaError);
-
-      await expect(service.deleteManyUsersById({ publicIds })).rejects.toThrow(prismaError);
-      expect(repository.user.deleteMany).toHaveBeenCalledWith({
-        where: { publicId: { in: publicIds } },
-      });
+      expect(remainingUser.name).toBe('Keep Me');
     });
   });
 });

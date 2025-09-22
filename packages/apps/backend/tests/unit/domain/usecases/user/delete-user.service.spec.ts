@@ -1,49 +1,90 @@
+import { Test, TestingModule } from '@nestjs/testing';
+
 import { FirebaseAuthService } from '@/domain/aggregates/firebase-auth/firebase-auth.service';
 import { UserCommandService } from '@/domain/aggregates/user/user.command.service';
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 import { DeleteUserService } from '@/domain/usecases/user/delete-user.service';
+import { RepositoryService } from '@/repository/repository.service';
+import { DatabaseHelper } from '@/tests/helpers/database.helper';
 
-describe('unit DeleteUserService', () => {
+describe('integration DeleteUserService', () => {
+  let testingModule: TestingModule;
+  let deleteUserService: DeleteUserService;
+  let userCommandService: UserCommandService;
+  let userQueryService: UserQueryService;
   let firebaseAuthService: jest.Mocked<Pick<FirebaseAuthService, 'deleteUser'>>;
-  let usersQueryService: jest.Mocked<Pick<UserQueryService, 'findUniqueOrThrowUserById'>>;
-  let usersCommandService: jest.Mocked<Pick<UserCommandService, 'deleteUserById'>>;
-  let service: DeleteUserService;
+  let databaseHelper: DatabaseHelper;
 
-  beforeEach(() => {
+  beforeAll(async () => {
+    databaseHelper = new DatabaseHelper();
+    await databaseHelper.connect();
+  });
+
+  beforeEach(async () => {
+    await databaseHelper.cleanDatabase();
+
     firebaseAuthService = {
       deleteUser: jest.fn().mockResolvedValue(undefined),
     };
-    usersQueryService = {
-      findUniqueOrThrowUserById: jest.fn(),
-    };
-    usersCommandService = {
-      deleteUserById: jest.fn().mockResolvedValue(undefined),
-    };
 
-    service = new DeleteUserService(
-      firebaseAuthService as unknown as FirebaseAuthService,
-      usersQueryService as unknown as UserQueryService,
-      usersCommandService as unknown as UserCommandService,
-    );
+    testingModule = await Test.createTestingModule({
+      providers: [
+        DeleteUserService,
+        UserCommandService,
+        UserQueryService,
+        {
+          provide: FirebaseAuthService,
+          useValue: firebaseAuthService,
+        },
+        {
+          provide: RepositoryService,
+          useValue: databaseHelper.client,
+        },
+      ],
+    }).compile();
+
+    deleteUserService = testingModule.get(DeleteUserService);
+    userCommandService = testingModule.get(UserCommandService);
+    userQueryService = testingModule.get(UserQueryService);
   });
 
-  afterEach(() => {
+  afterEach(async () => {
+    await testingModule.close();
     jest.clearAllMocks();
   });
 
-  it('deletes the firebase user first and then removes the database record', async () => {
-    expect.assertions(3);
+  afterAll(async () => {
+    await databaseHelper.disconnect();
+  });
 
-    const user = {
-      publicId: 'public-id-123',
-      firebaseUid: 'firebase-uid-456',
-    };
-    usersQueryService.findUniqueOrThrowUserById.mockResolvedValue(user as never);
+  describe('execute', () => {
+    it('deletes the firebase account before removing the database record', async () => {
+      expect.assertions(4);
 
-    await service.execute(user.publicId);
+      const createDto = {
+        name: 'Integration Delete User',
+        firebaseUid: 'uid-int-delete-user',
+      };
 
-    expect(usersQueryService.findUniqueOrThrowUserById).toHaveBeenCalledWith({ publicId: user.publicId });
-    expect(firebaseAuthService.deleteUser).toHaveBeenCalledWith(user.firebaseUid);
-    expect(usersCommandService.deleteUserById).toHaveBeenCalledWith({ publicId: user.publicId });
+      const createdUser = await userCommandService.createUser(createDto);
+
+      await deleteUserService.execute(createdUser.publicId);
+
+      expect(firebaseAuthService.deleteUser).toHaveBeenCalledTimes(1);
+      expect(firebaseAuthService.deleteUser).toHaveBeenCalledWith(createDto.firebaseUid);
+      await expect(userQueryService.findUniqueOrThrowUserById({ publicId: createdUser.publicId })).rejects.toThrow(
+        'No record was found for a query',
+      );
+      await expect(userQueryService.findUniqueUserByFirebaseUid(createDto.firebaseUid)).resolves.toBeNull();
+    });
+
+    it('propagates not-found errors without calling firebase', async () => {
+      expect.assertions(2);
+
+      const missingPublicId = '00000000-0000-0000-0000-000000000000';
+
+      await expect(deleteUserService.execute(missingPublicId)).rejects.toThrow('No record was found for a query');
+      expect(firebaseAuthService.deleteUser).not.toHaveBeenCalled();
+    });
   });
 });
