@@ -37,6 +37,7 @@
     "prisma:schema:print:test": "dotenv -e .env.test -- prisma db pull --print",
     "prisma:studio": "prisma studio",
     "prisma:validate": "prisma validate",
+    "seed:auth": "ts-node scripts/seed-auth.ts",
     "start:debug": "run-p start:debug:*",
     "start:debug:admin-api": "nest start admin-api --debug --watch",
     "start:debug:app-api": "nest start app-api --debug --watch",

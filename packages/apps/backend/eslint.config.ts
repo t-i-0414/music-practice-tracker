@@ -77,7 +77,7 @@ const config = defineConfig(
   },
   {
     files: ['scripts/**/*.ts', 'scripts/**/*.js'],
-    rules: baseScriptConfigRules,
+    rules: { ...baseScriptConfigRules, 'custom-backend-eslint/throw-new-common-error-only': 'off' },
   },
   globalIgnores(sharedIgnores),
   prettierConfig,
