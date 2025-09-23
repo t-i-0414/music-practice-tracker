@@ -117,4 +117,101 @@ describe('e2e AppApiUsersController', () => {
     expect(userInDatabase).toBeNull();
     expect(userInFirebase).toBeNull();
   });
+
+  it('returns 401 error when creating user without authentication token', async () => {
+    expect.assertions(2);
+
+    const response = await httpClient.post('/api/users').send({ firebaseUid: 'test-uid', name: 'Test User' });
+
+    expect(response.status).toBe(401);
+    expect(response.body).toMatchObject({
+      errorCode: 'AP0401',
+    });
+  });
+
+  it('returns 403 error when email is not verified and provider is not allowed', async () => {
+    expect.assertions(2);
+
+    const signUpResponse = await fetch(
+      `http://${process.env.FIREBASE_AUTH_EMULATOR_HOST}/identitytoolkit.googleapis.com/v1/accounts:signUp?key=test-api-key`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: `unverified-${Date.now()}@example.com`,
+          password: 'Password123!',
+          returnSecureToken: true,
+        }),
+      },
+    );
+    const { idToken } = (await signUpResponse.json()) as { idToken: string };
+
+    const response = await httpClient
+      .post('/api/users')
+      .set('Authorization', `Bearer ${idToken}`)
+      .send({ firebaseUid: 'test-uid', name: 'Test User' });
+
+    expect(response.status).toBe(403);
+    expect(response.body).toMatchObject({
+      errorCode: 'AP0403',
+    });
+  });
+
+  it('returns existing user when trying to create duplicate', async () => {
+    expect.assertions(3);
+
+    const { idToken, uid } = await firebaseHelper.createVerifiedUser();
+
+    const firstResponse = await httpClient
+      .post('/api/users')
+      .set('Authorization', `Bearer ${idToken}`)
+      .send({ firebaseUid: uid, name: 'First Name' });
+
+    const { publicId } = firstResponse.body;
+
+    const secondResponse = await httpClient
+      .post('/api/users')
+      .set('Authorization', `Bearer ${idToken}`)
+      .send({ firebaseUid: uid, name: 'Different Name' });
+
+    expect(secondResponse.status).toBe(201);
+    expect(secondResponse.body.publicId).toBe(publicId);
+    expect(secondResponse.body.name).toBe('First Name'); // Should return existing user's name
+  });
+
+  it('fetches user by public ID', async () => {
+    expect.assertions(2);
+
+    const { idToken, uid } = await firebaseHelper.createVerifiedUser();
+    const publicId = await createUserViaApi({
+      httpClient,
+      token: idToken,
+      firebaseUid: uid,
+      name: 'Test User',
+    });
+
+    const response = await httpClient.get(`/api/users/${publicId}`).set('Authorization', `Bearer ${idToken}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body).toMatchObject({
+      publicId,
+      firebaseUid: uid,
+      name: 'Test User',
+      status: 'ACTIVE',
+    });
+  });
+
+  it('returns 404 when fetching non-existent user by ID', async () => {
+    expect.assertions(2);
+
+    const { idToken } = await firebaseHelper.createVerifiedUser();
+    const nonExistentId = '550e8400-e29b-41d4-a716-446655440000';
+
+    const response = await httpClient.get(`/api/users/${nonExistentId}`).set('Authorization', `Bearer ${idToken}`);
+
+    expect(response.status).toBe(404);
+    expect(response.body).toMatchObject({
+      errorCode: 'RE0002',
+    });
+  });
 });
