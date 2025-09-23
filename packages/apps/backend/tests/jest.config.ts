@@ -18,10 +18,11 @@ const config: Config = {
   collectCoverageFrom: [
     '<rootDir>/src/**/*.ts',
     '!<rootDir>/src/**/*.d.ts',
+    '!<rootDir>/src/**/*.module.ts',
+    '!<rootDir>/src/**/*.seed.ts',
     '!<rootDir>/src/**/*.spec.ts',
     '!<rootDir>/src/**/*.test.ts',
     '!<rootDir>/src/**/main.ts',
-    '!<rootDir>/src/**/*.module.ts',
     '!<rootDir>/src/**/constants.ts',
     '!<rootDir>/src/**/dto.ts',
     '!<rootDir>/src/generated/**',
