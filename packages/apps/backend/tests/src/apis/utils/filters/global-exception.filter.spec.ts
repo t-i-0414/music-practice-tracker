@@ -4,6 +4,7 @@ import { Request, Response } from 'express';
 import { ApiError } from '@/apis/utils/api.error';
 import { GlobalExceptionFilter } from '@/apis/utils/filters/global-exception.filter';
 import { DomainError } from '@/domain/utils/domain.error';
+import { FirebaseError } from '@/firebase-auth/utils/firebase.error';
 import { PrismaClientKnownRequestError } from '@/generated/prisma/runtime/library';
 import { UnknownError } from '@/utils/errors/unknown.error';
 
@@ -140,6 +141,102 @@ describe('unit GlobalExceptionFilter', () => {
       expect(mockResponse.json).toHaveBeenCalledWith({
         statusCode: HttpStatus.NOT_FOUND,
         errorCode: 'RE0002',
+      });
+    });
+
+    it('should handle FirebaseError with email already exists error (FB0003)', () => {
+      const exception = new FirebaseError('FB0003', 'Email already exists');
+
+      filter.catch(exception, mockArgumentsHost as ArgumentsHost);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.CONFLICT);
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        statusCode: HttpStatus.CONFLICT,
+        errorCode: 'FB0003',
+      });
+    });
+
+    it('should handle FirebaseError with UID already exists error (FB0004)', () => {
+      const exception = new FirebaseError('FB0004', 'UID already exists');
+
+      filter.catch(exception, mockArgumentsHost as ArgumentsHost);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.CONFLICT);
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        statusCode: HttpStatus.CONFLICT,
+        errorCode: 'FB0004',
+      });
+    });
+
+    it('should handle FirebaseError with user not found error (FB0005)', () => {
+      const exception = new FirebaseError('FB0005', 'User not found');
+
+      filter.catch(exception, mockArgumentsHost as ArgumentsHost);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.NOT_FOUND);
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        statusCode: HttpStatus.NOT_FOUND,
+        errorCode: 'FB0005',
+      });
+    });
+
+    it('should handle FirebaseError with invalid ID token error (FB0006)', () => {
+      const exception = new FirebaseError('FB0006', 'Invalid ID token');
+
+      filter.catch(exception, mockArgumentsHost as ArgumentsHost);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.UNAUTHORIZED);
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        statusCode: HttpStatus.UNAUTHORIZED,
+        errorCode: 'FB0006',
+      });
+    });
+
+    it('should handle FirebaseError with token expired error (FB0007)', () => {
+      const exception = new FirebaseError('FB0007', 'Token expired');
+
+      filter.catch(exception, mockArgumentsHost as ArgumentsHost);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.UNAUTHORIZED);
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        statusCode: HttpStatus.UNAUTHORIZED,
+        errorCode: 'FB0007',
+      });
+    });
+
+    it('should handle FirebaseError with insufficient permissions error (FB0008)', () => {
+      const exception = new FirebaseError('FB0008', 'Insufficient permissions');
+
+      filter.catch(exception, mockArgumentsHost as ArgumentsHost);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.FORBIDDEN);
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        statusCode: HttpStatus.FORBIDDEN,
+        errorCode: 'FB0008',
+      });
+    });
+
+    it('should handle FirebaseError with unknown error (FB9999)', () => {
+      const exception = new FirebaseError('FB9999', 'Unknown Firebase error');
+
+      filter.catch(exception, mockArgumentsHost as ArgumentsHost);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        errorCode: 'FB9999',
+      });
+    });
+
+    it('should handle FirebaseError with unmapped error code as unauthorized', () => {
+      const exception = new FirebaseError('FB0001', 'Some other Firebase error');
+
+      filter.catch(exception, mockArgumentsHost as ArgumentsHost);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.UNAUTHORIZED);
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        statusCode: HttpStatus.UNAUTHORIZED,
+        errorCode: 'FB0001',
       });
     });
 

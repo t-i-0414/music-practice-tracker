@@ -60,6 +60,8 @@ repository/
 - **Repository Pattern**: Centralized database access through single repository service
 - **Query/Command Separation**: Read and write operations are separated
 - **DTO Pattern**: Input validation and response transformation
+- **Error Handling**: Custom error classes (ApiError, DomainError, FirebaseError, RepositoryError)
+- **Global Exception Filter**: Unified error response with proper HTTP status mapping
 
 ### Database Schema (Prisma)
 
@@ -74,6 +76,17 @@ updatedAt DateTime @updatedAt
 ```
 
 ## ⚡ Essential Commands
+
+### Quick Start
+
+```bash
+# Initial Setup (once)
+make setup
+
+# Start Services
+make docker-compose-up              # PostgreSQL
+make start-firebase-dev-emulators   # Firebase Emulator
+```
 
 ### Development
 
@@ -140,7 +153,9 @@ src/
 ├── repository/
 │   ├── repository.service.ts
 │   ├── repository.module.ts
+│   ├── seeds/           # Test data seeds
 │   └── utils/           # Repository utilities
+├── firebase-auth/       # Firebase authentication
 └── utils/               # Global utilities
 ```
 
@@ -159,6 +174,17 @@ src/
 
 ```bash
 bunx prisma migrate dev --name [name]
+```
+
+### Test Data Seeding
+
+```bash
+# Seed test users (Firebase + DB)
+bun run seed:all
+
+# Individual seeds
+bun run seed:firebase-auth  # Firebase auth users
+bun run seed:user          # Database users
 ```
 
 ## ⚠️ Common Pitfalls

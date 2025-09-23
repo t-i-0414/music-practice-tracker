@@ -5,10 +5,14 @@ NestJS backend providing dual REST APIs for Music Practice Tracker.
 ## Quick Start
 
 ```bash
-# Install dependencies
-bun install
+# Initial Setup (run once)
+make setup
 
-# Start development
+# Start Services
+make docker-compose-up              # PostgreSQL (if needed)
+make start-firebase-dev-emulators   # Firebase Emulator
+
+# Start Development
 bun run start:dev          # Both APIs
 bun run start:dev:app-api  # App API only (port 3000)
 bun run start:dev:admin-api # Admin API only (port 3001)
@@ -21,32 +25,38 @@ bun run prisma:studio      # GUI at http://localhost:5555
 
 ### Dual API Design
 
-- **App API** (3000): User-scoped operations
+- **App API** (3000): User-scoped operations with Firebase Auth
 - **Admin API** (3001): Full system access
 
-### Service Layers (per aggregate)
+### DDD Service Layers
 
-1. **Repository**: Database access only
-2. **Query Service**: Read operations (OrFail pattern)
-3. **Command Service**: Write operations
-4. **Facade Services**: API-specific orchestration
+1. **Domain Layer**: Business logic (query/command services)
+2. **API Layer**: HTTP endpoints and DTOs
+3. **Repository Layer**: Centralized database access
+4. **Firebase Auth**: Authentication and authorization
 
 ### File Structure
 
 ```
 src/
-├── modules/
-│   ├── aggregate/[entity]/
-│   │   ├── *.repository.service.ts
-│   │   ├── *.query.service.ts
-│   │   ├── *.command.service.ts
-│   │   ├── *.facade.service.ts
-│   │   ├── *.input.dto.ts
-│   │   └── *.response.dto.ts
-│   ├── api/
-│   │   ├── admin/
-│   │   └── app/
-│   └── repository/
+├── domain/
+│   └── aggregates/[entity]/
+│       ├── [entity].query.service.ts
+│       ├── [entity].command.service.ts
+│       └── utils/
+│           ├── dto.ts
+│           └── constants.ts
+├── apis/
+│   ├── admin/[entity]/
+│   ├── app/[entity]/
+│   └── utils/filters/
+│       └── global-exception.filter.ts
+├── repository/
+│   ├── repository.service.ts
+│   └── seeds/
+├── firebase-auth/
+│   └── utils/
+│       └── firebase.error.ts
 ├── admin-api.main.ts
 └── app-api.main.ts
 ```
@@ -76,24 +86,51 @@ bun run test:e2e           # E2E tests
 bun run prisma:migrate:dev  # Create migration
 bun run prisma:generate     # Generate client
 bun run prisma:studio       # Database GUI
+
+# Test Data Seeds
+bun run seed:all            # Seed Firebase + DB users
+bun run seed:firebase-auth  # Firebase auth only
+bun run seed:user          # Database users only
 ```
 
 ## Key Patterns
 
 - **UUID Public IDs**: Never expose internal IDs
-- **Repository Pattern**: All DB access through repositories
-- **DTO Validation**: Input/output transformation
+- **Repository Pattern**: Centralized DB access through single service
+- **Error Handling**: Custom error classes with global exception filter
 - **OrFail Pattern**: Throw NotFoundException for missing resources
 - **Service Separation**: Query (read) vs Command (write)
+- **Firebase Integration**: Authentication with proper error mapping
 
 ## Environment Variables
 
 ```bash
 DATABASE_URL="postgresql://postgres:postgres@localhost:15432/music_practice_tracker"
-PORT=3000           # App API port
-ADMIN_PORT=3001     # Admin API port
+PORT=3000                    # App API port
+ADMIN_PORT=3001             # Admin API port
 NODE_ENV=development
+FIREBASE_PROJECT_ID=music-practice-tracker-dev
+FIREBASE_AUTH_EMULATOR_HOST=localhost:9099  # For local development
 ```
+
+## Error Handling
+
+All errors are handled by the global exception filter and return consistent responses:
+
+```json
+{
+  "statusCode": 401,
+  "errorCode": "FB0006" // Specific error codes for each error type
+}
+```
+
+Error code prefixes:
+
+- `AP`: API errors
+- `DO`: Domain errors
+- `FB`: Firebase errors
+- `RE`: Repository errors
+- `UN`: Unknown errors
 
 ## API Documentation
 
