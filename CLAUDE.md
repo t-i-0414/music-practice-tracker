@@ -77,6 +77,17 @@ updatedAt DateTime @updatedAt
 
 ## ⚡ Essential Commands
 
+### Quick Start
+
+```bash
+# Initial Setup (once)
+make setup
+
+# Start Services
+make docker-compose-up              # PostgreSQL
+make start-firebase-dev-emulators   # Firebase Emulator
+```
+
 ### Development
 
 ```bash
