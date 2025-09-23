@@ -120,7 +120,7 @@ All errors are handled by the global exception filter and return consistent resp
 ```json
 {
   "statusCode": 401,
-  "errorCode": "FB0006"  // Specific error codes for each error type
+  "errorCode": "FB0006" // Specific error codes for each error type
 }
 ```
 
