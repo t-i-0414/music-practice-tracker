@@ -102,8 +102,10 @@ describe('unit FirebaseAuthProvider', () => {
     expect(auth).toBe('existing-auth');
   });
 
-  it('initializes firebase using application default credentials when not yet initialized', () => {
+  it('initializes firebase using application default credentials when not yet initialized and no emulator', () => {
     expect.assertions(4);
+
+    delete process.env.FIREBASE_AUTH_EMULATOR_HOST;
 
     const newApp = createFirebaseApp();
     newApp.auth.mockReturnValue('adc-auth');
@@ -124,12 +126,9 @@ describe('unit FirebaseAuthProvider', () => {
     expect(firebaseAdmin.apps[0]).toBe(newApp);
   });
 
-  it('falls back to emulator configuration when application default credentials fail', () => {
+  it('uses emulator configuration when FIREBASE_AUTH_EMULATOR_HOST is set', () => {
     expect.assertions(4);
 
-    firebaseAdmin.initializeApp.mockImplementationOnce(() => {
-      throw new Error('adc unavailable');
-    });
     const emulatorApp = createFirebaseApp();
     emulatorApp.auth.mockReturnValue('emulator-auth');
     firebaseAdmin.initializeApp.mockImplementationOnce(() => {
@@ -144,7 +143,7 @@ describe('unit FirebaseAuthProvider', () => {
 
     provider.onModuleInit();
 
-    expect(firebaseAdmin.initializeApp).toHaveBeenNthCalledWith(2, {
+    expect(firebaseAdmin.initializeApp).toHaveBeenCalledWith({
       projectId: 'test-project',
     });
     expect(provider.auth()).toBe('emulator-auth');
@@ -155,9 +154,6 @@ describe('unit FirebaseAuthProvider', () => {
   it('uses GCLOUD_PROJECT when GOOGLE_CLOUD_PROJECT is undefined', () => {
     expect.assertions(3);
 
-    firebaseAdmin.initializeApp.mockImplementationOnce(() => {
-      throw new Error('adc unavailable');
-    });
     const emulatorApp = createFirebaseApp();
     emulatorApp.auth.mockReturnValue('gcloud-auth');
     firebaseAdmin.initializeApp.mockImplementationOnce(() => {
@@ -173,7 +169,7 @@ describe('unit FirebaseAuthProvider', () => {
 
     provider.onModuleInit();
 
-    expect(firebaseAdmin.initializeApp).toHaveBeenNthCalledWith(2, {
+    expect(firebaseAdmin.initializeApp).toHaveBeenCalledWith({
       projectId: 'gcloud-project',
     });
     expect(provider.auth()).toBe('gcloud-auth');
@@ -183,9 +179,6 @@ describe('unit FirebaseAuthProvider', () => {
   it('uses FIREBASE_PROJECT_ID when other project vars are missing', () => {
     expect.assertions(3);
 
-    firebaseAdmin.initializeApp.mockImplementationOnce(() => {
-      throw new Error('adc unavailable');
-    });
     const emulatorApp = createFirebaseApp();
     emulatorApp.auth.mockReturnValue('firebase-project-auth');
     firebaseAdmin.initializeApp.mockImplementationOnce(() => {
@@ -202,22 +195,80 @@ describe('unit FirebaseAuthProvider', () => {
 
     provider.onModuleInit();
 
-    expect(firebaseAdmin.initializeApp).toHaveBeenNthCalledWith(2, {
+    expect(firebaseAdmin.initializeApp).toHaveBeenCalledWith({
       projectId: 'firebase-project',
     });
     expect(provider.auth()).toBe('firebase-project-auth');
     expect(firebaseAdmin.apps[firebaseAdmin.apps.length - 1]).toBe(emulatorApp);
   });
 
-  it('throws DO0001 when service account is missing after ADC failure', () => {
+  it('falls back to ADC when emulator host is set but project ID is empty', () => {
+    expect.assertions(3);
+
+    const adcApp = createFirebaseApp();
+    adcApp.auth.mockReturnValue('adc-auth-fallback');
+    firebaseAdmin.initializeApp.mockImplementation(() => {
+      firebaseAdmin.apps.push(adcApp);
+      return adcApp;
+    });
+
+    // Emulator host is set but project ID is empty/whitespace
+    process.env.FIREBASE_AUTH_EMULATOR_HOST = 'localhost:9099';
+    process.env.GOOGLE_CLOUD_PROJECT = '   '; // whitespace only
+    delete process.env.GCLOUD_PROJECT;
+    delete process.env.FIREBASE_PROJECT_ID;
+
+    const provider = new FirebaseAuthProvider();
+
+    provider.onModuleInit();
+
+    expect(firebaseAdmin.credential.applicationDefault).toHaveBeenCalledTimes(1);
+    expect(firebaseAdmin.initializeApp).toHaveBeenCalledWith({
+      credential: 'application-default-credential',
+    });
+    expect(provider.auth()).toBe('adc-auth-fallback');
+  });
+
+  it('falls back to ADC when emulator host is set but all project IDs are undefined', () => {
+    expect.assertions(3);
+
+    const adcApp = createFirebaseApp();
+    adcApp.auth.mockReturnValue('adc-auth-no-project');
+    firebaseAdmin.initializeApp.mockImplementation(() => {
+      firebaseAdmin.apps.push(adcApp);
+      return adcApp;
+    });
+
+    // Emulator host is set but no project ID variables are defined
+    process.env.FIREBASE_AUTH_EMULATOR_HOST = 'localhost:9099';
+    delete process.env.GOOGLE_CLOUD_PROJECT;
+    delete process.env.GCLOUD_PROJECT;
+    delete process.env.FIREBASE_PROJECT_ID;
+
+    const provider = new FirebaseAuthProvider();
+
+    provider.onModuleInit();
+
+    expect(firebaseAdmin.credential.applicationDefault).toHaveBeenCalledTimes(1);
+    expect(firebaseAdmin.initializeApp).toHaveBeenCalledWith({
+      credential: 'application-default-credential',
+    });
+    expect(provider.auth()).toBe('adc-auth-no-project');
+  });
+
+  it('throws DO0001 when service account is missing after ADC failure and no emulator', () => {
     expect.assertions(3);
 
     firebaseAdmin.initializeApp.mockImplementation(() => {
       throw new Error('adc unavailable');
     });
 
-    process.env.FIREBASE_AUTH_EMULATOR_HOST = 'localhost:9099';
-    process.env.FIREBASE_PROJECT_ID = '   ';
+    // No emulator configured
+    delete process.env.FIREBASE_AUTH_EMULATOR_HOST;
+    delete process.env.GOOGLE_CLOUD_PROJECT;
+    delete process.env.GCLOUD_PROJECT;
+    delete process.env.FIREBASE_PROJECT_ID;
+    delete process.env.FIREBASE_SERVICE_ACCOUNT;
 
     const provider = new FirebaseAuthProvider();
 

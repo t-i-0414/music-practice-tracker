@@ -83,6 +83,7 @@ const config = defineConfig(
           additionalTestBlockFunctions: ['it', 'test'],
         },
       ],
+      '@typescript-eslint/no-require-imports': 'off',
     },
   },
   {

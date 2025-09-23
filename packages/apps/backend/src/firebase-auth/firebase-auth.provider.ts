@@ -12,21 +12,21 @@ export class FirebaseAuthProvider implements OnModuleInit {
       return;
     }
 
+    const emulatorHost = process.env.FIREBASE_AUTH_EMULATOR_HOST;
+    if (typeof emulatorHost === 'string' && emulatorHost.trim() !== '') {
+      const projectId =
+        process.env.GOOGLE_CLOUD_PROJECT ?? process.env.GCLOUD_PROJECT ?? process.env.FIREBASE_PROJECT_ID;
+      if (typeof projectId === 'string' && projectId.trim() !== '') {
+        this.app = firebaseAdmin.initializeApp({ projectId: projectId.trim() });
+        return;
+      }
+    }
+
     try {
       this.app = firebaseAdmin.initializeApp({
         credential: firebaseAdmin.credential.applicationDefault(),
       });
     } catch (adcCause) {
-      const emulatorHost = process.env.FIREBASE_AUTH_EMULATOR_HOST;
-      if (typeof emulatorHost === 'string' && emulatorHost.trim() !== '') {
-        const projectId =
-          process.env.GOOGLE_CLOUD_PROJECT ?? process.env.GCLOUD_PROJECT ?? process.env.FIREBASE_PROJECT_ID;
-        if (typeof projectId === 'string' && projectId.trim() !== '') {
-          this.app = firebaseAdmin.initializeApp({ projectId: projectId.trim() });
-          return;
-        }
-      }
-
       const serviceAccountJsonString = process.env.FIREBASE_SERVICE_ACCOUNT;
       if (serviceAccountJsonString === undefined || serviceAccountJsonString.trim() === '') {
         throw new DomainError('DO0001', ERROR_CODE_RECORDS.DO0001, adcCause);
