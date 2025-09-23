@@ -89,6 +89,12 @@ const config = defineConfig(
     files: ['scripts/**/*.ts', 'scripts/**/*.js'],
     rules: { ...baseScriptConfigRules, 'custom-backend-eslint/throw-new-common-error-only': 'off' },
   },
+  {
+    files: ['**/*.seed.ts'],
+    rules: {
+      'custom-backend-eslint/no-console-log': 'off',
+    },
+  },
   globalIgnores(sharedIgnores),
   prettierConfig,
 );
