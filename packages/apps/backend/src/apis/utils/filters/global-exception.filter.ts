@@ -9,6 +9,7 @@ import {
 } from '../api.error';
 
 import { DomainError, isDomainError } from '@/domain/utils/domain.error';
+import { FirebaseError, isFirebaseError } from '@/firebase-auth/utils/firebase.error';
 import {
   buildRepositoryError,
   canConvertToRepositoryError,
@@ -41,6 +42,10 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     if (isDomainError(exception)) {
       return this.handleDomainError(exception);
+    }
+
+    if (isFirebaseError(exception)) {
+      return this.handleFirebaseError(exception);
     }
 
     if (canConvertToRepositoryError(exception)) {
@@ -87,6 +92,28 @@ export class GlobalExceptionFilter implements ExceptionFilter {
   private handleDomainError(exception: DomainError): ErrorResponseDto {
     return {
       statusCode: HttpStatus.BAD_REQUEST,
+      errorCode: exception.errorCode,
+    };
+  }
+
+  private handleFirebaseError(exception: FirebaseError): ErrorResponseDto {
+    const { errorCode } = exception;
+    let statusCode = HttpStatus.UNAUTHORIZED;
+
+    if (errorCode === 'FB0003' || errorCode === 'FB0004') {
+      statusCode = HttpStatus.CONFLICT;
+    } else if (errorCode === 'FB0005') {
+      statusCode = HttpStatus.NOT_FOUND;
+    } else if (errorCode === 'FB0006' || errorCode === 'FB0007') {
+      statusCode = HttpStatus.UNAUTHORIZED;
+    } else if (errorCode === 'FB0008') {
+      statusCode = HttpStatus.FORBIDDEN;
+    } else if (errorCode === 'FB9999') {
+      statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
+    }
+
+    return {
+      statusCode,
       errorCode: exception.errorCode,
     };
   }
