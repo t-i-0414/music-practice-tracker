@@ -68,4 +68,4 @@ start-firebase-dev-emulators:
 .PHONY: start-firebase-test-emulators
 start-firebase-test-emulators:
 	@echo "🚀 Starting Firebase emulators..."
-	firebase emulators:start --config firebase.test.json --project test
+	firebase emulators:start --config firebase.test.json --project music-practice-tracker-test
