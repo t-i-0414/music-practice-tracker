@@ -79,6 +79,7 @@ export default defineConfig({
     'osx',
     'ondevice',
     'Passw0rd',
+    'pkey',
     'pnp',
     'Pressable',
     'psql',
