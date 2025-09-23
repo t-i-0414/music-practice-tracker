@@ -41,8 +41,6 @@ const config: Config = {
     '^@/tests/(.*)$': '<rootDir>/tests/$1',
     '^@/(.*)$': '<rootDir>/src/$1',
   },
-  globalSetup: '<rootDir>/tests/global/setup.ts',
-  globalTeardown: '<rootDir>/tests/global/teardown.ts',
   setupFilesAfterEnv: ['<rootDir>/tests/jest.setup.ts'],
   setupFiles: ['<rootDir>/tests/jest-env.setup.ts'],
   maxWorkers: 1,
