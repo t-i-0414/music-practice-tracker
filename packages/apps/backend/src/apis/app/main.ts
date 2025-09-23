@@ -1,6 +1,7 @@
-import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
-import { NestFactory, Reflector } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+
+import { useGlobalOptions } from '../utils/use-global-options';
 
 import { AppApiModule } from '@/apis/app/app.module';
 import { isDevelopment } from '@/utils/environment';
@@ -9,8 +10,7 @@ const DEFAULT_PORT_NUMBER = 3000;
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppApiModule);
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
-  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+  useGlobalOptions(app);
 
   // Setup Swagger in non-production environments
   if (isDevelopment()) {

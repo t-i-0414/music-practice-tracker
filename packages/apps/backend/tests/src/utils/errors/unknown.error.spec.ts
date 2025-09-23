@@ -99,7 +99,8 @@ describe('function isUnknownErrorCode', () => {
   it('should return false for non-UN error codes', () => {
     expect(isUnknownErrorCode('RE0001')).toBe(false);
     expect(isUnknownErrorCode('AP0001')).toBe(false);
-    expect(isUnknownErrorCode('DO0001')).toBe(false);
+    expect(isUnknownErrorCode('DO0004')).toBe(false);
+    expect(isUnknownErrorCode('FB0001')).toBe(false);
   });
 
   it('should return false for invalid error codes', () => {

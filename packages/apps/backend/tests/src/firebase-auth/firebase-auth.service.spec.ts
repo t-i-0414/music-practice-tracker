@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import type { DecodedIdToken, UserRecord } from 'firebase-admin/auth';
 
-import { FirebaseAuthProvider } from '@/domain/aggregates/firebase-auth/firebase-auth.provider';
-import { FirebaseAuthService } from '@/domain/aggregates/firebase-auth/firebase-auth.service';
+import { FirebaseAuthProvider } from '@/firebase-auth/firebase-auth.provider';
+import { FirebaseAuthService } from '@/firebase-auth/firebase-auth.service';
 
 jest.mock<typeof import('firebase-admin')>('firebase-admin', () => {
   const apps: unknown[] = [];
@@ -106,52 +106,52 @@ describe('integration FirebaseAuthService', () => {
       expect(result).toBe(decoded);
     });
 
-    it('maps firebase expiration errors to DO0005', async () => {
+    it('maps firebase expiration errors to FB0004', async () => {
       expect.assertions(2);
 
       const error = Object.assign(new Error('expired'), { code: 'auth/id-token-expired' });
       authMock.verifyIdToken.mockRejectedValue(error);
 
       await expect(service.verifyIdToken('token-expired')).rejects.toMatchObject({
-        errorCode: 'DO0005',
+        errorCode: 'FB0004',
         detail: 'Firebase token expired.',
       });
       expect(authMock.verifyIdToken).toHaveBeenCalledWith('token-expired', false);
     });
 
-    it('maps firebase revoked errors to DO0006', async () => {
+    it('maps firebase revoked errors to FB0005', async () => {
       expect.assertions(2);
 
       const error = Object.assign(new Error('revoked'), { code: 'auth/id-token-revoked' });
       authMock.verifyIdToken.mockRejectedValue(error);
 
       await expect(service.verifyIdToken('token-revoked')).rejects.toMatchObject({
-        errorCode: 'DO0006',
+        errorCode: 'FB0005',
         detail: 'Firebase token revoked.',
       });
       expect(authMock.verifyIdToken).toHaveBeenCalledWith('token-revoked', false);
     });
 
-    it('maps other firebase errors to DO0007', async () => {
+    it('maps other firebase errors to FB0006', async () => {
       expect.assertions(2);
 
       const error = Object.assign(new Error('other'), { code: 'auth/unknown-error' });
       authMock.verifyIdToken.mockRejectedValue(error);
 
       await expect(service.verifyIdToken('token-invalid')).rejects.toMatchObject({
-        errorCode: 'DO0007',
+        errorCode: 'FB0006',
         detail: 'Firebase invalid token.',
       });
       expect(authMock.verifyIdToken).toHaveBeenCalledWith('token-invalid', false);
     });
 
-    it('maps non-firebase errors to DO0007', async () => {
+    it('maps non-firebase errors to FB0006', async () => {
       expect.assertions(2);
 
       authMock.verifyIdToken.mockRejectedValue(new Error('non-firebase-error'));
 
       await expect(service.verifyIdToken('token-error')).rejects.toMatchObject({
-        errorCode: 'DO0007',
+        errorCode: 'FB0006',
         detail: 'Firebase invalid token.',
       });
       expect(authMock.verifyIdToken).toHaveBeenCalledWith('token-error', false);
@@ -171,13 +171,13 @@ describe('integration FirebaseAuthService', () => {
       expect(result).toBe(user);
     });
 
-    it('wraps firebase failures with DO0008', async () => {
+    it('wraps firebase failures with FB0007', async () => {
       expect.assertions(2);
 
       authMock.getUser.mockRejectedValue(new Error('not found'));
 
       await expect(service.getUser('uid-missing')).rejects.toMatchObject({
-        errorCode: 'DO0008',
+        errorCode: 'FB0007',
         detail: 'Firebase user not found.',
       });
       expect(authMock.getUser).toHaveBeenCalledWith('uid-missing');
@@ -195,13 +195,13 @@ describe('integration FirebaseAuthService', () => {
       expect(authMock.deleteUser).toHaveBeenCalledWith('uid-already-deleted');
     });
 
-    it('propagates other firebase errors as DO0009', async () => {
+    it('propagates other firebase errors as FB0008', async () => {
       expect.assertions(2);
 
       authMock.deleteUser.mockRejectedValue(new Error('internal failure'));
 
       await expect(service.deleteUser('uid-error')).rejects.toMatchObject({
-        errorCode: 'DO0009',
+        errorCode: 'FB0008',
         detail: 'Failed to delete Firebase user.',
       });
       expect(authMock.deleteUser).toHaveBeenCalledWith('uid-error');

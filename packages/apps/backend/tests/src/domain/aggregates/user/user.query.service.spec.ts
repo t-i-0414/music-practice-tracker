@@ -216,4 +216,116 @@ describe('integration UserQueryService', () => {
       expect(names).toStrictEqual(['User A', 'User B', 'User C', 'User D']);
     });
   });
+
+  describe('findUniqueOrThrowUserByFirebaseUid', () => {
+    it('should find a user by firebaseUid', async () => {
+      expect.assertions(2);
+
+      const created = await repository.user.create({
+        data: {
+          name: 'Find Me By Firebase',
+          firebaseUid: 'uid-int-find-by-firebase-1',
+        },
+      });
+
+      const result = await userQueryService.findUniqueOrThrowUserByFirebaseUid('uid-int-find-by-firebase-1');
+
+      expect(result.name).toBe('Find Me By Firebase');
+      expect(result.publicId).toBe(created.publicId);
+    });
+
+    it('should throw NotFoundException for non-existent firebaseUid', async () => {
+      expect.assertions(1);
+
+      await expect(userQueryService.findUniqueOrThrowUserByFirebaseUid('non-existent-firebase-uid')).rejects.toThrow(
+        'No record was found for a query',
+      );
+    });
+
+    it('should return correct user when multiple users exist', async () => {
+      expect.assertions(2);
+
+      await repository.user.create({
+        data: {
+          name: 'User 1',
+          firebaseUid: 'uid-int-many-firebase-1',
+        },
+      });
+
+      const targetUser = await repository.user.create({
+        data: {
+          name: 'Target Firebase User',
+          firebaseUid: 'uid-int-many-firebase-2',
+        },
+      });
+
+      await repository.user.create({
+        data: {
+          name: 'User 3',
+          firebaseUid: 'uid-int-many-firebase-3',
+        },
+      });
+
+      const result = await userQueryService.findUniqueOrThrowUserByFirebaseUid('uid-int-many-firebase-2');
+
+      expect(result.name).toBe('Target Firebase User');
+      expect(result.publicId).toBe(targetUser.publicId);
+    });
+  });
+
+  describe('findUniqueUserByFirebaseUid', () => {
+    it('should find a user by firebaseUid', async () => {
+      expect.assertions(2);
+
+      const created = await repository.user.create({
+        data: {
+          name: 'Find Me By Firebase Nullable',
+          firebaseUid: 'uid-int-find-by-firebase-nullable-1',
+        },
+      });
+
+      const result = await userQueryService.findUniqueUserByFirebaseUid('uid-int-find-by-firebase-nullable-1');
+
+      expect(result).not.toBeNull();
+      expect(result?.publicId).toBe(created.publicId);
+    });
+
+    it('should return null for non-existent firebaseUid', async () => {
+      expect.assertions(1);
+
+      const result = await userQueryService.findUniqueUserByFirebaseUid('non-existent-firebase-uid-nullable');
+
+      expect(result).toBeNull();
+    });
+
+    it('should return correct user when multiple users exist', async () => {
+      expect.assertions(2);
+
+      await repository.user.create({
+        data: {
+          name: 'User 1',
+          firebaseUid: 'uid-int-many-firebase-nullable-1',
+        },
+      });
+
+      const targetUser = await repository.user.create({
+        data: {
+          name: 'Target Firebase User Nullable',
+          firebaseUid: 'uid-int-many-firebase-nullable-2',
+        },
+      });
+
+      await repository.user.create({
+        data: {
+          name: 'User 3',
+          firebaseUid: 'uid-int-many-firebase-nullable-3',
+        },
+      });
+
+      const result = await userQueryService.findUniqueUserByFirebaseUid('uid-int-many-firebase-nullable-2');
+
+      expect(result).not.toBeNull();
+      expect(result?.publicId).toBe(targetUser.publicId);
+    });
+  });
 });

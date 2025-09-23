@@ -59,7 +59,8 @@ describe('unit ApiError', () => {
 
     it.each([
       ['RE0001', 'repository error code'],
-      ['DO0001', 'domain error code'],
+      ['DO0004', 'domain error code'],
+      ['FB0001', 'firebase error code'],
       ['UN0001', 'unknown error code'],
       ['INVALID', 'invalid format'],
       ['', 'empty string'],

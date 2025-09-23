@@ -35,6 +35,16 @@ const config = defineConfig(
     rules: enabledBackendPluginRules,
   },
   {
+    files: ['src/firebase-auth/**/*.ts'],
+    plugins: {
+      'custom-backend-eslint': pluginBackend,
+    },
+    rules: {
+      ...enabledBackendPluginRules,
+      'custom-backend-eslint/prisma-naming-convention': 'off',
+    },
+  },
+  {
     files: ['src/repository/**/*.ts'],
     plugins: {
       'custom-backend-eslint': pluginBackend,
@@ -73,11 +83,20 @@ const config = defineConfig(
           additionalTestBlockFunctions: ['it', 'test'],
         },
       ],
+      '@typescript-eslint/no-require-imports': 'off',
     },
   },
   {
     files: ['scripts/**/*.ts', 'scripts/**/*.js'],
-    rules: baseScriptConfigRules,
+    rules: { ...baseScriptConfigRules, 'custom-backend-eslint/throw-new-common-error-only': 'off' },
+  },
+  {
+    files: ['**/*.seed.ts'],
+    rules: {
+      'no-console': 'off',
+      '@typescript-eslint/no-magic-numbers': 'off',
+      'custom-backend-eslint/throw-new-common-error-only': 'off',
+    },
   },
   globalIgnores(sharedIgnores),
   prettierConfig,

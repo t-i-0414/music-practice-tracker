@@ -1,194 +1,262 @@
-import { Test } from '@nestjs/testing';
+import { randomUUID } from 'node:crypto';
 
-import { AdminApiAdminUsersController } from '@/apis/admin/admin-users/admin-users.controller';
-import { AdminUserCommandService } from '@/domain/aggregates/admin-user/admin-user.command.service';
-import { AdminUserQueryService } from '@/domain/aggregates/admin-user/admin-user.query.service';
-import { AdminRole } from '@/generated/prisma';
-import { RepositoryService } from '@/repository/repository.service';
+import type { INestApplication } from '@nestjs/common';
+
+import { AdminApiModule } from '@/apis/admin/admin.module';
 import { DatabaseHelper } from '@/tests/helpers/database.helper';
+import { createTestingApp, type TestingHttpClient } from '@/tests/helpers/testing-app.helper';
 
-describe('integration AdminApiAdminUsersController', () => {
-  let controller: AdminApiAdminUsersController;
+describe('e2e AdminApiAdminUsersController', () => {
+  let app: INestApplication;
+  let httpClient: TestingHttpClient;
   let databaseHelper: DatabaseHelper;
 
   beforeAll(async () => {
+    ({ app, httpClient } = await createTestingApp(AdminApiModule));
+
     databaseHelper = new DatabaseHelper();
     await databaseHelper.connect();
   });
 
   beforeEach(async () => {
     await databaseHelper.cleanDatabase();
-
-    const module = await Test.createTestingModule({
-      controllers: [AdminApiAdminUsersController],
-      providers: [
-        AdminUserCommandService,
-        AdminUserQueryService,
-        { provide: RepositoryService, useValue: databaseHelper.client },
-      ],
-    }).compile();
-
-    controller = module.get<AdminApiAdminUsersController>(AdminApiAdminUsersController);
   });
 
   afterAll(async () => {
     await databaseHelper.disconnect();
+    await app.close();
   });
 
-  describe('get /admin/admin-users', () => {
-    it('should return specific admin users by publicIds', async () => {
+  describe('post /api/admin-users', () => {
+    it('creates an admin user', async () => {
       expect.assertions(2);
 
-      const admin1 = await controller.createAdminUser({
-        cognitoSub: 'sub-admin1',
-        name: 'Admin 1',
-        role: AdminRole.ADMIN,
+      const payload = {
+        cognitoSub: `cognito-${randomUUID()}`,
+        name: 'Admin Example',
+      };
+
+      const response = await httpClient.post('/api/admin-users').send(payload);
+
+      expect(response.status).toBe(201);
+      expect(response.body).toMatchObject({
+        publicId: expect.any(String),
+        cognitoSub: payload.cognitoSub,
+        name: payload.name,
+        status: 'ACTIVE',
+        role: 'VIEWER',
+      });
+    });
+  });
+
+  describe('get /api/admin-users', () => {
+    it('finds multiple admin users by public IDs', async () => {
+      expect.assertions(3);
+
+      // Create test admin users
+      const user1Payload = {
+        cognitoSub: `cognito-${randomUUID()}`,
+        name: 'Admin One',
+      };
+      const user2Payload = {
+        cognitoSub: `cognito-${randomUUID()}`,
+        name: 'Admin Two',
+      };
+
+      const user1Response = await httpClient.post('/api/admin-users').send(user1Payload);
+      const user2Response = await httpClient.post('/api/admin-users').send(user2Payload);
+
+      const publicId1 = user1Response.body.publicId;
+      const publicId2 = user2Response.body.publicId;
+
+      // Query multiple admin users
+      const response = await httpClient.get('/api/admin-users').query({ publicIds: [publicId1, publicId2] });
+
+      expect(response.status).toBe(200);
+      expect(response.body.adminUsers).toHaveLength(2);
+      expect(response.body.adminUsers).toStrictEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ publicId: publicId1, name: 'Admin One' }),
+          expect.objectContaining({ publicId: publicId2, name: 'Admin Two' }),
+        ]),
+      );
+    });
+
+    it('returns empty array when no admin users match', async () => {
+      expect.assertions(2);
+
+      const response = await httpClient
+        .get('/api/admin-users')
+        .query({ publicIds: ['550e8400-e29b-41d4-a716-446655440000'] });
+
+      expect(response.status).toBe(200);
+      expect(response.body.adminUsers).toStrictEqual([]);
+    });
+  });
+
+  describe('get /api/admin-users/:publicId', () => {
+    it('fetches an admin user by public ID', async () => {
+      expect.assertions(2);
+
+      const payload = {
+        cognitoSub: `cognito-${randomUUID()}`,
+        name: 'Admin User',
+      };
+
+      const createResponse = await httpClient.post('/api/admin-users').send(payload);
+      const { publicId } = createResponse.body;
+
+      const response = await httpClient.get(`/api/admin-users/${publicId}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toMatchObject({
+        publicId,
+        cognitoSub: payload.cognitoSub,
+        name: payload.name,
+        status: 'ACTIVE',
+      });
+    });
+
+    it('returns 404 for non-existent admin user', async () => {
+      expect.assertions(2);
+
+      const nonExistentId = '550e8400-e29b-41d4-a716-446655440000';
+      const response = await httpClient.get(`/api/admin-users/${nonExistentId}`);
+
+      expect(response.status).toBe(404);
+      expect(response.body).toMatchObject({
+        errorCode: 'RE0002',
+      });
+    });
+  });
+
+  describe('put /api/admin-users/:publicId', () => {
+    it('updates an admin user by public ID', async () => {
+      expect.assertions(2);
+
+      const createPayload = {
+        cognitoSub: `cognito-${randomUUID()}`,
+        name: 'Original Name',
+      };
+
+      const createResponse = await httpClient.post('/api/admin-users').send(createPayload);
+      const { publicId } = createResponse.body;
+
+      const updateResponse = await httpClient.put(`/api/admin-users/${publicId}`).send({
+        name: 'Updated Name',
+        role: 'ADMIN',
       });
 
-      await controller.createAdminUser({
-        cognitoSub: 'sub-admin2',
-        name: 'Admin 2',
-        role: AdminRole.VIEWER,
+      expect(updateResponse.status).toBe(200);
+      expect(updateResponse.body).toMatchObject({
+        publicId,
+        cognitoSub: createPayload.cognitoSub,
+        name: 'Updated Name',
+        role: 'ADMIN',
+      });
+    });
+
+    it('returns 404 when updating non-existent admin user', async () => {
+      expect.assertions(2);
+
+      const nonExistentId = '550e8400-e29b-41d4-a716-446655440000';
+      const response = await httpClient.put(`/api/admin-users/${nonExistentId}`).send({
+        name: 'New Name',
       });
 
-      const admin3 = await controller.createAdminUser({
-        cognitoSub: 'sub-admin3',
-        name: 'Admin 3',
-        role: AdminRole.ADMIN,
+      expect(response.status).toBe(404);
+      expect(response.body).toMatchObject({
+        errorCode: 'RE0002',
+      });
+    });
+  });
+
+  describe('delete /api/admin-users/:publicId', () => {
+    it('deletes an admin user by public ID', async () => {
+      expect.assertions(3);
+
+      const payload = {
+        cognitoSub: `cognito-${randomUUID()}`,
+        name: 'User to Delete',
+      };
+
+      const createResponse = await httpClient.post('/api/admin-users').send(payload);
+      const { publicId } = createResponse.body;
+
+      const deleteResponse = await httpClient.delete(`/api/admin-users/${publicId}`);
+
+      expect(deleteResponse.status).toBe(204);
+
+      // Verify admin user is deleted
+      const fetchResponse = await httpClient.get(`/api/admin-users/${publicId}`);
+
+      expect(fetchResponse.status).toBe(404);
+
+      // Verify admin user is deleted from database
+      const userInDatabase = await databaseHelper.client.adminUser.findUnique({ where: { publicId } });
+
+      expect(userInDatabase).toBeNull();
+    });
+  });
+
+  describe('post /api/admin-users/bulk', () => {
+    it('creates multiple admin users at once', async () => {
+      expect.assertions(3);
+
+      const response = await httpClient.post('/api/admin-users/bulk').send({
+        adminUsers: [
+          { cognitoSub: `cognito-${randomUUID()}`, name: 'Bulk Admin One' },
+          { cognitoSub: `cognito-${randomUUID()}`, name: 'Bulk Admin Two' },
+        ],
       });
 
-      const result = await controller.findManyAdminUsers({ publicIds: [admin1.publicId, admin3.publicId] });
-
-      expect(result.adminUsers).toHaveLength(2);
-      expect(result.adminUsers.map((u) => u.publicId).sort((a, b) => a.localeCompare(b))).toStrictEqual(
-        [admin1.publicId, admin3.publicId].sort((a, b) => a.localeCompare(b)),
+      expect(response.status).toBe(201);
+      expect(response.body.adminUsers).toHaveLength(2);
+      expect(response.body.adminUsers).toStrictEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ name: 'Bulk Admin One', status: 'ACTIVE' }),
+          expect.objectContaining({ name: 'Bulk Admin Two', status: 'ACTIVE' }),
+        ]),
       );
     });
   });
 
-  describe('post /admin/admin-users', () => {
-    it('should create an admin user and return response', async () => {
+  describe('delete /api/admin-users', () => {
+    it('deletes multiple admin users by public IDs', async () => {
       expect.assertions(4);
 
-      const createDto = {
-        cognitoSub: 'sub-admin',
-        name: 'Test Admin',
-        role: AdminRole.ADMIN,
+      const user1Payload = {
+        cognitoSub: `cognito-${randomUUID()}`,
+        name: 'Admin One to Delete',
+      };
+      const user2Payload = {
+        cognitoSub: `cognito-${randomUUID()}`,
+        name: 'Admin Two to Delete',
       };
 
-      const result = await controller.createAdminUser(createDto);
+      const user1Response = await httpClient.post('/api/admin-users').send(user1Payload);
+      const user2Response = await httpClient.post('/api/admin-users').send(user2Payload);
 
-      expect(result.cognitoSub).toBe(createDto.cognitoSub);
-      expect(result.name).toBe(createDto.name);
-      expect(result.role).toBe(createDto.role);
-      expect(result.publicId).toBeDefined();
-    });
-  });
+      const publicId1 = user1Response.body.publicId;
+      const publicId2 = user2Response.body.publicId;
 
-  describe('delete /admin/admin-users', () => {
-    it('should delete multiple admin users', async () => {
-      expect.assertions(1);
-
-      const admin1 = await controller.createAdminUser({
-        cognitoSub: 'sub-admin1-del',
-        name: 'Admin 1',
-        role: AdminRole.ADMIN,
+      const deleteResponse = await httpClient.delete('/api/admin-users').send({
+        publicIds: [publicId1, publicId2],
       });
 
-      const admin2 = await controller.createAdminUser({
-        cognitoSub: 'sub-admin2-del',
-        name: 'Admin 2',
-        role: AdminRole.VIEWER,
-      });
+      expect(deleteResponse.status).toBe(204);
 
-      const admin3 = await controller.createAdminUser({
-        cognitoSub: 'sub-admin3-del',
-        name: 'Admin 3',
-        role: AdminRole.ADMIN,
-      });
+      // Verify admin users are deleted
+      const user1InDatabase = await databaseHelper.client.adminUser.findUnique({ where: { publicId: publicId1 } });
+      const user2InDatabase = await databaseHelper.client.adminUser.findUnique({ where: { publicId: publicId2 } });
 
-      await controller.deleteManyAdminUsers({ publicIds: [admin1.publicId, admin2.publicId] });
+      expect(user1InDatabase).toBeNull();
+      expect(user2InDatabase).toBeNull();
 
-      const remaining = await controller.findManyAdminUsers({ publicIds: [admin3.publicId] });
+      // Verify they return 404 when fetched
+      const fetchResponse = await httpClient.get(`/api/admin-users/${publicId1}`);
 
-      expect(remaining.adminUsers).toHaveLength(1);
-    });
-  });
-
-  describe('post /admin/admin-users/bulk', () => {
-    it('should create multiple admin users', async () => {
-      expect.assertions(3);
-
-      const createDto = {
-        adminUsers: [
-          { cognitoSub: 'sub-admin1', name: 'Admin 1', role: AdminRole.VIEWER },
-          { cognitoSub: 'sub-admin2', name: 'Admin 2', role: AdminRole.ADMIN },
-        ],
-      };
-
-      const result = await controller.createManyAdminUsers(createDto);
-
-      expect(result.adminUsers).toHaveLength(2);
-      expect(result.adminUsers[0].cognitoSub).toBe('sub-admin1');
-      expect(result.adminUsers[1].cognitoSub).toBe('sub-admin2');
-    });
-  });
-
-  describe('get /admin/admin-users/:publicId', () => {
-    it('should return a specific admin user by publicId', async () => {
-      expect.assertions(3);
-
-      const created = await controller.createAdminUser({
-        cognitoSub: 'sub-admin',
-        name: 'Test Admin',
-        role: AdminRole.ADMIN,
-      });
-
-      const result = await controller.findAdminUserById(created.publicId);
-
-      expect(result.publicId).toBe(created.publicId);
-      expect(result.cognitoSub).toBe('sub-admin');
-      expect(result.name).toBe('Test Admin');
-    });
-  });
-
-  describe('put /admin/admin-users/:publicId', () => {
-    it('should update an admin user', async () => {
-      expect.assertions(4);
-
-      const created = await controller.createAdminUser({
-        cognitoSub: 'sub-admin',
-        name: 'Original Name',
-        role: AdminRole.VIEWER,
-      });
-
-      const updateData = {
-        name: 'Updated Name',
-        role: AdminRole.ADMIN,
-      };
-
-      const result = await controller.updateAdminUser(created.publicId, updateData);
-
-      expect(result.publicId).toBe(created.publicId);
-      expect(result.cognitoSub).toBe('sub-admin');
-      expect(result.name).toBe('Updated Name');
-      expect(result.role).toBe(AdminRole.ADMIN);
-    });
-  });
-
-  describe('delete /admin/admin-users/:publicId', () => {
-    it('should delete an admin user', async () => {
-      expect.assertions(1);
-
-      const created = await controller.createAdminUser({
-        cognitoSub: 'sub-admin-del',
-        name: 'To Delete',
-        role: AdminRole.ADMIN,
-      });
-
-      await controller.deleteAdminUser(created.publicId);
-
-      await expect(controller.findAdminUserById(created.publicId)).rejects.toThrow('No record was found');
+      expect(fetchResponse.status).toBe(404);
     });
   });
 });

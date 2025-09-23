@@ -16,13 +16,15 @@ runs:
           while true; do
             port_mobile_up=false
             port_admin_up=false
-            firebase_auth_up=false
+            firebase_dev_emulator_up=false
+            firebase_test_emulator_up=false
 
             curl --silent --fail http://localhost:3000/api >/dev/null 2>&1 && port_mobile_up=true
             curl --silent --fail http://localhost:3001/api >/dev/null 2>&1 && port_admin_up=true
-            curl --silent --fail http://localhost:4400/emulators >/dev/null 2>&1 && firebase_auth_up=true
+            curl --silent --fail http://localhost:4400/emulators >/dev/null 2>&1 && firebase_dev_emulator_up=true
+            curl --silent --fail http://localhost:4401/emulators >/dev/null 2>&1 && firebase_test_emulator_up=true
 
-            if [ "$port_mobile_up" = true ] && [ "$port_admin_up" = true ] && [ "$firebase_auth_up" = true ]; then
+            if [ "$port_mobile_up" = true ] && [ "$port_admin_up" = true ] && [ "$firebase_dev_emulator_up" = true ] && [ "$firebase_test_emulator_up" = true ]; then
               echo "✅ All services are up!"
               exit 0
             fi
@@ -38,5 +40,6 @@ runs:
           curl --silent --fail http://localhost:3000/api >/dev/null 2>&1 || echo "Mobile API Server DOWN"
           curl --silent --fail http://localhost:3001/api >/dev/null 2>&1 || echo "Admin API Server DOWN"
           curl --silent --fail http://localhost:4400/emulators >/dev/null 2>&1 || echo "Firebase Auth Emulator DOWN"
+          curl --silent --fail http://localhost:4401/emulators >/dev/null 2>&1 || echo "Firebase Test Emulator DOWN"
           exit 1
         fi
