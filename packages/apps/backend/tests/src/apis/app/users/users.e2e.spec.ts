@@ -3,19 +3,22 @@ import { randomUUID } from 'node:crypto';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 
-import { FirebaseAuthService } from '@/domain/aggregates/firebase-auth/firebase-auth.service';
 import { UserStatus } from '@/generated/prisma';
 import { UserFactory } from '@/tests/factory/user.factory';
 import { createAppApiNestApplication } from '@/tests/helpers/app-server.helper';
 import { DatabaseHelper } from '@/tests/helpers/database.helper';
-import { createFirebaseEmailUser, resetFirebaseAuthEmulator } from '@/tests/helpers/firebase-emulator.helper';
-import { buildAuthHeader, createVerifiedFirebaseUser } from '@/tests/helpers/tokens.helper';
+import {
+  buildAuthHeader,
+  createEmailUser,
+  deleteUserWithIdToken,
+  isUserPresent,
+  linkProviderToUser,
+  resetAuthEmulator,
+} from '@/tests/helpers/firebase-auth-emulator.client';
 
 describe('e2e App API /api/users', () => {
   let app: INestApplication;
   let databaseHelper: DatabaseHelper;
-  let firebaseAuthService: FirebaseAuthService;
-
   const userFactory = new UserFactory();
   const server = () => request(app.getHttpServer());
 
@@ -24,15 +27,14 @@ describe('e2e App API /api/users', () => {
   beforeAll(async () => {
     databaseHelper = new DatabaseHelper();
     await databaseHelper.connect();
-    resetFirebaseAuthEmulator();
+    await resetAuthEmulator();
 
     app = await createAppApiNestApplication(databaseHelper);
-    firebaseAuthService = app.get(FirebaseAuthService);
   });
 
   beforeEach(async () => {
     await databaseHelper.cleanDatabase();
-    resetFirebaseAuthEmulator();
+    await resetAuthEmulator();
     jest.restoreAllMocks();
   });
 
@@ -45,7 +47,7 @@ describe('e2e App API /api/users', () => {
     it('should create a user when firebase email is verified', async () => {
       expect.assertions(5);
 
-      const firebaseUser = createVerifiedFirebaseUser();
+      const firebaseUser = await createEmailUser({ emailVerified: true });
 
       const response = await server()
         .post('/api/users')
@@ -68,7 +70,7 @@ describe('e2e App API /api/users', () => {
     it('should be idempotent for the same firebase UID', async () => {
       expect.assertions(2);
 
-      const firebaseUser = createVerifiedFirebaseUser();
+      const firebaseUser = await createEmailUser({ emailVerified: true });
 
       const payload = buildCreateUserPayload(firebaseUser.localId, 'Duplicated User');
       const first = await server()
@@ -102,7 +104,7 @@ describe('e2e App API /api/users', () => {
     it('should return 403 when email is not verified and provider is not allowlisted', async () => {
       expect.assertions(2);
 
-      const firebaseUser = createFirebaseEmailUser({ emailVerified: false });
+      const firebaseUser = await createEmailUser({ emailVerified: false });
 
       const response = await server()
         .post('/api/users')
@@ -117,24 +119,17 @@ describe('e2e App API /api/users', () => {
     it('should allow creation when provider is in allowlist even if email is not verified', async () => {
       expect.assertions(2);
 
-      const firebaseUser = createFirebaseEmailUser({ emailVerified: false });
-
-      jest.spyOn(firebaseAuthService, 'verifyIdToken').mockResolvedValueOnce({
-        uid: firebaseUser.localId,
-        email_verified: false,
-        firebase: {
-          sign_in_provider: 'google.com',
-        },
-      } as unknown as Awaited<ReturnType<FirebaseAuthService['verifyIdToken']>>);
+      const baseUser = await createEmailUser({ emailVerified: false });
+      const linkedUser = await linkProviderToUser(baseUser, 'google.com');
 
       await server()
         .post('/api/users')
-        .set('Authorization', buildAuthHeader(firebaseUser.idToken))
-        .send(buildCreateUserPayload(firebaseUser.localId, 'Allowlisted Provider User'))
+        .set('Authorization', buildAuthHeader(linkedUser.idToken))
+        .send(buildCreateUserPayload(linkedUser.localId, 'Allowlisted Provider User'))
         .expect(201);
 
       const userInDb = await databaseHelper.client.user.findUnique({
-        where: { firebaseUid: firebaseUser.localId },
+        where: { firebaseUid: linkedUser.localId },
       });
 
       expect(userInDb).not.toBeNull();
@@ -144,7 +139,7 @@ describe('e2e App API /api/users', () => {
     it('should return 400 when body validation fails', async () => {
       expect.assertions(2);
 
-      const firebaseUser = createVerifiedFirebaseUser();
+      const firebaseUser = await createEmailUser({ emailVerified: true });
 
       const response = await server()
         .post('/api/users')
@@ -161,7 +156,7 @@ describe('e2e App API /api/users', () => {
     it('should return the current user', async () => {
       expect.assertions(3);
 
-      const firebaseUser = createVerifiedFirebaseUser();
+      const firebaseUser = await createEmailUser({ emailVerified: true });
       const user = userFactory.build({
         firebaseUid: firebaseUser.localId,
         name: 'Current User',
@@ -196,7 +191,7 @@ describe('e2e App API /api/users', () => {
     it('should return 404 when user does not exist in DB', async () => {
       expect.assertions(2);
 
-      const firebaseUser = createVerifiedFirebaseUser();
+      const firebaseUser = await createEmailUser({ emailVerified: true });
 
       const response = await server()
         .get('/api/users/me')
@@ -212,7 +207,7 @@ describe('e2e App API /api/users', () => {
     it('should update user name and status', async () => {
       expect.assertions(3);
 
-      const firebaseUser = createVerifiedFirebaseUser();
+      const firebaseUser = await createEmailUser({ emailVerified: true });
       const user = await databaseHelper.client.user.create({
         data: {
           firebaseUid: firebaseUser.localId,
@@ -235,7 +230,7 @@ describe('e2e App API /api/users', () => {
     it('should reject payload with additional properties', async () => {
       expect.assertions(2);
 
-      const firebaseUser = createVerifiedFirebaseUser();
+      const firebaseUser = await createEmailUser({ emailVerified: true });
       await databaseHelper.client.user.create({
         data: {
           firebaseUid: firebaseUser.localId,
@@ -256,10 +251,10 @@ describe('e2e App API /api/users', () => {
   });
 
   describe('delete /api/users/me', () => {
-    it('should delete user and call Firebase delete', async () => {
+    it('should delete user and remove account from Firebase', async () => {
       expect.assertions(3);
 
-      const firebaseUser = createVerifiedFirebaseUser();
+      const firebaseUser = await createEmailUser({ emailVerified: true });
       await databaseHelper.client.user.create({
         data: {
           firebaseUid: firebaseUser.localId,
@@ -268,25 +263,22 @@ describe('e2e App API /api/users', () => {
         },
       });
 
-      const deleteSpy = jest.spyOn(firebaseAuthService, 'deleteUser');
+      await expect(isUserPresent(firebaseUser.localId)).resolves.toBe(true);
 
       await server().delete('/api/users/me').set('Authorization', buildAuthHeader(firebaseUser.idToken)).expect(204);
-
-      expect(deleteSpy).toHaveBeenCalledTimes(1);
 
       const userInDb = await databaseHelper.client.user.findUnique({
         where: { firebaseUid: firebaseUser.localId },
       });
 
       expect(userInDb).toBeNull();
-
-      expect(deleteSpy).toHaveBeenCalledWith(firebaseUser.localId);
+      await expect(isUserPresent(firebaseUser.localId)).resolves.toBe(false);
     });
 
     it('should still return 204 when Firebase reports user-not-found', async () => {
       expect.assertions(3);
 
-      const firebaseUser = createVerifiedFirebaseUser();
+      const firebaseUser = await createEmailUser({ emailVerified: true });
       await databaseHelper.client.user.create({
         data: {
           firebaseUid: firebaseUser.localId,
@@ -295,7 +287,7 @@ describe('e2e App API /api/users', () => {
         },
       });
 
-      const deleteSpy = jest.spyOn(firebaseAuthService, 'deleteUser').mockResolvedValueOnce(undefined);
+      await deleteUserWithIdToken(firebaseUser.idToken);
 
       const response = await server()
         .delete('/api/users/me')
@@ -308,7 +300,7 @@ describe('e2e App API /api/users', () => {
 
       expect(response.status).toBe(204);
       expect(userInDb).toBeNull();
-      expect(deleteSpy).toHaveBeenCalledTimes(1);
+      await expect(isUserPresent(firebaseUser.localId)).resolves.toBe(false);
     });
   });
 
@@ -316,7 +308,7 @@ describe('e2e App API /api/users', () => {
     it('should fetch another user by publicId', async () => {
       expect.assertions(2);
 
-      const currentFirebaseUser = createVerifiedFirebaseUser();
+      const currentFirebaseUser = await createEmailUser({ emailVerified: true });
       await databaseHelper.client.user.create({
         data: {
           firebaseUid: currentFirebaseUser.localId,
@@ -345,7 +337,7 @@ describe('e2e App API /api/users', () => {
     it('should return 400 for invalid uuid path parameter', async () => {
       expect.assertions(2);
 
-      const firebaseUser = createVerifiedFirebaseUser();
+      const firebaseUser = await createEmailUser({ emailVerified: true });
       await databaseHelper.client.user.create({
         data: {
           firebaseUid: firebaseUser.localId,
@@ -366,7 +358,7 @@ describe('e2e App API /api/users', () => {
     it('should return 404 when user does not exist', async () => {
       expect.assertions(2);
 
-      const firebaseUser = createVerifiedFirebaseUser();
+      const firebaseUser = await createEmailUser({ emailVerified: true });
       await databaseHelper.client.user.create({
         data: {
           firebaseUid: firebaseUser.localId,

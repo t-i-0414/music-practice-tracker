@@ -7,7 +7,6 @@ import { UserStatus } from '@/generated/prisma';
 import { UserFactory } from '@/tests/factory/user.factory';
 import { createAdminApiNestApplication } from '@/tests/helpers/app-server.helper';
 import { DatabaseHelper } from '@/tests/helpers/database.helper';
-import { resetFirebaseAuthEmulator } from '@/tests/helpers/firebase-emulator.helper';
 
 describe('e2e Admin API /api/users', () => {
   let app: INestApplication;
@@ -19,14 +18,11 @@ describe('e2e Admin API /api/users', () => {
   beforeAll(async () => {
     databaseHelper = new DatabaseHelper();
     await databaseHelper.connect();
-    resetFirebaseAuthEmulator();
-
     app = await createAdminApiNestApplication(databaseHelper);
   });
 
   beforeEach(async () => {
     await databaseHelper.cleanDatabase();
-    resetFirebaseAuthEmulator();
     jest.restoreAllMocks();
   });
 
