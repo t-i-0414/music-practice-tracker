@@ -134,7 +134,7 @@ describe('unit ERROR_CODE_RECORDS', () => {
       const errorCodes = Object.keys(ERROR_CODE_RECORDS);
 
       errorCodes.forEach((code) => {
-        expect(code).toMatch(/^(?:AP|DO|RE|UN)\d{4}$/u);
+        expect(code).toMatch(/^(?:AP|DO|FB|RE|UN)\d{4}$/u);
       });
 
       expect(errorCodes.length).toBeGreaterThan(0);

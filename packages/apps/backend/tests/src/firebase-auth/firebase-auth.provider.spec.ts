@@ -1,5 +1,5 @@
-import { DomainError } from '@/domain/utils/domain.error';
 import { FirebaseAuthProvider } from '@/firebase-auth/firebase-auth.provider';
+import { FirebaseError } from '@/firebase-auth/utils/firebase.error';
 
 jest.mock<typeof import('firebase-admin')>('firebase-admin', () => {
   const apps: unknown[] = [];
@@ -256,7 +256,7 @@ describe('unit FirebaseAuthProvider', () => {
     expect(provider.auth()).toBe('adc-auth-no-project');
   });
 
-  it('throws DO0001 when service account is missing after ADC failure and no emulator', () => {
+  it('throws FB0001 when service account is missing after ADC failure and no emulator', () => {
     expect.assertions(3);
 
     firebaseAdmin.initializeApp.mockImplementation(() => {
@@ -280,12 +280,12 @@ describe('unit FirebaseAuthProvider', () => {
       caught = error;
     }
 
-    expect(caught).toBeInstanceOf(DomainError);
-    expect(caught).toHaveProperty('errorCode', 'DO0001');
-    expect((caught as DomainError).detail).toContain('Firebase Admin credential not configured.');
+    expect(caught).toBeInstanceOf(FirebaseError);
+    expect(caught).toHaveProperty('errorCode', 'FB0001');
+    expect((caught as FirebaseError).detail).toContain('Firebase Admin credential not configured.');
   });
 
-  it('throws DO0002 when service account JSON is invalid', () => {
+  it('throws FB0002 when service account JSON is invalid', () => {
     expect.assertions(3);
 
     firebaseAdmin.initializeApp.mockImplementation(() => {
@@ -308,12 +308,12 @@ describe('unit FirebaseAuthProvider', () => {
       caught = error;
     }
 
-    expect(caught).toBeInstanceOf(DomainError);
-    expect(caught).toHaveProperty('errorCode', 'DO0002');
-    expect((caught as DomainError).detail).toBe('Invalid FIREBASE_SERVICE_ACCOUNT JSON.');
+    expect(caught).toBeInstanceOf(FirebaseError);
+    expect(caught).toHaveProperty('errorCode', 'FB0002');
+    expect((caught as FirebaseError).detail).toBe('Invalid FIREBASE_SERVICE_ACCOUNT JSON.');
   });
 
-  it('throws DO0002 when service account JSON is missing required properties', () => {
+  it('throws FB0002 when service account JSON is missing required properties', () => {
     expect.assertions(3);
 
     firebaseAdmin.initializeApp.mockImplementation(() => {
@@ -336,9 +336,9 @@ describe('unit FirebaseAuthProvider', () => {
       caught = error;
     }
 
-    expect(caught).toBeInstanceOf(DomainError);
-    expect(caught).toHaveProperty('errorCode', 'DO0002');
-    expect((caught as DomainError).detail).toBe('Invalid FIREBASE_SERVICE_ACCOUNT JSON.');
+    expect(caught).toBeInstanceOf(FirebaseError);
+    expect(caught).toHaveProperty('errorCode', 'FB0002');
+    expect((caught as FirebaseError).detail).toBe('Invalid FIREBASE_SERVICE_ACCOUNT JSON.');
   });
 
   it('initializes firebase with service account credentials when provided', () => {
@@ -414,9 +414,9 @@ describe('unit FirebaseAuthProvider', () => {
       caught = error;
     }
 
-    expect(caught).toBeInstanceOf(DomainError);
-    expect(caught).toHaveProperty('errorCode', 'DO0003');
-    expect((caught as DomainError).detail).toBe('Failed to initialize Firebase Admin SDK.');
+    expect(caught).toBeInstanceOf(FirebaseError);
+    expect(caught).toHaveProperty('errorCode', 'FB0003');
+    expect((caught as FirebaseError).detail).toBe('Failed to initialize Firebase Admin SDK.');
   });
 
   it('resolves even when deleting the firebase app fails during shutdown', async () => {

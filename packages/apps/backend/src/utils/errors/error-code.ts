@@ -1,25 +1,29 @@
 export const apiErrorPrefix = 'AP';
 export const domainErrorPrefix = 'DO';
+export const firebaseErrorPrefix = 'FB';
 export const repositoryErrorPrefix = 'RE';
 export const unknownErrorPrefix = 'UN';
 
 export type ErrorPrefix =
   | typeof apiErrorPrefix
   | typeof domainErrorPrefix
+  | typeof firebaseErrorPrefix
   | typeof repositoryErrorPrefix
   | typeof unknownErrorPrefix;
 export const isErrorPrefix = (value: string): value is ErrorPrefix =>
-  [apiErrorPrefix, domainErrorPrefix, repositoryErrorPrefix, unknownErrorPrefix].includes(value);
+  [apiErrorPrefix, domainErrorPrefix, firebaseErrorPrefix, repositoryErrorPrefix, unknownErrorPrefix].includes(value);
 
 type Digit = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9';
 type FourDigits = `${Digit}${Digit}${Digit}${Digit}`;
 export type PreservedApiErrorCode = `${typeof apiErrorPrefix}${FourDigits}`;
 export type PreservedDomainErrorCode = `${typeof domainErrorPrefix}${FourDigits}`;
+export type PreservedFirebaseErrorCode = `${typeof firebaseErrorPrefix}${FourDigits}`;
 export type PreservedRepositoryErrorCode = `${typeof repositoryErrorPrefix}${FourDigits}`;
 export type PreservedUnknownErrorCode = `${typeof unknownErrorPrefix}${FourDigits}`;
 type PreservedErrorCode =
   | PreservedApiErrorCode
   | PreservedDomainErrorCode
+  | PreservedFirebaseErrorCode
   | PreservedRepositoryErrorCode
   | PreservedUnknownErrorCode;
 
@@ -27,6 +31,7 @@ type PreservedErrorCode =
  * #### ErrorCode
  * - AP xxxx: Api Errors
  * - DO xxxx: Domain Errors
+ * - FB xxxx: Firebase Errors
  * - RE xxxx: Repository Errors
  * - UN xxxx: Unknown Errors
  */
@@ -79,16 +84,19 @@ export const ERROR_CODE_RECORDS = {
   AP9999: 'Unknown application error.',
 
   // Domain Errors
-  DO0001: 'Firebase Admin credential not configured.',
-  DO0002: 'Invalid FIREBASE_SERVICE_ACCOUNT JSON.',
-  DO0003: 'Failed to initialize Firebase Admin SDK.',
   DO0004: 'Invalid public IDs format.',
-  DO0005: 'Firebase token expired.',
-  DO0006: 'Firebase token revoked.',
-  DO0007: 'Firebase invalid token.',
-  DO0008: 'Firebase user not found.',
-  DO0009: 'Failed to delete Firebase user.',
   DO9999: 'Unknown domain error.',
+
+  // Firebase Errors
+  FB0001: 'Firebase Admin credential not configured.',
+  FB0002: 'Invalid FIREBASE_SERVICE_ACCOUNT JSON.',
+  FB0003: 'Failed to initialize Firebase Admin SDK.',
+  FB0004: 'Firebase token expired.',
+  FB0005: 'Firebase token revoked.',
+  FB0006: 'Firebase invalid token.',
+  FB0007: 'Firebase user not found.',
+  FB0008: 'Failed to delete Firebase user.',
+  FB9999: 'Unknown Firebase error.',
 
   // Repository Errors - Data Validation (RE00xx)
   RE0001: 'Column value too long for database field.',

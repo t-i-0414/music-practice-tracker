@@ -15,7 +15,14 @@ const createRule = ESLintUtils.RuleCreator(
   (name) => `https://github.com/music-practice-tracker/eslint-plugins/blob/main/docs/${name}.md`,
 );
 
-const DEFAULT_ALLOWED = new Set(['CommonError', 'ApiError', 'DomainError', 'RepositoryError', 'UnknownError']);
+const DEFAULT_ALLOWED = new Set([
+  'CommonError',
+  'ApiError',
+  'DomainError',
+  'FirebaseError',
+  'RepositoryError',
+  'UnknownError',
+]);
 
 const rule = createRule<Options, MessageIds>({
   name: 'throw-new-common-error-only',
