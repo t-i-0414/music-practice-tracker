@@ -9,6 +9,7 @@ runs:
       run: |
         cd packages/apps/backend
         bun run start:dev &
+        bun run start:test:firebase-auth-emulators &
 
         echo "Waiting for Admin, Mobile, and Firebase Auth emulator to start..."
 
