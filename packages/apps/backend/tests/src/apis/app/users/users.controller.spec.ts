@@ -1,11 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { AppApiUsersController } from '@/apis/app/users/users.controller';
-import { FirebaseAuthProvider } from '@/domain/aggregates/firebase-auth/firebase-auth.provider';
-import { FirebaseAuthService } from '@/domain/aggregates/firebase-auth/firebase-auth.service';
 import { UserCommandService } from '@/domain/aggregates/user/user.command.service';
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 import { DeleteUserService } from '@/domain/usecases/user/delete-user.service';
+import { FirebaseAuthProvider } from '@/firebase-auth/firebase-auth.provider';
+import { FirebaseAuthService } from '@/firebase-auth/firebase-auth.service';
 import { RepositoryService } from '@/repository/repository.service';
 import { DatabaseHelper } from '@/tests/helpers/database.helper';
 

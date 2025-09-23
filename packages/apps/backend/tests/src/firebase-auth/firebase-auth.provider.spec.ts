@@ -1,5 +1,5 @@
-import { FirebaseAuthProvider } from '@/domain/aggregates/firebase-auth/firebase-auth.provider';
 import { DomainError } from '@/domain/utils/domain.error';
+import { FirebaseAuthProvider } from '@/firebase-auth/firebase-auth.provider';
 
 jest.mock<typeof import('firebase-admin')>('firebase-admin', () => {
   const apps: unknown[] = [];

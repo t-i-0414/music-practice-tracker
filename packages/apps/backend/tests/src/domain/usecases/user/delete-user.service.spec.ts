@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { FirebaseAuthService } from '@/domain/aggregates/firebase-auth/firebase-auth.service';
+import { FirebaseAuthService } from '@/firebase-auth/firebase-auth.service';
 import { UserCommandService } from '@/domain/aggregates/user/user.command.service';
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 import { DeleteUserService } from '@/domain/usecases/user/delete-user.service';

@@ -5,7 +5,7 @@ import type { Request } from 'express';
 import { UserAuthGuard } from '@/apis/app/utils/guards/user-auth.guard';
 import { ApiError } from '@/apis/utils/api.error';
 import { IS_PUBLIC_KEY } from '@/apis/utils/decorators/public.decorator';
-import { FirebaseAuthService } from '@/domain/aggregates/firebase-auth/firebase-auth.service';
+import { FirebaseAuthService } from '@/firebase-auth/firebase-auth.service';
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 
 const createExecutionContext = (request: Request): ExecutionContext =>

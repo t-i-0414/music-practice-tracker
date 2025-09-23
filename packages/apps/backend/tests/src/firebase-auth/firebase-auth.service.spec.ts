@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import type { DecodedIdToken, UserRecord } from 'firebase-admin/auth';
 
-import { FirebaseAuthProvider } from '@/domain/aggregates/firebase-auth/firebase-auth.provider';
-import { FirebaseAuthService } from '@/domain/aggregates/firebase-auth/firebase-auth.service';
+import { FirebaseAuthProvider } from '@/firebase-auth/firebase-auth.provider';
+import { FirebaseAuthService } from '@/firebase-auth/firebase-auth.service';
 
 jest.mock<typeof import('firebase-admin')>('firebase-admin', () => {
   const apps: unknown[] = [];
