@@ -1,63 +1,70 @@
 # Music Practice Tracker
 
-The fastest way to capture, review, and improve your daily music practice. Mobile app + Admin dashboard, backed by a scalable NestJS API.
+Track and improve your daily music practice. Mobile app + Admin dashboard.
 
-## What’s Inside
+## Tech Stack
 
-- Backend: NestJS + PostgreSQL + Prisma (Bun runtime)
-- Admin: Next.js dashboard
-- Mobile: React Native / Expo
-- Monorepo: Bun workspaces, shared ESLint configs and rules
+**Backend**: NestJS + PostgreSQL + Prisma
+**Admin**: Next.js
+**Mobile**: React Native / Expo
+**Runtime**: Bun
+
+## Quick Start
+
+```bash
+# Prerequisites: Bun 1.x, Docker
+
+# 1. Initial Setup (run once)
+make setup
+
+# 2. Start Services
+make docker-compose-up              # PostgreSQL
+make start-firebase-dev-emulators   # Firebase Emulator (separate terminal)
+
+# 3. Start Backend (port 3000/3001)
+cd packages/apps/backend
+bun run start:dev
+
+# 4. Start Admin (port 8000)
+cd packages/apps/admin
+bun run start:dev
+
+# 5. Start Mobile (port 8081)
+cd packages/apps/mobile
+bun run start:dev
+```
+
+## Project Structure
 
 ```
-/
-├── packages/
-│   ├── apps/
-│   │   ├── backend/   # App API (3000) / Admin API (3001) + Swagger
-│   │   ├── admin/     # Next.js dashboard (8000)
-│   │   └── mobile/    # Expo app (8081)
-│   └── libs/          # Shared lint configs, plugins, tsconfig
-└── docker-compose.yml # PostgreSQL (15432)
+packages/
+├── apps/
+│   ├── backend/   # API + Swagger docs
+│   ├── admin/     # Admin dashboard
+│   └── mobile/    # Mobile app
+└── libs/          # Shared configs
 ```
 
-## Quick Start (Local)
+## Development
 
-Prerequisites
+```bash
+# Quality checks (required before commit)
+bun run ci:temp
 
-- Bun 1.x
-- Docker + Docker Compose
+# Testing
+bun run test                        # Backend unit/integration tests
+cd packages/apps/admin && bun run test:e2e   # Admin E2E (Playwright)
+cd packages/apps/mobile && bun run test:e2e  # Mobile E2E (Maestro)
 
-Setup
+# Database
+bun run prisma:studio               # GUI at localhost:5555
+bun run prisma:migrate:dev
 
-1. Copy env and start DB
-   - `cp .env.example .env`
-   - `docker compose up -d postgres`
-2. Install deps at repo root
-   - `bun install`
-3. Backend (migrate + start)
-   - `cd packages/apps/backend`
-   - `bun run prisma:migrate:dev`
-   - `bun run start:dev`
-   - Swagger: <http://localhost:3000/api> (App), <http://localhost:3001/api> (Admin)
-4. Admin (in new terminal)
-   - `cd packages/apps/admin && bun run start:dev`
-5. Mobile (in new terminal)
-   - `cd packages/apps/mobile && bun run start:dev`
-
-## Scripts You’ll Use Most
-
-- Format/linters/types: `bun run quality:check`
-- Backend
-  - Migrate: `bun run prisma:migrate:dev`
-  - Start dev: `bun run start:dev`
-  - Open Swagger: `bun run open:swagger-ui`
-- Admin: `bun run start:dev`
-- Mobile: `bun run start:dev`
+# API Docs
+http://localhost:3000/api           # App API
+http://localhost:3001/api           # Admin API
+```
 
 ## License
 
 Proprietary software. See [LICENSE](./LICENSE). For inquiries: <takuya.iwashiro@takudev.net>
-
----
-
-Last updated: September 3, 2025
