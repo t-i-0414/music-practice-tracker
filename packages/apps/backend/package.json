@@ -42,7 +42,7 @@
     "start:debug:admin-api": "nest start admin-api --debug --watch",
     "start:debug:app-api": "nest start app-api --debug --watch",
     "start:debug:firebase-auth-emulators": "make start-firebase-dev-emulators",
-    "start:dev": "run-p start:dev:*",
+    "start:dev": "run-p start:dev:* start:test:firebase-auth-emulators",
     "start:dev:admin-api": "nest start admin-api --watch",
     "start:dev:app-api": "nest start app-api --watch",
     "start:dev:firebase-auth-emulators": "make start-firebase-dev-emulators",
