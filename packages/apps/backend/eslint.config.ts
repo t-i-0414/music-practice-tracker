@@ -92,7 +92,9 @@ const config = defineConfig(
   {
     files: ['**/*.seed.ts'],
     rules: {
-      'custom-backend-eslint/no-console-log': 'off',
+      'no-console': 'off',
+      '@typescript-eslint/no-magic-numbers': 'off',
+      'custom-backend-eslint/throw-new-common-error-only': 'off',
     },
   },
   globalIgnores(sharedIgnores),
