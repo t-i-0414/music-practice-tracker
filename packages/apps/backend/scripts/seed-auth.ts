@@ -101,10 +101,10 @@ async function upsertUser(definition: SeedUserDefinition): Promise<UpsertResult>
 }
 
 async function main(): Promise<void> {
-  console.log('[seed-auth] projectId:', process.env.PROJECT_ID);
+  console.log('[seed-auth] projectId:', process.env.FIREBASE_PROJECT_ID);
   console.log('[seed-auth] emulatorHost:', process.env.FIREBASE_AUTH_EMULATOR_HOST ?? '127.0.0.1:9099');
 
-  admin.initializeApp({ projectId: process.env.PROJECT_ID });
+  admin.initializeApp({ projectId: process.env.FIREBASE_PROJECT_ID });
 
   await Promise.all(
     USERS.map(async (userDefinition) => {

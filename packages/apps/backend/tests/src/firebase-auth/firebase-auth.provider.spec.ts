@@ -240,6 +240,11 @@ describe('unit FirebaseAuthProvider', () => {
     firebaseAdmin.initializeApp.mockImplementation(() => {
       throw new Error('adc unavailable');
     });
+
+    delete process.env.FIREBASE_AUTH_EMULATOR_HOST;
+    delete process.env.GOOGLE_CLOUD_PROJECT;
+    delete process.env.GCLOUD_PROJECT;
+    delete process.env.FIREBASE_PROJECT_ID;
     process.env.FIREBASE_SERVICE_ACCOUNT = 'not-json';
 
     const provider = new FirebaseAuthProvider();
@@ -263,6 +268,11 @@ describe('unit FirebaseAuthProvider', () => {
     firebaseAdmin.initializeApp.mockImplementation(() => {
       throw new Error('adc unavailable');
     });
+
+    delete process.env.FIREBASE_AUTH_EMULATOR_HOST;
+    delete process.env.GOOGLE_CLOUD_PROJECT;
+    delete process.env.GCLOUD_PROJECT;
+    delete process.env.FIREBASE_PROJECT_ID;
     process.env.FIREBASE_SERVICE_ACCOUNT = JSON.stringify({ projectId: 'id-only' });
 
     const provider = new FirebaseAuthProvider();
@@ -292,6 +302,11 @@ describe('unit FirebaseAuthProvider', () => {
       clientEmail: 'user@example.com',
       privateKey: '-----BEGIN KEY-----\\nline2\\n-----END KEY-----',
     };
+
+    delete process.env.FIREBASE_AUTH_EMULATOR_HOST;
+    delete process.env.GOOGLE_CLOUD_PROJECT;
+    delete process.env.GCLOUD_PROJECT;
+    delete process.env.FIREBASE_PROJECT_ID;
     process.env.FIREBASE_SERVICE_ACCOUNT = JSON.stringify(serviceAccount);
 
     const serviceAccountApp = createFirebaseApp();
@@ -326,6 +341,11 @@ describe('unit FirebaseAuthProvider', () => {
     firebaseAdmin.initializeApp.mockImplementationOnce(() => {
       throw new Error('service account failure');
     });
+
+    delete process.env.FIREBASE_AUTH_EMULATOR_HOST;
+    delete process.env.GOOGLE_CLOUD_PROJECT;
+    delete process.env.GCLOUD_PROJECT;
+    delete process.env.FIREBASE_PROJECT_ID;
 
     process.env.FIREBASE_SERVICE_ACCOUNT = JSON.stringify({
       projectId: 'project-abc',

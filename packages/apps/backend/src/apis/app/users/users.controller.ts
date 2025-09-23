@@ -9,12 +9,12 @@ import { ApiStandardResponses } from '@/apis/utils/api-standard-response';
 import { ApiError } from '@/apis/utils/api.error';
 import { ApiController } from '@/apis/utils/controllers/api.controller';
 import { Public } from '@/apis/utils/decorators/public.decorator';
-import { FirebaseAuthService } from '@/firebase-auth/firebase-auth.service';
-import { isProviderAllowed } from '@/firebase-auth/utils/constants';
 import { UserCommandService } from '@/domain/aggregates/user/user.command.service';
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 import { CreateUserInputDto, UpdateUserDataDto, UserResponseDto } from '@/domain/aggregates/user/utils/dto';
 import { DeleteUserService } from '@/domain/usecases/user/delete-user.service';
+import { FirebaseAuthService } from '@/firebase-auth/firebase-auth.service';
+import { isProviderAllowed } from '@/firebase-auth/utils/constants';
 
 @ApiTags('users')
 @ApiController('users')
