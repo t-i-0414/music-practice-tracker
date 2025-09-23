@@ -81,6 +81,7 @@ export default defineConfig({
     'ondevice',
     'Passw0rd',
     'pkey',
+    'pkill',
     'pnp',
     'Pressable',
     'psql',

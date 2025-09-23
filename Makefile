@@ -62,10 +62,32 @@ firebase-use-prod-project:
 
 .PHONY: start-firebase-dev-emulators
 start-firebase-dev-emulators:
-	@echo "🚀 Starting Firebase emulators..."
-	firebase emulators:start --config firebase.dev.json --project dev --import ./.firebase-emulator-data/dev --export-on-exit
+	@echo "🔍 Checking if Firebase emulators are already running..."
+	@if lsof -Pi :9099 -sTCP:LISTEN -t >/dev/null 2>&1 || \
+		lsof -Pi :4000 -sTCP:LISTEN -t >/dev/null 2>&1 || \
+		lsof -Pi :4400 -sTCP:LISTEN -t >/dev/null 2>&1; then \
+		echo "⚠️  Firebase emulators are already running on dev ports (Auth: 9099, UI: 4000)"; \
+		echo "📝 To view the emulator UI, open: http://localhost:4000"; \
+	else \
+		echo "🚀 Starting Firebase emulators..."; \
+		firebase emulators:start --config firebase.dev.json --project dev --import ./.firebase-emulator-data/dev --export-on-exit; \
+	fi
 
 .PHONY: start-firebase-test-emulators
 start-firebase-test-emulators:
-	@echo "🚀 Starting Firebase emulators..."
-	firebase emulators:start --config firebase.test.json --project music-practice-tracker-test
+	@echo "🔍 Checking if Firebase emulators are already running..."
+	@if lsof -Pi :9199 -sTCP:LISTEN -t >/dev/null 2>&1 || \
+		lsof -Pi :4001 -sTCP:LISTEN -t >/dev/null 2>&1 || \
+		lsof -Pi :4401 -sTCP:LISTEN -t >/dev/null 2>&1; then \
+		echo "⚠️  Firebase emulators are already running on test ports (Auth: 9199, UI: 4001)"; \
+		echo "📝 To view the emulator UI, open: http://localhost:4001"; \
+	else \
+		echo "🚀 Starting Firebase emulators..."; \
+		firebase emulators:start --config firebase.test.json --project music-practice-tracker-test; \
+	fi
+
+.PHONY: stop-firebase-emulators
+stop-firebase-emulators:
+	@echo "🛑 Stopping Firebase emulators..."
+	@pkill -f "firebase emulators:start" 2>/dev/null || true
+	@echo "✅ Firebase emulators stopped"
