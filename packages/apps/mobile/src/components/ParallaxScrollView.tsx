@@ -3,7 +3,7 @@ import type React from 'react';
 
 import { StyleSheet } from 'react-native';
 
-import Animated, { interpolate, useAnimatedRef, useAnimatedStyle, useScrollViewOffset } from 'react-native-reanimated';
+import Animated, { interpolate, useAnimatedRef, useAnimatedStyle, useScrollOffset } from 'react-native-reanimated';
 
 import { ThemedView } from '@/components/ThemedView';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -18,7 +18,7 @@ type Props = PropsWithChildren<{
 const ParallaxScrollView: React.FC<Props> = ({ children, headerImage, headerBackgroundColor }) => {
   const colorScheme = useColorScheme() ?? 'light';
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
-  const scrollOffset = useScrollViewOffset(scrollRef);
+  const scrollOffset = useScrollOffset(scrollRef);
   const FIRST_TAB_INDEX = 0;
   const headerAnimatedStyle = useAnimatedStyle(() => {
     const HEADER_OUTPUT_START_POSITION_DIVIDER = 2;

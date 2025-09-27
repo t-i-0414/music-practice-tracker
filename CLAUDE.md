@@ -2,254 +2,118 @@
 
 > Essential instructions for AI agents working with this codebase.
 
-## 🎯 Primary Directives
+## 🎯 Core Principles
 
-### Do What's Asked - Nothing More, Nothing Less
+1. **Do exactly what's asked** - No extra features, files, or documentation unless explicitly requested
+2. **Follow existing patterns** - Study neighboring code before writing
+3. **Quality gates are mandatory** - Run `bun run ci:temp` before ANY commit
+4. **Use existing libraries** - Check package.json before assuming availability
 
-- Execute the requested task precisely
-- Don't add features or files unless explicitly needed
-- Prefer editing existing files over creating new ones
-- NEVER proactively create documentation files (\*.md)
+## 🏗️ Architecture
 
-### Quality Gates Are Mandatory
+### Apps
 
-```bash
-bun run ci:temp  # Must pass before ANY commit
+- **Backend** (NestJS): App API (port 3000), Admin API (port 3001)
+- **Admin** (Next.js): Dashboard (port 8000)
+- **Mobile** (React Native/Expo): App (port 8081)
+
+### DDD Structure
+
 ```
-
-### Follow Existing Patterns
-
-- Study neighboring code before writing
-- Use existing libraries and utilities
-- Check package.json before assuming libraries exist
-
-## 🏗️ Architecture Overview
-
-### System Components
-
-1. **Backend API** (NestJS) - Ports 3000 (App), 3001 (Admin)
-2. **Admin Dashboard** (Next.js) - Port 8000
-3. **Mobile App** (React Native/Expo) - Port 8081
-
-### Domain-Driven Design (DDD) Architecture
-
-```typescript
-// Domain Layer - Business logic
 domain/aggregates/[entity]/
-├── [entity].query.service.ts     // Read operations (OrFail pattern)
-├── [entity].command.service.ts   // Write operations (CUD)
-└── utils/
-    ├── dto.ts                    // Domain DTOs
-    └── constants.ts              // Entity constants
+├── [entity].query.service.ts    # Read operations (OrFail pattern)
+├── [entity].command.service.ts  # Write operations (CUD)
+└── utils/dto.ts                 # Domain DTOs
 
-// API Layer - Interface adapters
 apis/[admin|app]/[entity]/
-├── [entity].controller.ts        // HTTP endpoints
-└── [entity].module.ts           // API module
+├── [entity].controller.ts       # HTTP endpoints
+└── [entity].module.ts
 
-// Repository Layer - Data access
 repository/
-└── repository.service.ts         // Centralized Prisma access
+└── repository.service.ts        # Single Prisma access point
 ```
 
 ### Key Patterns
 
-- **Domain-Driven Design**: Clear separation of domain, API, and repository layers
 - **Dual APIs**: App (user-scoped) vs Admin (full access)
-- **UUID Keys**: Never expose internal IDs (use publicId)
-- **Repository Pattern**: Centralized database access through single repository service
+- **UUID Only**: Use publicId, never expose internal IDs
 - **Query/Command Separation**: Read and write operations are separated
-- **DTO Pattern**: Input validation and response transformation
-- **Error Handling**: Custom error classes (ApiError, DomainError, FirebaseError, RepositoryError)
-- **Global Exception Filter**: Unified error response with proper HTTP status mapping
+- **Centralized Repository**: All DB access through repository.service.ts
+- **Error Handling**: Custom errors (ApiError, DomainError, FirebaseError, RepositoryError)
+- **Global Exception Filter**: apis/utils/filters/global-exception.filter.ts
 
-### Database Schema (Prisma)
+### Database (Prisma)
 
-```prisma
-// Required for ALL models:
-id        Int      @id @default(autoincrement())
-publicId  String   @unique @default(uuid())
-createdAt DateTime @default(now())
-updatedAt DateTime @updatedAt
+Every model must have: `id`, `publicId`, `createdAt`, `updatedAt`
 
-@@index([createdAt])
-```
-
-## ⚡ Essential Commands
-
-### Quick Start
+## ⚡ Commands
 
 ```bash
-# Initial Setup (once)
+# Setup (once)
 make setup
 
 # Start Services
 make docker-compose-up              # PostgreSQL
-make start-firebase-dev-emulators   # Firebase Emulator
-```
+make start-firebase-dev-emulators   # Firebase
 
-### Development
+# Development
+cd packages/apps/backend && bun run start:dev    # Both APIs
+cd packages/apps/admin && bun run start:dev      # Admin UI
+cd packages/apps/mobile && bun run start:dev     # Mobile
 
-```bash
-# Backend
-cd packages/apps/backend
-bun run start:dev          # Start both APIs
-bun run test              # Run tests
-bun run prisma:studio     # Database GUI
+# Quality (REQUIRED before commit)
+bun run ci:temp                    # Runs all checks
 
-# Frontend
-cd packages/apps/admin && bun run start:dev     # Admin dashboard
-cd packages/apps/mobile && bun run start:dev    # Mobile app
-```
-
-### Quality Checks
-
-```bash
-# Run ALL checks (required before commit)
-bun run ci:temp
-
-# Individual checks
-bun run format:fix        # Format code
-bun run cspell            # Spell check
-bun run lint:es:check     # Lint
-bun run type:check        # TypeScript
+# Database
+bunx prisma migrate dev --name [name]  # New migration
+bun run prisma:studio                   # GUI
 ```
 
 ## 📁 Project Structure
 
 ```
-/
-├── packages/
-│   ├── apps/
-│   │   ├── backend/     # NestJS APIs
-│   │   ├── admin/       # Next.js dashboard
-│   │   └── mobile/      # React Native app
-│   └── libs/            # Shared libraries
-└── docker-compose.yml   # PostgreSQL
-```
-
-### Backend DDD Structure
-
-```
-src/
-├── domain/
-│   ├── aggregates/[entity]/
-│   │   ├── [entity].query.service.ts
-│   │   ├── [entity].command.service.ts
-│   │   ├── [entity].module.ts
-│   │   └── utils/
-│   │       ├── dto.ts
-│   │       └── constants.ts
-│   ├── usecases/        # Complex business logic
-│   └── utils/           # Domain utilities
-├── apis/
-│   ├── admin/[entity]/
-│   │   ├── [entity].controller.ts
-│   │   └── [entity].module.ts
-│   ├── app/[entity]/
-│   │   ├── [entity].controller.ts
-│   │   └── [entity].module.ts
-│   └── utils/           # API utilities
-├── repository/
-│   ├── repository.service.ts
-│   ├── repository.module.ts
-│   ├── seeds/           # Test data seeds
-│   └── utils/           # Repository utilities
-├── firebase-auth/       # Firebase authentication
-└── utils/               # Global utilities
+packages/
+├── apps/
+│   ├── backend/     # NestJS APIs (both App and Admin)
+│   ├── admin/       # Next.js dashboard
+│   └── mobile/      # React Native app
+└── libs/            # Shared libraries
 ```
 
 ## 🏗️ Implementation Workflow
 
-### Feature Implementation
+1. **Domain**: Create aggregate with query/command services and DTOs
+2. **API**: Add controllers for admin/app endpoints
+3. **Repository**: Use repository.service.ts for all DB access
+4. **Error**: Use OrFail pattern and custom error types
+5. **Test**: 95% coverage minimum
 
-1. **Domain Layer**: Create aggregate with query/command services and DTOs
-2. **API Layer**: Add controllers and API modules for admin/app endpoints
-3. **Repository Integration**: Use centralized repository.service.ts for data access
-4. **Error Handling**: Implement proper error types and OrFail patterns
-5. **Testing**: Write comprehensive tests (95% coverage minimum)
-6. **Documentation**: Update module templates and examples
-
-### Database Changes
+### Seeds
 
 ```bash
-bunx prisma migrate dev --name [name]
+bun run seed:all          # Firebase + DB users
+bun run seed:user         # DB users only
 ```
 
-### Test Data Seeding
+## ⚠️ Rules
+
+**DON'T**: Use npm • Expose internal IDs • Skip quality checks • Add unnecessary comments
+**DO**: Use bun • Use publicId only • Run ci:temp • Separate Query/Command • Use OrFail pattern
+
+## 📋 Pre-Commit
 
 ```bash
-# Seed test users (Firebase + DB)
-bun run seed:all
-
-# Individual seeds
-bun run seed:firebase-auth  # Firebase auth users
-bun run seed:user          # Database users
+bun run ci:temp  # MUST pass
 ```
 
-## ⚠️ Common Pitfalls
-
-### DON'T
-
-- Use `npm` (use `bun`)
-- Expose internal IDs
-- Skip quality checks
-- Add comments unless requested
-- Access Prisma outside repositories
-
-### DO
-
-- Run `bun run ci:temp` before committing
-- Use publicId for external operations
-- Follow TDD approach
-- Separate Query from Command services
-- Use OrFail pattern for required resources
-
-## 📋 Pre-Commit Checklist
-
-### Automated (Required)
-
-```bash
-bun run ci:temp  # Must pass with zero errors
-```
-
-### Manual Review
-
-- [ ] No `console.log` statements
-- [ ] No `any` types
-- [ ] No hardcoded values
-- [ ] No secrets in code
-- [ ] Tests written and passing
-- [ ] No internal IDs exposed
-
-### Commit Format
-
-```bash
-type(scope): description
-# Types: feat, fix, docs, style, refactor, test, chore
-# Scope: backend, admin, mobile
-```
+Check for: No console.log • No any types • No hardcoded values • No exposed IDs
 
 ## 🔗 Environment
 
-### Database
-
-- Dev: `localhost:15432` (postgres:postgres)
-- Test: `localhost:15433`
-
-### Custom ESLint Rules
-
-- `repository-model-access-restriction` - Enforces centralized repository access
-- `aggregate-import-restriction` - Prevents cross-aggregate dependencies
-- `no-internal-id` - Prevents ID exposure
-
-### Testing
-
-- Minimum 95% coverage
-- Unit tests with mocks
-- Integration tests with real DB
-- E2E for critical paths
+- **Database**: Dev (15432), Test (15433)
+- **Custom ESLint**: repository-model-access-restriction, aggregate-import-restriction, no-internal-id
+- **Testing**: 95% coverage minimum
 
 ---
 
-_For detailed documentation, check `/packages/apps/_/README.md`\*
+⚠️ **REMINDER**: Do exactly what's asked. Don't create files/docs unless explicitly requested.
