@@ -126,6 +126,7 @@ export default defineConfig({
     'Wada',
     'WCAG',
     'worklet',
+    'worklets',
     'xcrun',
   ],
   flagWords: [],
