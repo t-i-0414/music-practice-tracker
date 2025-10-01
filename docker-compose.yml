@@ -12,7 +12,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-music_practice_tracker}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
+      POSTGRES_INITDB_ARGS: '--auth-host=scram-sha-256'
       POSTGRES_SHARED_PRELOAD_LIBRARIES: pg_stat_statements
       POSTGRES_MAX_CONNECTIONS: 200
       POSTGRES_SHARED_BUFFERS: 256MB
@@ -20,27 +20,23 @@ services:
       POSTGRES_WORK_MEM: 4MB
       POSTGRES_MAINTENANCE_WORK_MEM: 64MB
     ports:
-      - "${POSTGRES_PORT:-15432}:5432"
+      - '${POSTGRES_PORT:-15432}:5432'
     volumes:
       - music-practice-tracker-db-data:/var/lib/postgresql/data
       - ./.postgres-backups:/backups
     restart: unless-stopped
     user: postgres
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-music_practice_tracker}",
-        ]
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-music_practice_tracker}']
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 60s
     logging:
-      driver: "json-file"
+      driver: 'json-file'
       options:
-        max-size: "10m"
-        max-file: "3"
+        max-size: '10m'
+        max-file: '3'
     security_opt:
       - no-new-privileges:true
 
@@ -53,24 +49,23 @@ services:
       POSTGRES_DB: music_practice_tracker_test
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
+      POSTGRES_INITDB_ARGS: '--auth-host=scram-sha-256'
     ports:
-      - "15433:5432"
+      - '15433:5432'
     volumes:
       - music-practice-tracker-test-db-data:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
-      test:
-        ["CMD-SHELL", "pg_isready -U postgres -d music_practice_tracker_test"]
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d music_practice_tracker_test']
       interval: 10s
       timeout: 5s
       retries: 3
       start_period: 30s
     logging:
-      driver: "json-file"
+      driver: 'json-file'
       options:
-        max-size: "10m"
-        max-file: "3"
+        max-size: '10m'
+        max-file: '3'
     security_opt:
       - no-new-privileges:true
 
