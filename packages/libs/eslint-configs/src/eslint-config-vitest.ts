@@ -26,7 +26,7 @@ export const disabledRulesOnTests: FlatConfig.Rules = {
   '@typescript-eslint/no-dynamic-delete': 'off',
 };
 
-export const vitestConfig = defineConfig(
+export const vitestConfig: ReturnType<typeof defineConfig> = defineConfig(
   ...(Array.isArray(vitestPlugin.configs.all) ? vitestPlugin.configs.all : [vitestPlugin.configs.all]),
   {
     rules: {

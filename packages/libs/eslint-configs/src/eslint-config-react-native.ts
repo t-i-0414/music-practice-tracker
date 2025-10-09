@@ -6,7 +6,7 @@ import { defineConfig } from 'eslint/config';
 const expoConfig: Linter.Config = require('eslint-config-expo/flat');
 const compat = new FlatCompat({});
 
-export const reactNativeConfig = defineConfig(
+export const reactNativeConfig: ReturnType<typeof defineConfig> = defineConfig(
   ...compat.extends('plugin:react-native/all'),
   ...compat.plugins('eslint-plugin-react-native'),
 

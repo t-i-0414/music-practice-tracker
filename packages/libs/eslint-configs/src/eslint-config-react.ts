@@ -23,7 +23,7 @@ export const reactConfigRules: FlatConfig.Rules = {
   ],
 };
 
-export const reactConfig = defineConfig(
+export const reactConfig: ReturnType<typeof defineConfig> = defineConfig(
   reactPlugin.configs.flat['recommended'],
   reactPlugin.configs.flat['jsx-runtime'],
   {

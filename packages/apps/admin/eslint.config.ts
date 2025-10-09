@@ -26,7 +26,7 @@ const compat = new FlatCompat({
 });
 
 const nextEslintConfig = [...compat.extends('next/core-web-vitals', 'next/typescript', 'prettier')];
-const config = defineConfig(
+const config: ReturnType<typeof defineConfig> = defineConfig(
   ...nextEslintConfig,
   {
     languageOptions: {

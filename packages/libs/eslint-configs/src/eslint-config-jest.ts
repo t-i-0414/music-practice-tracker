@@ -3,7 +3,7 @@ import jestPlugin from 'eslint-plugin-jest';
 
 import { disabledRulesOnTests } from './eslint-config-vitest';
 
-export const jestConfig = defineConfig({
+export const jestConfig: ReturnType<typeof defineConfig> = defineConfig({
   extends: [jestPlugin.configs['flat/all']],
   rules: {
     ...disabledRulesOnTests,
