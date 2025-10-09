@@ -2,7 +2,7 @@ import { baseConfig, importConfig, sharedIgnores, tsConfig } from '@music-practi
 import { defineConfig, globalIgnores } from 'eslint/config';
 import prettierConfig from 'eslint-config-prettier/flat';
 
-export default defineConfig(
+const config: ReturnType<typeof defineConfig> = defineConfig(
   {
     languageOptions: {
       parserOptions: {
@@ -18,3 +18,5 @@ export default defineConfig(
   globalIgnores([...sharedIgnores, './packages']),
   prettierConfig,
 );
+
+export default config;

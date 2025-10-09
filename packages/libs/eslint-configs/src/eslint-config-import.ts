@@ -44,7 +44,7 @@ export const importConfigRules: FlatConfig.Rules = {
   ],
 };
 
-export const importConfig = defineConfig({
+export const importConfig: ReturnType<typeof defineConfig> = defineConfig({
   extends: [importPlugin.flatConfigs.recommended, importPlugin.flatConfigs.typescript],
   plugins: {
     'unused-imports': unusedImportsPlugin,

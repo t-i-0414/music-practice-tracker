@@ -12,6 +12,6 @@ export const baseScriptConfigRules: Linter.RulesRecord = {
   '@typescript-eslint/no-magic-numbers': 'off',
 };
 
-export const baseScriptConfig = defineConfig(baseConfig, tsConfig, importConfig, {
+export const baseScriptConfig: ReturnType<typeof defineConfig> = defineConfig(baseConfig, tsConfig, importConfig, {
   rules: baseScriptConfigRules,
 });

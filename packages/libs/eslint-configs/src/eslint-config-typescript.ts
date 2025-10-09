@@ -152,7 +152,7 @@ export const tsConfigRules: FlatConfig.Rules = {
   '@typescript-eslint/use-unknown-in-catch-callback-variable': 'error',
 };
 
-export const tsConfig = defineConfig(
+export const tsConfig: ReturnType<typeof defineConfig> = defineConfig(
   configs.recommendedTypeChecked,
   {
     rules: tsConfigRules,

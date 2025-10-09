@@ -3,7 +3,7 @@ import prettierConfig from 'eslint-config-prettier/flat';
 
 import { baseConfig, tsConfig, sharedIgnores, importConfig } from './src';
 
-export default defineConfig(
+const config: ReturnType<typeof defineConfig> = defineConfig(
   {
     languageOptions: {
       parserOptions: {
@@ -19,3 +19,5 @@ export default defineConfig(
   globalIgnores([...sharedIgnores, './types']),
   prettierConfig,
 );
+
+export default config;

@@ -1,7 +1,7 @@
 import eslint from '@eslint/js';
 import { defineConfig } from 'eslint/config';
 
-export const baseConfig = defineConfig(eslint.configs.recommended, {
+export const baseConfig: ReturnType<typeof defineConfig> = defineConfig(eslint.configs.recommended, {
   rules: {
     'array-callback-return': 'error',
     'no-await-in-loop': 'error',
