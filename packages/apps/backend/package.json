@@ -65,7 +65,7 @@
     "@nestjs/common": "11.1.6",
     "@nestjs/config": "4.0.2",
     "@nestjs/core": "11.1.6",
-    "@nestjs/jwt": "11.0.0",
+    "@nestjs/jwt": "11.0.1",
     "@nestjs/passport": "11.0.5",
     "@nestjs/platform-express": "11.1.6",
     "@nestjs/swagger": "11.2.0",
@@ -79,7 +79,7 @@
     "@golevelup/ts-jest": "0.7.0",
     "@music-practice-tracker/eslint-plugins": "workspace:*",
     "@nestjs/cli": "11.0.10",
-    "@nestjs/schematics": "11.0.8",
+    "@nestjs/schematics": "11.0.9",
     "@nestjs/testing": "11.1.6",
     "@types/bcrypt": "6.0.0",
     "@types/express": "5.0.3",
@@ -88,7 +88,7 @@
     "class-transformer": "0.5.1",
     "class-validator": "0.14.2",
     "firebase-admin": "13.5.0",
-    "prisma": "6.16.3",
+    "prisma": "6.17.1",
     "supertest": "7.1.4"
   }
 }
