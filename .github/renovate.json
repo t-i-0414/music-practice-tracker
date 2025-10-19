@@ -2,10 +2,11 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:best-practices"],
   "labels": ["dependencies"],
-  "prConcurrentLimit": 10,
+  "prConcurrentLimit": 3,
   "prHourlyLimit": 10,
   "commitMessagePrefix": "chore: ",
   "rangeStrategy": "bump",
+  "rebaseWhen": "never",
   "separateMajorMinor": true,
   "separateMinorPatch": false,
   "dependencyDashboard": true,
@@ -62,9 +63,8 @@
     "enabled": true,
     "labels": ["security"]
   },
-  "postUpdateOptions": ["npmDedupe"],
   "lockFileMaintenance": {
-    "enabled": true,
+    "enabled": false,
     "schedule": ["after 9am on Monday"]
   }
 }
