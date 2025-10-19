@@ -6,7 +6,7 @@
   "prHourlyLimit": 2,
   "commitMessagePrefix": "chore: ",
   "rangeStrategy": "replace",
-  "rebaseWhen": "never",
+  "rebaseWhen": "behind-base-branch",
   "separateMajorMinor": true,
   "separateMinorPatch": false,
   "dependencyDashboard": true,
