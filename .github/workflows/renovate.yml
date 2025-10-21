@@ -43,7 +43,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            ~/renovate/cache
+            /tmp/renovate/cache
           key: ${{ runner.os }}-renovate-${{ hashFiles('**/bun.lockb', '**/package-lock.json', '**/pnpm-lock.yaml', '**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-renovate-
@@ -68,8 +68,8 @@ jobs:
           LOG_LEVEL: ${{ github.event.inputs.logLevel || 'info' }}
           RENOVATE_DRY_RUN: ${{ github.event.inputs.dryRun || 'false' }}
           RENOVATE_BINARY_SOURCE: 'install'
-          RENOVATE_CACHE_DIR: '~/renovate/cache'
-          RENOVATE_REPOSITORY_CACHE: 'enabled'
+          RENOVATE_CACHE_DIR: /tmp/renovate/cache
+          RENOVATE_REPOSITORY_CACHE: enabled
           RENOVATE_PAGINATE_ALL: 'true'
           RENOVATE_GIT_TIMEOUT: '600000'
 
@@ -80,5 +80,5 @@ jobs:
           name: renovate-logs
           path: |
             renovate.log
-            ~/renovate/cache/renovate.log
+            /tmp/renovate/cache/renovate.log
           retention-days: 5
