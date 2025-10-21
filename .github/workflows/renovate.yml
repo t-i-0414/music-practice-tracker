@@ -37,10 +37,10 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
 
       - name: Setup Renovate cache
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: |
             /tmp/renovate/cache
@@ -50,14 +50,14 @@ jobs:
 
       # （Bun キャッシュが不要ならこのステップは削除）
       - name: Setup Bun cache
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: ~/.bun/install/cache
           key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
           restore-keys: ${{ runner.os }}-bun-
 
       - name: Self-hosted Renovate
-        uses: renovatebot/github-action@v43.0.16
+        uses: renovatebot/github-action@e2421a9a80287bba9997b41a15ea1e5585d96925 # v43.0.16
         with:
           configurationFile: .github/renovate.json
           # 任意: Renovate のイメージを固定したい場合は下記を有効化
@@ -76,7 +76,7 @@ jobs:
 
       - name: Upload Renovate logs
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: renovate-logs
           path: |
