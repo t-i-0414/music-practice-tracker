@@ -66,6 +66,7 @@ jobs:
         env:
           NODE_OPTIONS: '--max-old-space-size=3072'
           LOG_LEVEL: ${{ github.event.inputs.logLevel || 'info' }}
+          RENOVATE_REPOSITORIES: ${{ github.repository }}
           RENOVATE_DRY_RUN: ${{ github.event.inputs.dryRun || 'false' }}
           RENOVATE_BINARY_SOURCE: 'install'
           RENOVATE_CACHE_DIR: /tmp/renovate/cache
