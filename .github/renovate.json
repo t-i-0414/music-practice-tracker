@@ -2,16 +2,20 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:best-practices"],
   "labels": ["dependencies"],
-  "prConcurrentLimit": 1,
-  "prHourlyLimit": 2,
+  "prConcurrentLimit": 3,
+  "prHourlyLimit": 5,
   "commitMessagePrefix": "chore: ",
   "rangeStrategy": "replace",
   "rebaseWhen": "behind-base-branch",
   "separateMajorMinor": true,
   "separateMinorPatch": false,
   "dependencyDashboard": true,
+  "dependencyDashboardAutoclose": true,
   "minimumReleaseAge": "5 days",
   "ignoreDeps": ["anthropics/claude-code-action", "postgres"],
+  "ignorePaths": ["**/node_modules/**", "packages/apps/mobile/**"],
+  "binarySource": "install",
+  "postUpdateOptions": [],
   "packageRules": [
     {
       "description": "Exclude react and react-dom repo-wide",
@@ -54,17 +58,34 @@
       "semanticCommitScope": "eslint-plugins"
     },
     {
-      "description": "Majors: 1 PR per library (default behavior)",
-      "matchUpdateTypes": ["major"]
+      "description": "Security updates - immediate",
+      "matchDatasources": ["npm"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "prPriority": 10,
+      "schedule": ["at any time"],
+      "vulnerabilityAlerts": {
+        "enabled": true,
+        "labels": ["security", "urgent"]
+      }
+    },
+    {
+      "description": "Major updates - manual review required",
+      "matchUpdateTypes": ["major"],
+      "prPriority": -10,
+      "separateMajorMinor": true
     }
   ],
-  "ignorePaths": ["**/node_modules/**", "packages/apps/mobile/**"],
   "vulnerabilityAlerts": {
     "enabled": true,
     "labels": ["security"]
   },
   "lockFileMaintenance": {
-    "enabled": false,
-    "schedule": ["after 9am on Monday"]
-  }
+    "enabled": true,
+    "schedule": ["before 6am on Sunday"],
+    "prPriority": -1
+  },
+  "timezone": "Asia/Tokyo",
+  "schedule": ["after 2am and before 6pm every weekday"],
+  "prCreation": "immediate",
+  "suppressNotifications": ["prIgnoreNotification"]
 }
