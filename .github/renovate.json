@@ -71,8 +71,14 @@
     {
       "description": "Major updates - manual review required",
       "matchUpdateTypes": ["major"],
-      "prPriority": -10,
-      "separateMajorMinor": true
+      "labels": ["dependencies", "major"],
+      "draftPR": true,
+      "prPriority": -10
+    },
+    {
+      "description": "Lock file maintenance priority",
+      "matchUpdateTypes": ["lockFileMaintenance"],
+      "prPriority": -1
     }
   ],
   "vulnerabilityAlerts": {
@@ -81,8 +87,7 @@
   },
   "lockFileMaintenance": {
     "enabled": true,
-    "schedule": ["before 6am on Sunday"],
-    "prPriority": -1
+    "schedule": ["after 2am on Sunday"]
   },
   "timezone": "Asia/Tokyo",
   "schedule": ["after 2am and before 6pm every weekday"],
