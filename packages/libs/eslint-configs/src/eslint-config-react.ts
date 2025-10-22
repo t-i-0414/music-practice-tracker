@@ -26,6 +26,7 @@ export const reactConfigRules: FlatConfig.Rules = {
 export const reactConfig: ReturnType<typeof defineConfig> = defineConfig(
   reactPlugin.configs.flat['recommended'],
   reactPlugin.configs.flat['jsx-runtime'],
+  reactHooksPlugin.configs.flat['recommended'],
   {
     plugins: { reactPlugin },
     rules: reactConfigRules,
@@ -34,12 +35,6 @@ export const reactConfig: ReturnType<typeof defineConfig> = defineConfig(
         version: 'detect',
       },
     },
-  },
-  {
-    plugins: {
-      'react-hooks': reactHooksPlugin,
-    },
-    extends: ['react-hooks/recommended'],
   },
   {
     ...testingLibraryPlugin.configs['flat/react'],

@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import * as open from 'open';
+import open from 'open';
 
 const CRASH_EXIT_CODE = 1;
 
