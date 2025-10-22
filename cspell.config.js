@@ -142,6 +142,7 @@ export default defineConfig({
     'expo-env.d.ts',
     '.github/**',
     'firepit-log.txt',
+    '**/scripts/**',
   ],
   maxNumberOfProblems: 0,
   minWordLength: 3,

@@ -8,6 +8,7 @@ import {
   tsConfig,
 } from '@music-practice-tracker/eslint-configs';
 import { pluginBackend } from '@music-practice-tracker/eslint-plugins';
+import type { Linter } from 'eslint';
 import { defineConfig, globalIgnores } from 'eslint/config';
 import prettierConfig from 'eslint-config-prettier/flat';
 
@@ -16,7 +17,7 @@ const enabledBackendPluginRules = Object.keys(pluginBackend.rules).reduce<Record
   return acc;
 }, {});
 
-const config = defineConfig(
+const config: Linter.Config[] = defineConfig(
   {
     languageOptions: {
       parserOptions: {
