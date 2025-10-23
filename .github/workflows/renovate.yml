@@ -1,26 +1,26 @@
 name: Renovate
 on:
   schedule:
-    - cron: '0 0 * * 1-5' # every weekday at 00:00 UTC (09:00 JST)
+    - cron: "0 0 * * 1-5" # every weekday at 00:00 UTC (09:00 JST)
   workflow_dispatch:
     inputs:
       dryRun:
-        description: 'Dry Run mode - no PRs will be created'
+        description: "Dry Run mode - no PRs will be created"
         type: boolean
         required: false
         default: false
       logLevel:
-        description: 'Log level'
+        description: "Log level"
         type: choice
         required: false
-        default: 'info'
+        default: "info"
         options: [info, debug, trace]
   push:
     branches: [develop, main]
     paths:
-      - '.github/renovate.json'
-      - '.github/workflows/renovate.yml'
-      - './bun.lock'
+      - ".github/renovate.json"
+      - ".github/workflows/renovate.yml"
+      - "bun.lock"
 
 permissions:
   contents: write
@@ -64,15 +64,15 @@ jobs:
           # renovate-version: ghcr.io/renovatebot/renovate:41.155.3
           token: ${{ secrets.RENOVATE_TOKEN }}
         env:
-          NODE_OPTIONS: '--max-old-space-size=3072'
+          NODE_OPTIONS: "--max-old-space-size=3072"
           LOG_LEVEL: ${{ github.event.inputs.logLevel || 'info' }}
           RENOVATE_REPOSITORIES: ${{ github.repository }}
-          RENOVATE_BINARY_SOURCE: 'install'
+          RENOVATE_BINARY_SOURCE: "install"
           RENOVATE_REPOSITORY_CACHE: enabled
           RENOVATE_BASE_DIR: /home/ubuntu/renovate
           RENOVATE_CACHE_DIR: /home/ubuntu/renovate/cache
-          RENOVATE_PAGINATE_ALL: 'true'
-          RENOVATE_GIT_TIMEOUT: '600000'
+          RENOVATE_PAGINATE_ALL: "true"
+          RENOVATE_GIT_TIMEOUT: "600000"
 
       - name: Upload Renovate logs
         if: failure()
