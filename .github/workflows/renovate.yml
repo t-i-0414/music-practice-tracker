@@ -19,8 +19,8 @@ on:
     branches: [develop, main]
     paths:
       - '.github/renovate.json'
-      - '.github/renovate.json5'
       - '.github/workflows/renovate.yml'
+      - '**/package.json'
 
 permissions:
   contents: write
