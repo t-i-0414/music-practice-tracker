@@ -11,7 +11,7 @@ Run `make setup` once to install dependencies, copy `.env.example` to `.env`, an
 - `cd packages/apps/backend && bun run start:dev`
 - `cd packages/apps/admin && bun run start:dev`
 - `cd packages/apps/mobile && bun run start:dev`
-Repo-wide quality gate: `bun run quality:check`; autofix with `bun run quality:fix`. Regenerate frontend API clients after backend changes using `bun run gen:api-types` inside admin/mobile.
+  Repo-wide quality gate: `bun run quality:check`; autofix with `bun run quality:fix`. Regenerate frontend API clients after backend changes using `bun run gen:api-types` inside admin/mobile.
 
 ## Coding Style & Naming Conventions
 
@@ -22,7 +22,7 @@ TypeScript is required throughout, inheriting settings from `packages/libs/tscon
 - Backend: Jest via `bun run test`, with extras `test:integration`, `test:e2e`, `test:cov`. Ensure PostgreSQL and Firebase emulators are running first.
 - Admin: Vitest (`bun run test:unit`), Cypress (`test:integration`), Playwright (`test:e2e`). Aggregate all tiers with `bun run test`.
 - Mobile: Jest (`bun run test`, `test:unit`) and Maestro (`test:e2e`). Simulators or devices may be required for E2E runs.
-Place new specs under the appropriate `tests/` subtree and mirror the runtime feature structure.
+  Place new specs under the appropriate `tests/` subtree and mirror the runtime feature structure.
 
 ## Commit & Pull Request Guidelines
 
@@ -34,10 +34,10 @@ Environment variables derive from the root `.env`; keep it synced with `.env.exa
 
 ## Mobile-App Specific Guidance
 
-- **Design sources**:  
-  - Product requirements and feature taxonomy are documented in Notion (`Music Practice Tracker` space).  
+- **Design sources**:
+  - Product requirements and feature taxonomy are documented in Notion (`Music Practice Tracker` space).
   - UI specs, color tokens, and component states live in the Figma file `デザインマスタ` (key `xxQt68o5duDk86edLSpy1L`).  
-  When touching the Expo app, review both to align routing, component naming, and visual design.
+    When touching the Expo app, review both to align routing, component naming, and visual design.
 
 - **Information architecture**: Expo Router uses `(auth)` for onboarding/auth flows and `(tabs)` for `home`, `sessions`, `insights`, `profile`. Modals such as the log editor are under `(modals)`. Feature code should live under `src/features/<domain>` with screens/hooks/components mirroring Figma sections.
 
