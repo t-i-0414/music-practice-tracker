@@ -1,8 +1,6 @@
 import type React from 'react';
 
-import { Platform, StyleSheet } from 'react-native';
-
-import { Image } from 'expo-image';
+import { Image, Platform, StyleSheet } from 'react-native';
 
 import reactLogo from '@/assets/images/react-logo.png';
 import { Collapsible } from '@/components/Collapsible';
