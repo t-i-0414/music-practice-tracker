@@ -172,6 +172,10 @@ dist
 **/.claude/*.local.*
 **/.claude/**/docs/**
 
+# Codex
+**/.codex/local-*.json
+**/.codex/**/docs/**
+
 # Local IDE Settings
 **/.vscode/settings.json
 
