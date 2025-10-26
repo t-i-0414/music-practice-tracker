@@ -20,7 +20,6 @@
     "format:check": "prettier --check .",
     "format:fix": "prettier --write . && bun run format:prisma",
     "format:prisma": "cd packages/apps/backend && bun run prisma:format && cd -",
-    "postinstall": "sh scripts/fix-storybook-vite.sh",
     "lint:dotenv:check": "./bin/dotenv-linter",
     "lint:dotenv:compare": "./bin/dotenv-linter compare .env .env.*",
     "lint:dotenv:fix": "./bin/dotenv-linter fix",
