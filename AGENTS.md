@@ -2,40 +2,45 @@
 
 ## Project Structure & Module Organization
 
-- Monorepo uses workspaces under `packages/`; primary apps: `packages/apps/backend` (NestJS + Prisma), `packages/apps/admin` (Next.js), `packages/apps/mobile` (Expo).
-- Shared tooling lives in `packages/libs/*`; test suites reside under `tests/<app>` mirroring each app. Backend Prisma schema stays in `packages/apps/backend/prisma/`.
+This Bun monorepo hosts three primary apps under `packages/apps/`: `backend` (NestJS + Prisma), `admin` (Next.js), and `mobile` (Expo). Shared tooling and configs live in `packages/libs/`. Tests mirror runtime folders inside each app (`packages/apps/<app>/tests`). Prisma schema files stay in `packages/apps/backend/prisma/`, and generated Prisma clients output to `packages/apps/backend/generated/`.
 
 ## Build, Test, and Development Commands
 
-- Run `make setup` once to install dependencies, sync `.env`, and prepare tooling.
-- Use `bun run quality:check` at the root for formatting, lint, type, and spell checks; fix with `bun run quality:fix`.
-- Backend: from `packages/apps/backend`, start locally via `bun run start:dev`; build with `bun run build`; bring up the DB with `make docker-compose-up`.
-- Admin: inside `packages/apps/admin`, run `bun run start:dev` for Next.js dev server; `bun run build` for production bundles.
-- Mobile: from `packages/apps/mobile`, launch Expo with `bun run start:dev` or platform-specific variants.
+Run `make setup` once to install dependencies, copy `.env.example` to `.env`, and build shared ESLint/TS configs. Bring up infrastructure with `make docker-compose-up` (PostgreSQL) and `make start-firebase-dev-emulators`. Start apps via:
+
+- `cd packages/apps/backend && bun run start:dev`
+- `cd packages/apps/admin && bun run start:dev`
+- `cd packages/apps/mobile && bun run start:dev`
+  Repo-wide quality gate: `bun run quality:check`; autofix with `bun run quality:fix`. Regenerate frontend API clients after backend changes using `bun run gen:api-types` inside admin/mobile.
 
 ## Coding Style & Naming Conventions
 
-- TypeScript everywhere; follow `@music-practice-tracker/eslint-configs` and `packages/libs/tsconfig-base`.
-- Prettier enforces 120-char width, single quotes; run `bun run format:check` or `format:fix`.
-- Keep filenames kebab-case; React components PascalCase; favor descriptive module boundaries matching workspace folders.
+TypeScript is required throughout, inheriting settings from `packages/libs/tsconfig-base`. ESLint rules come from `@music-practice-tracker/eslint-configs`. Prettier enforces 120-character lines and single quotes (`bun run format:check`). Keep filenames kebab-case, React components PascalCase, and service classes suffixed with `Service`. Prefer descriptive module boundaries matching workspace folders.
 
 ## Testing Guidelines
 
-- Backend uses Jest (`bun run test`, `test:unit`, `test:integration`, `test:e2e`, `test:cov`); ensure meaningful coverage on new modules.
-- Admin relies on Vitest (`bun run test:unit`), Cypress (`test:integration`), and Playwright (`test:e2e`); mobile uses Jest (`test:unit`) and Maestro via `make test-e2e`.
-- Place new tests alongside respective packages under `tests/`, mirroring feature folders.
+- Backend: Jest via `bun run test`, with extras `test:integration`, `test:e2e`, `test:cov`. Ensure PostgreSQL and Firebase emulators are running first.
+- Admin: Vitest (`bun run test:unit`), Cypress (`test:integration`), Playwright (`test:e2e`). Aggregate all tiers with `bun run test`.
+- Mobile: Jest (`bun run test`, `test:unit`) and Maestro (`test:e2e`). Simulators or devices may be required for E2E runs.
+  Place new specs under the appropriate `tests/` subtree and mirror the runtime feature structure.
 
 ## Commit & Pull Request Guidelines
 
-- Commitlint enforces Conventional Commits; allowed scopes: `backend`, `admin`, `mobile`, `eslint-configs`, `eslint-plugins`, `tsconfig-base`. Example: `feat(backend): add practice session API`.
-- PRs should describe intent, link issues, note risks/rollbacks, and include UI screenshots when touching frontend. Ensure CI passes and docs stay current.
+Follow Conventional Commits with approved scopes (`backend`, `admin`, `mobile`, `eslint-configs`, `eslint-plugins`, `tsconfig-base`). PRs should explain intent, link issues, outline risks/rollbacks, and include UI screenshots when adjusting admin or mobile surfaces. Run `bun run quality:check` plus affected package-level tests before pushing; CI expects parity.
 
 ## Security & Configuration Tips
 
-- Environment variables derive from the root `.env`; copy `.env.example` or run `make setup`. Apps symlink automatically.
-- Run `bun run lint:secret:check` and `bun run lint:dotenv:check` after env changes; Prisma models validate during commits.
+Environment variables derive from the root `.env`; keep it synced with `.env.example`. Validate changes with `bun run lint:dotenv:check` and scan for secrets using `bun run lint:secret:check`. Prisma models are verified by Lefthook pre-commit hooks—do not bypass them. Keep Firebase credentials out of version control and rely on the provided emulators during local development.
 
-## Agent Workflow Notes
+## Mobile-App Specific Guidance
 
-- Build a concise plan before changes, keep edits scoped, and prefer `rg` for repository search.
-- Use `apply_patch` for modifications, limit file reads to focused chunks, and run package-level checks relevant to touched code.
+- **Design sources**:
+  - Product requirements and feature taxonomy are documented in Notion (`Music Practice Tracker` space).
+  - UI specs, color tokens, and component states live in the Figma file `デザインマスタ` (key `xxQt68o5duDk86edLSpy1L`).  
+    When touching the Expo app, review both to align routing, component naming, and visual design.
+
+- **Information architecture**: Expo Router uses `(auth)` for onboarding/auth flows and `(tabs)` for `home`, `sessions`, `insights`, `profile`. Modals such as the log editor are under `(modals)`. Feature code should live under `src/features/<domain>` with screens/hooks/components mirroring Figma sections.
+
+- **UI component usage**: Reuse shared primitives in `src/components` (`layout`, `feedback`, `charts`, `ui`). Round filled buttons, outlined text fields, loading/error patterns, and color palettes must match the Figma variants (primary `#B246EB`, secondary `#EB468D`, tertiary `#E846EB` plus dark theme counterparts). Extend these primitives instead of ad-hoc styling.
+
+- **Testing**: Mobile package relies on Jest for unit tests and Maestro for E2E flows. Keep tests in `packages/apps/mobile/tests` mirroring runtime structure and update scenarios when adjusting routing or feature flows.
