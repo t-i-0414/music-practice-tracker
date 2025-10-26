@@ -31,3 +31,16 @@ Follow Conventional Commits with approved scopes (`backend`, `admin`, `mobile`, 
 ## Security & Configuration Tips
 
 Environment variables derive from the root `.env`; keep it synced with `.env.example`. Validate changes with `bun run lint:dotenv:check` and scan for secrets using `bun run lint:secret:check`. Prisma models are verified by Lefthook pre-commit hooks—do not bypass them. Keep Firebase credentials out of version control and rely on the provided emulators during local development.
+
+## Mobile-App Specific Guidance
+
+- **Design sources**:  
+  - Product requirements and feature taxonomy are documented in Notion (`Music Practice Tracker` space).  
+  - UI specs, color tokens, and component states live in the Figma file `デザインマスタ` (key `xxQt68o5duDk86edLSpy1L`).  
+  When touching the Expo app, review both to align routing, component naming, and visual design.
+
+- **Information architecture**: Expo Router uses `(auth)` for onboarding/auth flows and `(tabs)` for `home`, `sessions`, `insights`, `profile`. Modals such as the log editor are under `(modals)`. Feature code should live under `src/features/<domain>` with screens/hooks/components mirroring Figma sections.
+
+- **UI component usage**: Reuse shared primitives in `src/components` (`layout`, `feedback`, `charts`, `ui`). Round filled buttons, outlined text fields, loading/error patterns, and color palettes must match the Figma variants (primary `#B246EB`, secondary `#EB468D`, tertiary `#E846EB` plus dark theme counterparts). Extend these primitives instead of ad-hoc styling.
+
+- **Testing**: Mobile package relies on Jest for unit tests and Maestro for E2E flows. Keep tests in `packages/apps/mobile/tests` mirroring runtime structure and update scenarios when adjusting routing or feature flows.
