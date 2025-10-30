@@ -26,6 +26,7 @@ export const reactConfigRules: FlatConfig.Rules = {
 export const reactConfig: ReturnType<typeof defineConfig> = defineConfig(
   reactPlugin.configs.flat['recommended'],
   reactPlugin.configs.flat['jsx-runtime'],
+  // eslint-disable-next-line @typescript-eslint/dot-notation
   reactHooksPlugin.configs.flat['recommended'],
   {
     plugins: { reactPlugin },
