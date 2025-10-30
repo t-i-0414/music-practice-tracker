@@ -106,7 +106,7 @@
       },
       "devDependencies": {
         "@next/eslint-plugin-next": "16.0.0",
-        "eslint-config-next": "^16.0.1",
+        "eslint-config-next": "16.0.1",
       },
     },
     "packages/apps/backend": {
