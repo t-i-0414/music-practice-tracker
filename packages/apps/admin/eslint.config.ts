@@ -1,7 +1,3 @@
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
-
-import { FlatCompat } from '@eslint/eslintrc';
 import {
   baseConfig,
   baseScriptConfigRules,
@@ -16,18 +12,12 @@ import {
   vitestConfig,
 } from '@music-practice-tracker/eslint-configs';
 import { defineConfig, globalIgnores } from 'eslint/config';
+import nextVitals from 'eslint-config-next/core-web-vitals';
 import prettierConfig from 'eslint-config-prettier/flat';
 import unusedImportsPlugin from 'eslint-plugin-unused-imports';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
-
-const nextEslintConfig = [...compat.extends('next/core-web-vitals', 'next/typescript', 'prettier')];
 const config: ReturnType<typeof defineConfig> = defineConfig(
-  ...nextEslintConfig,
+  ...nextVitals,
   {
     languageOptions: {
       parserOptions: {
