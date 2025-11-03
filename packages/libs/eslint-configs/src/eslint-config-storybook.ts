@@ -1,14 +1,18 @@
 import { defineConfig } from 'eslint/config';
-import storybookPlugin from 'eslint-plugin-storybook';
+import { configs } from 'eslint-plugin-storybook';
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-unsafe-type-assertion
+const storybookFlatRecommended = configs['flat/recommended'] as unknown as ReturnType<typeof defineConfig>;
+
+const storyFilesGlobs = ['**/stories/**/*.ts', '**/stories/**/*.tsx', '**/*/*.stories.ts', '**/*/*.stories.tsx'];
+
 export const storybookConfig: ReturnType<typeof defineConfig> = defineConfig(
-  {
-    files: ['**/stories/**/*.ts', '**/stories/**/*.tsx', '**/*/*.stories.ts', '**/*/*.stories.tsx'],
-    extends: [storybookPlugin.configs['flat/recommended']],
-  },
-  {
-    files: ['**/.storybook/**/*.ts'],
-    rules: {
-      'storybook/no-uninstalled-addons': 'off',
-    },
-  },
+  ...storybookFlatRecommended.map((config) =>
+    config.files
+      ? {
+          ...config,
+          files: storyFilesGlobs,
+        }
+      : config,
+  ),
 );
