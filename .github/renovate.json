@@ -73,11 +73,6 @@
       "labels": ["dependencies", "major"],
       "draftPR": true,
       "prPriority": -10
-    },
-    {
-      "description": "Lock file maintenance priority",
-      "matchUpdateTypes": ["lockFileMaintenance"],
-      "prPriority": -1
     }
   ],
   "vulnerabilityAlerts": {
@@ -85,8 +80,7 @@
     "labels": ["security"]
   },
   "lockFileMaintenance": {
-    "enabled": true,
-    "schedule": ["after 2am on Sunday"]
+    "enabled": false
   },
   "timezone": "Asia/Tokyo",
   "schedule": ["after 2am and before 6pm every weekday"],
