@@ -14,7 +14,7 @@ const config: Config = {
       },
     ],
   },
-  transformIgnorePatterns: ['/node_modules/(?!@faker-js/faker)', '\\.pnp\\.[^\\/]+$'],
+  transformIgnorePatterns: ['node_modules/(?!.*(faker|@paralleldrive|cuid2|formidable|@noble))', '\\.pnp\\.[^\\/]+$'],
   collectCoverageFrom: [
     '<rootDir>/src/**/*.ts',
     '!<rootDir>/src/**/*.d.ts',
