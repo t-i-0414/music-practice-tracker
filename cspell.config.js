@@ -79,6 +79,7 @@ export default defineConfig({
     'maxage',
     'osx',
     'ondevice',
+    'paralleldrive',
     'Passw0rd',
     'pkey',
     'pkill',
