@@ -148,7 +148,7 @@ export const tsConfigRules: FlatConfig.Rules = {
   '@typescript-eslint/switch-exhaustiveness-check': 'error',
   '@typescript-eslint/triple-slash-reference': 'error',
   '@typescript-eslint/unbound-method': 'off',
-  '@typescript-eslint/unified-signatures': 'error',
+  '@typescript-eslint/unified-signatures': 'off',
   '@typescript-eslint/use-unknown-in-catch-callback-variable': 'error',
 };
 
