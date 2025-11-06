@@ -52,17 +52,19 @@ export default ({ config: _config }: ConfigContext): ExpoConfig => {
 
   return {
     ...baseConfig,
-    ...(process.env.EXPO_PUBLIC_STORYBOOK_ENABLED === 'true' && {
-      name: `${baseConfig.name}-storybook`,
-      slug: `${baseConfig.slug}-storybook`,
-      orientation: 'landscape',
-      icon: './src/assets/images/icon-storybook.png',
-      splash: {
-        ...baseConfig.splash,
-        image: './src/assets/images/splash-storybook.png',
-        resizeMode: 'cover',
-        backgroundColor: '#ffffff',
-      },
-    }),
+    ...(process.env.EXPO_PUBLIC_STORYBOOK_ENABLED === 'true'
+      ? {
+          name: `${baseConfig.name}-storybook`,
+          slug: `${baseConfig.slug}-storybook`,
+          orientation: 'landscape',
+          icon: './src/assets/images/icon-storybook.png',
+          splash: {
+            ...baseConfig.splash,
+            image: './src/assets/images/splash-storybook.png',
+            resizeMode: 'cover',
+            backgroundColor: '#ffffff',
+          },
+        }
+      : {}),
   };
 };
