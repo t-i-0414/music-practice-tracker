@@ -25,14 +25,14 @@ runs:
         restore-keys: |
           bun-${{ runner.os }}-
 
-    # - name: Notify Cache Hit
-    #   if: steps.cache.outputs.cache-hit == 'true'
-    #   shell: bash
-    #   run: |
-    #     echo "✅ Bun dependencies restored from cache."
+    - name: Notify Cache Hit
+      if: steps.cache.outputs.cache-hit == 'true'
+      shell: bash
+      run: |
+        echo "✅ Bun dependencies restored from cache."
 
     - name: Install Dependencies
-      # if: steps.cache.outputs.cache-hit != 'true'
+      if: steps.cache.outputs.cache-hit != 'true'
       shell: bash
       run: |
         echo " Installing dependencies with Bun..."
