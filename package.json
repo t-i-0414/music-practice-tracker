@@ -78,11 +78,11 @@
     "@typescript-eslint/rule-tester": "8.46.4",
     "@typescript-eslint/types": "8.46.4",
     "@typescript-eslint/utils": "8.46.4",
-    "@vitest/browser": "4.0.8",
-    "@vitest/browser-playwright": "4.0.8",
-    "@vitest/coverage-v8": "4.0.8",
+    "@vitest/browser": "4.0.9",
+    "@vitest/browser-playwright": "4.0.9",
+    "@vitest/coverage-v8": "4.0.9",
     "@vitest/eslint-plugin": "1.4.2",
-    "@vitest/ui": "4.0.8",
+    "@vitest/ui": "4.0.9",
     "babel-jest": "30.2.0",
     "babel-plugin-module-resolver": "5.0.2",
     "babel-plugin-react-docgen-typescript": "1.5.1",
@@ -126,6 +126,6 @@
     "typescript": "5.9.3",
     "typescript-eslint": "8.46.4",
     "vite": "7.2.2",
-    "vitest": "4.0.8"
+    "vitest": "4.0.9"
   }
 }
