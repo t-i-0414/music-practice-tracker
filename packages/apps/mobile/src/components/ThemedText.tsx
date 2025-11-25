@@ -11,7 +11,7 @@ type ThemedTextProps = TextProps & {
 };
 
 export const ThemedText: React.FC<ThemedTextProps> = ({ style, lightColor, darkColor, type = 'default', ...rest }) => {
-  const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
+  const color = useThemeColor({ light: lightColor, dark: darkColor }, 'onSurface');
 
   return (
     <Text

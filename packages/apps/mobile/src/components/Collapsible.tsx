@@ -26,7 +26,7 @@ export const Collapsible: React.FC<PropsWithChildren & { title: string }> = ({ c
           name='chevron.right'
           size={18}
           weight='medium'
-          color={theme === 'light' ? Colors.light.icon : Colors.dark.icon}
+          color={theme === 'light' ? Colors.light.onSurfaceVariant : Colors.dark.onSurfaceVariant}
           style={{ transform: [{ rotate: isOpen ? '90deg' : '0deg' }] }}
         />
 
