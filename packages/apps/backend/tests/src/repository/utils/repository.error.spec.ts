@@ -12,19 +12,22 @@ import {
   buildRepositoryError,
 } from '@/repository/utils/repository.error';
 
-jest.mock<typeof import('@/repository/utils/prisma.error')>('@/repository/utils/prisma.error', () => {
-  const actual = jest.requireActual('@/repository/utils/prisma.error');
-  return {
-    ...actual,
-    isPrismaError: jest.fn(),
-    isPrismaErrorCode: jest.fn(),
-    PRISMA_ERROR_CODE_MAP: {
-      P2002: 'RE0003',
-      P2025: 'RE0002',
-      P1000: 'RE0206',
-    },
-  };
-});
+jest.mock<typeof import('../../../../src/repository/utils/prisma.error')>(
+  '../../../../src/repository/utils/prisma.error',
+  () => {
+    const actual = jest.requireActual('@/repository/utils/prisma.error');
+    return {
+      ...actual,
+      isPrismaError: jest.fn(),
+      isPrismaErrorCode: jest.fn(),
+      PRISMA_ERROR_CODE_MAP: {
+        P2002: 'RE0003',
+        P2025: 'RE0002',
+        P1000: 'RE0206',
+      },
+    };
+  },
+);
 
 describe('unit RepositoryError', () => {
   describe('constructor', () => {
