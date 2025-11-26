@@ -20,7 +20,7 @@ jest.mock<typeof import('@nestjs/swagger')>('@nestjs/swagger', () => {
   };
 });
 
-jest.mock<typeof import('@/apis/utils/api.error')>('@/apis/utils/api.error', () => {
+jest.mock<typeof import('../../../../src/apis/utils/api.error')>('../../../../src/apis/utils/api.error', () => {
   const actual = jest.requireActual('@/apis/utils/api.error');
   return {
     ...actual,
