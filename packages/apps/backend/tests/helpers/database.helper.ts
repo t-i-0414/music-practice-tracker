@@ -5,11 +5,7 @@ export class DatabaseHelper {
 
   constructor() {
     this.prisma = new PrismaClient({
-      datasources: {
-        db: {
-          url: process.env.DATABASE_URL,
-        },
-      },
+      accelerateUrl: process.env.DATABASE_URL,
     });
   }
 
