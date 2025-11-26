@@ -6,7 +6,7 @@ import {
   PrismaClientRustPanicError,
   PrismaClientInitializationError,
   PrismaClientValidationError,
-} from '@/generated/prisma/runtime/library';
+} from '@/generated/prisma/runtime/client';
 
 export type PrismaError =
   | PrismaClientKnownRequestError

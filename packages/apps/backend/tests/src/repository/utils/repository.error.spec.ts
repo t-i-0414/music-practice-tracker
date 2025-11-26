@@ -4,7 +4,7 @@ import {
   PrismaClientRustPanicError,
   PrismaClientUnknownRequestError,
   PrismaClientValidationError,
-} from '@/generated/prisma/runtime/library';
+} from '@/generated/prisma/runtime/client';
 import { isPrismaError, isPrismaErrorCode, type PrismaError } from '@/repository/utils/prisma.error';
 import {
   RepositoryError,

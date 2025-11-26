@@ -4,7 +4,7 @@ import {
   PrismaClientRustPanicError,
   PrismaClientInitializationError,
   PrismaClientValidationError,
-} from '@/generated/prisma/runtime/library';
+} from '@/generated/prisma/runtime/client';
 import { isPrismaError, PRISMA_ERROR_CODE_MAP, isPrismaErrorCode } from '@/repository/utils/prisma.error';
 
 describe('unit isPrismaError', () => {

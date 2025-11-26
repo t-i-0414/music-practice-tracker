@@ -5,7 +5,7 @@ import { ApiError } from '@/apis/utils/api.error';
 import { GlobalExceptionFilter } from '@/apis/utils/filters/global-exception.filter';
 import { DomainError } from '@/domain/utils/domain.error';
 import { FirebaseError } from '@/firebase-auth/utils/firebase.error';
-import { PrismaClientKnownRequestError } from '@/generated/prisma/runtime/library';
+import { PrismaClientKnownRequestError } from '@/generated/prisma/runtime/client';
 import { UnknownError } from '@/utils/errors/unknown.error';
 
 describe('unit GlobalExceptionFilter', () => {
