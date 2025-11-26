@@ -14,13 +14,27 @@ runs:
       with:
         bun-version-file: .tool-versions
 
-    - name: Cache Bun Dependencies
-      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
-      id: cache
-      with:
-        path: |
-          ~/.bun/install/cache
-          **/node_modules
-        key: bun-${{ runner.os }}-${{ hashFiles('**/bun.lock') }}
-        restore-keys: |
-          bun-${{ runner.os }}-
+    # - name: Cache Bun Dependencies
+    #   uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+    #   id: cache
+    #   with:
+    #     path: |
+    #       ~/.bun/install/cache
+    #       **/node_modules
+    #     key: bun-${{ runner.os }}-${{ hashFiles('**/bun.lock') }}
+    #     restore-keys: |
+    #       bun-${{ runner.os }}-
+
+    # - name: Notify Cache Hit
+    #   if: steps.cache.outputs.cache-hit == 'true'
+    #   shell: bash
+    #   run: |
+    #     echo "✅ Bun dependencies restored from cache."
+
+    - name: Install Dependencies
+      # if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        echo " Installing dependencies with Bun..."
+        bun install --frozen-lockfile
+        echo "✅ Dependencies installed successfully"
