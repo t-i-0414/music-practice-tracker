@@ -1,16 +1,15 @@
+import { PrismaPg } from '@prisma/adapter-pg';
+
 import { PrismaClient } from '@/generated/prisma';
 
 export class DatabaseHelper {
   private readonly prisma: PrismaClient;
 
   constructor() {
-    this.prisma = new PrismaClient({
-      datasources: {
-        db: {
-          url: process.env.DATABASE_URL,
-        },
-      },
+    const adapter = new PrismaPg({
+      connectionString: process.env.DATABASE_URL,
     });
+    this.prisma = new PrismaClient({ adapter });
   }
 
   async connect(): Promise<void> {

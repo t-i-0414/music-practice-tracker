@@ -6,7 +6,7 @@ import {
   PrismaClientRustPanicError,
   PrismaClientUnknownRequestError,
   PrismaClientValidationError,
-} from '@/generated/prisma/runtime/library';
+} from '@/generated/prisma/runtime/client';
 import { CommonError } from '@/utils/errors/common.error';
 import { type PreservedRepositoryErrorCode, type ErrorCode } from '@/utils/errors/error-code';
 
