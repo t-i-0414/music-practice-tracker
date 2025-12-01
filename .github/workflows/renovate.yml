@@ -43,7 +43,7 @@ jobs:
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: |
-            /tmp/renovate/cache
+            /home/ubuntu/renovate/cache
           key: ${{ runner.os }}-renovate-${{ hashFiles('**/bun.lockb', '**/package-lock.json', '**/pnpm-lock.yaml', '**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-renovate-
@@ -78,5 +78,5 @@ jobs:
           name: renovate-logs
           path: |
             renovate.log
-            /tmp/renovate/cache/renovate.log
+            /home/ubuntu/renovate/cache/renovate.log
           retention-days: 5
