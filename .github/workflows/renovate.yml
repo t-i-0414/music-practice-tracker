@@ -43,7 +43,7 @@ jobs:
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: |
-            /tmp/renovate/cache
+            /home/ubuntu/renovate/cache
           key: ${{ runner.os }}-renovate-${{ hashFiles('**/bun.lockb', '**/package-lock.json', '**/pnpm-lock.yaml', '**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-renovate-
@@ -56,7 +56,7 @@ jobs:
           restore-keys: ${{ runner.os }}-bun-
 
       - name: Self-hosted Renovate
-        uses: renovatebot/github-action@c91a61c730fa166439cd3e2c300c041590002b1d # v44.0.3
+        uses: renovatebot/github-action@03026bd55840025343414baec5d9337c5f9c7ea7 # v44.0.4
         with:
           configurationFile: .github/renovate.json
           token: ${{ secrets.RENOVATE_TOKEN }}
@@ -78,5 +78,5 @@ jobs:
           name: renovate-logs
           path: |
             renovate.log
-            /tmp/renovate/cache/renovate.log
+            /home/ubuntu/renovate/cache/renovate.log
           retention-days: 5
