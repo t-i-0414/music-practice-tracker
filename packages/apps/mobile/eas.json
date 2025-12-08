@@ -5,6 +5,7 @@
   },
   "build": {
     "development": {
+      "channel": "development",
       "developmentClient": true,
       "distribution": "internal",
       "env": {
@@ -12,6 +13,7 @@
       }
     },
     "development-simulator": {
+      "channel": "development-simulator",
       "developmentClient": true,
       "distribution": "internal",
       "ios": {
@@ -22,34 +24,24 @@
       }
     },
     "staging": {
+      "channel": "staging",
       "distribution": "internal",
       "env": {
         "APP_ENV": "staging"
       }
     },
     "production": {
+      "channel": "production",
       "autoIncrement": true,
       "env": {
         "APP_ENV": "production"
       }
     },
     "storybook": {
-      "developmentClient": true,
+      "channel": "storybook",
       "distribution": "internal",
       "env": {
-        "APP_ENV": "storybook",
-        "EXPO_PUBLIC_STORYBOOK_ENABLED": "true"
-      }
-    },
-    "storybook-simulator": {
-      "developmentClient": true,
-      "distribution": "internal",
-      "ios": {
-        "simulator": true
-      },
-      "env": {
-        "APP_ENV": "storybook",
-        "EXPO_PUBLIC_STORYBOOK_ENABLED": "true"
+        "APP_ENV": "storybook"
       }
     }
   },
