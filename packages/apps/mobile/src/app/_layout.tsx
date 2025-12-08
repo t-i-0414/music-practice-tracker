@@ -1,6 +1,7 @@
 import type React from 'react';
 
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import Constants from 'expo-constants';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -33,7 +34,7 @@ const RootLayout: React.FC = () => {
 
 let AppEntryPoint = RootLayout;
 
-if (process.env.EXPO_PUBLIC_STORYBOOK_ENABLED === 'true') {
+if (Constants.expoConfig?.extra?.appEnv === 'storybook') {
   AppEntryPoint = require('../../tests/storybook/.rnstorybook').default;
 }
 
