@@ -31,6 +31,7 @@ const getOrientation = (appEnv: AppEnv): 'portrait' | 'landscape' =>
 
 const getResizeMode = (appEnv: AppEnv): 'contain' | 'cover' => (appEnv === 'storybook' ? 'cover' : 'contain');
 
+const enabledStorybook = process.env.ENABLED_STORYBOOK === 'true';
 const lightBackgroundColor = '#ffffff';
 const darkBackgroundColor = '#1a191b';
 
@@ -103,6 +104,7 @@ export default ({ config: _config }: ConfigContext): ExpoConfig => {
     },
     extra: {
       appEnv,
+      enabledStorybook,
       eas: {
         projectId: '382a6dba-a16c-4b4d-91be-abade4f6c750',
       },

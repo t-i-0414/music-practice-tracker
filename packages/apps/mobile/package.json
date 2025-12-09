@@ -15,7 +15,7 @@
     "start:dev:android": "expo start --android --port 8082",
     "start:dev:ios": "expo start --ios --port 8081",
     "start:dev:web": "expo start --web --port 8083",
-    "storybook": "cross-env APP_ENV='storybook' expo start --port 6007",
+    "storybook": "cross-env ENABLED_STORYBOOK='true' expo start --port 6007",
     "storybook:android": "bun run storybook --android",
     "storybook:generate": "sb-rn-get-stories",
     "storybook:ios": "bun run storybook --ios",
