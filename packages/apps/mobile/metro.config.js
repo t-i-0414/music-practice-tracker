@@ -4,7 +4,7 @@ const defaultConfig = getDefaultConfig(__dirname);
 const { withStorybook } = require('@storybook/react-native/metro/withStorybook');
 
 module.exports = withStorybook(defaultConfig, {
-  enabled: process.env.APP_ENV === 'storybook',
+  enabled: process.env.APP_ENV === 'storybook' || process.env.ENABLED_STORYBOOK === 'true',
   onDisabledRemoveStorybook: true,
   configPath: 'tests/storybook/.rnstorybook',
 });
