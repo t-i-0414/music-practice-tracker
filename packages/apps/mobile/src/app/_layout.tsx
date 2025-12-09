@@ -34,7 +34,7 @@ const RootLayout: React.FC = () => {
 
 let AppEntryPoint = RootLayout;
 
-if (Constants.expoConfig?.extra?.appEnv === 'storybook' || Constants.expoConfig?.extra?.enabledStorybook === 'true') {
+if (Constants.expoConfig?.extra?.appEnv === 'storybook' || Boolean(Constants.expoConfig?.extra?.enabledStorybook)) {
   AppEntryPoint = require('../../tests/storybook/.rnstorybook').default;
 }
 

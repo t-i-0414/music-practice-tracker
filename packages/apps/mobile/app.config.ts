@@ -31,7 +31,7 @@ const getOrientation = (appEnv: AppEnv): 'portrait' | 'landscape' =>
 
 const getResizeMode = (appEnv: AppEnv): 'contain' | 'cover' => (appEnv === 'storybook' ? 'cover' : 'contain');
 
-const enabledStorybook = process.env.ENABLED_STORYBOOK === 'true' ? 'true' : 'false';
+const enabledStorybook = process.env.ENABLED_STORYBOOK === 'true';
 const lightBackgroundColor = '#ffffff';
 const darkBackgroundColor = '#1a191b';
 
