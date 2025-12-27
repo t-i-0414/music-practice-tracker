@@ -429,6 +429,7 @@ describe('unit FirebaseAuthProvider', () => {
     const provider = new FirebaseAuthProvider();
     provider.onModuleInit();
 
+    // eslint-disable-next-line jest/valid-expect-with-promise
     await expect(provider.onModuleDestroy()).resolves.toBeUndefined();
     expect(appInstance.delete).toHaveBeenCalledTimes(1);
   });
