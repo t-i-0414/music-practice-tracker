@@ -84,6 +84,7 @@ const config: Linter.Config[] = defineConfig(
           additionalTestBlockFunctions: ['it', 'test'],
         },
       ],
+      'jest/no-unnecessary-assertion': 'off',
       '@typescript-eslint/no-require-imports': 'off',
     },
   },
