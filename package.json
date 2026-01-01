@@ -110,7 +110,7 @@
     "jsdom": "27.4.0",
     "lefthook": "2.0.13",
     "markdownlint-cli": "0.47.0",
-    "msw": "2.12.6",
+    "msw": "2.12.7",
     "npm-run-all2": "8.0.4",
     "openapi-typescript": "7.10.1",
     "playwright": "1.57.0",
