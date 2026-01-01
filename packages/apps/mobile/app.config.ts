@@ -26,6 +26,12 @@ const getSplashImage = (appEnv: AppEnv): string =>
 const getIconImage = (appEnv: AppEnv): string =>
   appEnv === 'storybook' ? './src/assets/images/icon-storybook.png' : './src/assets/images/icon.png';
 
+const getForegroundImage = (appEnv: AppEnv): string =>
+  appEnv === 'storybook' ? './src/assets/images/icon-storybook.png' : './src/assets/images/adaptive-icon.png';
+
+const getBackgroundImage = (appEnv: AppEnv): string =>
+  appEnv === 'storybook' ? '' : './src/assets/images/adaptive-background.png';
+
 const getOrientation = (appEnv: AppEnv): 'portrait' | 'landscape' =>
   appEnv === 'storybook' ? 'landscape' : 'portrait';
 
@@ -42,6 +48,8 @@ export default ({ config: _config }: ConfigContext): ExpoConfig => {
   const scheme = getScheme(appEnv);
   const splash = getSplashImage(appEnv);
   const icon = getIconImage(appEnv);
+  const foregroundImage = getForegroundImage(appEnv);
+  const backgroundImage = getBackgroundImage(appEnv);
   const orientation = getOrientation(appEnv);
   const resizeMode = getResizeMode(appEnv);
 
@@ -76,8 +84,8 @@ export default ({ config: _config }: ConfigContext): ExpoConfig => {
     android: {
       package: bundleId,
       adaptiveIcon: {
-        foregroundImage: icon,
-        backgroundColor: lightBackgroundColor,
+        foregroundImage,
+        backgroundImage,
       },
       edgeToEdgeEnabled: true,
     },
