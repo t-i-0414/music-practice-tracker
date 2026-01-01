@@ -29,8 +29,8 @@ const getIconImage = (appEnv: AppEnv): string =>
 const getForegroundImage = (appEnv: AppEnv): string =>
   appEnv === 'storybook' ? './src/assets/images/icon-storybook.png' : './src/assets/images/adaptive-icon.png';
 
-const getBackgroundImage = (appEnv: AppEnv): string =>
-  appEnv === 'storybook' ? '' : './src/assets/images/adaptive-background.png';
+const getBackgroundImage = (appEnv: AppEnv): string | undefined =>
+  appEnv === 'storybook' ? undefined : './src/assets/images/adaptive-background.png';
 
 const getOrientation = (appEnv: AppEnv): 'portrait' | 'landscape' =>
   appEnv === 'storybook' ? 'landscape' : 'portrait';
