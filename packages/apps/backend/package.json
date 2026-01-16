@@ -62,13 +62,13 @@
     "type:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@nestjs/common": "11.1.10",
+    "@nestjs/common": "11.1.11",
     "@nestjs/config": "4.0.2",
-    "@nestjs/core": "11.1.10",
+    "@nestjs/core": "11.1.11",
     "@nestjs/jwt": "11.0.2",
     "@nestjs/passport": "11.0.5",
-    "@nestjs/platform-express": "11.1.10",
-    "@nestjs/swagger": "11.2.3",
+    "@nestjs/platform-express": "11.1.11",
+    "@nestjs/swagger": "11.2.4",
     "@prisma/adapter-pg": "^7.1.0",
     "@prisma/client": "7.2.0",
     "bcrypt": "6.0.0",
@@ -78,11 +78,11 @@
     "rxjs": "7.8.2"
   },
   "devDependencies": {
-    "@golevelup/ts-jest": "1.1.1",
+    "@golevelup/ts-jest": "1.2.0",
     "@music-practice-tracker/eslint-plugins": "workspace:*",
     "@nestjs/cli": "11.0.14",
     "@nestjs/schematics": "11.0.9",
-    "@nestjs/testing": "11.1.10",
+    "@nestjs/testing": "11.1.11",
     "@types/bcrypt": "6.0.0",
     "@types/express": "5.0.6",
     "@types/passport-jwt": "4.0.1",
@@ -92,6 +92,6 @@
     "firebase-admin": "13.6.0",
     "open": "11.0.0",
     "prisma": "7.2.0",
-    "supertest": "7.1.4"
+    "supertest": "7.2.2"
   }
 }
