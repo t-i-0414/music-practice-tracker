@@ -155,7 +155,7 @@ export function isPrismaFindMethod(node: TSESTree.Node): node is TSESTree.Member
   }
 
   const { property } = node;
-  if (!property || property.type !== AST_NODE_TYPES.Identifier) {
+  if (property?.type !== AST_NODE_TYPES.Identifier) {
     return false;
   }
 
