@@ -110,7 +110,8 @@ Check for: No console.log • No any types • No hardcoded values • No expose
 
 ## 🔗 Environment
 
-- **Database**: Dev (15432), Test (15433)
+- **Database**: Dev (15432 + offset), Test (15433 + offset)
+- **Git Worktree**: Supported - each worktree gets unique ports (see README.md)
 - **Custom ESLint**: repository-model-access-restriction, aggregate-import-restriction, no-internal-id
 - **Testing**: 95% coverage minimum
 

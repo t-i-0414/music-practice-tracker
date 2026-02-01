@@ -5,7 +5,7 @@ networks:
 services:
   postgres:
     image: postgres:18.0-alpine
-    container_name: music-practice-tracker-db
+    container_name: ${COMPOSE_PROJECT_NAME:-music-practice-tracker}-db
     networks:
       - music_practice_tracker_net
     environment:
@@ -22,7 +22,7 @@ services:
     ports:
       - '${POSTGRES_PORT:-15432}:5432'
     volumes:
-      - music-practice-tracker-db-data:/var/lib/postgresql/data
+      - ${COMPOSE_PROJECT_NAME:-music-practice-tracker}-db-data:/var/lib/postgresql/data
       - ./.postgres-backups:/backups
     restart: unless-stopped
     user: postgres
@@ -42,7 +42,7 @@ services:
 
   postgres-test:
     image: postgres:18.0-alpine
-    container_name: music-practice-tracker-test-db
+    container_name: ${COMPOSE_PROJECT_NAME:-music-practice-tracker}-test-db
     networks:
       - music_practice_tracker_net
     environment:
@@ -51,9 +51,9 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_INITDB_ARGS: '--auth-host=scram-sha-256'
     ports:
-      - '15433:5432'
+      - '${POSTGRES_TEST_PORT:-15433}:5432'
     volumes:
-      - music-practice-tracker-test-db-data:/var/lib/postgresql/data
+      - ${COMPOSE_PROJECT_NAME:-music-practice-tracker}-test-db-data:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U postgres -d music_practice_tracker_test']
@@ -71,6 +71,8 @@ services:
 
 volumes:
   music-practice-tracker-db-data:
+    name: ${COMPOSE_PROJECT_NAME:-music-practice-tracker}-db-data
     driver: local
   music-practice-tracker-test-db-data:
+    name: ${COMPOSE_PROJECT_NAME:-music-practice-tracker}-test-db-data
     driver: local

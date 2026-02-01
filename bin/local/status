@@ -1,0 +1,50 @@
+#!/bin/bash
+# Display current worktree status
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
+if [ ! -f "$PROJECT_ROOT/.env" ]; then
+  echo "Error: .env file not found. Run 'make setup-local' first."
+  exit 1
+fi
+
+# shellcheck disable=SC1091
+source "$PROJECT_ROOT/.env"
+
+echo "=== Worktree Environment Status ==="
+echo ""
+echo "Project: ${COMPOSE_PROJECT_NAME:-unknown}"
+echo "Port Offset: ${PORT_OFFSET:-0}"
+echo ""
+echo "Configured Ports:"
+echo "  PostgreSQL (Dev):  localhost:${POSTGRES_PORT:-15432}"
+echo "  PostgreSQL (Test): localhost:${POSTGRES_TEST_PORT:-15433}"
+echo "  App API:           http://localhost:${APP_API_PORT:-3000}"
+echo "  Admin API:         http://localhost:${ADMIN_API_PORT:-3001}"
+echo "  Admin UI:          http://localhost:${ADMIN_PORT:-8000}"
+echo "  Mobile iOS:        http://localhost:${APP_PORT_IOS:-8081}"
+echo "  Firebase Auth:     localhost:${FIREBASE_AUTH_PORT:-9099}"
+echo "  Firebase UI:       http://localhost:${FIREBASE_UI_PORT:-4000}"
+echo ""
+echo "Docker Containers:"
+docker compose -f "$PROJECT_ROOT/docker-compose.yml" ps 2>/dev/null || echo "  No containers running"
+echo ""
+echo "Local Processes:"
+if lsof -i :"${APP_API_PORT:-3000}" >/dev/null 2>&1; then
+  echo "  Backend (App API): Running on port ${APP_API_PORT:-3000}"
+else
+  echo "  Backend (App API): Not running"
+fi
+if lsof -i :"${ADMIN_PORT:-8000}" >/dev/null 2>&1; then
+  echo "  Admin Frontend: Running on port ${ADMIN_PORT:-8000}"
+else
+  echo "  Admin Frontend: Not running"
+fi
+if lsof -i :"${FIREBASE_AUTH_PORT:-9099}" >/dev/null 2>&1; then
+  echo "  Firebase Emulator: Running"
+else
+  echo "  Firebase Emulator: Not running"
+fi

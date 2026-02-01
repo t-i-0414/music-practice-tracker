@@ -1,0 +1,129 @@
+#!/bin/bash
+# Port Registry Management
+# Usage: bin/port-registry [list|cleanup|rm|reset]
+# Source: source bin/port-registry && get_next_offset
+#
+# Shared file: ~/.music-practice-tracker-ports
+# Format: OFFSET:PROJECT_PATH
+
+REGISTRY_FILE="$HOME/.music-practice-tracker-ports"
+
+# Initialize registry file if it doesn't exist
+init_registry() {
+  [ -f "$REGISTRY_FILE" ] || touch "$REGISTRY_FILE"
+}
+
+# Get list of used offsets
+get_used_offsets() {
+  init_registry
+  cut -d: -f1 "$REGISTRY_FILE" 2>/dev/null | sort -nu
+}
+
+# Get next available offset
+get_next_offset() {
+  local used_offsets
+  used_offsets=$(get_used_offsets)
+
+  for i in $(seq 0 10 990); do
+    if ! echo "$used_offsets" | grep -q "^$i$"; then
+      echo "$i"
+      return
+    fi
+  done
+  echo "0"
+}
+
+# Register an offset
+register_offset() {
+  local offset=$1
+  local project_path=$2
+  init_registry
+
+  # Remove existing entry for the same path
+  unregister_by_path "$project_path"
+
+  # Add new entry
+  echo "${offset}:${project_path}" >> "$REGISTRY_FILE"
+}
+
+# Unregister by path
+unregister_by_path() {
+  local project_path=$1
+  init_registry
+  grep -v ":${project_path}$" "$REGISTRY_FILE" > "${REGISTRY_FILE}.tmp" 2>/dev/null || true
+  mv "${REGISTRY_FILE}.tmp" "$REGISTRY_FILE"
+}
+
+# Unregister by offset number
+unregister_by_offset() {
+  local offset=$1
+  init_registry
+  grep -v "^${offset}:" "$REGISTRY_FILE" > "${REGISTRY_FILE}.tmp" 2>/dev/null || true
+  mv "${REGISTRY_FILE}.tmp" "$REGISTRY_FILE"
+}
+
+# Display registry list
+list_registry() {
+  init_registry
+  if [ -s "$REGISTRY_FILE" ]; then
+    echo "PORT_OFFSET : PROJECT_PATH"
+    echo "----------------------------"
+    sort -t: -k1 -n "$REGISTRY_FILE" | while IFS=: read -r offset path; do
+      printf "%10s : %s\n" "$offset" "$path"
+    done
+  else
+    echo "No registered ports."
+  fi
+}
+
+# Cleanup entries for non-existent paths
+cleanup_registry() {
+  init_registry
+  local cleaned=0
+  while IFS=: read -r offset path; do
+    if [ -d "$path" ]; then
+      echo "${offset}:${path}"
+    else
+      echo "Removed: $offset -> $path (not found)" >&2
+      cleaned=$((cleaned + 1))
+    fi
+  done < "$REGISTRY_FILE" > "${REGISTRY_FILE}.tmp"
+  mv "${REGISTRY_FILE}.tmp" "$REGISTRY_FILE"
+  echo "Cleaned up $cleaned stale entries." >&2
+}
+
+# Process commands only when executed as CLI
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  set -e
+  case "${1:-list}" in
+    list)
+      list_registry
+      ;;
+    cleanup)
+      cleanup_registry
+      list_registry
+      ;;
+    rm)
+      if [ -z "$2" ]; then
+        echo "Usage: bin/port-registry rm <offset>"
+        exit 1
+      fi
+      unregister_by_offset "$2"
+      echo "Removed offset: $2"
+      ;;
+    reset)
+      : > "$REGISTRY_FILE"
+      echo "Registry cleared."
+      ;;
+    *)
+      echo "Usage: bin/port-registry [list|cleanup|rm|reset]"
+      echo ""
+      echo "Commands:"
+      echo "  list           Show registered ports (default)"
+      echo "  cleanup        Remove stale entries (deleted directories)"
+      echo "  rm <offset>    Remove specified offset from registry"
+      echo "  reset          Clear all entries"
+      exit 1
+      ;;
+  esac
+fi

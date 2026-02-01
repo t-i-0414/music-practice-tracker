@@ -1,0 +1,18 @@
+#!/bin/bash
+# Display all music-practice-tracker Docker ports in use
+
+set -e
+
+echo "=== Music Practice Tracker Docker Ports in Use ==="
+echo ""
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=/dev/null
+source "$SCRIPT_DIR/../port-registry"
+
+echo "Registered Worktrees:"
+list_registry
+echo ""
+
+echo "Active Docker Containers:"
+docker ps --format 'table {{.Names}}\t{{.Ports}}' 2>/dev/null | grep -E 'music-practice-tracker|NAMES' || echo "  No matching containers running"

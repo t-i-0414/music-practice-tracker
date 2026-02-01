@@ -8,7 +8,7 @@ runs:
       shell: bash
       run: |
         echo "Setting up environment variables..."
-        make setup-env
+        make setup-ci-env
         echo "Environment variables set up successfully."
 
     - name: Setup Bun with cache
