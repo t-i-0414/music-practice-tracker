@@ -72,24 +72,24 @@ make start-firebase-dev-emulators
 
 ### Port Allocation
 
-| Service | Base | offset 0 | offset 10 | offset 20 |
-|---------|------|----------|-----------|-----------|
-| PostgreSQL (Dev) | 15432 | 15432 | 15442 | 15452 |
-| App API | 3000 | 3000 | 3010 | 3020 |
-| Admin API | 3001 | 3001 | 3011 | 3021 |
-| Admin UI | 8000 | 8000 | 8010 | 8020 |
-| Firebase Auth | 9099 | 9099 | 9109 | 9119 |
+| Service          | Base  | offset 0 | offset 10 | offset 20 |
+| ---------------- | ----- | -------- | --------- | --------- |
+| PostgreSQL (Dev) | 15432 | 15432    | 15442     | 15452     |
+| App API          | 3000  | 3000     | 3010      | 3020      |
+| Admin API        | 3001  | 3001     | 3011      | 3021      |
+| Admin UI         | 8000  | 8000     | 8010      | 8020      |
+| Firebase Auth    | 9099  | 9099     | 9109      | 9119      |
 
 ### Management Commands
 
-| Command | Description |
-|---------|-------------|
-| `make wt-status` | Show current worktree config and container status |
-| `make wt-ports` | List all ports in use |
-| `make wt-list` | List all worktrees with Docker status |
-| `make wt-clean` | Remove containers and volumes for current worktree |
-| `make ports-list` | Show registered port offsets |
-| `make ports-cleanup` | Remove entries for non-existent directories |
+| Command              | Description                                        |
+| -------------------- | -------------------------------------------------- |
+| `make wt-status`     | Show current worktree config and container status  |
+| `make wt-ports`      | List all ports in use                              |
+| `make wt-list`       | List all worktrees with Docker status              |
+| `make wt-clean`      | Remove containers and volumes for current worktree |
+| `make ports-list`    | Show registered port offsets                       |
+| `make ports-cleanup` | Remove entries for non-existent directories        |
 
 ### Cleanup
 
