@@ -3,8 +3,8 @@
 # -------------------------------------------------------------
 .PHONY: setup
 setup:
-	@echo "🔧 Setting up the environment..."
-	@${MAKE} setup-env
+	@echo "🔧 Setting up the environment with git worktree support..."
+	@bin/local/setup-env
 	@${MAKE} setup-dotenv-linter
 	bun install
 	@make -C packages/libs/tsconfig-base setup
@@ -17,22 +17,56 @@ setup:
 	@make -C packages/apps/admin setup
 	@mkdir -p .vscode && printf '{\n  "files.exclude": {\n    ".postgres-backups": true\n  },\n  "jest.enable": false,\n  "editor.codeActionsOnSave": {\n    "source.organizeImports": "never"\n  }\n}' > .vscode/settings.json
 	@echo "✅ Setup complete!"
+	@bin/local/status
 
-.PHONY: setup-env
-setup-env:
-	@echo "🔧 Setting up environment..."
-	@if [ ! -f .env ]; then \
-		echo "Creating .env file from .env.example..."; \
-		cp .env.example .env; \
-		echo "✅ .env file created"; \
-	else \
-		echo "⚠️  .env file already exists, skipping creation"; \
-	fi
+.PHONY: setup-ci-env
+setup-ci-env:
+	@echo "🔧 Setting up CI environment variables..."
+	@CI=true bin/local/setup-env
+	@echo "✅ CI environment variables set up."
 
 .PHONY: setup-dotenv-linter
 setup-dotenv-linter:
 	curl -sSfL https://raw.githubusercontent.com/dotenv-linter/dotenv-linter/master/install.sh | sh -s
 
+# -------------------------------------------------------------
+# Docker Compose
+# -------------------------------------------------------------
+.PHONY: docker-compose-up
+docker-compose-up:
+	@echo "🐳 Starting Docker containers..."
+	docker compose up -d
+	@echo "✅ Docker containers started"
+
+.PHONY: docker-compose-down
+docker-compose-down:
+	@echo "🐳 Stopping Docker containers..."
+	docker compose down
+	@echo "✅ Docker containers stopped"
+
+.PHONY: docker-compose-down-volumes
+docker-compose-down-volumes:
+	@echo "🐳 Stopping Docker containers and removing volumes..."
+	docker compose down -v --remove-orphans
+	@echo "✅ Docker containers and volumes removed"
+
+.PHONY: docker-compose-restart
+docker-compose-restart:
+	@echo "🐳 Restarting Docker containers..."
+	docker compose restart
+	@echo "✅ Docker containers restarted"
+
+.PHONY: docker-compose-logs
+docker-compose-logs:
+	docker compose logs -f
+
+.PHONY: docker-compose-ps
+docker-compose-ps:
+	docker compose ps
+
+# -------------------------------------------------------------
+# Firebase
+# -------------------------------------------------------------
 .PHONY: firebase-login
 firebase-login:
 	@echo "🔐 Logging into Firebase..."
@@ -62,32 +96,57 @@ firebase-use-prod-project:
 
 .PHONY: start-firebase-dev-emulators
 start-firebase-dev-emulators:
-	@echo "🔍 Checking if Firebase emulators are already running..."
-	@if lsof -Pi :9099 -sTCP:LISTEN -t >/dev/null 2>&1 || \
-		lsof -Pi :4000 -sTCP:LISTEN -t >/dev/null 2>&1 || \
-		lsof -Pi :4400 -sTCP:LISTEN -t >/dev/null 2>&1; then \
-		echo "⚠️  Firebase emulators are already running on dev ports (Auth: 9099, UI: 4000)"; \
-		echo "📝 To view the emulator UI, open: http://localhost:4000"; \
-	else \
-		echo "🚀 Starting Firebase emulators..."; \
-		firebase emulators:start --config firebase.dev.json --project dev --import ./.firebase-emulator-data/dev --export-on-exit; \
-	fi
+	@echo "🚀 Starting Firebase dev emulators..."
+	@bin/firebase/start-dev-emulators
 
 .PHONY: start-firebase-test-emulators
 start-firebase-test-emulators:
-	@echo "🔍 Checking if Firebase emulators are already running..."
-	@if lsof -Pi :9199 -sTCP:LISTEN -t >/dev/null 2>&1 || \
-		lsof -Pi :4001 -sTCP:LISTEN -t >/dev/null 2>&1 || \
-		lsof -Pi :4401 -sTCP:LISTEN -t >/dev/null 2>&1; then \
-		echo "⚠️  Firebase emulators are already running on test ports (Auth: 9199, UI: 4001)"; \
-		echo "📝 To view the emulator UI, open: http://localhost:4001"; \
-	else \
-		echo "🚀 Starting Firebase emulators..."; \
-		firebase emulators:start --config firebase.test.json --project music-practice-tracker-test; \
-	fi
+	@echo "🚀 Starting Firebase test emulators..."
+	@bin/firebase/start-test-emulators
 
 .PHONY: stop-firebase-emulators
 stop-firebase-emulators:
 	@echo "🛑 Stopping Firebase emulators..."
 	@pkill -f "firebase emulators:start" 2>/dev/null || true
 	@echo "✅ Firebase emulators stopped"
+
+# -------------------------------------------------------------
+# Git Worktree Management
+# -------------------------------------------------------------
+.PHONY: wt-status
+wt-status:
+	@bin/wt/status
+
+.PHONY: wt-list
+wt-list:
+	@bin/wt/list
+
+.PHONY: wt-ports
+wt-ports:
+	@bin/wt/ports
+
+.PHONY: wt-clean
+wt-clean:
+	@bin/wt/clean
+
+# -------------------------------------------------------------
+# Port Registry Management
+# -------------------------------------------------------------
+.PHONY: ports-list
+ports-list:
+	@bin/port-registry list
+
+.PHONY: ports-cleanup
+ports-cleanup:
+	@bin/port-registry cleanup
+
+.PHONY: ports-reset
+ports-reset:
+	@bin/port-registry reset
+
+# -------------------------------------------------------------
+# Status
+# -------------------------------------------------------------
+.PHONY: status
+status:
+	@bin/local/status

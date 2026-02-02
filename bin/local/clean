@@ -1,0 +1,23 @@
+#!/bin/bash
+# Remove Docker resources for current worktree
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
+if [ ! -f "$PROJECT_ROOT/.env" ]; then
+  echo "Error: .env file not found."
+  exit 1
+fi
+
+# shellcheck disable=SC1091
+source "$PROJECT_ROOT/.env"
+
+echo "This will remove infrastructure containers and volumes for: ${COMPOSE_PROJECT_NAME:-unknown}"
+read -p "Continue? [y/N] " -n 1 -r
+echo
+[[ ! $REPLY =~ ^[Yy]$ ]] && exit 0
+
+docker compose -f "$PROJECT_ROOT/docker-compose.yml" down -v --remove-orphans
+echo "Cleanup complete for ${COMPOSE_PROJECT_NAME:-unknown}"
