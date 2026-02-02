@@ -72,13 +72,14 @@ make start-firebase-dev-emulators
 
 ### Port Allocation
 
-| Service          | Base  | offset 0 | offset 10 | offset 20 |
-| ---------------- | ----- | -------- | --------- | --------- |
-| PostgreSQL (Dev) | 15432 | 15432    | 15442     | 15452     |
-| App API          | 3000  | 3000     | 3010      | 3020      |
-| Admin API        | 3001  | 3001     | 3011      | 3021      |
-| Admin UI         | 8000  | 8000     | 8010      | 8020      |
-| Firebase Auth    | 9099  | 9099     | 9109      | 9119      |
+| Service           | Base  | offset 0 | offset 10 | offset 20 |
+| ----------------- | ----- | -------- | --------- | --------- |
+| PostgreSQL (Dev)  | 15432 | 15432    | 15442     | 15452     |
+| PostgreSQL (Test) | 15433 | 15433    | 15443     | 15453     |
+| App API           | 3000  | 3000     | 3010      | 3020      |
+| Admin API         | 3001  | 3001     | 3011      | 3021      |
+| Admin UI          | 8000  | 8000     | 8010      | 8020      |
+| Firebase Auth     | 9099  | 9099     | 9109      | 9119      |
 
 ### Management Commands
 
