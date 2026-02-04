@@ -11,7 +11,14 @@ Run `make setup` once to install dependencies, generate `.env` with worktree-awa
 - `cd packages/apps/backend && bun run start:dev`
 - `cd packages/apps/admin && bun run start:dev`
 - `cd packages/apps/mobile && bun run start:dev`
-  Repo-wide quality gate: `bun run quality:check`; autofix with `bun run quality:fix`. Regenerate frontend API clients after backend changes using `bun run gen:api-types` inside admin/mobile.
+- Or use Turborepo: `bun turbo start:dev` (starts all apps in parallel)
+
+Repo-wide quality checks use Turborepo for parallel execution:
+- `bun turbo lint:es:check type:check` - ESLint and TypeScript checks
+- `bun turbo test` - Run all tests
+- `bun run lint:es:check:root` - Root-level ESLint only
+
+Regenerate frontend API clients after backend changes using `bun run gen:api-types` inside admin/mobile.
 
 ## Coding Style & Naming Conventions
 

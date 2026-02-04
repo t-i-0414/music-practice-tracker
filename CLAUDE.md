@@ -6,7 +6,7 @@
 
 1. **Do exactly what's asked** - No extra features, files, or documentation unless explicitly requested
 2. **Follow existing patterns** - Study neighboring code before writing
-3. **Quality gates are mandatory** - Run `bun run ci:temp` before ANY commit
+3. **Quality gates are mandatory** - Run `bun turbo lint:es:check type:check` before ANY commit
 4. **Use existing libraries** - Check package.json before assuming availability
 
 ## 🏗️ Architecture
@@ -60,9 +60,11 @@ make start-firebase-dev-emulators   # Firebase
 cd packages/apps/backend && bun run start:dev    # Both APIs
 cd packages/apps/admin && bun run start:dev      # Admin UI
 cd packages/apps/mobile && bun run start:dev     # Mobile
+bun turbo start:dev                              # All apps (parallel)
 
-# Quality (REQUIRED before commit)
-bun run ci:temp                    # Runs all checks
+# Quality (REQUIRED before commit - Turborepo)
+bun turbo lint:es:check type:check  # ESLint + TypeScript (parallel)
+bun turbo test                      # All tests
 
 # Database
 bunx prisma migrate dev --name [name]  # New migration
@@ -98,12 +100,12 @@ bun run seed:user         # DB users only
 ## ⚠️ Rules
 
 **DON'T**: Use npm • Expose internal IDs • Skip quality checks • Add unnecessary comments
-**DO**: Use bun • Use publicId only • Run ci:temp • Separate Query/Command • Use OrFail pattern
+**DO**: Use bun • Use publicId only • Run Turborepo checks • Separate Query/Command • Use OrFail pattern
 
 ## 📋 Pre-Commit
 
 ```bash
-bun run ci:temp  # MUST pass
+bun turbo lint:es:check type:check  # MUST pass
 ```
 
 Check for: No console.log • No any types • No hardcoded values • No exposed IDs
