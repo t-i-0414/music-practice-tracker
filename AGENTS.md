@@ -14,6 +14,7 @@ Run `make setup` once to install dependencies, generate `.env` with worktree-awa
 - Or use Turborepo: `bun turbo start:dev` (starts all apps in parallel)
 
 Repo-wide quality checks use Turborepo for parallel execution:
+
 - `bun turbo lint:es:check type:check` - ESLint and TypeScript checks
 - `bun turbo test` - Run all tests
 - `bun run lint:es:check:root` - Root-level ESLint only

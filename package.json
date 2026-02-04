@@ -13,7 +13,7 @@
     "packages/libs/*"
   ],
   "scripts": {
-    "build": "turbo build",
+    "build": "bun turbo build",
     "changeset:add": "changeset",
     "changeset:version": "changeset version",
     "cspell": "cspell '**'",
@@ -23,17 +23,17 @@
     "lint:dotenv:check": "./bin/dotenv-linter",
     "lint:dotenv:compare": "./bin/dotenv-linter compare .env .env.*",
     "lint:dotenv:fix": "./bin/dotenv-linter fix",
-    "lint:es:check": "turbo lint:es:check",
+    "lint:es:check": "bun turbo lint:es:check",
     "lint:es:check:root": "eslint",
-    "lint:es:fix": "turbo lint:es:fix && eslint --fix",
+    "lint:es:fix": "bun turbo lint:es:fix && eslint --fix",
     "lint:markdown:check": "markdownlint '**/*.md' --ignore '**/node_modules/**'",
     "lint:markdown:fix": "markdownlint '**/*.md' --ignore '**/node_modules/**' --fix",
     "lint:secret:check": "secretlint '**/*'",
     "lint:secret:fix": "secretlint --fix '**/*'",
     "lint:shell:check": "sh scripts/lint-shell.sh",
-    "test": "turbo test",
-    "test:cov": "turbo test:cov",
-    "type:check": "turbo type:check",
+    "test": "bun turbo test",
+    "test:cov": "bun turbo test:cov",
+    "type:check": "bun turbo type:check",
     "type:check:root": "tsc --noEmit"
   },
   "dependencies": {
