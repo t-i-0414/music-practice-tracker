@@ -38,7 +38,7 @@
       "cache": true,
       "env": ["DATABASE_URL", "FIREBASE_*"]
     },
-    "dev": {
+    "start:dev": {
       "dependsOn": ["^build"],
       "cache": false,
       "persistent": true
