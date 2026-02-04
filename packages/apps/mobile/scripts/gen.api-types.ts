@@ -1,7 +1,7 @@
 import 'dotenv/config';
 
-const host = process.env.HOST ?? 'localhost';
-const port = process.env.APP_API_PORT ?? '3000';
+const host = String(process.env.HOST ?? 'localhost');
+const port = String(process.env.APP_API_PORT ?? '3000');
 
 console.log(`🔗 Generating API types at http://${host}:${port}/api`);
 

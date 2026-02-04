@@ -9,7 +9,6 @@ import { useUpdatesContext } from '../context/UpdatesProvider';
 import { ThemedText } from '@/components/ThemedText';
 import { useThemeColor } from '@/hooks/useThemeColor';
 
-
 const BANNER_HEIGHT = 48;
 const PROGRESS_BAR_HEIGHT = 3;
 const BORDER_RADIUS = 8;

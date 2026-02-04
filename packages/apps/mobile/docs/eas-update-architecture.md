@@ -8,24 +8,24 @@ Music Practice Tracker モバイルアプリに EAS Update (OTA更新) を統合
 
 ### 1.2 スコープ
 
-| 対象 | 含む/含まない |
-|------|--------------|
-| アプリ内更新検知・ダウンロード・適用 | ✅ 含む |
-| GitHub Actions による自動デプロイ | ✅ 含む |
-| チャンネル別環境管理 (dev/staging/production) | ✅ 含む |
-| ロールバック対応 | ✅ 含む |
-| ネイティブコード変更を伴う更新 | ❌ 含まない (ストア経由) |
+| 対象                                          | 含む/含まない            |
+| --------------------------------------------- | ------------------------ |
+| アプリ内更新検知・ダウンロード・適用          | ✅ 含む                  |
+| GitHub Actions による自動デプロイ             | ✅ 含む                  |
+| チャンネル別環境管理 (dev/staging/production) | ✅ 含む                  |
+| ロールバック対応                              | ✅ 含む                  |
+| ネイティブコード変更を伴う更新                | ❌ 含まない (ストア経由) |
 
 ### 1.3 現在の状態
 
-| 項目 | 状態 | 備考 |
-|------|------|------|
-| `expo-updates` | ✅ インストール済み | v29.0.15 |
-| `eas.json` チャンネル設定 | ✅ 設定済み | dev/staging/production |
-| `runtimeVersion` ポリシー | ✅ 設定済み | `appVersion` |
-| EAS Project ID | ✅ 設定済み | `382a6dba-a16c-4b4d-91be-abade4f6c750` |
-| GitHub Actions | ❌ 未設定 | CI/CD連携なし |
-| アプリ内更新UI | ❌ 未実装 | `useUpdates` フック未使用 |
+| 項目                      | 状態                | 備考                                   |
+| ------------------------- | ------------------- | -------------------------------------- |
+| `expo-updates`            | ✅ インストール済み | v29.0.15                               |
+| `eas.json` チャンネル設定 | ✅ 設定済み         | dev/staging/production                 |
+| `runtimeVersion` ポリシー | ✅ 設定済み         | `appVersion`                           |
+| EAS Project ID            | ✅ 設定済み         | `382a6dba-a16c-4b4d-91be-abade4f6c750` |
+| GitHub Actions            | ❌ 未設定           | CI/CD連携なし                          |
+| アプリ内更新UI            | ❌ 未実装           | `useUpdates` フック未使用              |
 
 ---
 
@@ -78,12 +78,12 @@ Music Practice Tracker モバイルアプリに EAS Update (OTA更新) を統合
 
 ### 2.2 チャンネル・ブランチ構成
 
-| Channel | Git Branch | 用途 | 配信先 |
-|---------|------------|------|--------|
-| `development` | develop / PR | 開発・PRプレビュー | 開発チーム |
-| `staging` | staging | QAテスト | TestFlight / 内部テスト |
-| `production` | main | 本番リリース | App Store / Google Play |
-| `storybook` | - | UIコンポーネント確認 | デザインチーム |
+| Channel       | Git Branch   | 用途                 | 配信先                  |
+| ------------- | ------------ | -------------------- | ----------------------- |
+| `development` | develop / PR | 開発・PRプレビュー   | 開発チーム              |
+| `staging`     | staging      | QAテスト             | TestFlight / 内部テスト |
+| `production`  | main         | 本番リリース         | App Store / Google Play |
+| `storybook`   | -            | UIコンポーネント確認 | デザインチーム          |
 
 ---
 
@@ -253,11 +253,11 @@ interface UpdatesContextValue extends UseAppUpdatesReturn {
 
 ### 5.1 ワークフロー構成
 
-| ワークフロー | トリガー | アクション |
-|-------------|---------|-----------|
-| `eas-preview.yml` | Pull Request | `eas update --auto` |
-| `eas-staging.yml` | push to staging | `eas update --channel staging` |
-| `eas-production.yml` | push to main | `eas update --channel production` |
+| ワークフロー         | トリガー        | アクション                        |
+| -------------------- | --------------- | --------------------------------- |
+| `eas-preview.yml`    | Pull Request    | `eas update --auto`               |
+| `eas-staging.yml`    | push to staging | `eas update --channel staging`    |
+| `eas-production.yml` | push to main    | `eas update --channel production` |
 
 ### 5.2 setup-eas Action (新規)
 
@@ -365,8 +365,8 @@ jobs:
 
 ### 6.2 必要な環境変数・シークレット
 
-| 名前 | 場所 | 用途 | 取得元 |
-|------|------|------|--------|
+| 名前         | 場所           | 用途         | 取得元                                                        |
+| ------------ | -------------- | ------------ | ------------------------------------------------------------- |
 | `EXPO_TOKEN` | GitHub Secrets | EAS CLI 認証 | [Expo Access Tokens](https://expo.dev/settings/access-tokens) |
 
 ---
