@@ -13,9 +13,9 @@
     "packages/libs/*"
   ],
   "scripts": {
+    "build": "turbo build",
     "changeset:add": "changeset",
     "changeset:version": "changeset version",
-    "ci:temp": "bun run format:fix && bun run cspell && bun run lint:es:check && bun run type:check",
     "cspell": "cspell '**'",
     "format:check": "prettier --check .",
     "format:fix": "prettier --write . && bun run format:prisma",
@@ -23,16 +23,18 @@
     "lint:dotenv:check": "./bin/dotenv-linter",
     "lint:dotenv:compare": "./bin/dotenv-linter compare .env .env.*",
     "lint:dotenv:fix": "./bin/dotenv-linter fix",
-    "lint:es:check": "eslint && sh scripts/lint-es.sh",
+    "lint:es:check": "turbo lint:es:check",
+    "lint:es:check:root": "eslint && sh scripts/lint-es.sh",
     "lint:es:fix": "eslint --fix && sh scripts/lint-es.sh --fix",
     "lint:markdown:check": "markdownlint '**/*.md' --ignore '**/node_modules/**'",
     "lint:markdown:fix": "markdownlint '**/*.md' --ignore '**/node_modules/**' --fix",
     "lint:secret:check": "secretlint '**/*'",
     "lint:secret:fix": "secretlint --fix '**/*'",
     "lint:shell:check": "sh scripts/lint-shell.sh",
-    "quality:check": "bun run format:check && bun run cspell && bun run lint:es:check && bun run type:check",
-    "quality:fix": "bun run format:fix && bun run cspell && bun run lint:es:fix && bun run type:check",
-    "type:check": "tsc --noEmit && sh scripts/type_check.sh"
+    "test": "turbo test",
+    "test:cov": "turbo test:cov",
+    "type:check": "turbo type:check",
+    "type:check:root": "tsc --noEmit"
   },
   "dependencies": {
     "dotenv": "17.2.3",
@@ -122,9 +124,11 @@
     "ts-loader": "9.5.4",
     "ts-node": "10.9.2",
     "tsconfig-paths": "4.2.0",
+    "turbo": "^2.8.3",
     "typescript": "5.9.3",
     "typescript-eslint": "8.54.0",
     "vite": "7.3.1",
     "vitest": "4.0.18"
-  }
+  },
+  "packageManager": "bun@1.3.8"
 }
