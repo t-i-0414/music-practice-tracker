@@ -8,6 +8,7 @@ import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
 import SpaceMono from '@/assets/fonts/SpaceMono-Regular.ttf';
+import { UpdatesProvider } from '@/features/updates';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 const RootLayout: React.FC = () => {
@@ -22,13 +23,15 @@ const RootLayout: React.FC = () => {
   }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
-        <Stack.Screen name='+not-found' />
-      </Stack>
-      <StatusBar style='auto' />
-    </ThemeProvider>
+    <UpdatesProvider>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <Stack>
+          <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
+          <Stack.Screen name='+not-found' />
+        </Stack>
+        <StatusBar style='auto' />
+      </ThemeProvider>
+    </UpdatesProvider>
   );
 };
 
