@@ -20,6 +20,10 @@
       "outputs": [],
       "cache": true
     },
+    "lint:es:fix": {
+      "dependsOn": ["^build"],
+      "cache": false
+    },
     "test": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", "tests/**"],
