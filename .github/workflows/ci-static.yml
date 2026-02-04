@@ -130,6 +130,9 @@ jobs:
 
       - name: Setup Base Project
         uses: ./.github/actions/setup-base-project
+        with:
+          turbo_token: ${{ secrets.TURBO_TOKEN }}
+          turbo_team: ${{ secrets.TURBO_TEAM }}
 
       - name: Setup Backend Project
         uses: ./.github/actions/setup-backend

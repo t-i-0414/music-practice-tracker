@@ -1,5 +1,13 @@
 name: 'Setup Base Project'
-description: ''
+description: 'Setup base project with Bun, ESLint packages, and Turborepo cache'
+
+inputs:
+  turbo_token:
+    description: 'Vercel Remote Cache token for Turborepo'
+    required: false
+  turbo_team:
+    description: 'Vercel team slug for Turborepo Remote Cache'
+    required: false
 
 runs:
   using: 'composite'
@@ -13,6 +21,12 @@ runs:
 
     - name: Setup Bun with cache
       uses: ./.github/actions/setup-bun
+
+    - name: Setup Turborepo Cache
+      uses: ./.github/actions/setup-turborepo-cache
+      with:
+        turbo_token: ${{ inputs.turbo_token }}
+        turbo_team: ${{ inputs.turbo_team }}
 
     - name: Build ESLint Packages
       uses: ./.github/actions/build-eslint-packages
