@@ -119,11 +119,11 @@ jobs:
           reporter: github-pr-review
           dotenv_linter_flags: --skip UnorderedKey
 
-  check-es-lint:
-    name: Check ESLint
+  check-lint-and-type:
+    name: Check ESLint & Type (Turborepo)
     needs: setup
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Checkout Repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
@@ -137,29 +137,8 @@ jobs:
           skip_migrations: 'true'
           need_db: 'false'
 
-      - name: Run ESLint Check
-        run: bun run lint:es:check
-
-  check-type:
-    name: Check Type
-    needs: setup
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-
-      - name: Setup Base Project
-        uses: ./.github/actions/setup-base-project
-
-      - name: Setup Backend Project
-        uses: ./.github/actions/setup-backend
-        with:
-          skip_migrations: 'true'
-          need_db: 'false'
-
-      - name: Run Type Check
-        run: bun run type:check
+      - name: Run ESLint & Type Check with Turborepo
+        run: bun turbo lint:es:check type:check
 
   check-schema:
     name: Check Schema
