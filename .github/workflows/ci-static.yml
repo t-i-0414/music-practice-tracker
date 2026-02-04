@@ -143,6 +143,9 @@ jobs:
       - name: Run ESLint & Type Check with Turborepo
         run: bun turbo lint:es:check type:check
 
+      - name: Run Root ESLint & Type Check
+        run: bun run lint:es:check:root && bun run type:check:root
+
   check-schema:
     name: Check Schema
     needs: setup
