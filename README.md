@@ -103,11 +103,16 @@ make ports-cleanup                                      # Clean port registry
 ## Development
 
 ```bash
-# Quality checks (required before commit)
-bun run ci:temp
+# Quality checks (Turborepo - parallel execution)
+bun turbo lint:es:check type:check  # ESLint + TypeScript
+bun turbo test                      # All tests
+
+# Individual checks
+bun run lint:es:check:root          # Root ESLint only
+bun run type:check:root             # Root TypeScript only
 
 # Testing
-bun run test                        # Backend unit/integration tests
+bun turbo test                      # All package tests (parallel)
 cd packages/apps/admin && bun run test:e2e   # Admin E2E (Playwright)
 cd packages/apps/mobile && bun run test:e2e  # Mobile E2E (Maestro)
 
@@ -118,6 +123,31 @@ bun run prisma:migrate:dev
 # API Docs (check .env for actual ports)
 # http://localhost:${APP_API_PORT}/api   - App API
 # http://localhost:${ADMIN_API_PORT}/api - Admin API
+```
+
+## Turborepo
+
+This monorepo uses [Turborepo](https://turbo.build/) for build optimization with intelligent caching.
+
+```bash
+# Common commands
+bun turbo build                     # Build all packages
+bun turbo lint:es:check type:check  # Parallel lint + type check
+bun turbo test                      # Run all tests
+bun turbo start:dev                 # Start all apps
+
+# Filter by package (use package name or path)
+bun turbo build --filter=@music-practice-tracker/backend
+bun turbo test --filter=./packages/apps/admin
+```
+
+### Remote Cache
+
+CI uses Vercel Remote Cache for faster builds. Configure locally (optional):
+
+```bash
+bunx turbo login
+bunx turbo link
 ```
 
 ## License

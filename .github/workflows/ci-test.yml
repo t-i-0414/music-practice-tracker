@@ -27,6 +27,9 @@ jobs:
 
       - name: Setup Base Project
         uses: ./.github/actions/setup-base-project
+        with:
+          turbo_token: ${{ secrets.TURBO_TOKEN }}
+          turbo_team: ${{ secrets.TURBO_TEAM }}
 
   test-admin:
     name: Apps / Test Admin
@@ -39,6 +42,9 @@ jobs:
 
       - name: Setup Base Project
         uses: ./.github/actions/setup-base-project
+        with:
+          turbo_token: ${{ secrets.TURBO_TOKEN }}
+          turbo_team: ${{ secrets.TURBO_TEAM }}
 
       - name: Setup Backend Project
         uses: ./.github/actions/setup-backend
@@ -75,6 +81,9 @@ jobs:
 
       - name: Setup Base Project
         uses: ./.github/actions/setup-base-project
+        with:
+          turbo_token: ${{ secrets.TURBO_TOKEN }}
+          turbo_team: ${{ secrets.TURBO_TEAM }}
 
       - name: Setup Backend Project
         uses: ./.github/actions/setup-backend
@@ -105,6 +114,9 @@ jobs:
 
       - name: Setup Base Project
         uses: ./.github/actions/setup-base-project
+        with:
+          turbo_token: ${{ secrets.TURBO_TOKEN }}
+          turbo_team: ${{ secrets.TURBO_TEAM }}
 
       - name: Setup Mobile Project
         uses: ./.github/actions/setup-mobile
@@ -130,6 +142,9 @@ jobs:
 
       - name: Setup Base Project
         uses: ./.github/actions/setup-base-project
+        with:
+          turbo_token: ${{ secrets.TURBO_TOKEN }}
+          turbo_team: ${{ secrets.TURBO_TEAM }}
 
       - name: Run ESLint Plugins Tests
         run: |

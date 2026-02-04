@@ -193,3 +193,6 @@ bin/dotenv-linter
 firepit-log.txt
 .firebase-emulator-data/
 firepit-log.txt
+
+# Turborepo
+.turbo/
