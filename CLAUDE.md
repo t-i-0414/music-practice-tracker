@@ -6,7 +6,7 @@
 
 1. **Do exactly what's asked** - No extra features, files, or documentation unless explicitly requested
 2. **Follow existing patterns** - Study neighboring code before writing
-3. **Quality gates are mandatory** - Run `bun turbo lint:es:check type:check` before ANY commit
+3. **Quality gates are mandatory** - Run Turborepo checks + root checks before ANY commit
 4. **Use existing libraries** - Check package.json before assuming availability
 
 ## 🏗️ Architecture
@@ -62,8 +62,10 @@ cd packages/apps/admin && bun run start:dev      # Admin UI
 cd packages/apps/mobile && bun run start:dev     # Mobile
 bun turbo start:dev                              # All apps (parallel)
 
-# Quality (REQUIRED before commit - Turborepo)
-bun turbo lint:es:check type:check  # ESLint + TypeScript (parallel)
+# Quality (REQUIRED before commit)
+bun turbo lint:es:check type:check  # Package checks (parallel)
+bun run lint:es:check:root          # Root ESLint
+bun run type:check:root             # Root TypeScript
 bun turbo test                      # All tests
 
 # Database
@@ -105,7 +107,11 @@ bun run seed:user         # DB users only
 ## 📋 Pre-Commit
 
 ```bash
-bun turbo lint:es:check type:check  # MUST pass
+# Package checks (Turborepo)
+bun turbo lint:es:check type:check
+
+# Root checks (required by CI)
+bun run lint:es:check:root && bun run type:check:root
 ```
 
 Check for: No console.log • No any types • No hardcoded values • No exposed IDs

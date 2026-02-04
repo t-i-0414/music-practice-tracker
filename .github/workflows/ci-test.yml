@@ -27,6 +27,9 @@ jobs:
 
       - name: Setup Base Project
         uses: ./.github/actions/setup-base-project
+        with:
+          turbo_token: ${{ secrets.TURBO_TOKEN }}
+          turbo_team: ${{ secrets.TURBO_TEAM }}
 
   test-admin:
     name: Apps / Test Admin
