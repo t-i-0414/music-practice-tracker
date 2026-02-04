@@ -1,0 +1,51 @@
+name: EAS Production Deploy
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'packages/apps/mobile/**'
+      - '.github/workflows/eas-production.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check for EXPO_TOKEN
+        run: |
+          if [ -z "${{ secrets.EXPO_TOKEN }}" ]; then
+            echo "::error::EXPO_TOKEN secret is required for production deployment."
+            echo "Add EXPO_TOKEN to repository secrets: https://expo.dev/settings/access-tokens"
+            exit 1
+          fi
+
+      - name: Checkout Repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+
+      - name: Setup Base Project
+        uses: ./.github/actions/setup-base-project
+
+      - name: Setup EAS
+        uses: ./.github/actions/setup-eas
+        with:
+          expo_token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Publish EAS Update to Production
+        working-directory: packages/apps/mobile
+        run: |
+          echo "Publishing EAS Update to production channel..."
+          eas update \
+            --channel production \
+            --message "${{ github.event.head_commit.message }}" \
+            --non-interactive
+          echo "EAS Update published successfully to production channel"

@@ -1,0 +1,23 @@
+name: 'Setup EAS'
+description: 'Set up Expo EAS CLI for mobile deployments'
+
+inputs:
+  expo_token:
+    description: 'Expo access token for authentication'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup EAS CLI
+      uses: expo/expo-github-action@v8
+      with:
+        eas-version: latest
+        token: ${{ inputs.expo_token }}
+
+    - name: Verify EAS CLI Installation
+      shell: bash
+      run: |
+        echo "Verifying EAS CLI installation..."
+        eas --version
+        echo "EAS CLI installed successfully"
