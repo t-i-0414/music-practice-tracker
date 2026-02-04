@@ -34,7 +34,7 @@ TypeScript is required throughout, inheriting settings from `packages/libs/tscon
 
 ## Commit & Pull Request Guidelines
 
-Follow Conventional Commits with approved scopes (`backend`, `admin`, `mobile`, `eslint-configs`, `eslint-plugins`, `tsconfig-base`). PRs should explain intent, link issues, outline risks/rollbacks, and include UI screenshots when adjusting admin or mobile surfaces. Run `bun run quality:check` plus affected package-level tests before pushing; CI expects parity.
+Follow Conventional Commits with approved scopes (`backend`, `admin`, `mobile`, `eslint-configs`, `eslint-plugins`, `tsconfig-base`). PRs should explain intent, link issues, outline risks/rollbacks, and include UI screenshots when adjusting admin or mobile surfaces. Run `bun turbo lint:es:check type:check` plus affected package-level tests before pushing; CI expects parity.
 
 ## Security & Configuration Tips
 

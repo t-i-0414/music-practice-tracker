@@ -136,9 +136,9 @@ bun turbo lint:es:check type:check  # Parallel lint + type check
 bun turbo test                      # Run all tests
 bun turbo start:dev                 # Start all apps
 
-# Filter by package
-bun turbo build --filter=backend
-bun turbo test --filter=admin
+# Filter by package (use package name or path)
+bun turbo build --filter=@music-practice-tracker/backend
+bun turbo test --filter=./packages/apps/admin
 ```
 
 ### Remote Cache
