@@ -54,6 +54,7 @@ jobs:
         if: steps.check-token.outputs.has_token == 'true'
         working-directory: packages/apps/mobile
         env:
+          APP_ENV: storybook
           EAS_UPDATE_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
           echo "Publishing EAS Update to storybook channel..."

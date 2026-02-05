@@ -53,6 +53,8 @@ jobs:
       - name: Create EAS Update Preview
         if: steps.check-token.outputs.has_token == 'true'
         uses: expo/expo-github-action/preview@v8
+        env:
+          APP_ENV: development
         with:
           working-directory: packages/apps/mobile
           command: eas update --branch pr${{ github.event.pull_request.number }} --message PR-${{ github.event.pull_request.number }}

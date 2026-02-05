@@ -46,6 +46,7 @@ jobs:
       - name: Publish EAS Update to Production
         working-directory: packages/apps/mobile
         env:
+          APP_ENV: production
           EAS_UPDATE_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
           echo "Publishing EAS Update to production channel..."
