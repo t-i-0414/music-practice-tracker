@@ -60,12 +60,20 @@ export const UpdateBanner: React.FC = () => {
               style={[styles.updateButton, { backgroundColor: buttonBackgroundColor }]}
               onPress={handleUpdate}
               activeOpacity={0.7}
+              accessibilityLabel='Download and apply update'
+              accessibilityRole='button'
             >
               <ThemedText style={[styles.updateButtonText, { color: buttonTextColor }]}>Update</ThemedText>
             </TouchableOpacity>
           )}
 
-          <TouchableOpacity style={styles.closeButton} onPress={hideBanner} activeOpacity={0.7}>
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={hideBanner}
+            activeOpacity={0.7}
+            accessibilityLabel='Dismiss update notification'
+            accessibilityRole='button'
+          >
             <ThemedText style={[styles.closeButtonText, { color: textColor }]}>✕</ThemedText>
           </TouchableOpacity>
         </View>
