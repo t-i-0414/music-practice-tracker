@@ -69,6 +69,13 @@ export const useAppUpdates = (): UseAppUpdatesReturn => {
     setManualDownloadError(null);
 
     try {
+      // If update is already downloaded and pending, just reload to apply it
+      if (isUpdatePending) {
+        await Updates.reloadAsync();
+        return;
+      }
+
+      // Otherwise, fetch the update first
       const result = await Updates.fetchUpdateAsync();
 
       if (result.isNew) {
@@ -79,7 +86,7 @@ export const useAppUpdates = (): UseAppUpdatesReturn => {
       setManualDownloadError(err);
       throw err;
     }
-  }, []);
+  }, [isUpdatePending]);
 
   return {
     isEnabled: Updates.isEnabled,
