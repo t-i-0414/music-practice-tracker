@@ -39,7 +39,7 @@ import { useAppUpdates } from '@/features/updates/hooks/useAppUpdates';
 const mockedUseAppUpdates = jest.mocked(useAppUpdates);
 
 // Simple child component for rendering tests
-const TestChild: React.FC = () => <View testID="test-child" />;
+const TestChild: React.FC = () => <View testID='test-child' />;
 
 const createMockUseAppUpdatesReturn = (overrides: Partial<UseAppUpdatesReturn> = {}): UseAppUpdatesReturn => ({
   isEnabled: true,
@@ -56,9 +56,7 @@ const createMockUseAppUpdatesReturn = (overrides: Partial<UseAppUpdatesReturn> =
   ...overrides,
 });
 
-const wrapper = ({ children }: { children: React.ReactNode }) => (
-  <UpdatesProvider>{children}</UpdatesProvider>
-);
+const wrapper = ({ children }: { children: React.ReactNode }) => <UpdatesProvider>{children}</UpdatesProvider>;
 
 describe('UpdatesProvider', () => {
   beforeEach(() => {
