@@ -2,13 +2,13 @@ import {
   baseConfig,
   baseScriptConfigRules,
   importConfigRules,
+  jestConfig,
   reactConfigRules,
   reactNativeConfig,
   sharedIgnores,
   storybookConfig,
   testFilePatterns,
   tsConfigRules,
-  vitestConfig,
 } from '@music-practice-tracker/eslint-configs';
 import { defineConfig, globalIgnores } from 'eslint/config';
 import prettierConfig from 'eslint-config-prettier/flat';
@@ -48,7 +48,26 @@ const config = defineConfig(
   },
   {
     files: testFilePatterns({ prefix: 'tests/unit' }),
-    extends: [vitestConfig],
+    extends: [jestConfig],
+    rules: {
+      // Path aliases (@/) are not resolved by ESLint
+      'jest/valid-mock-module-path': 'off',
+      // Type inference works fine without explicit type parameters
+      'jest/no-untyped-mock-factory': 'off',
+      // toBeDefined() is explicit and intentional
+      'jest/no-unnecessary-assertion': 'off',
+      // waitFor and other patterns don't always end with expect
+      'jest/prefer-ending-with-an-expect': 'off',
+      // Top-level mock setup is standard Jest pattern
+      'jest/require-hook': 'off',
+      // toHaveBeenCalledTimes is valid when args don't matter
+      'jest/prefer-called-with': 'off',
+      // Stylistic preferences - padding rules
+      'jest/padding-around-all': 'off',
+      'jest/padding-around-expect-groups': 'off',
+      // Component names as describe titles is acceptable
+      'jest/prefer-lowercase-title': 'off',
+    },
   },
   {
     extends: [storybookConfig],
