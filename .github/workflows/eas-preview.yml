@@ -55,4 +55,4 @@ jobs:
         uses: expo/expo-github-action/preview@v8
         with:
           working-directory: packages/apps/mobile
-          command: eas update --branch pr-${{ github.event.pull_request.number }} --message "PR #${{ github.event.pull_request.number }}: ${{ github.event.pull_request.title }}"
+          command: eas update --branch pr-${{ github.event.pull_request.number }} --message "PR #${{ github.event.pull_request.number }}"
