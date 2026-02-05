@@ -7,9 +7,9 @@ permissions:
 on:
   pull_request:
     paths:
-      - "packages/apps/mobile/**"
-      - ".github/workflows/eas-preview.yml"
-      - ".github/actions/setup-eas/**"
+      - 'packages/apps/mobile/**'
+      - '.github/workflows/eas-preview.yml'
+      - '.github/actions/setup-eas/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}

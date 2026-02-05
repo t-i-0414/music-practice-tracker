@@ -8,24 +8,24 @@ Integrate EAS Update (OTA updates) into the Music Practice Tracker mobile app, e
 
 ### 1.2 Scope
 
-| Item                                         | Included/Excluded          |
-| -------------------------------------------- | -------------------------- |
-| In-app update detection, download, and apply | Included                   |
-| Automated deployment via GitHub Actions      | Included                   |
-| Channel-based environment management         | Included                   |
-| Rollback support                             | Included                   |
-| Updates requiring native code changes        | Excluded (via app stores)  |
+| Item                                         | Included/Excluded         |
+| -------------------------------------------- | ------------------------- |
+| In-app update detection, download, and apply | Included                  |
+| Automated deployment via GitHub Actions      | Included                  |
+| Channel-based environment management         | Included                  |
+| Rollback support                             | Included                  |
+| Updates requiring native code changes        | Excluded (via app stores) |
 
 ### 1.3 Current State
 
-| Item                      | Status       | Notes                                  |
-| ------------------------- | ------------ | -------------------------------------- |
-| `expo-updates`            | Installed    | v29.0.15                               |
-| `eas.json` channel config | Configured   | dev/staging/production                 |
-| `runtimeVersion` policy   | Configured   | `appVersion`                           |
-| EAS Project ID            | Configured   | `382a6dba-a16c-4b4d-91be-abade4f6c750` |
-| GitHub Actions            | Not set up   | No CI/CD integration                   |
-| In-app update UI          | Implemented  | `useUpdates` hook in use               |
+| Item                      | Status      | Notes                                  |
+| ------------------------- | ----------- | -------------------------------------- |
+| `expo-updates`            | Installed   | v29.0.15                               |
+| `eas.json` channel config | Configured  | dev/staging/production                 |
+| `runtimeVersion` policy   | Configured  | `appVersion`                           |
+| EAS Project ID            | Configured  | `382a6dba-a16c-4b4d-91be-abade4f6c750` |
+| GitHub Actions            | Not set up  | No CI/CD integration                   |
+| In-app update UI          | Implemented | `useUpdates` hook in use               |
 
 ---
 
@@ -78,12 +78,12 @@ Integrate EAS Update (OTA updates) into the Music Practice Tracker mobile app, e
 
 ### 2.2 Channel and Branch Configuration
 
-| Channel       | Git Branch   | Purpose              | Target Audience         |
-| ------------- | ------------ | -------------------- | ----------------------- |
-| `development` | develop / PR | Development/Preview  | Development team        |
-| `staging`     | staging      | QA testing           | TestFlight/Internal     |
-| `production`  | main         | Production release   | App Store/Google Play   |
-| `storybook`   | -            | UI component preview | Design team             |
+| Channel       | Git Branch   | Purpose              | Target Audience       |
+| ------------- | ------------ | -------------------- | --------------------- |
+| `development` | develop / PR | Development/Preview  | Development team      |
+| `staging`     | staging      | QA testing           | TestFlight/Internal   |
+| `production`  | main         | Production release   | App Store/Google Play |
+| `storybook`   | -            | UI component preview | Design team           |
 
 ---
 
@@ -368,9 +368,9 @@ jobs:
 
 ### 6.2 Required Environment Variables and Secrets
 
-| Name         | Location       | Purpose          | Source                                                        |
-| ------------ | -------------- | ---------------- | ------------------------------------------------------------- |
-| `EXPO_TOKEN` | GitHub Secrets | EAS CLI auth     | [Expo Access Tokens](https://expo.dev/settings/access-tokens) |
+| Name         | Location       | Purpose      | Source                                                        |
+| ------------ | -------------- | ------------ | ------------------------------------------------------------- |
+| `EXPO_TOKEN` | GitHub Secrets | EAS CLI auth | [Expo Access Tokens](https://expo.dev/settings/access-tokens) |
 
 ---
 
