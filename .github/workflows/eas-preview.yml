@@ -7,9 +7,9 @@ permissions:
 on:
   pull_request:
     paths:
-      - 'packages/apps/mobile/**'
-      - '.github/workflows/eas-preview.yml'
-      - '.github/actions/setup-eas/**'
+      - "packages/apps/mobile/**"
+      - ".github/workflows/eas-preview.yml"
+      - ".github/actions/setup-eas/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -55,4 +55,4 @@ jobs:
         uses: expo/expo-github-action/preview@v8
         with:
           working-directory: packages/apps/mobile
-          command: eas update --branch pr-${{ github.event.pull_request.number }} --message "PR #${{ github.event.pull_request.number }}"
+          command: eas update --branch pr${{ github.event.pull_request.number }} --message "PR #${{ github.event.pull_request.number }}"
