@@ -1,37 +1,37 @@
-# EAS Update 統合アーキテクチャ設計書
+# EAS Update Integration Architecture
 
-## 1. 概要
+## 1. Overview
 
-### 1.1 目的
+### 1.1 Purpose
 
-Music Practice Tracker モバイルアプリに EAS Update (OTA更新) を統合し、ストア審査なしでJavaScriptバンドルの更新を配信できるようにする。
+Integrate EAS Update (OTA updates) into the Music Practice Tracker mobile app, enabling JavaScript bundle updates without app store review.
 
-### 1.2 スコープ
+### 1.2 Scope
 
-| 対象                                          | 含む/含まない            |
-| --------------------------------------------- | ------------------------ |
-| アプリ内更新検知・ダウンロード・適用          | ✅ 含む                  |
-| GitHub Actions による自動デプロイ             | ✅ 含む                  |
-| チャンネル別環境管理 (dev/staging/production) | ✅ 含む                  |
-| ロールバック対応                              | ✅ 含む                  |
-| ネイティブコード変更を伴う更新                | ❌ 含まない (ストア経由) |
+| Item                                         | Included/Excluded          |
+| -------------------------------------------- | -------------------------- |
+| In-app update detection, download, and apply | Included                   |
+| Automated deployment via GitHub Actions      | Included                   |
+| Channel-based environment management         | Included                   |
+| Rollback support                             | Included                   |
+| Updates requiring native code changes        | Excluded (via app stores)  |
 
-### 1.3 現在の状態
+### 1.3 Current State
 
-| 項目                      | 状態                | 備考                                   |
-| ------------------------- | ------------------- | -------------------------------------- |
-| `expo-updates`            | ✅ インストール済み | v29.0.15                               |
-| `eas.json` チャンネル設定 | ✅ 設定済み         | dev/staging/production                 |
-| `runtimeVersion` ポリシー | ✅ 設定済み         | `appVersion`                           |
-| EAS Project ID            | ✅ 設定済み         | `382a6dba-a16c-4b4d-91be-abade4f6c750` |
-| GitHub Actions            | ❌ 未設定           | CI/CD連携なし                          |
-| アプリ内更新UI            | ❌ 未実装           | `useUpdates` フック未使用              |
+| Item                      | Status       | Notes                                  |
+| ------------------------- | ------------ | -------------------------------------- |
+| `expo-updates`            | Installed    | v29.0.15                               |
+| `eas.json` channel config | Configured   | dev/staging/production                 |
+| `runtimeVersion` policy   | Configured   | `appVersion`                           |
+| EAS Project ID            | Configured   | `382a6dba-a16c-4b4d-91be-abade4f6c750` |
+| GitHub Actions            | Not set up   | No CI/CD integration                   |
+| In-app update UI          | Implemented  | `useUpdates` hook in use               |
 
 ---
 
-## 2. システムアーキテクチャ
+## 2. System Architecture
 
-### 2.1 全体構成図
+### 2.1 Overall Structure
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
@@ -46,7 +46,7 @@ Music Practice Tracker モバイルアプリに EAS Update (OTA更新) を統合
 │  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐       │         │
 │  │  │ PR Preview   │  │ Staging      │  │ Production   │       │         │
 │  │  │ eas update   │  │ eas update   │  │ eas update   │       │         │
-│  │  │ --auto       │  │ --channel    │  │ --channel    │       │         │
+│  │  │ --branch pr-N│  │ --channel    │  │ --channel    │       │         │
 │  │  └──────┬───────┘  │ staging      │  │ production   │       │         │
 │  │         │          └──────┬───────┘  └──────┬───────┘       │         │
 │  └─────────┼─────────────────┼─────────────────┼───────────────┘         │
@@ -76,48 +76,48 @@ Music Practice Tracker モバイルアプリに EAS Update (OTA更新) を統合
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 2.2 チャンネル・ブランチ構成
+### 2.2 Channel and Branch Configuration
 
-| Channel       | Git Branch   | 用途                 | 配信先                  |
+| Channel       | Git Branch   | Purpose              | Target Audience         |
 | ------------- | ------------ | -------------------- | ----------------------- |
-| `development` | develop / PR | 開発・PRプレビュー   | 開発チーム              |
-| `staging`     | staging      | QAテスト             | TestFlight / 内部テスト |
-| `production`  | main         | 本番リリース         | App Store / Google Play |
-| `storybook`   | -            | UIコンポーネント確認 | デザインチーム          |
+| `development` | develop / PR | Development/Preview  | Development team        |
+| `staging`     | staging      | QA testing           | TestFlight/Internal     |
+| `production`  | main         | Production release   | App Store/Google Play   |
+| `storybook`   | -            | UI component preview | Design team             |
 
 ---
 
-## 3. コンポーネント設計
+## 3. Component Design
 
-### 3.1 ファイル構成
+### 3.1 File Structure
 
 ```
 packages/apps/mobile/src/
 ├── features/
-│   └── updates/                          # 🆕 新規ディレクトリ
+│   └── updates/
 │       ├── index.ts                      # Public exports
 │       ├── hooks/
-│       │   └── useAppUpdates.ts          # 更新管理フック
+│       │   └── useAppUpdates.ts          # Update management hook
 │       ├── components/
-│       │   ├── UpdateBanner.tsx          # 更新通知バナー
-│       │   └── UpdateModal.tsx           # 更新確認モーダル
+│       │   ├── UpdateBanner.tsx          # Update notification banner
+│       │   └── UpdateModal.tsx           # Update confirmation modal
 │       ├── context/
-│       │   └── UpdatesProvider.tsx       # 更新Context Provider
+│       │   └── UpdatesProvider.tsx       # Updates Context Provider
 │       └── utils/
-│           └── updateHelpers.ts          # ヘルパー関数
+│           └── updateHelpers.ts          # Helper functions
 ├── app/
-│   └── _layout.tsx                       # 📝 UpdatesProvider追加
+│   └── _layout.tsx                       # UpdatesProvider added
 └── hooks/
-    └── index.ts                          # 📝 エクスポート追加
+    └── index.ts                          # Export additions
 ```
 
-### 3.2 コンポーネント詳細
+### 3.2 Component Details
 
 #### 3.2.1 useAppUpdates Hook
 
 ```typescript
 interface UseAppUpdatesReturn {
-  // 状態
+  // State
   isEnabled: boolean;
   isEmbeddedLaunch: boolean;
   isUpdateAvailable: boolean;
@@ -125,91 +125,91 @@ interface UseAppUpdatesReturn {
   isDownloading: boolean;
   downloadProgress: number;
 
-  // エラー
+  // Errors
   checkError: Error | null;
   downloadError: Error | null;
 
-  // 更新情報
+  // Update info
   currentUpdate: Updates.UpdateInfo | null;
   availableUpdate: Updates.UpdateInfo | null;
 
-  // アクション
+  // Actions
   checkForUpdates: () => Promise<void>;
   downloadAndApplyUpdate: () => Promise<void>;
   dismissUpdate: () => void;
 }
 ```
 
-**責務:**
+**Responsibilities:**
 
-- `expo-updates` の状態をラップ
-- 更新チェック・ダウンロード・適用のロジック
-- エラーハンドリング
+- Wrap `expo-updates` state
+- Update check, download, and apply logic
+- Error handling
 
 #### 3.2.2 UpdatesProvider Context
 
 ```typescript
 interface UpdatesContextValue extends UseAppUpdatesReturn {
-  // UI状態
+  // UI state
   showBanner: boolean;
   showModal: boolean;
 
-  // UI制御
+  // UI controls
   openModal: () => void;
   closeModal: () => void;
   hideBanner: () => void;
 }
 ```
 
-**責務:**
+**Responsibilities:**
 
-- アプリ全体で更新状態を共有
-- UI表示状態の管理
-- 自動更新チェック (アプリ起動時)
+- Share update state across the app
+- Manage UI display state
+- Auto-check updates on app launch
 
 #### 3.2.3 UpdateBanner Component
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│ 🔄 新しいバージョンが利用可能です          [更新する] [×]   │
+│ 🔄 A new update is available                  [Update] [×]   │
 └──────────────────────────────────────────────────────────────┘
 ```
 
-**責務:**
+**Responsibilities:**
 
-- 非侵入型の更新通知
-- ダウンロード進捗表示
-- ユーザーアクション (更新/閉じる)
+- Non-intrusive update notification
+- Download progress display
+- User actions (update/dismiss)
 
 #### 3.2.4 UpdateModal Component
 
 ```
 ┌────────────────────────────────────────┐
-│           アプリを更新                  │
+│           Update App                    │
 │                                        │
-│  新しいバージョンが利用可能です。       │
-│  更新すると、最新の機能と修正が         │
-│  適用されます。                         │
+│  A new version is available.           │
+│  Updating will apply the latest        │
+│  features and fixes.                   │
 │                                        │
 │  ┌────────────────────────────────┐   │
 │  │ ████████████████░░░░  75%     │   │
 │  └────────────────────────────────┘   │
 │                                        │
-│      [後で]           [今すぐ更新]      │
+│      [Later]           [Update Now]    │
 └────────────────────────────────────────┘
 ```
 
-**責務:**
+**Responsibilities:**
 
-- 更新の詳細表示
-- ダウンロード進捗
-- 確認ダイアログ
+- Update details display
+- Download progress
+- Confirmation dialog
 
 ---
 
-## 4. データフロー
+## 4. Data Flow
 
-### 4.1 更新チェックフロー
+### 4.1 Update Check Flow
 
 ```
 ┌─────────────┐     ┌──────────────────┐     ┌─────────────────┐
@@ -232,7 +232,7 @@ interface UpdatesContextValue extends UseAppUpdatesReturn {
 └───────────────┘    └───────────────┘
 ```
 
-### 4.2 更新適用フロー
+### 4.2 Update Apply Flow
 
 ```
 ┌───────────────┐     ┌──────────────────┐     ┌─────────────────┐
@@ -249,17 +249,17 @@ interface UpdatesContextValue extends UseAppUpdatesReturn {
 
 ---
 
-## 5. CI/CD パイプライン設計
+## 5. CI/CD Pipeline Design
 
-### 5.1 ワークフロー構成
+### 5.1 Workflow Configuration
 
-| ワークフロー         | トリガー        | アクション                        |
+| Workflow             | Trigger         | Action                            |
 | -------------------- | --------------- | --------------------------------- |
-| `eas-preview.yml`    | Pull Request    | `eas update --auto`               |
+| `eas-preview.yml`    | Pull Request    | `eas update --branch pr-N`        |
 | `eas-staging.yml`    | push to staging | `eas update --channel staging`    |
 | `eas-production.yml` | push to main    | `eas update --channel production` |
 
-### 5.2 setup-eas Action (新規)
+### 5.2 setup-eas Action
 
 ```yaml
 # .github/actions/setup-eas/action.yml
@@ -311,7 +311,7 @@ jobs:
       - uses: expo/expo-github-action/preview@v8
         with:
           working-directory: packages/apps/mobile
-          command: eas update --auto
+          command: eas update --branch pr-${{ github.event.pull_request.number }}
 ```
 
 ### 5.4 eas-production.yml
@@ -340,20 +340,23 @@ jobs:
 
       - name: Publish Update
         working-directory: packages/apps/mobile
+        env:
+          EAS_UPDATE_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
           eas update \
             --channel production \
-            --message "${{ github.event.head_commit.message }}"
+            --message "$EAS_UPDATE_MESSAGE" \
+            --non-interactive
 ```
 
 ---
 
-## 6. 設定変更
+## 6. Configuration Changes
 
-### 6.1 app.config.ts 追加設定
+### 6.1 app.config.ts Additional Settings
 
 ```typescript
-// 追加する設定
+// Settings to add
 {
   updates: {
     url: `https://u.expo.dev/382a6dba-a16c-4b4d-91be-abade4f6c750`,
@@ -363,85 +366,85 @@ jobs:
 }
 ```
 
-### 6.2 必要な環境変数・シークレット
+### 6.2 Required Environment Variables and Secrets
 
-| 名前         | 場所           | 用途         | 取得元                                                        |
-| ------------ | -------------- | ------------ | ------------------------------------------------------------- |
-| `EXPO_TOKEN` | GitHub Secrets | EAS CLI 認証 | [Expo Access Tokens](https://expo.dev/settings/access-tokens) |
-
----
-
-## 7. 実装優先順位
-
-### Phase 1: 基盤 (必須)
-
-1. `app.config.ts` に `updates` 設定追加
-2. `useAppUpdates` フック実装
-3. `UpdatesProvider` 実装
-
-### Phase 2: UI (必須)
-
-1. `UpdateBanner` コンポーネント実装
-2. `_layout.tsx` に Provider 追加
-
-### Phase 3: CI/CD (推奨)
-
-1. `setup-eas` Action 作成
-2. `eas-preview.yml` ワークフロー追加
-3. `eas-production.yml` ワークフロー追加
-
-### Phase 4: 拡張 (オプション)
-
-1. `UpdateModal` コンポーネント (強制更新用)
-2. 段階的ロールアウト設定
-3. エラー監視連携
+| Name         | Location       | Purpose          | Source                                                        |
+| ------------ | -------------- | ---------------- | ------------------------------------------------------------- |
+| `EXPO_TOKEN` | GitHub Secrets | EAS CLI auth     | [Expo Access Tokens](https://expo.dev/settings/access-tokens) |
 
 ---
 
-## 8. テスト戦略
+## 7. Implementation Priority
 
-### 8.1 ユニットテスト
+### Phase 1: Foundation (Required)
 
-- `useAppUpdates` フックのモック動作テスト
-- `UpdateBanner` レンダリングテスト
+1. Add `updates` configuration to `app.config.ts`
+2. Implement `useAppUpdates` hook
+3. Implement `UpdatesProvider`
 
-### 8.2 E2Eテスト
+### Phase 2: UI (Required)
 
-- 更新バナー表示テスト (Maestro)
+1. Implement `UpdateBanner` component
+2. Add Provider to `_layout.tsx`
 
-### 8.3 手動テスト
+### Phase 3: CI/CD (Recommended)
 
-1. Development build で `eas update --channel development` 実行
-2. 更新検知・ダウンロード・適用の動作確認
+1. Create `setup-eas` Action
+2. Add `eas-preview.yml` workflow
+3. Add `eas-production.yml` workflow
+
+### Phase 4: Extensions (Optional)
+
+1. `UpdateModal` component (for forced updates)
+2. Gradual rollout configuration
+3. Error monitoring integration
 
 ---
 
-## 9. 運用コマンド
+## 8. Testing Strategy
 
-### 更新の公開
+### 8.1 Unit Tests
+
+- `useAppUpdates` hook mock behavior tests
+- `UpdateBanner` rendering tests
+
+### 8.2 E2E Tests
+
+- Update banner display tests (Maestro)
+
+### 8.3 Manual Testing
+
+1. Run `eas update --channel development` with development build
+2. Verify update detection, download, and apply behavior
+
+---
+
+## 9. Operations Commands
+
+### Publishing Updates
 
 ```bash
-# 開発環境
+# Development
 eas update --channel development --message "Fix: bug description"
 
-# ステージング
+# Staging
 eas update --channel staging --message "Release: v1.0.1"
 
-# 本番 (段階的ロールアウト)
+# Production (gradual rollout)
 eas update --channel production --rollout-percentage 10 --message "Release: v1.0.1"
 
-# ロールアウト拡大
+# Expand rollout
 eas update:edit --rollout-percentage 50
 eas update:edit --rollout-percentage 100
 ```
 
-### Republish (ステージング → 本番)
+### Republish (Staging → Production)
 
 ```bash
 eas update:republish --destination-channel production
 ```
 
-### ロールバック
+### Rollback
 
 ```bash
 eas update:rollback --channel production
@@ -449,7 +452,7 @@ eas update:rollback --channel production
 
 ---
 
-## 10. 参考資料
+## 10. References
 
 - [EAS Update Documentation](https://docs.expo.dev/eas-update/introduction/)
 - [Runtime Versions](https://docs.expo.dev/eas-update/runtime-versions/)
