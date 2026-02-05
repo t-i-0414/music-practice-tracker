@@ -3,7 +3,7 @@ import { type ConfigContext, type ExpoConfig } from 'expo/config';
 type AppEnv = 'production' | 'staging' | 'storybook' | 'development';
 
 const getAppEnv = (): AppEnv => {
-  const env = process.env.APP_ENV;
+  const env = String(process.env.APP_ENV ?? '');
   if (env === 'production') return 'production';
   if (env === 'staging') return 'staging';
   if (env === 'storybook') return 'storybook';
@@ -40,6 +40,7 @@ const getResizeMode = (appEnv: AppEnv): 'contain' | 'cover' => (appEnv === 'stor
 const enabledStorybook = process.env.ENABLED_STORYBOOK === 'true';
 const lightBackgroundColor = '#ffffff';
 const darkBackgroundColor = '#1a191b';
+const easProjectId = '382a6dba-a16c-4b4d-91be-abade4f6c750';
 
 export default ({ config: _config }: ConfigContext): ExpoConfig => {
   const appEnv = getAppEnv();
@@ -89,6 +90,10 @@ export default ({ config: _config }: ConfigContext): ExpoConfig => {
       },
       edgeToEdgeEnabled: true,
     },
+    updates: {
+      url: `https://u.expo.dev/${easProjectId}`,
+      fallbackToCacheTimeout: 0,
+    },
     plugins: [
       'expo-router',
       [
@@ -114,7 +119,7 @@ export default ({ config: _config }: ConfigContext): ExpoConfig => {
       appEnv,
       enabledStorybook,
       eas: {
-        projectId: '382a6dba-a16c-4b4d-91be-abade4f6c750',
+        projectId: easProjectId,
       },
     },
   };

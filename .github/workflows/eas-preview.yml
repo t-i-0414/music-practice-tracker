@@ -1,0 +1,60 @@
+name: EAS Preview
+
+permissions:
+  contents: read
+  pull-requests: write
+
+on:
+  pull_request:
+    paths:
+      - 'packages/apps/mobile/**'
+      - '.github/workflows/eas-preview.yml'
+      - '.github/actions/setup-eas/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  preview:
+    name: EAS Update Preview
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check for EXPO_TOKEN
+        id: check-token
+        run: |
+          if [ -z "${{ secrets.EXPO_TOKEN }}" ]; then
+            echo "::warning::EXPO_TOKEN secret is not set. Skipping EAS Update preview."
+            echo "To enable EAS Update previews, add EXPO_TOKEN to repository secrets."
+            echo "Get your token from: https://expo.dev/settings/access-tokens"
+            echo "has_token=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_token=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout Repository
+        if: steps.check-token.outputs.has_token == 'true'
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+
+      - name: Setup Base Project
+        if: steps.check-token.outputs.has_token == 'true'
+        uses: ./.github/actions/setup-base-project
+        with:
+          turbo_token: ${{ secrets.TURBO_TOKEN }}
+          turbo_team: ${{ secrets.TURBO_TEAM }}
+
+      - name: Setup EAS
+        if: steps.check-token.outputs.has_token == 'true'
+        uses: ./.github/actions/setup-eas
+        with:
+          expo_token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Create EAS Update Preview
+        if: steps.check-token.outputs.has_token == 'true'
+        uses: expo/expo-github-action/preview@v8
+        env:
+          APP_ENV: development
+        with:
+          working-directory: packages/apps/mobile
+          command: eas update --branch pr${{ github.event.pull_request.number }} --message PR-${{ github.event.pull_request.number }}
