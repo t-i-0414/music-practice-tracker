@@ -13,7 +13,7 @@
       }
     },
     "development-simulator": {
-      "channel": "development-simulator",
+      "channel": "development",
       "developmentClient": true,
       "distribution": "internal",
       "ios": {
