@@ -1,0 +1,64 @@
+name: EAS Development Deploy
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - 'packages/apps/mobile/**'
+      - '.github/workflows/eas-development.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy to Development
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check for EXPO_TOKEN
+        id: check-token
+        run: |
+          if [ -z "${{ secrets.EXPO_TOKEN }}" ]; then
+            echo "::warning::EXPO_TOKEN secret is not set. Skipping EAS Update development deployment."
+            echo "To enable EAS Update deployments, add EXPO_TOKEN to repository secrets."
+            echo "Get your token from: https://expo.dev/settings/access-tokens"
+            echo "has_token=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_token=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout Repository
+        if: steps.check-token.outputs.has_token == 'true'
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+
+      - name: Setup Base Project
+        if: steps.check-token.outputs.has_token == 'true'
+        uses: ./.github/actions/setup-base-project
+        with:
+          turbo_token: ${{ secrets.TURBO_TOKEN }}
+          turbo_team: ${{ secrets.TURBO_TEAM }}
+
+      - name: Setup EAS
+        if: steps.check-token.outputs.has_token == 'true'
+        uses: ./.github/actions/setup-eas
+        with:
+          expo_token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Publish EAS Update to Development
+        if: steps.check-token.outputs.has_token == 'true'
+        working-directory: packages/apps/mobile
+        env:
+          EAS_UPDATE_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          echo "Publishing EAS Update to development channel..."
+          eas update \
+            --channel development \
+            --message "$EAS_UPDATE_MESSAGE" \
+            --non-interactive
+          echo "EAS Update published successfully to development channel"
