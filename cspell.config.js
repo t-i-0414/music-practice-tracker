@@ -153,6 +153,7 @@ export default defineConfig({
     '.github/**',
     'firepit-log.txt',
     '**/scripts/**',
+    '.agents/**',
     'packages/apps/mobile/ios/**',
     'packages/apps/mobile/android/**',
   ],

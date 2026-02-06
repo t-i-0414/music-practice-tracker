@@ -7,4 +7,5 @@ export const sharedIgnores = [
   '**/.turbo/**',
   '**/node_modules/**',
   '**/*/mockServiceWorker.js',
+  '**/.agents/**',
 ];
