@@ -88,19 +88,19 @@ packages/
 
 Best practice guides are available as agent skills. Reference the relevant skill BEFORE writing or reviewing code.
 
-| Context | Skills to reference |
-|---------|-------------------|
-| **Monorepo / Turborepo** | `turborepo` |
-| **Backend** (NestJS) | `nestjs-best-practices` |
-| **Admin** (Next.js) | `next-best-practices`, `next-cache-components`, `next-upgrade` |
-| **Mobile** (React Native/Expo) | `vercel-react-native-skills` |
-| **React shared** (Admin + Mobile) | `vercel-react-best-practices`, `vercel-composition-patterns` |
-| **UI review / accessibility** | `web-design-guidelines` |
-| **Frontend design** | `frontend-design` |
-| **Code review** | `code-review-plugin` |
-| **PR review** | `pr-review-toolkit-plugin` |
-| **Hook rules** | `hookify` |
-| **CLAUDE.md management** | `claude-md-management` |
+| Context                           | Skills to reference                                            |
+| --------------------------------- | -------------------------------------------------------------- |
+| **Monorepo / Turborepo**          | `turborepo`                                                    |
+| **Backend** (NestJS)              | `nestjs-best-practices`                                        |
+| **Admin** (Next.js)               | `next-best-practices`, `next-cache-components`, `next-upgrade` |
+| **Mobile** (React Native/Expo)    | `vercel-react-native-skills`                                   |
+| **React shared** (Admin + Mobile) | `vercel-react-best-practices`, `vercel-composition-patterns`   |
+| **UI review / accessibility**     | `web-design-guidelines`                                        |
+| **Frontend design**               | `frontend-design`                                              |
+| **Code review**                   | `code-review-plugin`                                           |
+| **PR review**                     | `pr-review-toolkit-plugin`                                     |
+| **Hook rules**                    | `hookify`                                                      |
+| **CLAUDE.md management**          | `claude-md-management`                                         |
 
 Each skill directory contains a `SKILL.md` (overview) and detailed rule files under `rules/` or `references/`.
 

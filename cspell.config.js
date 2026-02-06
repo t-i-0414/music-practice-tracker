@@ -45,6 +45,7 @@ export default defineConfig({
     'Dto',
     'Dtos',
     'golevelup',
+    'hookify',
     'gorhom',
     'harddelete',
     'harddeletemany',
