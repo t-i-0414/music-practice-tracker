@@ -130,7 +130,7 @@
         "rxjs": "7.8.2",
       },
       "devDependencies": {
-        "@golevelup/ts-jest": "1.2.0",
+        "@golevelup/ts-jest": "1.2.1",
         "@music-practice-tracker/eslint-plugins": "workspace:*",
         "@nestjs/cli": "11.0.16",
         "@nestjs/schematics": "11.0.9",
@@ -912,7 +912,7 @@
 
     "@firebase/util": ["@firebase/util@1.13.0", "", { "dependencies": { "tslib": "^2.1.0" } }, "sha512-0AZUyYUfpMNcztR5l09izHwXkZpghLgCUaAGjtMwXnCg3bj4ml5VgiwqOMOxJ+Nw4qN/zJAaOQBcJ7KGkWStqQ=="],
 
-    "@golevelup/ts-jest": ["@golevelup/ts-jest@1.2.0", "", {}, "sha512-plN26rWBmwOrtWBc46FKgTMWDlLK5F/vYP2i+0NXnoOLdcXrTNDftzW4dpa0fREqUdCRb3EJtuyr6g5AKNKTRA=="],
+    "@golevelup/ts-jest": ["@golevelup/ts-jest@1.2.1", "", {}, "sha512-1LQ6iDkKJve1AifgVNN0C27hUfd6zZ2qiAbK8x9Mvur+sB1YGc8Z70uEJPtyHL/akA8e4IEKZWC8lkKe/WuTlw=="],
 
     "@google-cloud/cloud-sql-connector": ["@google-cloud/cloud-sql-connector@1.8.4", "", { "dependencies": { "@googleapis/sqladmin": "^31.1.0", "gaxios": "^7.1.2", "google-auth-library": "^10.4.0", "p-throttle": "^7.0.0" } }, "sha512-dX36ksbh4xrIsALCHxNYXwvRUtlZ/msQ/PL0LpSYWHnfMenRM+watAzM/XIVr8tQOtzhT7mrmrAb/W/bgayQAQ=="],
 
