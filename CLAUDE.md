@@ -96,6 +96,7 @@ Best practice guides are available as agent skills. Reference the relevant skill
 | **Mobile** (React Native/Expo) | `vercel-react-native-skills` |
 | **React shared** (Admin + Mobile) | `vercel-react-best-practices`, `vercel-composition-patterns` |
 | **UI review / accessibility** | `web-design-guidelines` |
+| **Frontend design** | `frontend-design` |
 
 Each skill directory contains a `SKILL.md` (overview) and detailed rule files under `rules/` or `references/`.
 
