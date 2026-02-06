@@ -97,6 +97,9 @@ Best practice guides are available as agent skills. Reference the relevant skill
 | **React shared** (Admin + Mobile) | `vercel-react-best-practices`, `vercel-composition-patterns` |
 | **UI review / accessibility** | `web-design-guidelines` |
 | **Frontend design** | `frontend-design` |
+| **Code review** | `code-review-plugin` |
+| **PR review** | `pr-review-toolkit-plugin` |
+| **Hook rules** | `hookify` |
 
 Each skill directory contains a `SKILL.md` (overview) and detailed rule files under `rules/` or `references/`.
 
