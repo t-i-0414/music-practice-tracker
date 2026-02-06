@@ -139,6 +139,7 @@ Check for: No console.log • No any types • No hardcoded values • No expose
 ## 🔗 Environment
 
 - **Default Branch**: `develop` (PRs should target `develop`, not `main`)
+- **Branch Strategy**: `develop` → `staging` → `main`
 - **Database**: Dev (15432 + offset), Test (15433 + offset)
 - **Git Worktree**: Supported - each worktree gets unique ports (see README.md)
 - **Custom ESLint**: repository-model-access-restriction, aggregate-import-restriction, no-internal-id
