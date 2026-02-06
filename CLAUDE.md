@@ -84,6 +84,21 @@ packages/
 └── libs/            # Shared libraries
 ```
 
+## 📚 Agent Skills (`.agents/skills/`)
+
+Best practice guides are available as agent skills. Reference the relevant skill BEFORE writing or reviewing code.
+
+| Context | Skills to reference |
+|---------|-------------------|
+| **Monorepo / Turborepo** | `turborepo` |
+| **Backend** (NestJS) | `nestjs-best-practices` |
+| **Admin** (Next.js) | `next-best-practices`, `next-cache-components`, `next-upgrade` |
+| **Mobile** (React Native/Expo) | `vercel-react-native-skills` |
+| **React shared** (Admin + Mobile) | `vercel-react-best-practices`, `vercel-composition-patterns` |
+| **UI review / accessibility** | `web-design-guidelines` |
+
+Each skill directory contains a `SKILL.md` (overview) and detailed rule files under `rules/` or `references/`.
+
 ## 🏗️ Implementation Workflow
 
 1. **Domain**: Create aggregate with query/command services and DTOs
