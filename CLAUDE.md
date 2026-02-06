@@ -100,6 +100,7 @@ Best practice guides are available as agent skills. Reference the relevant skill
 | **Code review** | `code-review-plugin` |
 | **PR review** | `pr-review-toolkit-plugin` |
 | **Hook rules** | `hookify` |
+| **CLAUDE.md management** | `claude-md-management` |
 
 Each skill directory contains a `SKILL.md` (overview) and detailed rule files under `rules/` or `references/`.
 
