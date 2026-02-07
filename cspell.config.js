@@ -67,6 +67,7 @@ export default defineConfig({
     'ltr',
     'manyandreturn',
     'mau',
+    'mcp',
     'mts',
     'musicpracticetracker',
     'nent',

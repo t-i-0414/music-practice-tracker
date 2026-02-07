@@ -1,3 +1,10 @@
+---
+root: true
+targets:
+  - '*'
+globs:
+  - '**/*'
+---
 # CLAUDE.md
 
 > Essential instructions for AI agents working with this codebase.
@@ -84,9 +91,9 @@ packages/
 └── libs/            # Shared libraries
 ```
 
-## 📚 Agent Skills (`.agents/skills/`)
+## 📚 Agent Skills
 
-Best practice guides are available as agent skills. Reference the relevant skill BEFORE writing or reviewing code.
+Best practice guides are available as agent skills (managed by RuleSync). Reference the relevant skill BEFORE writing or reviewing code.
 
 | Context                           | Skills to reference                                            |
 | --------------------------------- | -------------------------------------------------------------- |
