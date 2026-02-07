@@ -159,7 +159,8 @@ jobs:
           need_db: 'false'
 
       - name: Run ESLint & Type Check with Turborepo
-        run: bun turbo lint:es:check type:check
+        # TODO: Remove --force after remote cache is refreshed
+        run: bun turbo lint:es:check type:check --force
 
       - name: Run Root ESLint & Type Check
         run: bun run lint:es:check:root && bun run type:check:root
