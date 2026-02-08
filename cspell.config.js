@@ -161,6 +161,7 @@ export default defineConfig({
     '.agents/**',
     'packages/apps/mobile/ios/**',
     'packages/apps/mobile/android/**',
+    '**/.prettierignore',
   ],
   maxNumberOfProblems: 0,
   minWordLength: 3,
