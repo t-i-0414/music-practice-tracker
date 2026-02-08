@@ -5,6 +5,7 @@
 ### 1. Commands/Workflows (20 points)
 
 **20 points**: All essential commands documented with context
+
 - Build, test, lint, deploy commands present
 - Development workflow clear
 - Common operations documented
@@ -20,6 +21,7 @@
 ### 2. Architecture Clarity (20 points)
 
 **20 points**: Clear codebase map
+
 - Key directories explained
 - Module relationships documented
 - Entry points identified
@@ -36,6 +38,7 @@
 ### 3. Non-Obvious Patterns (15 points)
 
 **15 points**: Gotchas and quirks captured
+
 - Known issues documented
 - Workarounds explained
 - Edge cases noted
@@ -50,6 +53,7 @@
 ### 4. Conciseness (15 points)
 
 **15 points**: Dense, valuable content
+
 - No filler or obvious info
 - Each line adds value
 - No redundancy with code comments
@@ -63,6 +67,7 @@
 ### 5. Currency (15 points)
 
 **15 points**: Reflects current codebase
+
 - Commands work as documented
 - File references accurate
 - Tech stack current
@@ -76,6 +81,7 @@
 ### 6. Actionability (15 points)
 
 **15 points**: Instructions are executable
+
 - Commands can be copy-pasted
 - Steps are concrete
 - Paths are real

@@ -22,13 +22,13 @@ find . -name "CLAUDE.md" -o -name ".claude.md" -o -name ".claude.local.md" 2>/de
 
 **File Types & Locations:**
 
-| Type | Location | Purpose |
-|------|----------|---------|
-| Project root | `./CLAUDE.md` | Primary project context (checked into git, shared with team) |
-| Local overrides | `./.claude.local.md` | Personal/local settings (gitignored, not shared) |
-| Global defaults | `~/.claude/CLAUDE.md` | User-wide defaults across all projects |
-| Package-specific | `./packages/*/CLAUDE.md` | Module-level context in monorepos |
-| Subdirectory | Any nested location | Feature/domain-specific context |
+| Type             | Location                 | Purpose                                                      |
+| ---------------- | ------------------------ | ------------------------------------------------------------ |
+| Project root     | `./CLAUDE.md`            | Primary project context (checked into git, shared with team) |
+| Local overrides  | `./.claude.local.md`     | Personal/local settings (gitignored, not shared)             |
+| Global defaults  | `~/.claude/CLAUDE.md`    | User-wide defaults across all projects                       |
+| Package-specific | `./packages/*/CLAUDE.md` | Module-level context in monorepos                            |
+| Subdirectory     | Any nested location      | Feature/domain-specific context                              |
 
 **Note:** Claude auto-discovers CLAUDE.md files in parent directories, making monorepo setups work automatically.
 
@@ -38,16 +38,17 @@ For each CLAUDE.md file, evaluate against quality criteria. See [references/qual
 
 **Quick Assessment Checklist:**
 
-| Criterion | Weight | Check |
-|-----------|--------|-------|
-| Commands/workflows documented | High | Are build/test/deploy commands present? |
-| Architecture clarity | High | Can Claude understand the codebase structure? |
-| Non-obvious patterns | Medium | Are gotchas and quirks documented? |
-| Conciseness | Medium | No verbose explanations or obvious info? |
-| Currency | High | Does it reflect current codebase state? |
-| Actionability | High | Are instructions executable, not vague? |
+| Criterion                     | Weight | Check                                         |
+| ----------------------------- | ------ | --------------------------------------------- |
+| Commands/workflows documented | High   | Are build/test/deploy commands present?       |
+| Architecture clarity          | High   | Can Claude understand the codebase structure? |
+| Non-obvious patterns          | Medium | Are gotchas and quirks documented?            |
+| Conciseness                   | Medium | No verbose explanations or obvious info?      |
+| Currency                      | High   | Does it reflect current codebase state?       |
+| Actionability                 | High   | Are instructions executable, not vague?       |
 
 **Quality Scores:**
+
 - **A (90-100)**: Comprehensive, current, actionable
 - **B (70-89)**: Good coverage, minor gaps
 - **C (50-69)**: Basic info, missing key sections
@@ -118,19 +119,23 @@ After outputting the quality report, ask user for confirmation before updating.
 
 **Diff Format:**
 
-```markdown
+`````markdown
 ### Update: ./CLAUDE.md
 
 **Why:** Build command was missing, causing confusion about how to run the project.
 
-```diff
+````diff
 + ## Quick Start
 +
 + ```bash
 + npm install
 + npm run dev  # Start development server on port 3000
 + ```
-```
+````
+`````
+
+````
+
 ```
 
 ### Phase 5: Apply Updates
@@ -177,3 +182,5 @@ When presenting recommendations, remind users:
 - Testing (commands, patterns)
 - Gotchas (quirks, common mistakes)
 - Workflow (when to do what)
+```
+````

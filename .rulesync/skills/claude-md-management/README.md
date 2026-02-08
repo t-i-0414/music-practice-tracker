@@ -6,11 +6,11 @@ Tools to maintain and improve CLAUDE.md files - audit quality, capture session l
 
 Two complementary tools for different purposes:
 
-| | claude-md-improver (skill) | /revise-claude-md (command) |
-|---|---|---|
-| **Purpose** | Keep CLAUDE.md aligned with codebase | Capture session learnings |
-| **Triggered by** | Codebase changes | End of session |
-| **Use when** | Periodic maintenance | Session revealed missing context |
+|                  | claude-md-improver (skill)           | /revise-claude-md (command)      |
+| ---------------- | ------------------------------------ | -------------------------------- |
+| **Purpose**      | Keep CLAUDE.md aligned with codebase | Capture session learnings        |
+| **Triggered by** | Codebase changes                     | End of session                   |
+| **Use when**     | Periodic maintenance                 | Session revealed missing context |
 
 ## Usage
 

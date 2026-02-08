@@ -5,6 +5,7 @@ targets:
 globs:
   - '**/*'
 ---
+
 # CLAUDE.md
 
 > Essential instructions for AI agents working with this codebase.

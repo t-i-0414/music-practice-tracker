@@ -169,24 +169,24 @@ bun run rulesync:check
 
 ### Managed Targets
 
-| Tool | Generated Files |
-| ------------ | ----------------------------------------- |
-| Claude Code | `CLAUDE.md`, `.claude/` |
-| Cursor | `.cursor/rules/`, `.cursor/commands/`, etc |
+| Tool           | Generated Files                                       |
+| -------------- | ----------------------------------------------------- |
+| Claude Code    | `CLAUDE.md`, `.claude/`                               |
+| Cursor         | `.cursor/rules/`, `.cursor/commands/`, etc            |
 | GitHub Copilot | `.github/copilot-instructions.md`, `.github/prompts/` |
 
 ### Editing Rules
 
 Edit files in `.rulesync/` (not the generated files), then run `bun run rulesync`.
 
-| What | Location |
-| -------- | ------------------------------ |
-| Rules | `.rulesync/rules/CLAUDE.md` |
-| Commands | `.rulesync/commands/` |
-| Agents | `.rulesync/subagents/` |
-| Skills | `.rulesync/skills/` |
-| MCP | `.rulesync/mcp.json` |
-| Ignore | `.rulesync/.aiignore` |
+| What     | Location                    |
+| -------- | --------------------------- |
+| Rules    | `.rulesync/rules/CLAUDE.md` |
+| Commands | `.rulesync/commands/`       |
+| Agents   | `.rulesync/subagents/`      |
+| Skills   | `.rulesync/skills/`         |
+| MCP      | `.rulesync/mcp.json`        |
+| Ignore   | `.rulesync/.aiignore`       |
 
 ## License
 

@@ -1,7 +1,7 @@
 ---
 name: project-context
-description: "Summarize the project context and key constraints"
-targets: ["*"]
+description: 'Summarize the project context and key constraints'
+targets: ['*']
 ---
 
 Summarize the project goals, core constraints, and relevant dependencies.
