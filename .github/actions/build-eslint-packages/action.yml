@@ -8,6 +8,5 @@ runs:
       shell: bash
       run: |
         echo "Building ESLint packages with Turborepo..."
-        # TODO: Remove --force after remote cache is refreshed
-        bun turbo build --filter='@music-practice-tracker/eslint-*' --force
+        bun turbo build --filter='@music-practice-tracker/eslint-*'
         echo "ESLint packages built successfully"
