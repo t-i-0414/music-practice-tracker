@@ -19,23 +19,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  setup:
-    name: Setup Base Project
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-
-      - name: Setup Base Project
-        uses: ./.github/actions/setup-base-project
-        with:
-          turbo_token: ${{ secrets.TURBO_TOKEN }}
-          turbo_team: ${{ secrets.TURBO_TEAM }}
-
   check-format:
     name: Check Format
-    needs: setup
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -53,7 +38,6 @@ jobs:
 
   check-spelling:
     name: Check Spelling
-    needs: setup
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -71,7 +55,6 @@ jobs:
 
   check-shell-lint:
     name: Check Shell Lint
-    needs: setup
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -89,7 +72,6 @@ jobs:
 
   check-secret-lint:
     name: Check Secret Lint
-    needs: setup
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -107,7 +89,6 @@ jobs:
 
   check-markdown-lint:
     name: Check Markdown Lint
-    needs: setup
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -139,7 +120,6 @@ jobs:
 
   check-lint-and-type:
     name: Check ESLint & Type (Turborepo)
-    needs: setup
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -171,7 +151,6 @@ jobs:
 
   check-schema:
     name: Check Schema
-    needs: setup
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
