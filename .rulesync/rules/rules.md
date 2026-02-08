@@ -92,25 +92,41 @@ packages/
 └── libs/            # Shared libraries
 ```
 
-## 📚 Agent Skills
+## 📚 RuleSync Resources
 
-Best practice guides are available as agent skills (managed by RuleSync). Reference the relevant skill BEFORE writing or reviewing code.
+This project uses RuleSync to manage agent skills, commands, and subagents. **Always reference the relevant resource BEFORE starting work.**
 
-| Context                           | Skills to reference                                            |
-| --------------------------------- | -------------------------------------------------------------- |
-| **Monorepo / Turborepo**          | `turborepo`                                                    |
-| **Backend** (NestJS)              | `nestjs-best-practices`                                        |
-| **Admin** (Next.js)               | `next-best-practices`, `next-cache-components`, `next-upgrade` |
-| **Mobile** (React Native/Expo)    | `vercel-react-native-skills`                                   |
-| **React shared** (Admin + Mobile) | `vercel-react-best-practices`, `vercel-composition-patterns`   |
-| **UI review / accessibility**     | `web-design-guidelines`                                        |
-| **Frontend design**               | `frontend-design`                                              |
-| **Code review**                   | `code-review-plugin`                                           |
-| **PR review**                     | `pr-review-toolkit-plugin`                                     |
-| **Hook rules**                    | `hookify`                                                      |
-| **CLAUDE.md management**          | `claude-md-management`                                         |
+### Skills (Best Practice Guides)
 
-Each skill directory contains a `SKILL.md` (overview) and detailed rule files under `rules/` or `references/`.
+Read `SKILL.md` in each skill directory for an overview, then consult `rules/` or `references/` for details.
+
+| Use case | Skills |
+| --- | --- |
+| `turbo.json` editing, cache debugging, CI pipeline | `turborepo` |
+| Backend API / DDD / module implementation | `nestjs-best-practices` |
+| Admin page / Server Components / data fetching | `next-best-practices`, `next-cache-components` |
+| Next.js version upgrade | `next-upgrade` |
+| Mobile screen / component implementation | `vercel-react-native-skills` |
+| React component shared by Admin + Mobile | `vercel-react-best-practices`, `vercel-composition-patterns` |
+| UI accessibility / design review | `web-design-guidelines` |
+| New frontend page or component from scratch | `frontend-design` |
+| Code review (single file / function level) | `code-review-plugin` |
+| PR review (multi-file, cross-cutting concerns) | `pr-review-toolkit-plugin` |
+| Creating or managing git hooks | `hookify` |
+| Editing CLAUDE.md or agent instructions | `claude-md-management` |
+| Summarizing project context for a new agent | `project-context` |
+
+### Commands (Slash Commands)
+
+| Command | When to use |
+| --- | --- |
+| `/review-pr [PR#]` | PR review - runs specialized agents in parallel (comments, tests, types, silent failures, simplification) |
+
+### Subagents
+
+| Subagent | When to use |
+| --- | --- |
+| `planner` | Planning a new feature, refactoring, or spec. User explicitly invokes to get a structured implementation plan before coding. |
 
 ## 🏗️ Implementation Workflow
 
