@@ -5,20 +5,13 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
-      "cache": true
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     },
     "type:check": {
-      "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$", "tsconfig*.json"],
-      "outputs": [],
-      "cache": true
+      "dependsOn": ["^build"]
     },
     "lint:es:check": {
-      "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$", "eslint.config.*"],
-      "outputs": [],
-      "cache": true
+      "dependsOn": ["^build"]
     },
     "lint:es:fix": {
       "dependsOn": ["^build"],
@@ -26,16 +19,13 @@
     },
     "test": {
       "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$", "tests/**"],
-      "outputs": [],
-      "cache": true,
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "env": ["DATABASE_URL", "FIREBASE_*"]
     },
     "test:cov": {
       "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$", "tests/**"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["coverage/**"],
-      "cache": true,
       "env": ["DATABASE_URL", "FIREBASE_*"]
     },
     "start:dev": {
@@ -44,6 +34,6 @@
       "persistent": true
     }
   },
-  "globalDependencies": [".env", "tsconfig.json"],
+  "globalDependencies": ["tsconfig.json", "bun.lock"],
   "globalEnv": ["NODE_ENV", "CI"]
 }

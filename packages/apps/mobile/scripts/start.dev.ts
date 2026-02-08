@@ -1,6 +1,6 @@
 import 'dotenv/config';
 
-const port = String(process.env.APP_PORT ?? '8081');
+const port = process.env.APP_PORT ?? '8081';
 
 console.log(`🔗 Starting development server`);
 

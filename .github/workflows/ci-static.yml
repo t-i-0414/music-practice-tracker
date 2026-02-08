@@ -158,6 +158,11 @@ jobs:
           skip_migrations: 'true'
           need_db: 'false'
 
+      - name: Generate framework type declarations
+        run: |
+          echo '/// <reference types="expo/types" />' > packages/apps/mobile/expo-env.d.ts
+          printf '/// <reference types="next" />\n/// <reference types="next/image-types/global" />\n' > packages/apps/admin/next-env.d.ts
+
       - name: Run ESLint & Type Check with Turborepo
         run: bun turbo lint:es:check type:check
 

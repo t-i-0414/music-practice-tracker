@@ -15,7 +15,7 @@ const config: ReturnType<typeof defineConfig> = defineConfig(
     files: ['**/*.ts'],
     extends: [baseConfig, tsConfig, importConfig],
   },
-  globalIgnores([...sharedIgnores, './packages']),
+  globalIgnores([...sharedIgnores, './packages', './.rulesync']),
   prettierConfig,
 );
 
