@@ -17,23 +17,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  setup:
-    name: Setup Base Project
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-
-      - name: Setup Base Project
-        uses: ./.github/actions/setup-base-project
-        with:
-          turbo_token: ${{ secrets.TURBO_TOKEN }}
-          turbo_team: ${{ secrets.TURBO_TEAM }}
-
   test-admin:
     name: Apps / Test Admin
-    needs: setup
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -72,7 +57,6 @@ jobs:
 
   test-backend:
     name: Apps / Test Backend
-    needs: setup
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -105,7 +89,6 @@ jobs:
 
   test-mobile:
     name: Apps / Test Mobile
-    needs: setup
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -133,7 +116,6 @@ jobs:
 
   eslint-plugin:
     name: Libs / Test ESLint Plugins
-    needs: setup
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
