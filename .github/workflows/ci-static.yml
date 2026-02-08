@@ -155,8 +155,8 @@ jobs:
       - name: Setup Backend Project
         uses: ./.github/actions/setup-backend
         with:
-          skip_migrations: 'true'
-          need_db: 'false'
+          skip_migrations: "true"
+          need_db: "false"
 
       - name: Generate framework type declarations
         run: |
@@ -164,7 +164,8 @@ jobs:
           printf '/// <reference types="next" />\n/// <reference types="next/image-types/global" />\n' > packages/apps/admin/next-env.d.ts
 
       - name: Run ESLint & Type Check with Turborepo
-        run: bun turbo lint:es:check type:check
+        # TODO: Remove --force after remote cache is refreshed
+        run: bun turbo lint:es:check type:check --force
 
       - name: Run Root ESLint & Type Check
         run: bun run lint:es:check:root && bun run type:check:root
