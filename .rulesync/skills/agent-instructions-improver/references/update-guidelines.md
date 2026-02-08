@@ -1,8 +1,8 @@
-# CLAUDE.md Update Guidelines
+# Agent Instruction File Update Guidelines
 
 ## Core Principle
 
-Only add information that will genuinely help future Claude sessions. The context window is precious - every line must earn its place.
+Only add information that will genuinely help future agent sessions. The context window is precious - every line must earn its place.
 
 ## What TO Add
 
@@ -101,8 +101,7 @@ Bad:
 ```markdown
 The authentication system uses JWT tokens. JWT (JSON Web Tokens) are
 an open standard (RFC 7519) that defines a compact and self-contained
-way for securely transmitting information between parties as a JSON
-object. In our implementation, we use the HS256 algorithm which...
+way for securely transmitting information between parties...
 ```
 
 Good:
@@ -151,5 +150,5 @@ Before finalizing an update, verify:
 - [ ] No generic advice or obvious info
 - [ ] Commands are tested and work
 - [ ] File paths are accurate
-- [ ] Would a new Claude session find this helpful?
+- [ ] Would a new agent session find this helpful?
 - [ ] Is this the most concise way to express the info?

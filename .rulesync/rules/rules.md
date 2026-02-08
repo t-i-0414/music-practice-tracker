@@ -110,23 +110,29 @@ Read `SKILL.md` in each skill directory for an overview, then consult `rules/` o
 | React component shared by Admin + Mobile | `vercel-react-best-practices`, `vercel-composition-patterns` |
 | UI accessibility / design review | `web-design-guidelines` |
 | New frontend page or component from scratch | `frontend-design` |
-| Code review (single file / function level) | `code-review-plugin` |
-| PR review (multi-file, cross-cutting concerns) | `pr-review-toolkit-plugin` |
+| Code review / PR review | `pr-review-toolkit-plugin` |
 | Creating or managing git hooks | `hookify` |
-| Editing CLAUDE.md or agent instructions | `claude-md-management` |
+| Auditing / improving agent instruction files | `agent-instructions-improver`, `claude-md-management` |
 | Summarizing project context for a new agent | `project-context` |
 
 ### Commands (Slash Commands)
 
 | Command | When to use |
 | --- | --- |
-| `/review-pr [PR#]` | PR review - runs specialized agents in parallel (comments, tests, types, silent failures, simplification) |
+| `/review-pr [aspects]` | Comprehensive PR review using specialized sub-agents (comments, tests, types, errors, code quality, simplification) |
+| `/revise-rules` | Capture session learnings into `.rulesync/rules/` (the single source of truth for agent instructions) |
 
 ### Subagents
 
 | Subagent | When to use |
 | --- | --- |
 | `planner` | Planning a new feature, refactoring, or spec. User explicitly invokes to get a structured implementation plan before coding. |
+| `code-reviewer` | Review code for project guideline compliance, bug detection, and code quality. Use for single-file to PR-level review before commits. |
+| `code-simplifier` | Simplify and refine code for clarity and maintainability while preserving functionality. Use after implementation. |
+| `comment-analyzer` | Analyze code comments for accuracy, completeness, and technical debt. Use before finalizing PRs with documentation. |
+| `pr-test-analyzer` | Review test coverage quality, identify critical gaps and edge cases. Use when adding new functionality. |
+| `silent-failure-hunter` | Find silent failures, inadequate error handling, and hidden catch blocks. Use when reviewing error handling code. |
+| `type-design-analyzer` | Analyze type design for encapsulation, invariants, and enforcement quality. Use when introducing or refactoring types. |
 
 ## 🏗️ Implementation Workflow
 
@@ -168,6 +174,7 @@ Check for: No console.log • No any types • No hardcoded values • No expose
 - **Git Worktree**: Supported - each worktree gets unique ports (see README.md)
 - **Custom ESLint**: repository-model-access-restriction, aggregate-import-restriction, no-internal-id
 - **Testing**: 95% coverage minimum
+- **CI Gotcha**: `expo-env.d.ts` / `next-env.d.ts` are gitignored but required for type-aware ESLint rules. CI generates them before lint step.
 
 ---
 

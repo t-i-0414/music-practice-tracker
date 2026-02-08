@@ -1,4 +1,4 @@
-# CLAUDE.md Templates
+# Agent Instruction File Templates
 
 ## Key Principles
 
@@ -31,23 +31,20 @@ Document the essential commands for working with the project.
 
 ### Architecture
 
-Describe the project structure so Claude understands where things live.
+Describe the project structure so the agent understands where things live.
 
 ```markdown
 ## Architecture
-```
 
 <root>/
-
   <dir>/    # <purpose>
   <dir>/    # <purpose>
   <dir>/    # <purpose>
-```
 ```
 
 ### Key Files
 
-List important files that Claude should know about.
+List important files that the agent should know about.
 
 ```markdown
 ## Key Files
@@ -135,16 +132,13 @@ Document development workflow patterns.
 | `<command>` | <description> |
 
 ## Architecture
-```
 
 <structure>
-```
 
 ## Gotchas
 
 - <gotcha>
-
-````
+```
 
 ---
 
@@ -163,10 +157,7 @@ Document development workflow patterns.
 
 ## Architecture
 
-````
-
 <structure with descriptions>
-```
 
 ## Key Files
 
@@ -187,8 +178,7 @@ Document development workflow patterns.
 ## Gotchas
 
 - <gotcha>
-
-````
+```
 
 ---
 
@@ -203,11 +193,7 @@ For packages within a monorepo or distinct modules.
 
 ## Usage
 
-````
-
 <import/usage example>
-
-```
 
 ## Key Exports
 
@@ -253,9 +239,9 @@ For packages within a monorepo or distinct modules.
 
 ## Update Principles
 
-When updating any CLAUDE.md:
+When updating any instruction file:
 
 1. **Be specific**: Use actual file paths, real commands from this project
 2. **Be current**: Verify info against the actual codebase
 3. **Be brief**: One line per concept when possible
-4. **Be useful**: Would this help a new Claude session understand the project?
+4. **Be useful**: Would this help a new agent session understand the project?

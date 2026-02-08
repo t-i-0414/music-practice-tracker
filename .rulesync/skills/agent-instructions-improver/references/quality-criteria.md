@@ -1,4 +1,4 @@
-# CLAUDE.md Quality Criteria
+# Agent Instruction File Quality Criteria
 
 ## Scoring Rubric
 
@@ -94,7 +94,7 @@
 
 ## Assessment Process
 
-1. Read the CLAUDE.md file completely
+1. Read the instruction file completely
 2. Cross-reference with actual codebase:
    - Run documented commands (mentally or actually)
    - Check if referenced files exist
@@ -112,4 +112,4 @@
 - Copy-paste from templates without customization
 - Generic advice not specific to the project
 - "TODO" items never completed
-- Duplicate info across multiple CLAUDE.md files
+- Duplicate info across multiple instruction files
