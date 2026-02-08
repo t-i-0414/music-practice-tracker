@@ -110,9 +110,7 @@ Read `SKILL.md` in each skill directory for an overview, then consult `rules/` o
 | React component shared by Admin + Mobile | `vercel-react-best-practices`, `vercel-composition-patterns` |
 | UI accessibility / design review | `web-design-guidelines` |
 | New frontend page or component from scratch | `frontend-design` |
-| Code review / PR review | `pr-review-toolkit-plugin` |
-| Creating or managing git hooks | `hookify` |
-| Auditing / improving agent instruction files | `agent-instructions-improver`, `claude-md-management` |
+| Auditing / improving agent instruction files | `agent-instructions-improver` |
 | Summarizing project context for a new agent | `project-context` |
 
 ### Commands (Slash Commands)
