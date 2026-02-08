@@ -3,7 +3,7 @@ import { type ConfigContext, type ExpoConfig } from 'expo/config';
 type AppEnv = 'production' | 'staging' | 'storybook' | 'development';
 
 const getAppEnv = (): AppEnv => {
-  const env = String(process.env.APP_ENV ?? '');
+  const env = process.env.APP_ENV ?? '';
   if (env === 'production') return 'production';
   if (env === 'staging') return 'staging';
   if (env === 'storybook') return 'storybook';

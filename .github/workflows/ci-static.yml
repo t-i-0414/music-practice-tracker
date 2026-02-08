@@ -164,8 +164,7 @@ jobs:
           printf '/// <reference types="next" />\n/// <reference types="next/image-types/global" />\n' > packages/apps/admin/next-env.d.ts
 
       - name: Run ESLint & Type Check with Turborepo
-        # TODO: Remove --force after remote cache is refreshed
-        run: bun turbo lint:es:check type:check --force
+        run: bun turbo lint:es:check type:check
 
       - name: Run Root ESLint & Type Check
         run: bun run lint:es:check:root && bun run type:check:root
