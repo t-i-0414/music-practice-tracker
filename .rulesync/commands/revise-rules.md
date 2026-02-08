@@ -21,8 +21,8 @@ What context was missing that would have helped the AI agent work more effective
 
 The rule files live under `.rulesync/rules/`:
 
-| File | Scope |
-|------|-------|
+| File       | Scope |
+| ---------- | ----- |
 | `rules.md` | Index |
 
 Decide which file each addition belongs to based on scope.

@@ -100,42 +100,42 @@ This project uses RuleSync to manage agent skills, commands, and subagents. **Al
 
 Read `SKILL.md` in each skill directory for an overview, then consult `rules/` or `references/` for details.
 
-| Use case | Skills |
-| --- | --- |
-| `turbo.json` editing, cache debugging, CI pipeline | `turborepo` |
-| Backend API / DDD / module implementation | `nestjs-best-practices` |
-| Admin page / Server Components / data fetching | `next-best-practices`, `next-cache-components` |
-| Next.js version upgrade | `next-upgrade` |
-| Mobile screen / component implementation | `vercel-react-native-skills` |
-| React component shared by Admin + Mobile | `vercel-react-best-practices`, `vercel-composition-patterns` |
-| UI accessibility / design review | `web-design-guidelines` |
-| New frontend page or component from scratch | `frontend-design` |
-| Auditing / improving agent instruction files | `agent-instructions-improver` |
-| Summarizing project context for a new agent | `project-context` |
+| Use case                                           | Skills                                                       |
+| -------------------------------------------------- | ------------------------------------------------------------ |
+| `turbo.json` editing, cache debugging, CI pipeline | `turborepo`                                                  |
+| Backend API / DDD / module implementation          | `nestjs-best-practices`                                      |
+| Admin page / Server Components / data fetching     | `next-best-practices`, `next-cache-components`               |
+| Next.js version upgrade                            | `next-upgrade`                                               |
+| Mobile screen / component implementation           | `vercel-react-native-skills`                                 |
+| React component shared by Admin + Mobile           | `vercel-react-best-practices`, `vercel-composition-patterns` |
+| UI accessibility / design review                   | `web-design-guidelines`                                      |
+| New frontend page or component from scratch        | `frontend-design`                                            |
+| Auditing / improving agent instruction files       | `agent-instructions-improver`                                |
+| Summarizing project context for a new agent        | `project-context`                                            |
 
 ### Commands (Slash Commands)
 
-| Command | When to use |
-| --- | --- |
-| `/review-pr [aspects]` | Comprehensive PR review using specialized sub-agents (comments, tests, types, errors, code quality, simplification) |
-| `/revise-rules` | Capture session learnings into `.rulesync/rules/` (the single source of truth for agent instructions) |
-| `/pre-commit` | Quick quality gate before committing (code-reviewer + silent-failure-hunter) |
-| `/polish` | Post-implementation refinement (code-simplifier + comment-analyzer) |
-| `/plan [feature]` | Domain-aware feature planning (planner + auto-selected skill) |
-| `/audit-types` | Audit all type changes in the current branch for design quality |
-| `/accessibility-review` | Review UI changes for accessibility compliance (web-design-guidelines) |
+| Command                 | When to use                                                                                                         |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `/review-pr [aspects]`  | Comprehensive PR review using specialized sub-agents (comments, tests, types, errors, code quality, simplification) |
+| `/revise-rules`         | Capture session learnings into `.rulesync/rules/` (the single source of truth for agent instructions)               |
+| `/pre-commit`           | Quick quality gate before committing (code-reviewer + silent-failure-hunter)                                        |
+| `/polish`               | Post-implementation refinement (code-simplifier + comment-analyzer)                                                 |
+| `/plan [feature]`       | Domain-aware feature planning (planner + auto-selected skill)                                                       |
+| `/audit-types`          | Audit all type changes in the current branch for design quality                                                     |
+| `/accessibility-review` | Review UI changes for accessibility compliance (web-design-guidelines)                                              |
 
 ### Subagents
 
-| Subagent | When to use |
-| --- | --- |
-| `planner` | Planning a new feature, refactoring, or spec. User explicitly invokes to get a structured implementation plan before coding. |
-| `code-reviewer` | Review code for project guideline compliance, bug detection, and code quality. Use for single-file to PR-level review before commits. |
-| `code-simplifier` | Simplify and refine code for clarity and maintainability while preserving functionality. Use after implementation. |
-| `comment-analyzer` | Analyze code comments for accuracy, completeness, and technical debt. Use before finalizing PRs with documentation. |
-| `pr-test-analyzer` | Review test coverage quality, identify critical gaps and edge cases. Use when adding new functionality. |
-| `silent-failure-hunter` | Find silent failures, inadequate error handling, and hidden catch blocks. Use when reviewing error handling code. |
-| `type-design-analyzer` | Analyze type design for encapsulation, invariants, and enforcement quality. Use when introducing or refactoring types. |
+| Subagent                | When to use                                                                                                                           |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `planner`               | Planning a new feature, refactoring, or spec. User explicitly invokes to get a structured implementation plan before coding.          |
+| `code-reviewer`         | Review code for project guideline compliance, bug detection, and code quality. Use for single-file to PR-level review before commits. |
+| `code-simplifier`       | Simplify and refine code for clarity and maintainability while preserving functionality. Use after implementation.                    |
+| `comment-analyzer`      | Analyze code comments for accuracy, completeness, and technical debt. Use before finalizing PRs with documentation.                   |
+| `pr-test-analyzer`      | Review test coverage quality, identify critical gaps and edge cases. Use when adding new functionality.                               |
+| `silent-failure-hunter` | Find silent failures, inadequate error handling, and hidden catch blocks. Use when reviewing error handling code.                     |
+| `type-design-analyzer`  | Analyze type design for encapsulation, invariants, and enforcement quality. Use when introducing or refactoring types.                |
 
 ## 🏗️ Implementation Workflow
 

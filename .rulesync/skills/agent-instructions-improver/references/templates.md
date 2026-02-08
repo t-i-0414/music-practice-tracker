@@ -37,6 +37,7 @@ Describe the project structure so the agent understands where things live.
 ## Architecture
 
 <root>/
+
   <dir>/    # <purpose>
   <dir>/    # <purpose>
   <dir>/    # <purpose>
@@ -151,8 +152,8 @@ Document development workflow patterns.
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
+| Command     | Description   |
+| ----------- | ------------- |
 | `<command>` | <description> |
 
 ## Architecture

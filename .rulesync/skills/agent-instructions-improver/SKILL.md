@@ -19,13 +19,13 @@ Find all agent instruction files in the repository (e.g., CLAUDE.md, .cursorrule
 
 **File Types & Locations:**
 
-| Type             | Examples                                     | Purpose                                  |
-| ---------------- | -------------------------------------------- | ---------------------------------------- |
-| Project root     | `./CLAUDE.md`, `./.cursorrules`              | Primary project context (shared)         |
-| Local overrides  | `./.claude.local.md`                         | Personal/local settings (gitignored)     |
-| Global defaults  | `~/.claude/CLAUDE.md`, `~/.cursor/rules`     | User-wide defaults across all projects   |
-| Package-specific | `./packages/*/CLAUDE.md`                     | Module-level context in monorepos        |
-| Subdirectory     | Any nested location                          | Feature/domain-specific context          |
+| Type             | Examples                                 | Purpose                                |
+| ---------------- | ---------------------------------------- | -------------------------------------- |
+| Project root     | `./CLAUDE.md`, `./.cursorrules`          | Primary project context (shared)       |
+| Local overrides  | `./.claude.local.md`                     | Personal/local settings (gitignored)   |
+| Global defaults  | `~/.claude/CLAUDE.md`, `~/.cursor/rules` | User-wide defaults across all projects |
+| Package-specific | `./packages/*/CLAUDE.md`                 | Module-level context in monorepos      |
+| Subdirectory     | Any nested location                      | Feature/domain-specific context        |
 
 ### Phase 2: Quality Assessment
 
@@ -33,14 +33,14 @@ For each instruction file, evaluate against quality criteria. See [references/qu
 
 **Quick Assessment Checklist:**
 
-| Criterion                     | Weight | Check                                         |
-| ----------------------------- | ------ | --------------------------------------------- |
-| Commands/workflows documented | High   | Are build/test/deploy commands present?       |
+| Criterion                     | Weight | Check                                            |
+| ----------------------------- | ------ | ------------------------------------------------ |
+| Commands/workflows documented | High   | Are build/test/deploy commands present?          |
 | Architecture clarity          | High   | Can the agent understand the codebase structure? |
-| Non-obvious patterns          | Medium | Are gotchas and quirks documented?            |
-| Conciseness                   | Medium | No verbose explanations or obvious info?      |
-| Currency                      | High   | Does it reflect current codebase state?       |
-| Actionability                 | High   | Are instructions executable, not vague?       |
+| Non-obvious patterns          | Medium | Are gotchas and quirks documented?               |
+| Conciseness                   | Medium | No verbose explanations or obvious info?         |
+| Currency                      | High   | Does it reflect current codebase state?          |
+| Actionability                 | High   | Are instructions executable, not vague?          |
 
 **Quality Scores:**
 
