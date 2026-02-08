@@ -121,6 +121,11 @@ Read `SKILL.md` in each skill directory for an overview, then consult `rules/` o
 | --- | --- |
 | `/review-pr [aspects]` | Comprehensive PR review using specialized sub-agents (comments, tests, types, errors, code quality, simplification) |
 | `/revise-rules` | Capture session learnings into `.rulesync/rules/` (the single source of truth for agent instructions) |
+| `/pre-commit` | Quick quality gate before committing (code-reviewer + silent-failure-hunter) |
+| `/polish` | Post-implementation refinement (code-simplifier + comment-analyzer) |
+| `/plan [feature]` | Domain-aware feature planning (planner + auto-selected skill) |
+| `/audit-types` | Audit all type changes in the current branch for design quality |
+| `/accessibility-review` | Review UI changes for accessibility compliance (web-design-guidelines) |
 
 ### Subagents
 
