@@ -5,6 +5,7 @@ export default defineConfig({
   language: 'en',
   words: [
     'adr',
+    'aiignore',
     'aquasecurity',
     'Autodocs',
     'autoincrement',
