@@ -8,13 +8,19 @@ import {
   PrismaClientValidationError,
 } from '@/generated/prisma/runtime/client';
 import { CommonError } from '@/utils/errors/common.error';
+import { ErrorCategory } from '@/utils/errors/error-category';
 import { type PreservedRepositoryErrorCode, type ErrorCode } from '@/utils/errors/error-code';
+import { ErrorSeverity } from '@/utils/errors/error-severity';
 
 export type RepositoryErrorCode = Extract<ErrorCode, PreservedRepositoryErrorCode>;
 
 export class RepositoryError extends CommonError<RepositoryErrorCode> {
   public constructor(errorCode: RepositoryErrorCode, detail: string, cause?: unknown) {
-    super(errorCode, detail, cause);
+    super(errorCode, detail, cause, {
+      severity: ErrorSeverity.HIGH,
+      category: ErrorCategory.INFRASTRUCTURE,
+      isOperational: false,
+    });
   }
 }
 

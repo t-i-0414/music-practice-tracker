@@ -3,11 +3,17 @@ import { ApiProperty } from '@nestjs/swagger';
 
 import { type RepositoryErrorCode } from '@/repository/utils/repository.error';
 import { CommonError } from '@/utils/errors/common.error';
+import { ErrorCategory } from '@/utils/errors/error-category';
 import { apiErrorPrefix, type ErrorCode, isErrorCode, type PreservedApiErrorCode } from '@/utils/errors/error-code';
+import { ErrorSeverity } from '@/utils/errors/error-severity';
 
 export class ApiError extends CommonError<ApiErrorCode> {
   public constructor(errorCode: ApiErrorCode, detail: string, cause?: unknown) {
-    super(errorCode, detail, cause);
+    super(errorCode, detail, cause, {
+      severity: ErrorSeverity.MEDIUM,
+      category: ErrorCategory.VALIDATION,
+      isOperational: true,
+    });
   }
 }
 export const isApiError = (error: unknown): error is ApiError => error instanceof ApiError;

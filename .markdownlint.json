@@ -8,9 +8,12 @@
   },
   "MD013": false,
   "MD024": false,
+  "MD031": false,
   "MD033": false,
+  "MD036": false,
   "MD040": false,
   "MD041": false,
+  "MD056": false,
   "MD060": false,
   "line-length": false
 }

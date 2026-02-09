@@ -1,6 +1,7 @@
 import type { ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
+import { ClsService } from 'nestjs-cls';
 
 import { UserAuthGuard } from '@/apis/app/utils/guards/user-auth.guard';
 import { ApiError } from '@/apis/utils/api.error';
@@ -21,6 +22,7 @@ describe('unit UserAuthGuard', () => {
   let reflector: jest.Mocked<Pick<Reflector, 'getAllAndOverride'>>;
   let firebaseAuthService: jest.Mocked<Pick<FirebaseAuthService, 'verifyIdToken'>>;
   let usersQueryService: jest.Mocked<Pick<UserQueryService, 'findUniqueOrThrowUserByFirebaseUid'>>;
+  let cls: jest.Mocked<Pick<ClsService, 'set'>>;
   let guard: UserAuthGuard;
   const originalCheckRevoked = process.env.FIREBASE_CHECK_REVOKED;
 
@@ -34,11 +36,15 @@ describe('unit UserAuthGuard', () => {
     usersQueryService = {
       findUniqueOrThrowUserByFirebaseUid: jest.fn(),
     };
+    cls = {
+      set: jest.fn(),
+    };
 
     guard = new UserAuthGuard(
       reflector as unknown as Reflector,
       firebaseAuthService as unknown as FirebaseAuthService,
       usersQueryService as unknown as UserQueryService,
+      cls as unknown as ClsService,
     );
   });
 
@@ -75,7 +81,7 @@ describe('unit UserAuthGuard', () => {
   });
 
   it('verifies the token, loads the user and attaches it to the request', async () => {
-    expect.assertions(5);
+    expect.assertions(6);
 
     reflector.getAllAndOverride.mockReturnValue(false);
     process.env.FIREBASE_CHECK_REVOKED = 'true';
@@ -106,6 +112,7 @@ describe('unit UserAuthGuard', () => {
     expect(firebaseAuthService.verifyIdToken).toHaveBeenCalledWith('access-token', true);
     expect(usersQueryService.findUniqueOrThrowUserByFirebaseUid).toHaveBeenCalledWith('firebase-uid');
     expect(request.user).toStrictEqual({ publicId: 'public-id', name: 'Current User' });
+    expect(cls.set).toHaveBeenCalledWith('userId', 'public-id');
     expect(reflector.getAllAndOverride).toHaveBeenCalledWith(IS_PUBLIC_KEY, [handler, controller]);
   });
 

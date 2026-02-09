@@ -1,5 +1,7 @@
 import { ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { ClsService } from 'nestjs-cls';
+import { PinoLogger } from 'nestjs-pino';
 
 import { ApiError } from '@/apis/utils/api.error';
 import { GlobalExceptionFilter } from '@/apis/utils/filters/global-exception.filter';
@@ -13,16 +15,42 @@ describe('unit GlobalExceptionFilter', () => {
   let mockResponse: Partial<Response>;
   let mockRequest: Partial<Request>;
   let mockArgumentsHost: Partial<ArgumentsHost>;
+  let mockLogger: {
+    setContext: jest.Mock;
+    info: jest.Mock;
+    warn: jest.Mock;
+    error: jest.Mock;
+    fatal: jest.Mock;
+  };
+  let mockCls: { getId: jest.Mock };
 
   beforeEach(() => {
-    filter = new GlobalExceptionFilter();
+    mockLogger = {
+      setContext: jest.fn(),
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+      fatal: jest.fn(),
+    };
+
+    mockCls = {
+      getId: jest.fn().mockReturnValue('test-correlation-id'),
+    };
+
+    filter = new GlobalExceptionFilter(
+      mockLogger as unknown as PinoLogger,
+      mockCls as unknown as ClsService,
+    );
 
     mockResponse = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
     };
 
-    mockRequest = {};
+    mockRequest = {
+      method: 'GET',
+      url: '/test',
+    };
 
     mockArgumentsHost = {
       switchToHttp: jest.fn().mockReturnValue({
@@ -274,6 +302,109 @@ describe('unit GlobalExceptionFilter', () => {
         statusCode: 999,
         errorCode: 'AP9999',
       });
+    });
+  });
+
+  describe('logging', () => {
+    it('should log DomainError with warn level (severity MEDIUM)', () => {
+      const exception = new DomainError('DO9999', 'Test domain error');
+
+      filter.catch(exception, mockArgumentsHost as ArgumentsHost);
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          correlationId: 'test-correlation-id',
+          errorCode: 'DO9999',
+          severity: 'MEDIUM',
+          category: 'BUSINESS_RULE',
+          method: 'GET',
+          url: '/test',
+        }),
+        'Business error',
+      );
+    });
+
+    it('should log RepositoryError with error level (severity HIGH)', () => {
+      const exception = new PrismaClientKnownRequestError('Record not found', {
+        code: 'P2025',
+        clientVersion: '5.0.0',
+      });
+
+      filter.catch(exception, mockArgumentsHost as ArgumentsHost);
+
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.objectContaining({
+          correlationId: 'test-correlation-id',
+          severity: 'HIGH',
+          category: 'INFRASTRUCTURE',
+          method: 'GET',
+          url: '/test',
+        }),
+        'Infrastructure error',
+      );
+    });
+
+    it('should log UnknownError with fatal level (severity CRITICAL)', () => {
+      const exception = new UnknownError('UN9999', 'Test unknown error');
+
+      filter.catch(exception, mockArgumentsHost as ArgumentsHost);
+
+      expect(mockLogger.fatal).toHaveBeenCalledWith(
+        expect.objectContaining({
+          correlationId: 'test-correlation-id',
+          errorCode: 'UN9999',
+          severity: 'CRITICAL',
+          category: 'UNKNOWN',
+          method: 'GET',
+          url: '/test',
+        }),
+        'Critical error',
+      );
+    });
+
+    it('should log HttpException with warn level', () => {
+      const exception = new HttpException('Test error', HttpStatus.BAD_REQUEST);
+
+      filter.catch(exception, mockArgumentsHost as ArgumentsHost);
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          correlationId: 'test-correlation-id',
+          statusCode: HttpStatus.BAD_REQUEST,
+          errorCode: 'AP0400',
+          message: 'Test error',
+        }),
+        'HTTP exception',
+      );
+    });
+
+    it('should log unhandled exception with error level', () => {
+      const exception = new Error('Unknown error');
+
+      filter.catch(exception, mockArgumentsHost as ArgumentsHost);
+
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.objectContaining({
+          correlationId: 'test-correlation-id',
+          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+          error: 'Unknown error',
+        }),
+        'Unhandled exception',
+      );
+    });
+
+    it('should include correlation ID from ClsService in all log entries', () => {
+      mockCls.getId.mockReturnValue('custom-correlation-id');
+      const exception = new DomainError('DO9999', 'Test error');
+
+      filter.catch(exception, mockArgumentsHost as ArgumentsHost);
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          correlationId: 'custom-correlation-id',
+        }),
+        'Business error',
+      );
     });
   });
 });

@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { Logger } from 'nestjs-pino';
 
 import { useGlobalOptions } from '../utils/use-global-options';
 
@@ -9,7 +10,8 @@ import { isDevelopment } from '@/utils/environment';
 const DEFAULT_PORT_NUMBER = 3000;
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppApiModule);
+  const app = await NestFactory.create(AppApiModule, { bufferLogs: true });
+  app.useLogger(app.get(Logger));
   useGlobalOptions(app);
 
   // Setup Swagger in non-production environments

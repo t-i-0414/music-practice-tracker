@@ -1,0 +1,11 @@
+export const ErrorCategory = {
+  VALIDATION: 'VALIDATION',
+  BUSINESS_RULE: 'BUSINESS_RULE',
+  AUTHENTICATION: 'AUTHENTICATION',
+  AUTHORIZATION: 'AUTHORIZATION',
+  INFRASTRUCTURE: 'INFRASTRUCTURE',
+  EXTERNAL_SERVICE: 'EXTERNAL_SERVICE',
+  UNKNOWN: 'UNKNOWN',
+} as const;
+
+export type ErrorCategory = (typeof ErrorCategory)[keyof typeof ErrorCategory];
