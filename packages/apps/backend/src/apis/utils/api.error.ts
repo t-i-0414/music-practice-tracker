@@ -2,17 +2,23 @@ import { HttpStatus } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
 
 import { type RepositoryErrorCode } from '@/repository/utils/repository.error';
-import { CommonError } from '@/utils/errors/common.error';
+import { CommonError, type CommonErrorOptions } from '@/utils/errors/common.error';
 import { ErrorCategory } from '@/utils/errors/error-category';
 import { apiErrorPrefix, type ErrorCode, isErrorCode, type PreservedApiErrorCode } from '@/utils/errors/error-code';
 import { ErrorSeverity } from '@/utils/errors/error-severity';
 
+const resolveCategory = (errorCode: ApiErrorCode): ErrorCategory => {
+  if (errorCode === 'AP0401') return ErrorCategory.AUTHENTICATION;
+  if (errorCode === 'AP0403') return ErrorCategory.AUTHORIZATION;
+  return ErrorCategory.VALIDATION;
+};
+
 export class ApiError extends CommonError<ApiErrorCode> {
-  public constructor(errorCode: ApiErrorCode, detail: string, cause?: unknown) {
+  public constructor(errorCode: ApiErrorCode, detail: string, cause?: unknown, options?: CommonErrorOptions) {
     super(errorCode, detail, cause, {
-      severity: ErrorSeverity.MEDIUM,
-      category: ErrorCategory.VALIDATION,
-      isOperational: true,
+      severity: options?.severity ?? ErrorSeverity.MEDIUM,
+      category: options?.category ?? resolveCategory(errorCode),
+      isOperational: options?.isOperational ?? true,
     });
   }
 }

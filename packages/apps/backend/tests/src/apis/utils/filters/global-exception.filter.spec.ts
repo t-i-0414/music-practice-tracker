@@ -22,7 +22,7 @@ describe('unit GlobalExceptionFilter', () => {
     error: jest.Mock;
     fatal: jest.Mock;
   };
-  let mockCls: { getId: jest.Mock };
+  let mockCls: { getId: jest.Mock; get: jest.Mock };
 
   beforeEach(() => {
     mockLogger = {
@@ -35,6 +35,7 @@ describe('unit GlobalExceptionFilter', () => {
 
     mockCls = {
       getId: jest.fn().mockReturnValue('test-correlation-id'),
+      get: jest.fn().mockReturnValue('test-user-id'),
     };
 
     filter = new GlobalExceptionFilter(
@@ -393,8 +394,9 @@ describe('unit GlobalExceptionFilter', () => {
       );
     });
 
-    it('should include correlation ID from ClsService in all log entries', () => {
+    it('should include correlation ID and userId from ClsService in all log entries', () => {
       mockCls.getId.mockReturnValue('custom-correlation-id');
+      mockCls.get.mockReturnValue('custom-user-id');
       const exception = new DomainError('DO9999', 'Test error');
 
       filter.catch(exception, mockArgumentsHost as ArgumentsHost);
@@ -402,6 +404,7 @@ describe('unit GlobalExceptionFilter', () => {
       expect(mockLogger.warn).toHaveBeenCalledWith(
         expect.objectContaining({
           correlationId: 'custom-correlation-id',
+          userId: 'custom-user-id',
         }),
         'Business error',
       );

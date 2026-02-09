@@ -40,14 +40,21 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
 
     const { errorResponse, resolvedException } = this.buildErrorResponse(exception);
-    this.logError(resolvedException, errorResponse, request);
+    try {
+      this.logError(resolvedException, errorResponse, request);
+    } catch (loggingError: unknown) {
+      // eslint-disable-next-line no-console -- last-resort fallback when structured logging itself fails
+      console.error('GlobalExceptionFilter: logError failed', loggingError);
+    }
     response.status(errorResponse.statusCode).json(errorResponse);
   }
 
   private logError(exception: unknown, errorResponse: ErrorResponseDto, request: Request): void {
     const correlationId = this.cls.getId();
+    const userId = this.cls.get('userId');
     const baseLogEntry = {
       correlationId,
+      userId,
       statusCode: errorResponse.statusCode,
       errorCode: errorResponse.errorCode,
       method: request.method,
@@ -81,9 +88,11 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       case ErrorSeverity.CRITICAL:
         this.logger.fatal(logEntry, 'Critical error');
         break;
-      default:
-        this.logger.error(logEntry, 'Unknown severity error');
+      default: {
+        const _exhaustive: never = severity;
+        this.logger.error(logEntry, `Unknown severity: ${String(_exhaustive)}`);
         break;
+      }
     }
   }
 

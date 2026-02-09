@@ -15,6 +15,18 @@ export type CommonErrorOptions = {
   isOperational?: boolean;
 };
 
+export type CommonErrorLogEntry = {
+  errorName: string;
+  errorCode: string;
+  errorMessage: string;
+  detail: string;
+  severity: ErrorSeverity;
+  category: ErrorCategory;
+  isOperational: boolean;
+  timestamp: string;
+  cause?: string;
+};
+
 export abstract class CommonError<TErrorCode extends ErrorCode = ErrorCode> extends Error {
   public readonly errorCode: TErrorCode;
   public readonly errorMessage: CommonErrorBody['errorMessage'];
@@ -52,7 +64,7 @@ export abstract class CommonError<TErrorCode extends ErrorCode = ErrorCode> exte
     return `${this.name} [${this.errorCode}](${this.timestamp}): ${this.errorMessage} ${this.detail}`;
   }
 
-  public toLogEntry(): Record<string, unknown> {
+  public toLogEntry(): CommonErrorLogEntry {
     return {
       errorName: this.name,
       errorCode: this.errorCode,
@@ -65,8 +77,17 @@ export abstract class CommonError<TErrorCode extends ErrorCode = ErrorCode> exte
       ...(this.cause instanceof Error
         ? { cause: this.cause.message }
         : this.cause !== undefined
-          ? { cause: typeof this.cause === 'string' ? this.cause : JSON.stringify(this.cause) }
+          ? { cause: this.serializeCause(this.cause) }
           : {}),
     };
+  }
+
+  private serializeCause(cause: unknown): string {
+    if (typeof cause === 'string') return cause;
+    try {
+      return JSON.stringify(cause);
+    } catch {
+      return '[non-serializable cause]';
+    }
   }
 }
