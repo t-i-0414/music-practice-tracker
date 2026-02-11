@@ -4,12 +4,10 @@
 .PHONY: setup
 setup:
 	@echo "🔧 Setting up the environment with git worktree support..."
-	@command -v rulesync >/dev/null 2>&1 || \
-		( echo "📦 Installing rulesync..." && brew install rulesync )
-	rulesync generate
 	@bin/local/setup-env
 	@${MAKE} setup-dotenv-linter
 	bun install
+	bun run gen:rules
 	@make -C packages/libs/tsconfig-base setup
 	@make -C packages/libs/eslint-configs setup
 	@make -C packages/libs/eslint-configs build
