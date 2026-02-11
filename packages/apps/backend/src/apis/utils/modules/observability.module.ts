@@ -7,6 +7,7 @@ import { isDevelopment } from '@/utils/environment';
 @Module({
   imports: [
     ClsModule.forRoot({
+      global: true,
       middleware: {
         mount: true,
         generateId: true,

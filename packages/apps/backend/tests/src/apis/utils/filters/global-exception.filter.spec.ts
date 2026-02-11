@@ -38,10 +38,7 @@ describe('unit GlobalExceptionFilter', () => {
       get: jest.fn().mockReturnValue('test-user-id'),
     };
 
-    filter = new GlobalExceptionFilter(
-      mockLogger as unknown as PinoLogger,
-      mockCls as unknown as ClsService,
-    );
+    filter = new GlobalExceptionFilter(mockLogger as unknown as PinoLogger, mockCls as unknown as ClsService);
 
     mockResponse = {
       status: jest.fn().mockReturnThis(),
