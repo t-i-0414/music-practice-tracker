@@ -12,7 +12,7 @@ Track and improve your daily music practice. Mobile app + Admin dashboard.
 ## Quick Start
 
 ```bash
-# Prerequisites: Bun 1.x, Docker, Homebrew
+# Prerequisites: Bun 1.x, Docker
 
 # 1. Initial Setup (run once)
 make setup
@@ -165,7 +165,7 @@ bun run rulesync:dry-run
 bun run rulesync:check
 ```
 
-`make setup` automatically installs RuleSync (via Homebrew) and runs generation.
+`make setup` automatically runs RuleSync generation (`bun run gen:rules`). RuleSync is installed as an npm devDependency.
 
 ### Managed Targets
 
