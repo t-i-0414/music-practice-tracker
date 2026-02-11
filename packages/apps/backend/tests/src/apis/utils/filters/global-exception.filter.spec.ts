@@ -434,10 +434,7 @@ describe('unit GlobalExceptionFilter', () => {
 
       filter.catch(exception, mockArgumentsHost as ArgumentsHost);
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'GlobalExceptionFilter: logError failed',
-        expect.any(Error),
-      );
+      expect(consoleSpy).toHaveBeenCalledWith('GlobalExceptionFilter: logError failed', expect.any(Error));
 
       consoleSpy.mockRestore();
 

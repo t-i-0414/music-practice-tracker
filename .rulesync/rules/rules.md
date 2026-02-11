@@ -74,6 +74,7 @@ bun turbo start:dev                              # All apps (parallel)
 bun turbo lint:es:check type:check  # Package checks (parallel)
 bun run lint:es:check:root          # Root ESLint
 bun run type:check:root             # Root TypeScript
+bun run format:check                # Prettier formatting
 bun turbo test                      # All tests
 
 # Database
@@ -169,6 +170,9 @@ bun turbo lint:es:check type:check
 
 # Root checks (required by CI)
 bun run lint:es:check:root && bun run type:check:root
+
+# Formatting (required by CI)
+bun run format:check
 ```
 
 Check for: No console.log • No any types • No hardcoded values • No exposed IDs
