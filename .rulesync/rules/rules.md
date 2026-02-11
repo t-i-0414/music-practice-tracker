@@ -157,6 +157,10 @@ bun run seed:user         # DB users only
 **DON'T**: Use npm • Expose internal IDs • Skip quality checks • Add unnecessary comments
 **DO**: Use bun • Use publicId only • Run Turborepo checks • Separate Query/Command • Use OrFail pattern
 
+### AI Generated Documents
+
+Investigation notes, plans, and design documents created by AI must be placed under `docs/tmp/<feature-name>/`. These are temporary working documents and should not be committed to `main`.
+
 ## 📋 Pre-Commit
 
 ```bash
