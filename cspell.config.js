@@ -19,6 +19,7 @@ export default defineConfig({
     'cli',
     'clinerules',
     'clineignore',
+    'codexcli',
     'codexignore',
     'CLS',
     'commitlint',

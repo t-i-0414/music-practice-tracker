@@ -2,12 +2,25 @@ import { HttpStatus } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
 
 import { type RepositoryErrorCode } from '@/repository/utils/repository.error';
-import { CommonError } from '@/utils/errors/common.error';
+import { CommonError, type CommonErrorOptions } from '@/utils/errors/common.error';
+import { ErrorCategory } from '@/utils/errors/error-category';
 import { apiErrorPrefix, type ErrorCode, isErrorCode, type PreservedApiErrorCode } from '@/utils/errors/error-code';
+import { ErrorSeverity } from '@/utils/errors/error-severity';
+
+const resolveCategory = (errorCode: ApiErrorCode): ErrorCategory => {
+  if (errorCode === 'AP0401') return ErrorCategory.AUTHENTICATION;
+  if (errorCode === 'AP0403') return ErrorCategory.AUTHORIZATION;
+  if (errorCode >= 'AP0500' || errorCode === 'AP9999') return ErrorCategory.UNKNOWN;
+  return ErrorCategory.VALIDATION;
+};
 
 export class ApiError extends CommonError<ApiErrorCode> {
-  public constructor(errorCode: ApiErrorCode, detail: string, cause?: unknown) {
-    super(errorCode, detail, cause);
+  public constructor(errorCode: ApiErrorCode, detail: string, cause?: unknown, options?: Partial<CommonErrorOptions>) {
+    super(errorCode, detail, cause, {
+      severity: options?.severity ?? ErrorSeverity.MEDIUM,
+      category: options?.category ?? resolveCategory(errorCode),
+      isOperational: options?.isOperational ?? true,
+    });
   }
 }
 export const isApiError = (error: unknown): error is ApiError => error instanceof ApiError;
@@ -123,5 +136,5 @@ export class ErrorResponseDto {
   public statusCode: HttpStatus;
 
   @ApiProperty({ example: 'RE0002' })
-  public errorCode: string;
+  public errorCode: ErrorCode;
 }

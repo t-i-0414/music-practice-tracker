@@ -11,6 +11,8 @@ import {
   canConvertToRepositoryError,
   buildRepositoryError,
 } from '@/repository/utils/repository.error';
+import { ErrorCategory } from '@/utils/errors/error-category';
+import { ErrorSeverity } from '@/utils/errors/error-severity';
 
 jest.mock<typeof import('../../../../src/repository/utils/prisma.error')>(
   '../../../../src/repository/utils/prisma.error',
@@ -38,6 +40,14 @@ describe('unit RepositoryError', () => {
       expect(error.message).toBe('Test error');
       expect(error).toBeInstanceOf(Error);
       expect(error).toBeInstanceOf(RepositoryError);
+    });
+
+    it('should have severity HIGH, category INFRASTRUCTURE, isOperational false', () => {
+      const error = new RepositoryError('RE0001', 'Test error');
+
+      expect(error.severity).toBe(ErrorSeverity.HIGH);
+      expect(error.category).toBe(ErrorCategory.INFRASTRUCTURE);
+      expect(error.isOperational).toBe(false);
     });
 
     it('should create RepositoryError with cause', () => {

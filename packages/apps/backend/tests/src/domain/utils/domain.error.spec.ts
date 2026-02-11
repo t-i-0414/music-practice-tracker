@@ -1,5 +1,8 @@
 import { DomainError, isDomainError, isDomainErrorCode } from '@/domain/utils/domain.error';
 import { CommonError } from '@/utils/errors/common.error';
+import { ErrorCategory } from '@/utils/errors/error-category';
+import { type ErrorCode } from '@/utils/errors/error-code';
+import { ErrorSeverity } from '@/utils/errors/error-severity';
 
 describe('unit DomainError', () => {
   describe('constructor', () => {
@@ -27,6 +30,16 @@ describe('unit DomainError', () => {
 
       expect(error).toBeInstanceOf(CommonError);
       expect(error.name).toBe('DomainError');
+    });
+  });
+
+  describe('observability properties', () => {
+    it('should have severity MEDIUM, category BUSINESS_RULE, isOperational true', () => {
+      const error = new DomainError('DO9999', 'Business rule violation');
+
+      expect(error.severity).toBe(ErrorSeverity.MEDIUM);
+      expect(error.category).toBe(ErrorCategory.BUSINESS_RULE);
+      expect(error.isOperational).toBe(true);
     });
   });
 
@@ -93,8 +106,12 @@ describe('function isDomainError', () => {
 
   it('should return false for other CommonError subclasses', () => {
     class MockError extends CommonError {
-      public constructor(errorCode: any, detail: string) {
-        super(errorCode, detail);
+      public constructor(errorCode: ErrorCode, detail: string) {
+        super(errorCode, detail, undefined, {
+          severity: ErrorSeverity.MEDIUM,
+          category: ErrorCategory.UNKNOWN,
+          isOperational: true,
+        });
       }
     }
 

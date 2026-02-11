@@ -1,4 +1,7 @@
 import { CommonError } from '@/utils/errors/common.error';
+import { ErrorCategory } from '@/utils/errors/error-category';
+import { type ErrorCode } from '@/utils/errors/error-code';
+import { ErrorSeverity } from '@/utils/errors/error-severity';
 import { UnknownError, isUnknownError, isUnknownErrorCode } from '@/utils/errors/unknown.error';
 
 describe('unit UnknownError', () => {
@@ -27,6 +30,14 @@ describe('unit UnknownError', () => {
 
       expect(error).toBeInstanceOf(CommonError);
       expect(error.name).toBe('UnknownError');
+    });
+
+    it('should have severity CRITICAL, category UNKNOWN, isOperational false', () => {
+      const error = new UnknownError('UN9999', 'Test error');
+
+      expect(error.severity).toBe(ErrorSeverity.CRITICAL);
+      expect(error.category).toBe(ErrorCategory.UNKNOWN);
+      expect(error.isOperational).toBe(false);
     });
   });
 
@@ -62,8 +73,12 @@ describe('function isUnknownError', () => {
 
   it('should return false for other CommonError subclasses', () => {
     class MockError extends CommonError {
-      public constructor(errorCode: any, detail: string) {
-        super(errorCode, detail);
+      public constructor(errorCode: ErrorCode, detail: string) {
+        super(errorCode, detail, undefined, {
+          severity: ErrorSeverity.MEDIUM,
+          category: ErrorCategory.UNKNOWN,
+          isOperational: true,
+        });
       }
     }
 

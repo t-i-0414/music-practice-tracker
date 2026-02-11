@@ -1,5 +1,8 @@
 import { FirebaseError, isFirebaseError, isFirebaseErrorCode } from '@/firebase-auth/utils/firebase.error';
 import { CommonError } from '@/utils/errors/common.error';
+import { ErrorCategory } from '@/utils/errors/error-category';
+import { type ErrorCode } from '@/utils/errors/error-code';
+import { ErrorSeverity } from '@/utils/errors/error-severity';
 
 describe('unit FirebaseError', () => {
   describe('class FirebaseError', () => {
@@ -47,6 +50,16 @@ describe('unit FirebaseError', () => {
     );
   });
 
+  describe('observability properties', () => {
+    it('should have severity MEDIUM, category AUTHENTICATION, isOperational true', () => {
+      const error = new FirebaseError('FB0001', 'Firebase error');
+
+      expect(error.severity).toBe(ErrorSeverity.MEDIUM);
+      expect(error.category).toBe(ErrorCategory.AUTHENTICATION);
+      expect(error.isOperational).toBe(true);
+    });
+  });
+
   describe('function isFirebaseError', () => {
     it('should return true for FirebaseError instances', () => {
       const error = new FirebaseError('FB0001', 'Test error');
@@ -61,8 +74,12 @@ describe('unit FirebaseError', () => {
 
     it('should return false for other CommonError subclasses', () => {
       class MockError extends CommonError {
-        public constructor(errorCode: any, detail: string) {
-          super(errorCode, detail);
+        public constructor(errorCode: ErrorCode, detail: string) {
+          super(errorCode, detail, undefined, {
+            severity: ErrorSeverity.MEDIUM,
+            category: ErrorCategory.UNKNOWN,
+            isOperational: true,
+          });
         }
       }
 

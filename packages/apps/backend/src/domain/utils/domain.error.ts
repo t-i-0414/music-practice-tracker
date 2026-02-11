@@ -1,14 +1,20 @@
 import { CommonError } from '@/utils/errors/common.error';
+import { ErrorCategory } from '@/utils/errors/error-category';
 import {
   domainErrorPrefix,
   isErrorCode,
   type PreservedDomainErrorCode,
   type ErrorCode,
 } from '@/utils/errors/error-code';
+import { ErrorSeverity } from '@/utils/errors/error-severity';
 
 export class DomainError extends CommonError<DomainErrorCode> {
   public constructor(errorCode: DomainErrorCode, detail: string, cause?: unknown) {
-    super(errorCode, detail, cause);
+    super(errorCode, detail, cause, {
+      severity: ErrorSeverity.MEDIUM,
+      category: ErrorCategory.BUSINESS_RULE,
+      isOperational: true,
+    });
   }
 }
 

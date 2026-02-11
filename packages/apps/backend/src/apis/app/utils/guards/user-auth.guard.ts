@@ -1,6 +1,7 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
+import { ClsService } from 'nestjs-cls';
 
 import { CurrentUserData } from '../decorators/current-user.decorator';
 
@@ -16,6 +17,7 @@ export class UserAuthGuard implements CanActivate {
     private readonly reflector: Reflector,
     private readonly firebaseAuthService: FirebaseAuthService,
     private readonly usersQueryService: UserQueryService,
+    private readonly cls: ClsService,
   ) {}
 
   public async canActivate(ctx: ExecutionContext): Promise<boolean> {
@@ -41,6 +43,7 @@ export class UserAuthGuard implements CanActivate {
       name: user.name,
     };
     req.user = currentUser;
+    this.cls.set('userId', user.publicId);
 
     return true;
   }

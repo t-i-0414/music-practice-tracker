@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 
 import { GlobalExceptionFilter } from '../utils/filters/global-exception.filter';
+import { ObservabilityModule } from '../utils/modules/observability.module';
 
 import { AppApiUsersModule } from './users/users.module';
 import { CommonModule } from './utils/common.module';
@@ -13,6 +14,7 @@ import { UserAuthGuard } from './utils/guards/user-auth.guard';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    ObservabilityModule,
     CommonModule,
     AppApiUsersModule,
   ],

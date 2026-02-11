@@ -1,0 +1,49 @@
+{
+  "hooks": {},
+  "permissions": {
+    "allow": [
+      "Bash(bun turbo *)",
+      "Bash(bun run *)",
+      "Bash(bun install*)",
+      "Bash(bun x *)",
+      "Bash(bunx *)",
+      "Bash(make *)",
+      "Bash(make)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git checkout *)",
+      "Bash(git switch *)",
+      "Bash(git push *)",
+      "Bash(git push)",
+      "Bash(git merge *)",
+      "Bash(git diff*)",
+      "Bash(git log *)",
+      "Bash(git log)",
+      "Bash(git status*)",
+      "Bash(git show *)",
+      "Bash(git branch*)",
+      "Bash(wc *)",
+      "Bash(tail *)",
+      "Bash(head *)",
+      "Bash(gh pr *)",
+      "Bash(gh issue *)",
+      "Bash(gh api *)",
+      "Bash(gh run view:*)",
+      "Bash(gh pr view:*)",
+      "WebSearch"
+    ],
+    "deny": [
+      "Bash(git push --force*)",
+      "Bash(git push -f *)",
+      "Bash(git reset --hard*)",
+      "Bash(git clean -f*)",
+      "Bash(git clean -df*)",
+      "Bash(git branch -D*)",
+      "Bash(git checkout -- .)",
+      "Bash(git restore .)",
+      "Bash(rm -rf *)",
+      "Bash(sudo *)",
+      "Bash(npm *)"
+    ]
+  }
+}

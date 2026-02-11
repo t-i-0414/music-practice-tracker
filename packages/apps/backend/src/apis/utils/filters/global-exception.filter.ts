@@ -1,5 +1,7 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { Response } from 'express';
+import { Request, Response } from 'express';
+import { ClsService } from 'nestjs-cls';
+import { PinoLogger } from 'nestjs-pino';
 
 import {
   ApiError,
@@ -15,7 +17,9 @@ import {
   canConvertToRepositoryError,
   RepositoryError,
 } from '@/repository/utils/repository.error';
+import { CommonError } from '@/utils/errors/common.error';
 import { apiErrorPrefix, isErrorCode } from '@/utils/errors/error-code';
+import { ErrorSeverity } from '@/utils/errors/error-severity';
 import { isUnknownError, UnknownError } from '@/utils/errors/unknown.error';
 
 const httpErrorCodePrefix = `${apiErrorPrefix}0`;
@@ -23,45 +27,113 @@ const httpErrorCodePrefix = `${apiErrorPrefix}0`;
 @Injectable()
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
+  public constructor(
+    private readonly logger: PinoLogger,
+    private readonly cls: ClsService,
+  ) {
+    this.logger.setContext(GlobalExceptionFilter.name);
+  }
+
   public catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
+    const request = ctx.getRequest<Request>();
 
-    const errorResponse = this.buildErrorResponse(exception);
+    const { errorResponse, resolvedException } = this.buildErrorResponse(exception);
+    try {
+      this.logError(resolvedException, errorResponse, request);
+    } catch (loggingError: unknown) {
+      // eslint-disable-next-line no-console -- last-resort fallback when structured logging itself fails
+      console.error('GlobalExceptionFilter: logError failed', loggingError, resolvedException);
+    }
     response.status(errorResponse.statusCode).json(errorResponse);
   }
 
-  private buildErrorResponse(exception: unknown): ErrorResponseDto {
+  private logError(exception: unknown, errorResponse: ErrorResponseDto, request: Request): void {
+    const correlationId = this.cls.getId();
+    const userId = this.cls.get('userId');
+    const baseLogEntry = {
+      correlationId,
+      userId,
+      statusCode: errorResponse.statusCode,
+      errorCode: errorResponse.errorCode,
+      method: request.method,
+      url: request.url,
+    };
+
+    if (exception instanceof CommonError) {
+      const logEntry = { ...baseLogEntry, ...exception.toLogEntry() };
+      this.logBySeverity(exception.severity, logEntry);
+    } else if (exception instanceof HttpException) {
+      this.logger.warn({ ...baseLogEntry, message: exception.message }, 'HTTP exception');
+    } else {
+      const errorDetail =
+        exception instanceof Error
+          ? { error: exception.message, stack: exception.stack }
+          : { error: String(exception) };
+      this.logger.error({ ...baseLogEntry, ...errorDetail }, 'Unhandled exception');
+    }
+  }
+
+  private logBySeverity(severity: ErrorSeverity, logEntry: Record<string, unknown>): void {
+    switch (severity) {
+      case ErrorSeverity.LOW:
+        this.logger.info(logEntry, 'Operational error');
+        break;
+      case ErrorSeverity.MEDIUM:
+        this.logger.warn(logEntry, 'Business error');
+        break;
+      case ErrorSeverity.HIGH:
+        this.logger.error(logEntry, 'Infrastructure error');
+        break;
+      case ErrorSeverity.CRITICAL:
+        this.logger.fatal(logEntry, 'Critical error');
+        break;
+      default: {
+        const _exhaustive: never = severity;
+        this.logger.error(logEntry, `Unknown severity: ${String(_exhaustive)}`);
+        break;
+      }
+    }
+  }
+
+  private buildErrorResponse(exception: unknown): {
+    errorResponse: ErrorResponseDto;
+    resolvedException: unknown;
+  } {
     if (exception instanceof HttpException) {
-      return this.handleHttpException(exception);
+      return { errorResponse: this.handleHttpException(exception), resolvedException: exception };
     }
 
     if (isApiError(exception)) {
-      return this.handleApiError(exception);
+      return { errorResponse: this.handleApiError(exception), resolvedException: exception };
     }
 
     if (isDomainError(exception)) {
-      return this.handleDomainError(exception);
+      return { errorResponse: this.handleDomainError(exception), resolvedException: exception };
     }
 
     if (isFirebaseError(exception)) {
-      return this.handleFirebaseError(exception);
+      return { errorResponse: this.handleFirebaseError(exception), resolvedException: exception };
     }
 
     if (canConvertToRepositoryError(exception)) {
       const repositoryError = buildRepositoryError(exception);
-      return this.handleRepositoryError(repositoryError);
+      return { errorResponse: this.handleRepositoryError(repositoryError), resolvedException: repositoryError };
     }
 
     if (isUnknownError(exception)) {
-      return this.handleUnknownError(exception);
+      return { errorResponse: this.handleUnknownError(exception), resolvedException: exception };
     }
 
     const errorCode = 'UN9999';
 
     return {
-      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-      errorCode,
+      errorResponse: {
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        errorCode,
+      },
+      resolvedException: exception,
     };
   }
 
