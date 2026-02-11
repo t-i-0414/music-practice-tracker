@@ -25,6 +25,7 @@ export type CommonErrorLogEntry = {
   isOperational: boolean;
   timestamp: string;
   cause?: string;
+  stack?: string;
 };
 
 export abstract class CommonError<TErrorCode extends ErrorCode = ErrorCode> extends Error {
@@ -79,6 +80,7 @@ export abstract class CommonError<TErrorCode extends ErrorCode = ErrorCode> exte
         : this.cause !== undefined
           ? { cause: this.serializeCause(this.cause) }
           : {}),
+      ...(!this.isOperational && this.stack !== undefined ? { stack: this.stack } : {}),
     };
   }
 

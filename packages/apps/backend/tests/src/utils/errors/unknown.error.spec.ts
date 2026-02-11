@@ -1,4 +1,6 @@
 import { CommonError } from '@/utils/errors/common.error';
+import { ErrorCategory } from '@/utils/errors/error-category';
+import { ErrorSeverity } from '@/utils/errors/error-severity';
 import { UnknownError, isUnknownError, isUnknownErrorCode } from '@/utils/errors/unknown.error';
 
 describe('unit UnknownError', () => {
@@ -27,6 +29,14 @@ describe('unit UnknownError', () => {
 
       expect(error).toBeInstanceOf(CommonError);
       expect(error.name).toBe('UnknownError');
+    });
+
+    it('should have severity CRITICAL, category UNKNOWN, isOperational false', () => {
+      const error = new UnknownError('UN9999', 'Test error');
+
+      expect(error.severity).toBe(ErrorSeverity.CRITICAL);
+      expect(error.category).toBe(ErrorCategory.UNKNOWN);
+      expect(error.isOperational).toBe(false);
     });
   });
 

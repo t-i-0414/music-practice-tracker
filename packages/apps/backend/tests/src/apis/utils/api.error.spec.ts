@@ -7,6 +7,8 @@ import {
   ErrorResponseDto,
   HTTP_STATUS_ERROR_CODE_RECORD_BY_REPOSITORY_ERROR_CODE,
 } from '@/apis/utils/api.error';
+import { ErrorCategory } from '@/utils/errors/error-category';
+import { ErrorSeverity } from '@/utils/errors/error-severity';
 
 describe('unit ApiError', () => {
   describe('constructor', () => {
@@ -26,6 +28,57 @@ describe('unit ApiError', () => {
       expect(error.errorCode).toBe('AP0400');
       expect(error.message).toBe('Test error');
       expect(error.cause).toBe(originalError);
+    });
+  });
+
+  describe('observability properties', () => {
+    it('should have default severity MEDIUM and isOperational true', () => {
+      const error = new ApiError('AP0400', 'Bad request');
+
+      expect(error.severity).toBe(ErrorSeverity.MEDIUM);
+      expect(error.isOperational).toBe(true);
+    });
+
+    it('should resolve category to AUTHENTICATION for AP0401', () => {
+      const error = new ApiError('AP0401', 'Unauthorized');
+
+      expect(error.category).toBe(ErrorCategory.AUTHENTICATION);
+    });
+
+    it('should resolve category to AUTHORIZATION for AP0403', () => {
+      const error = new ApiError('AP0403', 'Forbidden');
+
+      expect(error.category).toBe(ErrorCategory.AUTHORIZATION);
+    });
+
+    it('should resolve category to VALIDATION for 4xx errors', () => {
+      const error = new ApiError('AP0400', 'Bad request');
+
+      expect(error.category).toBe(ErrorCategory.VALIDATION);
+    });
+
+    it('should resolve category to UNKNOWN for 5xx errors', () => {
+      const error = new ApiError('AP0500', 'Internal server error');
+
+      expect(error.category).toBe(ErrorCategory.UNKNOWN);
+    });
+
+    it('should resolve category to UNKNOWN for AP9999', () => {
+      const error = new ApiError('AP9999', 'Unknown error');
+
+      expect(error.category).toBe(ErrorCategory.UNKNOWN);
+    });
+
+    it('should allow overriding options', () => {
+      const error = new ApiError('AP0400', 'Test', undefined, {
+        severity: ErrorSeverity.CRITICAL,
+        category: ErrorCategory.INFRASTRUCTURE,
+        isOperational: false,
+      });
+
+      expect(error.severity).toBe(ErrorSeverity.CRITICAL);
+      expect(error.category).toBe(ErrorCategory.INFRASTRUCTURE);
+      expect(error.isOperational).toBe(false);
     });
   });
 

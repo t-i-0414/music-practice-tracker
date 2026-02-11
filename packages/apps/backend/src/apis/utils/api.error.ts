@@ -10,6 +10,7 @@ import { ErrorSeverity } from '@/utils/errors/error-severity';
 const resolveCategory = (errorCode: ApiErrorCode): ErrorCategory => {
   if (errorCode === 'AP0401') return ErrorCategory.AUTHENTICATION;
   if (errorCode === 'AP0403') return ErrorCategory.AUTHORIZATION;
+  if (errorCode >= 'AP0500' || errorCode === 'AP9999') return ErrorCategory.UNKNOWN;
   return ErrorCategory.VALIDATION;
 };
 

@@ -120,6 +120,112 @@ describe('unit CommonError', () => {
     });
   });
 
+  describe('observability properties', () => {
+    it('should have default severity, category, and isOperational', () => {
+      const error = new TestCommonError('AP0400', 'Test detail');
+
+      expect(error.severity).toBe('MEDIUM');
+      expect(error.category).toBe('UNKNOWN');
+      expect(error.isOperational).toBe(true);
+    });
+
+    it('should allow overriding options via constructor', () => {
+      class OverridableError extends CommonError {
+        public constructor(errorCode: any, detail: string, options?: any) {
+          super(errorCode, detail, undefined, options);
+        }
+      }
+
+      const error = new OverridableError('AP0400', 'Test', {
+        severity: 'CRITICAL',
+        category: 'INFRASTRUCTURE',
+        isOperational: false,
+      });
+
+      expect(error.severity).toBe('CRITICAL');
+      expect(error.category).toBe('INFRASTRUCTURE');
+      expect(error.isOperational).toBe(false);
+    });
+  });
+
+  describe('toLogEntry', () => {
+    it('should return correct log entry shape', () => {
+      const error = new TestCommonError('AP0400', 'Test detail');
+      const logEntry = error.toLogEntry();
+
+      expect(logEntry).toStrictEqual({
+        errorName: 'TestCommonError',
+        errorCode: 'AP0400',
+        errorMessage: 'Bad request',
+        detail: 'Test detail',
+        severity: 'MEDIUM',
+        category: 'UNKNOWN',
+        isOperational: true,
+        timestamp: mockDate,
+      });
+    });
+
+    it('should include cause message when cause is an Error', () => {
+      const cause = new Error('Original failure');
+      const error = new TestCommonError('AP0400', 'Test detail', cause);
+      const logEntry = error.toLogEntry();
+
+      expect(logEntry.cause).toBe('Original failure');
+    });
+
+    it('should serialize string cause directly', () => {
+      const error = new TestCommonError('AP0400', 'Test detail', 'string cause');
+      const logEntry = error.toLogEntry();
+
+      expect(logEntry.cause).toBe('string cause');
+    });
+
+    it('should serialize object cause as JSON', () => {
+      const cause = { code: 123, reason: 'test' };
+      const error = new TestCommonError('AP0400', 'Test detail', cause);
+      const logEntry = error.toLogEntry();
+
+      expect(logEntry.cause).toBe('{"code":123,"reason":"test"}');
+    });
+
+    it('should handle circular cause with fallback message', () => {
+      const circular: Record<string, unknown> = {};
+      circular.self = circular;
+      const error = new TestCommonError('AP0400', 'Test detail', circular);
+      const logEntry = error.toLogEntry();
+
+      expect(logEntry.cause).toBe('[non-serializable cause]');
+    });
+
+    it('should not include cause when cause is undefined', () => {
+      const error = new TestCommonError('AP0400', 'Test detail');
+      const logEntry = error.toLogEntry();
+
+      expect(logEntry).not.toHaveProperty('cause');
+    });
+
+    it('should include stack trace for non-operational errors', () => {
+      class NonOperationalError extends CommonError {
+        public constructor(errorCode: any, detail: string) {
+          super(errorCode, detail, undefined, { isOperational: false });
+        }
+      }
+
+      const error = new NonOperationalError('AP0400', 'Critical failure');
+      const logEntry = error.toLogEntry();
+
+      expect(logEntry.stack).toBeDefined();
+      expect(logEntry.stack).toContain('NonOperationalError');
+    });
+
+    it('should not include stack trace for operational errors', () => {
+      const error = new TestCommonError('AP0400', 'Normal error');
+      const logEntry = error.toLogEntry();
+
+      expect(logEntry).not.toHaveProperty('stack');
+    });
+  });
+
   describe('inheritance', () => {
     class CustomError extends CommonError {
       public customProperty: string;

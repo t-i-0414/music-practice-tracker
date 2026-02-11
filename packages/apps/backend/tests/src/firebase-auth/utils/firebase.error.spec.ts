@@ -1,5 +1,7 @@
 import { FirebaseError, isFirebaseError, isFirebaseErrorCode } from '@/firebase-auth/utils/firebase.error';
 import { CommonError } from '@/utils/errors/common.error';
+import { ErrorCategory } from '@/utils/errors/error-category';
+import { ErrorSeverity } from '@/utils/errors/error-severity';
 
 describe('unit FirebaseError', () => {
   describe('class FirebaseError', () => {
@@ -45,6 +47,16 @@ describe('unit FirebaseError', () => {
         expect(error.detail).toBe(`Error for ${code}`);
       },
     );
+  });
+
+  describe('observability properties', () => {
+    it('should have severity MEDIUM, category AUTHENTICATION, isOperational true', () => {
+      const error = new FirebaseError('FB0001', 'Firebase error');
+
+      expect(error.severity).toBe(ErrorSeverity.MEDIUM);
+      expect(error.category).toBe(ErrorCategory.AUTHENTICATION);
+      expect(error.isOperational).toBe(true);
+    });
   });
 
   describe('function isFirebaseError', () => {

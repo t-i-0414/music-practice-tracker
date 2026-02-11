@@ -392,6 +392,58 @@ describe('unit GlobalExceptionFilter', () => {
       );
     });
 
+    it('should log ApiError with warn level (severity MEDIUM)', () => {
+      const exception = new ApiError('AP0400', 'Bad request');
+
+      filter.catch(exception, mockArgumentsHost as ArgumentsHost);
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          correlationId: 'test-correlation-id',
+          errorCode: 'AP0400',
+          severity: 'MEDIUM',
+          category: 'VALIDATION',
+        }),
+        'Business error',
+      );
+    });
+
+    it('should log FirebaseError with warn level (severity MEDIUM)', () => {
+      const exception = new FirebaseError('FB0001', 'Firebase error');
+
+      filter.catch(exception, mockArgumentsHost as ArgumentsHost);
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          correlationId: 'test-correlation-id',
+          errorCode: 'FB0001',
+          severity: 'MEDIUM',
+          category: 'AUTHENTICATION',
+        }),
+        'Business error',
+      );
+    });
+
+    it('should fallback to console.error when logError throws', () => {
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      mockCls.getId.mockImplementation(() => {
+        throw new Error('CLS failure');
+      });
+      const exception = new DomainError('DO9999', 'Test error');
+
+      filter.catch(exception, mockArgumentsHost as ArgumentsHost);
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'GlobalExceptionFilter: logError failed',
+        expect.any(Error),
+      );
+
+      consoleSpy.mockRestore();
+
+      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+    });
+
     it('should include correlation ID and userId from ClsService in all log entries', () => {
       mockCls.getId.mockReturnValue('custom-correlation-id');
       mockCls.get.mockReturnValue('custom-user-id');
