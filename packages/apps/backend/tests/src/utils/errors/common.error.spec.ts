@@ -1,10 +1,16 @@
 import { setupDateMock, restoreDateMocks } from '@/tests/helpers/date-mock.helper';
-import { CommonError } from '@/utils/errors/common.error';
+import { CommonError, type CommonErrorOptions } from '@/utils/errors/common.error';
+import { ErrorCategory } from '@/utils/errors/error-category';
 import { ERROR_CODE_RECORDS, type ErrorCode } from '@/utils/errors/error-code';
+import { ErrorSeverity } from '@/utils/errors/error-severity';
 
 class TestCommonError extends CommonError {
   public constructor(errorCode: ErrorCode, detail: string, cause?: unknown) {
-    super(errorCode, detail, cause);
+    super(errorCode, detail, cause, {
+      severity: ErrorSeverity.MEDIUM,
+      category: ErrorCategory.UNKNOWN,
+      isOperational: true,
+    });
   }
 }
 
@@ -131,14 +137,14 @@ describe('unit CommonError', () => {
 
     it('should allow overriding options via constructor', () => {
       class OverridableError extends CommonError {
-        public constructor(errorCode: any, detail: string, options?: any) {
+        public constructor(errorCode: ErrorCode, detail: string, options: CommonErrorOptions) {
           super(errorCode, detail, undefined, options);
         }
       }
 
       const error = new OverridableError('AP0400', 'Test', {
-        severity: 'CRITICAL',
-        category: 'INFRASTRUCTURE',
+        severity: ErrorSeverity.CRITICAL,
+        category: ErrorCategory.INFRASTRUCTURE,
         isOperational: false,
       });
 
@@ -206,8 +212,12 @@ describe('unit CommonError', () => {
 
     it('should include stack trace for non-operational errors', () => {
       class NonOperationalError extends CommonError {
-        public constructor(errorCode: any, detail: string) {
-          super(errorCode, detail, undefined, { isOperational: false });
+        public constructor(errorCode: ErrorCode, detail: string) {
+          super(errorCode, detail, undefined, {
+            severity: ErrorSeverity.CRITICAL,
+            category: ErrorCategory.UNKNOWN,
+            isOperational: false,
+          });
         }
       }
 
@@ -230,8 +240,12 @@ describe('unit CommonError', () => {
     class CustomError extends CommonError {
       public customProperty: string;
 
-      public constructor(errorCode: any, detail: string, customProperty: string) {
-        super(errorCode, detail);
+      public constructor(errorCode: ErrorCode, detail: string, customProperty: string) {
+        super(errorCode, detail, undefined, {
+          severity: ErrorSeverity.MEDIUM,
+          category: ErrorCategory.UNKNOWN,
+          isOperational: true,
+        });
         this.customProperty = customProperty;
       }
     }

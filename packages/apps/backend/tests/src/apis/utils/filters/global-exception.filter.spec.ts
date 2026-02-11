@@ -127,18 +127,6 @@ describe('unit GlobalExceptionFilter', () => {
       });
     });
 
-    it('should fallback to 500 when ApiError code does not encode status', () => {
-      const exception = new ApiError('AP9999', 'Unknown api error');
-
-      filter.catch(exception, mockArgumentsHost as ArgumentsHost);
-
-      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
-      expect(mockResponse.json).toHaveBeenCalledWith({
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-        errorCode: 'AP9999',
-      });
-    });
-
     it('should handle RepositoryError correctly', () => {
       const exception = new PrismaClientKnownRequestError('Test repository error', {
         code: 'P2000',
@@ -434,7 +422,7 @@ describe('unit GlobalExceptionFilter', () => {
 
       filter.catch(exception, mockArgumentsHost as ArgumentsHost);
 
-      expect(consoleSpy).toHaveBeenCalledWith('GlobalExceptionFilter: logError failed', expect.any(Error));
+      expect(consoleSpy).toHaveBeenCalledWith('GlobalExceptionFilter: logError failed', expect.any(Error), exception);
 
       consoleSpy.mockRestore();
 

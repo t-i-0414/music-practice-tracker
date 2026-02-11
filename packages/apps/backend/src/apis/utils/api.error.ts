@@ -15,7 +15,7 @@ const resolveCategory = (errorCode: ApiErrorCode): ErrorCategory => {
 };
 
 export class ApiError extends CommonError<ApiErrorCode> {
-  public constructor(errorCode: ApiErrorCode, detail: string, cause?: unknown, options?: CommonErrorOptions) {
+  public constructor(errorCode: ApiErrorCode, detail: string, cause?: unknown, options?: Partial<CommonErrorOptions>) {
     super(errorCode, detail, cause, {
       severity: options?.severity ?? ErrorSeverity.MEDIUM,
       category: options?.category ?? resolveCategory(errorCode),
@@ -136,5 +136,5 @@ export class ErrorResponseDto {
   public statusCode: HttpStatus;
 
   @ApiProperty({ example: 'RE0002' })
-  public errorCode: string;
+  public errorCode: ErrorCode;
 }

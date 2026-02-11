@@ -1,6 +1,6 @@
-import { ErrorCategory } from '@/utils/errors/error-category';
+import type { ErrorCategory } from '@/utils/errors/error-category';
 import { ERROR_CODE_RECORDS, type ErrorCode, type ErrorMessage } from '@/utils/errors/error-code';
-import { ErrorSeverity } from '@/utils/errors/error-severity';
+import type { ErrorSeverity } from '@/utils/errors/error-severity';
 
 export type CommonErrorBody = {
   errorCode: ErrorCode;
@@ -10,14 +10,14 @@ export type CommonErrorBody = {
 };
 
 export type CommonErrorOptions = {
-  severity?: ErrorSeverity;
-  category?: ErrorCategory;
-  isOperational?: boolean;
+  severity: ErrorSeverity;
+  category: ErrorCategory;
+  isOperational: boolean;
 };
 
 export type CommonErrorLogEntry = {
   errorName: string;
-  errorCode: string;
+  errorCode: ErrorCode;
   errorMessage: string;
   detail: string;
   severity: ErrorSeverity;
@@ -37,16 +37,16 @@ export abstract class CommonError<TErrorCode extends ErrorCode = ErrorCode> exte
   public readonly category: ErrorCategory;
   public readonly isOperational: boolean;
 
-  protected constructor(errorCode: TErrorCode, detail: string, cause?: unknown, options?: CommonErrorOptions) {
+  protected constructor(errorCode: TErrorCode, detail: string, cause: unknown, options: CommonErrorOptions) {
     super(detail, { cause });
     this.name = this.constructor.name;
     this.errorCode = errorCode;
     this.errorMessage = ERROR_CODE_RECORDS[errorCode];
     this.detail = detail;
     this.timestamp = new Date().toISOString();
-    this.severity = options?.severity ?? ErrorSeverity.MEDIUM;
-    this.category = options?.category ?? ErrorCategory.UNKNOWN;
-    this.isOperational = options?.isOperational ?? true;
+    this.severity = options.severity;
+    this.category = options.category;
+    this.isOperational = options.isOperational;
   }
 
   public toJSON(): CommonErrorBody & {

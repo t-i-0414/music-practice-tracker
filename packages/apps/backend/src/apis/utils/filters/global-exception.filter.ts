@@ -44,7 +44,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       this.logError(resolvedException, errorResponse, request);
     } catch (loggingError: unknown) {
       // eslint-disable-next-line no-console -- last-resort fallback when structured logging itself fails
-      console.error('GlobalExceptionFilter: logError failed', loggingError);
+      console.error('GlobalExceptionFilter: logError failed', loggingError, resolvedException);
     }
     response.status(errorResponse.statusCode).json(errorResponse);
   }
