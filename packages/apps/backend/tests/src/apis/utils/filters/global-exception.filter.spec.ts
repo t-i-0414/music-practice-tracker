@@ -376,7 +376,7 @@ describe('unit GlobalExceptionFilter', () => {
       );
     });
 
-    it('should log unhandled exception with error level', () => {
+    it('should log unhandled exception with error level and stack trace', () => {
       const exception = new Error('Unknown error');
 
       filter.catch(exception, mockArgumentsHost as ArgumentsHost);
@@ -386,6 +386,7 @@ describe('unit GlobalExceptionFilter', () => {
           correlationId: 'test-correlation-id',
           statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
           error: 'Unknown error',
+          stack: expect.stringContaining('Error: Unknown error'),
         }),
         'Unhandled exception',
       );

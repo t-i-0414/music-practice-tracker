@@ -67,10 +67,11 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     } else if (exception instanceof HttpException) {
       this.logger.warn({ ...baseLogEntry, message: exception.message }, 'HTTP exception');
     } else {
-      this.logger.error(
-        { ...baseLogEntry, error: exception instanceof Error ? exception.message : String(exception) },
-        'Unhandled exception',
-      );
+      const errorDetail =
+        exception instanceof Error
+          ? { error: exception.message, stack: exception.stack }
+          : { error: String(exception) };
+      this.logger.error({ ...baseLogEntry, ...errorDetail }, 'Unhandled exception');
     }
   }
 
