@@ -16,9 +16,21 @@
       "Bash(git push *)",
       "Bash(git push)",
       "Bash(git merge *)",
+      "Bash(git diff*)",
+      "Bash(git log *)",
+      "Bash(git log)",
+      "Bash(git status*)",
+      "Bash(git show *)",
+      "Bash(git branch*)",
+      "Bash(wc *)",
+      "Bash(tail *)",
+      "Bash(head *)",
       "Bash(gh pr *)",
       "Bash(gh issue *)",
-      "Bash(gh api *)"
+      "Bash(gh api *)",
+      "Bash(gh run view:*)",
+      "Bash(gh pr view:*)",
+      "WebSearch"
     ],
     "deny": [
       "Bash(git push --force*)",
