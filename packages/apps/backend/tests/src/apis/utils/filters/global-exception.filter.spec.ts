@@ -10,6 +10,29 @@ import { FirebaseError } from '@/firebase-auth/utils/firebase.error';
 import { PrismaClientKnownRequestError } from '@/generated/prisma/runtime/client';
 import { UnknownError } from '@/utils/errors/unknown.error';
 
+jest.mock<typeof import('dd-trace')>('dd-trace', () => {
+  const setTag = jest.fn().mockReturnThis();
+  const span = { setTag };
+  const active = jest.fn().mockReturnValue(span);
+  const scope = { active };
+  const increment = jest.fn();
+
+  return {
+    __esModule: true,
+    default: {
+      scope: () => scope,
+      dogstatsd: { increment },
+    },
+  } as never;
+});
+
+const ddTraceMock = require('dd-trace').default;
+const mockScope = ddTraceMock.scope();
+const mockActive = jest.mocked(mockScope.active);
+const mockSpan = mockActive() as { setTag: jest.Mock };
+const mockSetTag = mockSpan.setTag;
+const mockIncrement = jest.mocked(ddTraceMock.dogstatsd.increment);
+
 describe('unit GlobalExceptionFilter', () => {
   let filter: GlobalExceptionFilter;
   let mockResponse: Partial<Response>;
@@ -25,6 +48,10 @@ describe('unit GlobalExceptionFilter', () => {
   let mockCls: { getId: jest.Mock; get: jest.Mock };
 
   beforeEach(() => {
+    mockSetTag.mockClear();
+    mockActive.mockClear().mockReturnValue(mockSpan);
+    mockIncrement.mockClear();
+
     mockLogger = {
       setContext: jest.fn(),
       info: jest.fn(),
@@ -443,6 +470,97 @@ describe('unit GlobalExceptionFilter', () => {
         }),
         'Business error',
       );
+    });
+  });
+
+  describe('datadog integration', () => {
+    it('should tag active span with error metadata for CommonError', () => {
+      const exception = new DomainError('DO9999', 'Test domain error');
+
+      filter.catch(exception, mockArgumentsHost as ArgumentsHost);
+
+      expect(mockSetTag).toHaveBeenCalledWith('error', true);
+      expect(mockSetTag).toHaveBeenCalledWith('error.type', 'DomainError');
+      expect(mockSetTag).toHaveBeenCalledWith('error.code', 'DO9999');
+      expect(mockSetTag).toHaveBeenCalledWith('http.status_code', HttpStatus.BAD_REQUEST);
+      expect(mockSetTag).toHaveBeenCalledWith('error.severity', 'MEDIUM');
+      expect(mockSetTag).toHaveBeenCalledWith('error.category', 'BUSINESS_RULE');
+      expect(mockSetTag).toHaveBeenCalledWith('error.operational', true);
+    });
+
+    it('should include stack trace for non-operational errors', () => {
+      const exception = new UnknownError('UN9999', 'Critical failure');
+
+      filter.catch(exception, mockArgumentsHost as ArgumentsHost);
+
+      expect(mockSetTag).toHaveBeenCalledWith('error.operational', false);
+      expect(mockSetTag).toHaveBeenCalledWith('error.message', 'Critical failure');
+      expect(mockSetTag).toHaveBeenCalledWith('error.stack', expect.stringContaining('UnknownError'));
+    });
+
+    it('should not include stack trace for operational errors', () => {
+      const exception = new DomainError('DO9999', 'Expected error');
+
+      filter.catch(exception, mockArgumentsHost as ArgumentsHost);
+
+      expect(mockSetTag).not.toHaveBeenCalledWith('error.message', expect.anything());
+      expect(mockSetTag).not.toHaveBeenCalledWith('error.stack', expect.anything());
+    });
+
+    it('should tag span with error info for plain Error exceptions', () => {
+      const exception = new Error('Unexpected error');
+
+      filter.catch(exception, mockArgumentsHost as ArgumentsHost);
+
+      expect(mockSetTag).toHaveBeenCalledWith('error', true);
+      expect(mockSetTag).toHaveBeenCalledWith('error.type', 'Error');
+      expect(mockSetTag).toHaveBeenCalledWith('error.message', 'Unexpected error');
+      expect(mockSetTag).toHaveBeenCalledWith('error.stack', expect.stringContaining('Error: Unexpected error'));
+    });
+
+    it('should increment dogstatsd counter with tags for CommonError', () => {
+      const exception = new DomainError('DO9999', 'Test error');
+
+      filter.catch(exception, mockArgumentsHost as ArgumentsHost);
+
+      expect(mockIncrement).toHaveBeenCalledWith('app.error.count', undefined, [
+        'error_code:DO9999',
+        'severity:MEDIUM',
+        'category:BUSINESS_RULE',
+        'operational:true',
+      ]);
+    });
+
+    it('should increment dogstatsd counter with minimal tags for non-CommonError', () => {
+      const exception = new Error('Unknown error');
+
+      filter.catch(exception, mockArgumentsHost as ArgumentsHost);
+
+      expect(mockIncrement).toHaveBeenCalledWith('app.error.count', undefined, ['error_code:UN9999']);
+    });
+
+    it('should skip span tagging when no active span exists', () => {
+      mockActive.mockReturnValue(null);
+      const exception = new DomainError('DO9999', 'Test error');
+
+      filter.catch(exception, mockArgumentsHost as ArgumentsHost);
+
+      expect(mockSetTag).not.toHaveBeenCalled();
+    });
+
+    it('should not block error response when Datadog reporting fails', () => {
+      mockActive.mockImplementation(() => {
+        throw new Error('Datadog unavailable');
+      });
+      const exception = new DomainError('DO9999', 'Test error');
+
+      filter.catch(exception, mockArgumentsHost as ArgumentsHost);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        statusCode: HttpStatus.BAD_REQUEST,
+        errorCode: 'DO9999',
+      });
     });
   });
 });
