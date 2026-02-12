@@ -1,5 +1,4 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import tracer from 'dd-trace';
 import { Request, Response } from 'express';
 import { ClsService } from 'nestjs-cls';
 import { PinoLogger } from 'nestjs-pino';
@@ -46,12 +45,6 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     } catch (loggingError: unknown) {
       // eslint-disable-next-line no-console -- last-resort fallback when structured logging itself fails
       console.error('GlobalExceptionFilter: logError failed', loggingError, resolvedException);
-    }
-    try {
-      this.reportToDatadog(resolvedException, errorResponse);
-    } catch (datadogError: unknown) {
-      // eslint-disable-next-line no-console -- last-resort fallback when Datadog reporting fails
-      console.warn('GlobalExceptionFilter: reportToDatadog failed', datadogError);
     }
     response.status(errorResponse.statusCode).json(errorResponse);
   }
@@ -102,43 +95,6 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         break;
       }
     }
-  }
-
-  private reportToDatadog(exception: unknown, errorResponse: ErrorResponseDto): void {
-    const span = tracer.scope().active();
-
-    if (span !== null) {
-      span.setTag('error', true);
-      span.setTag('error.type', exception instanceof Error ? exception.name : 'UnknownError');
-      span.setTag('error.code', errorResponse.errorCode);
-      span.setTag('http.status_code', errorResponse.statusCode);
-
-      if (exception instanceof CommonError) {
-        span.setTag('error.severity', exception.severity);
-        span.setTag('error.category', exception.category);
-        span.setTag('error.operational', exception.isOperational);
-
-        if (!exception.isOperational) {
-          span.setTag('error.message', exception.detail);
-          if (exception.stack !== undefined) {
-            span.setTag('error.stack', exception.stack);
-          }
-        }
-      } else if (exception instanceof Error) {
-        span.setTag('error.message', exception.message);
-        if (exception.stack !== undefined) {
-          span.setTag('error.stack', exception.stack);
-        }
-      }
-    }
-
-    const metricTags = [`error_code:${errorResponse.errorCode}`];
-    if (exception instanceof CommonError) {
-      metricTags.push(`severity:${exception.severity}`);
-      metricTags.push(`category:${exception.category}`);
-      metricTags.push(`operational:${String(exception.isOperational)}`);
-    }
-    tracer.dogstatsd.increment('app.error.count', undefined, metricTags);
   }
 
   private buildErrorResponse(exception: unknown): {
