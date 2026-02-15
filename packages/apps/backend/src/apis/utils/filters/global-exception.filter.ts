@@ -49,8 +49,9 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     }
     try {
       this.reportToDatadog(resolvedException, errorResponse);
-    } catch {
-      // Datadog reporting is best-effort; never block the error response
+    } catch (datadogError: unknown) {
+      // eslint-disable-next-line no-console -- last-resort fallback when Datadog reporting fails
+      console.warn('GlobalExceptionFilter: reportToDatadog failed', datadogError);
     }
     response.status(errorResponse.statusCode).json(errorResponse);
   }
@@ -105,28 +106,29 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
   private reportToDatadog(exception: unknown, errorResponse: ErrorResponseDto): void {
     const span = tracer.scope().active();
-    if (span === null) return;
 
-    span.setTag('error', true);
-    span.setTag('error.type', exception instanceof Error ? exception.name : 'UnknownError');
-    span.setTag('error.code', errorResponse.errorCode);
-    span.setTag('http.status_code', errorResponse.statusCode);
+    if (span !== null) {
+      span.setTag('error', true);
+      span.setTag('error.type', exception instanceof Error ? exception.name : 'UnknownError');
+      span.setTag('error.code', errorResponse.errorCode);
+      span.setTag('http.status_code', errorResponse.statusCode);
 
-    if (exception instanceof CommonError) {
-      span.setTag('error.severity', exception.severity);
-      span.setTag('error.category', exception.category);
-      span.setTag('error.operational', exception.isOperational);
+      if (exception instanceof CommonError) {
+        span.setTag('error.severity', exception.severity);
+        span.setTag('error.category', exception.category);
+        span.setTag('error.operational', exception.isOperational);
 
-      if (!exception.isOperational) {
-        span.setTag('error.message', exception.detail);
+        if (!exception.isOperational) {
+          span.setTag('error.message', exception.detail);
+          if (exception.stack !== undefined) {
+            span.setTag('error.stack', exception.stack);
+          }
+        }
+      } else if (exception instanceof Error) {
+        span.setTag('error.message', exception.message);
         if (exception.stack !== undefined) {
           span.setTag('error.stack', exception.stack);
         }
-      }
-    } else if (exception instanceof Error) {
-      span.setTag('error.message', exception.message);
-      if (exception.stack !== undefined) {
-        span.setTag('error.stack', exception.stack);
       }
     }
 

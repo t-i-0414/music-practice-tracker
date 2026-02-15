@@ -1,8 +1,13 @@
 import tracer from 'dd-trace';
 
-tracer.init({
-  logInjection: true,
-  runtimeMetrics: true,
-});
+try {
+  tracer.init({
+    logInjection: true,
+    runtimeMetrics: true,
+  });
+} catch (error: unknown) {
+  // eslint-disable-next-line no-console -- tracer initializes before NestJS logger is available
+  console.error('dd-trace initialization failed', error);
+}
 
 export default tracer;

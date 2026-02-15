@@ -1,3 +1,5 @@
+import { Logger } from '@nestjs/common';
+
 import { PrismaHealthIndicator } from '@/apis/utils/health/prisma-health.indicator';
 import { RepositoryService } from '@/repository/repository.service';
 
@@ -10,6 +12,7 @@ const mockHealthIndicatorService = { check: mockCheck };
 describe('unit PrismaHealthIndicator', () => {
   let indicator: PrismaHealthIndicator;
   let mockRepository: { $queryRawUnsafe: jest.Mock };
+  let loggerErrorSpy: jest.SpyInstance;
 
   beforeEach(() => {
     mockUp.mockClear();
@@ -24,6 +27,12 @@ describe('unit PrismaHealthIndicator', () => {
       mockHealthIndicatorService as never,
       mockRepository as unknown as RepositoryService,
     );
+
+    loggerErrorSpy = jest.spyOn(Logger.prototype, 'error').mockImplementation();
+  });
+
+  afterEach(() => {
+    loggerErrorSpy.mockRestore();
   });
 
   it('should return healthy status when database is reachable', async () => {
@@ -43,6 +52,22 @@ describe('unit PrismaHealthIndicator', () => {
     await expect(indicator.pingCheck('database')).rejects.toStrictEqual({
       database: { status: 'down', message: 'Database unreachable' },
     });
+  });
+
+  it('should log original error when database check fails', async () => {
+    expect.hasAssertions();
+
+    const dbError = new Error('Connection refused');
+    mockRepository.$queryRawUnsafe.mockRejectedValue(dbError);
+
+    await expect(indicator.pingCheck('database')).rejects.toStrictEqual({
+      database: { status: 'down', message: 'Database unreachable' },
+    });
+
+    expect(loggerErrorSpy).toHaveBeenCalledWith(
+      'Database health check failed',
+      expect.stringContaining('Connection refused'),
+    );
   });
 
   it('should use the provided key in the health check session', async () => {

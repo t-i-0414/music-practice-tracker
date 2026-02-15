@@ -6,9 +6,8 @@ import { Public } from '@/apis/utils/decorators/public.decorator';
 import { PrismaHealthIndicator } from '@/apis/utils/health/prisma-health.indicator';
 
 const MEMORY_HEAP_THRESHOLD_MB = 200;
-const BYTES_PER_KB = 1024;
-const KB_PER_MB = 1024;
-const MEMORY_HEAP_THRESHOLD = MEMORY_HEAP_THRESHOLD_MB * BYTES_PER_KB * KB_PER_MB;
+const BYTES_PER_MB = 1_048_576;
+const MEMORY_HEAP_THRESHOLD = MEMORY_HEAP_THRESHOLD_MB * BYTES_PER_MB;
 
 @ApiTags('health')
 @Controller('health')

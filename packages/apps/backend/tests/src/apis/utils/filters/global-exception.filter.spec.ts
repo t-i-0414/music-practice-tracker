@@ -539,22 +539,46 @@ describe('unit GlobalExceptionFilter', () => {
       expect(mockIncrement).toHaveBeenCalledWith('app.error.count', undefined, ['error_code:UN9999']);
     });
 
-    it('should skip span tagging when no active span exists', () => {
+    it('should skip span tagging but still increment metrics when no active span exists', () => {
       mockActive.mockReturnValue(null);
       const exception = new DomainError('DO9999', 'Test error');
 
       filter.catch(exception, mockArgumentsHost as ArgumentsHost);
 
       expect(mockSetTag).not.toHaveBeenCalled();
+      expect(mockIncrement).toHaveBeenCalledWith('app.error.count', undefined, [
+        'error_code:DO9999',
+        'severity:MEDIUM',
+        'category:BUSINESS_RULE',
+        'operational:true',
+      ]);
     });
 
-    it('should not block error response when Datadog reporting fails', () => {
+    it('should tag non-Error exception as UnknownError without message or stack', () => {
+      const exception = 'string error';
+
+      filter.catch(exception, mockArgumentsHost as ArgumentsHost);
+
+      expect(mockSetTag).toHaveBeenCalledWith('error', true);
+      expect(mockSetTag).toHaveBeenCalledWith('error.type', 'UnknownError');
+      expect(mockSetTag).not.toHaveBeenCalledWith('error.message', expect.anything());
+      expect(mockSetTag).not.toHaveBeenCalledWith('error.stack', expect.anything());
+      expect(mockIncrement).toHaveBeenCalledWith('app.error.count', undefined, ['error_code:UN9999']);
+    });
+
+    it('should fallback to console.warn when Datadog reporting fails', () => {
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+      const datadogError = new Error('Datadog unavailable');
       mockActive.mockImplementation(() => {
-        throw new Error('Datadog unavailable');
+        throw datadogError;
       });
       const exception = new DomainError('DO9999', 'Test error');
 
       filter.catch(exception, mockArgumentsHost as ArgumentsHost);
+
+      expect(consoleSpy).toHaveBeenCalledWith('GlobalExceptionFilter: reportToDatadog failed', datadogError);
+
+      consoleSpy.mockRestore();
 
       expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
       expect(mockResponse.json).toHaveBeenCalledWith({
