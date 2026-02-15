@@ -20,7 +20,6 @@ Plan a feature implementation using the **planner** sub-agent enhanced with doma
    | Mobile app            | `vercel-react-native-skills`                                 | screen, mobile component, Expo                     |
    | Shared React          | `vercel-react-best-practices`, `vercel-composition-patterns` | shared component, design system                    |
    | Build system          | `turborepo`                                                  | turbo.json, CI, caching, pipeline                  |
-   | Frontend from scratch | `frontend-design`                                            | new page, new UI component                         |
 
 2. **Load Domain Knowledge**
 

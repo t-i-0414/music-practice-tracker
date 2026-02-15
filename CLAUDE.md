@@ -105,6 +105,15 @@ bun run seed:user         # DB users only
 **DON'T**: Use npm • Expose internal IDs • Skip quality checks • Add unnecessary comments
 **DO**: Use bun • Use publicId only • Run Turborepo checks • Separate Query/Command • Use OrFail pattern
 
+### Claude Code Config (`.claude/`)
+
+- **Skills** (`.claude/skills/`): Domain knowledge and workflows. Each skill is a directory with `SKILL.md`
+- **Agents** (`.claude/agents/`): Sub-agent definitions for specialized review tasks
+- **Settings** (`.claude/settings.json`): Shared permission rules
+- Skills/agents are auto-discovered by Claude Code — do NOT duplicate their content in CLAUDE.md
+- When adding/removing/renaming a skill, check all other skills for cross-references to keep them consistent
+- Do NOT place README.md, CHANGELOG.md, or other auxiliary files inside skill directories
+
 ### AI Generated Documents
 
 Investigation notes, plans, and design documents created by AI must be placed under `docs/tmp/<feature-name>/`. These are temporary working documents and should not be committed to `main`.
