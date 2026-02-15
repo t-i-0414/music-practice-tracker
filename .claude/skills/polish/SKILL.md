@@ -1,6 +1,8 @@
 ---
-description: Post-implementation refinement - simplify code and verify comments
+name: polish
+description: Post-implementation refinement that simplifies code and verifies comments. Use after completing a coding task, before creating a PR, or when asked to "polish", "refine", or "clean up" recently written code.
 ---
+
 # Post-Implementation Polish
 
 Refine recently written code for clarity and maintainability after implementation is complete.
@@ -49,4 +51,4 @@ Refine recently written code for clarity and maintainability after implementatio
 
 - Code simplifier makes direct edits (with approval)
 - Comment analyzer provides advisory feedback only
-- Run `/pre-commit` after polishing to verify no regressions
+- Run `pre-commit` skill after polishing to verify no regressions

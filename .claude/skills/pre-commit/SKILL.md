@@ -1,6 +1,8 @@
 ---
-description: Quick quality gate before committing - checks code quality and error handling
+name: pre-commit
+description: Quick quality gate before committing that checks code quality and error handling. Use before git commit, when asked to "check before commit", "pre-commit check", or "quality gate" on staged/unstaged changes.
 ---
+
 # Pre-Commit Quality Check
 
 Run a quick quality gate on unstaged/staged changes before committing.
@@ -47,5 +49,5 @@ Run a quick quality gate on unstaged/staged changes before committing.
    - [issue] [file:line]
 
    ### Verdict
-   ✅ Ready to commit / ❌ Fix blockers before committing
+   Ready to commit / Fix blockers before committing
    ```

@@ -1,6 +1,8 @@
 ---
-description: Audit all type changes in the current branch for design quality
+name: audit-types
+description: Audit all type changes in the current branch for design quality using type-design-analyzer. Use when introducing new types, refactoring data models, during PR creation with type/interface/enum changes, or when asked to "audit types" or "check type design".
 ---
+
 # Type Design Audit
 
 Run **type-design-analyzer** across all new or modified types in the current branch.

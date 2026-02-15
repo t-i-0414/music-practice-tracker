@@ -1,11 +1,11 @@
 ---
-description: Plan a feature with domain-aware context from relevant skills
+name: plan
+description: Plan a feature implementation with domain-aware context from relevant skills. Use when asked to "plan a feature", "design implementation", or before starting non-trivial feature work that spans backend (NestJS), admin (Next.js), mobile (React Native), or build system (Turborepo).
 ---
+
 # Domain-Aware Feature Planning
 
 Plan a feature implementation using the **planner** sub-agent enhanced with domain-specific knowledge from relevant skills.
-
-**Feature:** "$ARGUMENTS"
 
 ## Workflow
 
@@ -15,12 +15,12 @@ Plan a feature implementation using the **planner** sub-agent enhanced with doma
 
    | Domain                | Skill to consult                                             | Indicators                                        |
    | --------------------- | ------------------------------------------------------------ | ------------------------------------------------- |
-   | Backend API / DDD     | `nestjs-best-practices`                                      | controller, service, module, API endpoint, Prisma |
-   | Admin dashboard       | `next-best-practices`, `next-cache-components`               | admin page, dashboard, Server Components          |
-   | Mobile app            | `vercel-react-native-skills`                                 | screen, mobile component, Expo                    |
-   | Shared React          | `vercel-react-best-practices`, `vercel-composition-patterns` | shared component, design system                   |
-   | Build system          | `turborepo`                                                  | turbo.json, CI, caching, pipeline                 |
-   | Frontend from scratch | `frontend-design`                                            | new page, new UI component                        |
+   | Backend API / DDD     | `nestjs-best-practices`                                      | controller, service, module, API endpoint, Prisma  |
+   | Admin dashboard       | `next-best-practices`, `next-cache-components`               | admin page, dashboard, Server Components           |
+   | Mobile app            | `vercel-react-native-skills`                                 | screen, mobile component, Expo                     |
+   | Shared React          | `vercel-react-best-practices`, `vercel-composition-patterns` | shared component, design system                    |
+   | Build system          | `turborepo`                                                  | turbo.json, CI, caching, pipeline                  |
+   | Frontend from scratch | `frontend-design`                                            | new page, new UI component                         |
 
 2. **Load Domain Knowledge**
 

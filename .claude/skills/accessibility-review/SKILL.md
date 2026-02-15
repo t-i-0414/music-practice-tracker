@@ -1,6 +1,8 @@
 ---
-description: Review UI changes for accessibility compliance
+name: accessibility-review
+description: Review UI changes for accessibility compliance against web-design-guidelines. Use when asked to "review my UI", "check accessibility", "audit a11y", or after modifying frontend components in admin or mobile apps.
 ---
+
 # Accessibility Review
 
 Review UI changes against the **web-design-guidelines** skill for accessibility compliance.

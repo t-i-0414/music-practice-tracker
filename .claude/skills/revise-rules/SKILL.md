@@ -1,6 +1,10 @@
 ---
-description: Update rules with learnings from this session
+name: revise-rules
+description: Update CLAUDE.md with learnings from the current session. Use at the end of a session, when asked to "save learnings", "update rules", "revise rules", or when important patterns or gotchas were discovered during work.
 ---
+
+# Revise Rules
+
 Review this session for learnings about this codebase. Update `CLAUDE.md` with context that would help future AI agent sessions be more effective.
 
 ## Step 1: Reflect
