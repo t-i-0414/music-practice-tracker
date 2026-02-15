@@ -1,6 +1,3 @@
-// eslint-disable-next-line import/order -- dd-trace must be initialized before any other imports
-import '../../tracer';
-
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from 'nestjs-pino';

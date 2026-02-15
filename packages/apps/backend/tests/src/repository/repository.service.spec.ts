@@ -243,8 +243,13 @@ describe('unit RepositoryService', () => {
       expect.assertions(1);
 
       await expect(
-        service.$executeRaw`INSERT INTO "users" ("firebase_uid", name, status)
-          VALUES (${'uid-invalid-enum'}, ${'FK User'}, ${'INVALID_STATUS'})`,
+        service.$executeRawUnsafe(
+          `INSERT INTO "users" ("firebase_uid", name, status)
+          VALUES ($1, $2, $3)`,
+          'uid-invalid-enum',
+          'FK User',
+          'INVALID_STATUS',
+        ),
       ).rejects.toBeDefined();
     });
 
