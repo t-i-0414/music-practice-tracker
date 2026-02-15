@@ -11,7 +11,7 @@ const mockHealthIndicatorService = { check: mockCheck };
 
 describe('unit PrismaHealthIndicator', () => {
   let indicator: PrismaHealthIndicator;
-  let mockRepository: { $queryRawUnsafe: jest.Mock };
+  let mockRepository: { $queryRaw: jest.Mock };
   let loggerErrorSpy: jest.SpyInstance;
 
   beforeEach(() => {
@@ -20,7 +20,7 @@ describe('unit PrismaHealthIndicator', () => {
     mockCheck.mockClear().mockReturnValue({ up: mockUp, down: mockDown });
 
     mockRepository = {
-      $queryRawUnsafe: jest.fn().mockResolvedValue([{ '?column?': 1 }]),
+      $queryRaw: jest.fn().mockResolvedValue([{ '?column?': 1 }]),
     };
 
     indicator = new PrismaHealthIndicator(
@@ -41,13 +41,13 @@ describe('unit PrismaHealthIndicator', () => {
     const result = await indicator.pingCheck('database');
 
     expect(result).toStrictEqual({ database: { status: 'up' } });
-    expect(mockRepository.$queryRawUnsafe).toHaveBeenCalledWith('SELECT 1');
+    expect(mockRepository.$queryRaw).toHaveBeenCalledWith(['SELECT 1']);
   });
 
   it('should throw down result when database is unreachable', async () => {
     expect.hasAssertions();
 
-    mockRepository.$queryRawUnsafe.mockRejectedValue(new Error('Connection refused'));
+    mockRepository.$queryRaw.mockRejectedValue(new Error('Connection refused'));
 
     await expect(indicator.pingCheck('database')).rejects.toStrictEqual({
       database: { status: 'down', message: 'Database unreachable' },
@@ -58,7 +58,7 @@ describe('unit PrismaHealthIndicator', () => {
     expect.hasAssertions();
 
     const dbError = new Error('Connection refused');
-    mockRepository.$queryRawUnsafe.mockRejectedValue(dbError);
+    mockRepository.$queryRaw.mockRejectedValue(dbError);
 
     await expect(indicator.pingCheck('database')).rejects.toStrictEqual({
       database: { status: 'down', message: 'Database unreachable' },

@@ -15,7 +15,8 @@ export class PrismaHealthIndicator {
   public async pingCheck(key: string): Promise<HealthIndicatorResult> {
     const session = this.healthIndicatorService.check(key);
     try {
-      await this.repository.$queryRawUnsafe('SELECT 1');
+      // eslint-disable-next-line custom-backend-eslint/repository-model-access-restriction -- health check is an infrastructure concern, not a domain aggregate
+      await this.repository.$queryRaw`SELECT 1`;
       return session.up();
     } catch (error: unknown) {
       this.logger.error('Database health check failed', error instanceof Error ? error.stack : String(error));
