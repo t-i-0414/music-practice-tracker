@@ -1,8 +1,0 @@
-credentials/
-node_modules/
-.env
-.env.*
-.firebase-emulator-data/
-.turbo/
-dist/
-coverage/

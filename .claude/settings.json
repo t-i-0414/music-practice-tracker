@@ -22,6 +22,7 @@
       "Bash(git status*)",
       "Bash(git show *)",
       "Bash(git branch*)",
+      "Bash(git fetch*)",
       "Bash(wc *)",
       "Bash(tail *)",
       "Bash(head *)",
@@ -30,7 +31,8 @@
       "Bash(gh api *)",
       "Bash(gh run view:*)",
       "Bash(gh pr view:*)",
-      "WebSearch"
+      "WebSearch",
+      "WebFetch(domain:code.claude.com)"
     ],
     "deny": [
       "Bash(git push --force*)",
@@ -43,7 +45,10 @@
       "Bash(git restore .)",
       "Bash(rm -rf *)",
       "Bash(sudo *)",
-      "Bash(npm *)"
+      "Bash(npm *)",
+      "Read(.env*)",
+      "Read(.firebase-emulator-data/)"
     ]
-  }
+  },
+  "enableAllProjectMcpServers": true
 }
