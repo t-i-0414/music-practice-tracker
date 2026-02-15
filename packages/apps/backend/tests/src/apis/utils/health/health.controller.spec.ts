@@ -1,3 +1,4 @@
+import { ServiceUnavailableException } from '@nestjs/common';
 import { HealthCheckService, MemoryHealthIndicator } from '@nestjs/terminus';
 
 import { HealthController } from '@/apis/utils/health/health.controller';
@@ -73,5 +74,21 @@ describe('unit HealthController', () => {
     const expectedThreshold = 200 * 1024 * 1024;
 
     expect(mockMemory.checkHeap).toHaveBeenCalledWith('memory_heap', expectedThreshold);
+  });
+
+  it('should throw ServiceUnavailableException when health check fails', async () => {
+    expect.hasAssertions();
+
+    mockHealthCheckService.check.mockRejectedValue(new Error('Health check failed'));
+
+    await expect(controller.check()).rejects.toThrow(ServiceUnavailableException);
+  });
+
+  it('should return 503 status when health check fails', async () => {
+    expect.hasAssertions();
+
+    mockHealthCheckService.check.mockRejectedValue(new Error('Health check failed'));
+
+    await expect(controller.check()).rejects.toHaveProperty('status', 503);
   });
 });
