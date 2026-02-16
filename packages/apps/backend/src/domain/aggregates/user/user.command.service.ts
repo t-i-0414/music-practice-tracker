@@ -13,13 +13,16 @@ import {
 } from './utils/dto';
 
 import { RepositoryService } from '@/repository/repository.service';
+import { Metrics } from '@/utils/metrics/dogstatsd.metrics';
 
 @Injectable()
 export class UserCommandService {
   public constructor(private readonly repository: RepositoryService) {}
 
   public async createUser(dto: CreateUserInputDto): Promise<UserResponseDto> {
-    return toUserResponseDto(await this.repository.user.create({ data: dto }));
+    const user = toUserResponseDto(await this.repository.user.create({ data: dto }));
+    Metrics.incrementUserCreated();
+    return user;
   }
 
   public async createManyAndReturnUsers({ users }: CreateManyUsersInputDto): Promise<UsersResponseDto> {

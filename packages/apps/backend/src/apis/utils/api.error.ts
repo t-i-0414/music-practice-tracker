@@ -131,10 +131,26 @@ export const HTTP_STATUS_ERROR_CODE_RECORD_BY_REPOSITORY_ERROR_CODE: Record<Repo
   RE9999: HttpStatus.INTERNAL_SERVER_ERROR, // Unknown repository error
 };
 
-export class ErrorResponseDto {
-  @ApiProperty({ example: 400 })
-  public statusCode: HttpStatus;
+const ERROR_TYPE_BASE_URL = 'https://developer.music-practice-tracker.com/errors';
 
-  @ApiProperty({ example: 'RE0002' })
+export const buildErrorTypeUrl = (errorCode: ErrorCode): string => `${ERROR_TYPE_BASE_URL}/${errorCode}`;
+
+export class ErrorResponseDto {
+  @ApiProperty({ example: 'https://developer.music-practice-tracker.com/errors/AP0400' })
+  public type: string;
+
+  @ApiProperty({ example: 'Bad request.' })
+  public title: string;
+
+  @ApiProperty({ example: 400 })
+  public status: number;
+
+  @ApiProperty({ example: 'AP0400' })
   public errorCode: ErrorCode;
+
+  @ApiProperty({ example: 'req-uuid-xxx', required: false })
+  public correlationId?: string;
+
+  @ApiProperty({ example: '/api/v1/users', required: false })
+  public instance?: string;
 }
