@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
+import { UserAggregate } from './user.aggregate';
 import {
   CreateManyUsersInputDto,
   CreateUserInputDto,
@@ -12,17 +13,29 @@ import {
   UsersResponseDto,
 } from './utils/dto';
 
+import { DomainEventPublisher } from '@/domain/utils/domain-event-publisher.service';
 import { RepositoryService } from '@/repository/repository.service';
-import { Metrics } from '@/utils/metrics/dogstatsd.metrics';
 
 @Injectable()
 export class UserCommandService {
-  public constructor(private readonly repository: RepositoryService) {}
+  public constructor(
+    private readonly repository: RepositoryService,
+    private readonly eventPublisher: DomainEventPublisher,
+  ) {}
 
   public async createUser(dto: CreateUserInputDto): Promise<UserResponseDto> {
-    const user = toUserResponseDto(await this.repository.user.create({ data: dto }));
-    Metrics.incrementUserCreated();
-    return user;
+    const created = await this.repository.user.create({ data: dto });
+
+    const aggregate = UserAggregate.fromPersistence({
+      publicId: created.publicId,
+      name: created.name,
+      firebaseUid: created.firebaseUid,
+      status: created.status,
+    });
+    aggregate.markAsCreated();
+    this.eventPublisher.publishAll(aggregate);
+
+    return toUserResponseDto(created);
   }
 
   public async createManyAndReturnUsers({ users }: CreateManyUsersInputDto): Promise<UsersResponseDto> {

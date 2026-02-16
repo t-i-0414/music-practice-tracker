@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UserCommandService } from '@/domain/aggregates/user/user.command.service';
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 import { DeleteUserService } from '@/domain/usecases/user/delete-user.service';
+import { DomainEventPublisher } from '@/domain/utils/domain-event-publisher.service';
 import { FirebaseAuthService } from '@/firebase-auth/firebase-auth.service';
 import { RepositoryService } from '@/repository/repository.service';
 import { DatabaseHelper } from '@/tests/helpers/database.helper';
@@ -39,6 +40,10 @@ describe('integration DeleteUserService', () => {
         {
           provide: RepositoryService,
           useValue: databaseHelper.client,
+        },
+        {
+          provide: DomainEventPublisher,
+          useValue: { publishAll: jest.fn() },
         },
       ],
     }).compile();

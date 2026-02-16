@@ -1,6 +1,6 @@
 export abstract class Entity<TProps, TId extends string = string> {
   protected readonly _publicId: TId;
-  protected readonly props: TProps;
+  protected props: TProps;
 
   protected constructor(publicId: TId, props: TProps) {
     this._publicId = publicId;
