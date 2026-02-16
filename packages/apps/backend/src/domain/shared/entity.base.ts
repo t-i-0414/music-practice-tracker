@@ -11,8 +11,8 @@ export abstract class Entity<TProps, TId extends string = string> {
     return this._publicId;
   }
 
-  public equals(entity?: Entity<unknown>): boolean {
-    if (entity === undefined) return false;
+  public equals(entity?: Entity<unknown> | null): boolean {
+    if (entity === undefined || entity === null) return false;
     if (entity.constructor !== this.constructor) return false;
     return this._publicId === entity._publicId;
   }

@@ -62,5 +62,13 @@ describe('unit Entity', () => {
 
       expect(entity.equals(undefined)).toBe(false);
     });
+
+    it('should return false when compared with null', () => {
+      expect.assertions(1);
+
+      const entity = new TestEntity('abc-123', 'Alice');
+
+      expect(entity.equals(null)).toBe(false);
+    });
   });
 });

@@ -71,6 +71,14 @@ describe('unit ValueObject', () => {
       expect(vo.equals(undefined)).toBe(false);
     });
 
+    it('should return false when compared with null', () => {
+      expect.assertions(1);
+
+      const vo = new TestVO('hello');
+
+      expect(vo.equals(null)).toBe(false);
+    });
+
     it('should correctly compare VOs with multiple properties', () => {
       expect.assertions(2);
 

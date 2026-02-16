@@ -2,7 +2,7 @@ import type { AdminUserPublicId, Brand, CognitoSub, FirebaseUid, UserPublicId } 
 
 import { DomainError } from '@/domain/utils/domain.error';
 
-const UUID_REGEX = /^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/iu;
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu;
 
 function validateUuid<T extends Brand<string, string>>(value: string, label: string): T {
   if (!UUID_REGEX.test(value)) {
