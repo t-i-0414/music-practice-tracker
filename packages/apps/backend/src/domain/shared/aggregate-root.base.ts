@@ -1,7 +1,7 @@
 import type { DomainEvent } from './domain-event.base';
 import { Entity } from './entity.base';
 
-export abstract class AggregateRoot<TProps> extends Entity<TProps> {
+export abstract class AggregateRoot<TProps, TId extends string = string> extends Entity<TProps, TId> {
   private _domainEvents: DomainEvent[] = [];
 
   protected addDomainEvent(event: DomainEvent): void {

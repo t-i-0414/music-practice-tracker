@@ -24,6 +24,16 @@ class OtherVO extends ValueObject<{ value: string }> {
   }
 }
 
+class MultiPropVO extends ValueObject<{ name: string; age: number }> {
+  public constructor(name: string, age: number) {
+    super({ name, age });
+  }
+
+  public toValue(): { name: string; age: number } {
+    return { name: this.props.name, age: this.props.age };
+  }
+}
+
 describe('unit ValueObject', () => {
   describe('equals', () => {
     it('should return true for VOs with same props and same type', () => {
@@ -60,6 +70,17 @@ describe('unit ValueObject', () => {
 
       expect(vo.equals(undefined)).toBe(false);
     });
+
+    it('should correctly compare VOs with multiple properties', () => {
+      expect.assertions(2);
+
+      const vo1 = new MultiPropVO('Alice', 30);
+      const vo2 = new MultiPropVO('Alice', 30);
+      const vo3 = new MultiPropVO('Alice', 31);
+
+      expect(vo1.equals(vo2)).toBe(true);
+      expect(vo1.equals(vo3)).toBe(false);
+    });
   });
 
   describe('immutability', () => {
@@ -69,6 +90,18 @@ describe('unit ValueObject', () => {
       const vo = new TestVO('hello');
 
       expect(Object.isFrozen(vo.getProps())).toBe(true);
+    });
+
+    it('should throw when attempting to mutate props', () => {
+      expect.assertions(1);
+
+      const vo = new TestVO('hello');
+      const props = vo.getProps();
+
+      expect(() => {
+        // @ts-expect-error -- intentionally testing runtime immutability
+        props.value = 'mutated';
+      }).toThrow(TypeError);
     });
   });
 

@@ -13,6 +13,14 @@ describe('unit Brand Constructors', () => {
       expect(result).toBe(validUuid);
     });
 
+    it('should accept uppercase UUID', () => {
+      expect.assertions(1);
+
+      const result = toUserPublicId('123E4567-E89B-12D3-A456-426614174000');
+
+      expect(result).toBe('123E4567-E89B-12D3-A456-426614174000');
+    });
+
     it.each(['not-a-uuid', '', '123', 'zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz'])(
       'should throw DomainError for invalid value: %s',
       (value) => {
@@ -53,6 +61,12 @@ describe('unit Brand Constructors', () => {
 
       expect(() => toFirebaseUid('')).toThrow(DomainError);
     });
+
+    it('should throw DomainError for whitespace-only string', () => {
+      expect.assertions(1);
+
+      expect(() => toFirebaseUid('   ')).toThrow(DomainError);
+    });
   });
 
   describe('toCognitoSub', () => {
@@ -68,6 +82,12 @@ describe('unit Brand Constructors', () => {
       expect.assertions(1);
 
       expect(() => toCognitoSub('')).toThrow(DomainError);
+    });
+
+    it('should throw DomainError for whitespace-only string', () => {
+      expect.assertions(1);
+
+      expect(() => toCognitoSub('   ')).toThrow(DomainError);
     });
   });
 });

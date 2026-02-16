@@ -19,6 +19,14 @@ describe('unit UserName', () => {
       expect(name.value).toBe('Takuya');
     });
 
+    it('should accept single character (exact min length)', () => {
+      expect.assertions(1);
+
+      const name = UserName.create('A');
+
+      expect(name.value).toBe('A');
+    });
+
     it('should throw DomainError for empty string', () => {
       expect.assertions(1);
 
@@ -56,6 +64,14 @@ describe('unit UserName', () => {
       const name = UserName.fromPersistence('any value');
 
       expect(name.value).toBe('any value');
+    });
+
+    it('should preserve whitespace (no trimming unlike create)', () => {
+      expect.assertions(1);
+
+      const name = UserName.fromPersistence('  spaced  ');
+
+      expect(name.value).toBe('  spaced  ');
     });
   });
 

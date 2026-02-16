@@ -1,13 +1,13 @@
-export abstract class Entity<TProps> {
-  protected readonly _publicId: string;
-  protected props: TProps;
+export abstract class Entity<TProps, TId extends string = string> {
+  protected readonly _publicId: TId;
+  protected readonly props: TProps;
 
-  protected constructor(publicId: string, props: TProps) {
+  protected constructor(publicId: TId, props: TProps) {
     this._publicId = publicId;
     this.props = props;
   }
 
-  public get publicId(): string {
+  public get publicId(): TId {
     return this._publicId;
   }
 

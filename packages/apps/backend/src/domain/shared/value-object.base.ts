@@ -8,7 +8,10 @@ export abstract class ValueObject<TProps extends Record<string, unknown>> {
   public equals(vo?: ValueObject<TProps>): boolean {
     if (vo === undefined) return false;
     if (vo.constructor !== this.constructor) return false;
-    return JSON.stringify(this.props) === JSON.stringify(vo.props);
+    const thisKeys = Object.keys(this.props);
+    const otherKeys = Object.keys(vo.props);
+    if (thisKeys.length !== otherKeys.length) return false;
+    return thisKeys.every((key) => this.props[key] === vo.props[key]);
   }
 
   public abstract toValue(): unknown;

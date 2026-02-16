@@ -27,6 +27,7 @@ export class UserName extends ValueObject<UserNameProps> {
     return new UserName({ value: trimmed });
   }
 
+  /** Reconstitute from persistence. DB constraints (NOT NULL, VARCHAR(50)) guarantee invariants. */
   public static fromPersistence(name: string): UserName {
     return new UserName({ value: name });
   }

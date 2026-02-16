@@ -4,8 +4,8 @@ import { DomainEvent } from '@/domain/shared/domain-event.base';
 class TestEvent extends DomainEvent {
   public readonly eventName = 'TestEvent';
 
-  public constructor() {
-    super();
+  public constructor(aggregateId: string) {
+    super(aggregateId);
   }
 }
 
@@ -15,7 +15,7 @@ class TestAggregate extends AggregateRoot<{ value: string }> {
   }
 
   public doSomething(): void {
-    this.addDomainEvent(new TestEvent());
+    this.addDomainEvent(new TestEvent(this.publicId));
   }
 }
 
@@ -39,6 +39,15 @@ describe('unit AggregateRoot', () => {
       expect(aggregate.domainEvents).toHaveLength(2);
       expect(aggregate.domainEvents[0]).toBeInstanceOf(TestEvent);
     });
+
+    it('should store aggregateId in events', () => {
+      expect.assertions(1);
+
+      const aggregate = new TestAggregate('abc-123', 'test');
+      aggregate.doSomething();
+
+      expect(aggregate.domainEvents[0]?.aggregateId).toBe('abc-123');
+    });
   });
 
   describe('pullDomainEvents', () => {
@@ -54,6 +63,31 @@ describe('unit AggregateRoot', () => {
       expect(events).toHaveLength(2);
       expect(events[0]).toBeInstanceOf(TestEvent);
       expect(aggregate.domainEvents).toHaveLength(0);
+    });
+
+    it('should return empty array on second pull (no double-dispatch)', () => {
+      expect.assertions(1);
+
+      const aggregate = new TestAggregate('abc-123', 'test');
+      aggregate.doSomething();
+      aggregate.pullDomainEvents();
+
+      const secondPull = aggregate.pullDomainEvents();
+
+      expect(secondPull).toHaveLength(0);
+    });
+
+    it('should return a detached copy not affected by subsequent events', () => {
+      expect.assertions(2);
+
+      const aggregate = new TestAggregate('abc-123', 'test');
+      aggregate.doSomething();
+
+      const pulled = aggregate.pullDomainEvents();
+      aggregate.doSomething();
+
+      expect(pulled).toHaveLength(1);
+      expect(aggregate.domainEvents).toHaveLength(1);
     });
   });
 
