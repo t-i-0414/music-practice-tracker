@@ -177,7 +177,9 @@ describe('class ErrorResponseDto', () => {
   it('should have correct structure', () => {
     const dto = new ErrorResponseDto();
 
-    expect(dto).toHaveProperty('statusCode');
+    expect(dto).toHaveProperty('type');
+    expect(dto).toHaveProperty('title');
+    expect(dto).toHaveProperty('status');
     expect(dto).toHaveProperty('errorCode');
   });
 });

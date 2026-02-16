@@ -6,6 +6,7 @@ import { PinoLogger } from 'nestjs-pino';
 
 import {
   ApiError,
+  buildErrorTypeUrl,
   ErrorResponseDto,
   HTTP_STATUS_ERROR_CODE_RECORD_BY_REPOSITORY_ERROR_CODE,
   isApiError,
@@ -19,11 +20,13 @@ import {
   RepositoryError,
 } from '@/repository/utils/repository.error';
 import { CommonError } from '@/utils/errors/common.error';
-import { apiErrorPrefix, isErrorCode } from '@/utils/errors/error-code';
+import { apiErrorPrefix, ERROR_CODE_RECORDS, type ErrorCode, isErrorCode } from '@/utils/errors/error-code';
 import { ErrorSeverity } from '@/utils/errors/error-severity';
 import { isUnknownError, UnknownError } from '@/utils/errors/unknown.error';
 
 const httpErrorCodePrefix = `${apiErrorPrefix}0`;
+
+type BuildResult = { errorResponse: ErrorResponseDto; resolvedException: unknown };
 
 @Injectable()
 @Catch()
@@ -41,6 +44,9 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
 
     const { errorResponse, resolvedException } = this.buildErrorResponse(exception);
+    errorResponse.correlationId = this.cls.getId();
+    errorResponse.instance = request.url;
+
     try {
       this.logError(resolvedException, errorResponse, request);
     } catch (loggingError: unknown) {
@@ -53,7 +59,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       // eslint-disable-next-line no-console -- last-resort fallback when Datadog reporting fails
       console.warn('GlobalExceptionFilter: reportToDatadog failed', datadogError);
     }
-    response.status(errorResponse.statusCode).json(errorResponse);
+    response.status(errorResponse.status).header('Content-Type', 'application/problem+json').json(errorResponse);
   }
 
   private logError(exception: unknown, errorResponse: ErrorResponseDto, request: Request): void {
@@ -62,7 +68,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const baseLogEntry = {
       correlationId,
       userId,
-      statusCode: errorResponse.statusCode,
+      statusCode: errorResponse.status,
       errorCode: errorResponse.errorCode,
       method: request.method,
       url: request.url,
@@ -111,7 +117,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       span.setTag('error', true);
       span.setTag('error.type', exception instanceof Error ? exception.name : 'UnknownError');
       span.setTag('error.code', errorResponse.errorCode);
-      span.setTag('http.status_code', errorResponse.statusCode);
+      span.setTag('http.status_code', errorResponse.status);
 
       if (exception instanceof CommonError) {
         span.setTag('error.severity', exception.severity);
@@ -141,10 +147,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     tracer.dogstatsd.increment('app.error.count', undefined, metricTags);
   }
 
-  private buildErrorResponse(exception: unknown): {
-    errorResponse: ErrorResponseDto;
-    resolvedException: unknown;
-  } {
+  private buildErrorResponse(exception: unknown): BuildResult {
     if (exception instanceof HttpException) {
       return { errorResponse: this.handleHttpException(exception), resolvedException: exception };
     }
@@ -170,82 +173,70 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       return { errorResponse: this.handleUnknownError(exception), resolvedException: exception };
     }
 
-    const errorCode = 'UN9999';
+    const errorCode = 'UN9999' as const;
 
     return {
-      errorResponse: {
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-        errorCode,
-      },
+      errorResponse: this.toRfc7807(HttpStatus.INTERNAL_SERVER_ERROR, errorCode),
       resolvedException: exception,
     };
   }
 
-  private handleHttpException(exception: HttpException): ErrorResponseDto {
-    const statusCode = exception.getStatus();
-    const _errorCode = `${httpErrorCodePrefix}${statusCode}`;
-    const errorCode = isErrorCode(_errorCode) ? _errorCode : 'AP9999';
-
+  private toRfc7807(status: number, errorCode: ErrorCode): ErrorResponseDto {
     return {
-      statusCode,
+      type: buildErrorTypeUrl(errorCode),
+      title: ERROR_CODE_RECORDS[errorCode],
+      status,
       errorCode,
     };
   }
 
+  private handleHttpException(exception: HttpException): ErrorResponseDto {
+    const status = exception.getStatus();
+    const _errorCode = `${httpErrorCodePrefix}${status}`;
+    const errorCode = isErrorCode(_errorCode) ? _errorCode : 'AP9999';
+
+    return this.toRfc7807(status, errorCode);
+  }
+
   private handleApiError(exception: ApiError): ErrorResponseDto {
     const statusMatch = /^AP0(?<status>\d{3})$/u.exec(exception.errorCode);
-    const statusCode =
+    const status =
       statusMatch?.groups?.status !== undefined && statusMatch.groups.status !== ''
         ? parseInt(statusMatch.groups.status, 10)
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    return {
-      statusCode,
-      errorCode: exception.errorCode,
-    };
+    return this.toRfc7807(status, exception.errorCode);
   }
 
   private handleDomainError(exception: DomainError): ErrorResponseDto {
-    return {
-      statusCode: HttpStatus.BAD_REQUEST,
-      errorCode: exception.errorCode,
-    };
+    return this.toRfc7807(HttpStatus.BAD_REQUEST, exception.errorCode);
   }
 
   private handleFirebaseError(exception: FirebaseError): ErrorResponseDto {
     const { errorCode } = exception;
-    let statusCode = HttpStatus.UNAUTHORIZED;
+    let status = HttpStatus.UNAUTHORIZED;
 
     if (errorCode === 'FB0003' || errorCode === 'FB0004') {
-      statusCode = HttpStatus.CONFLICT;
+      status = HttpStatus.CONFLICT;
     } else if (errorCode === 'FB0005') {
-      statusCode = HttpStatus.NOT_FOUND;
+      status = HttpStatus.NOT_FOUND;
     } else if (errorCode === 'FB0006' || errorCode === 'FB0007') {
-      statusCode = HttpStatus.UNAUTHORIZED;
+      status = HttpStatus.UNAUTHORIZED;
     } else if (errorCode === 'FB0008') {
-      statusCode = HttpStatus.FORBIDDEN;
+      status = HttpStatus.FORBIDDEN;
     } else if (errorCode === 'FB9999') {
-      statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
+      status = HttpStatus.INTERNAL_SERVER_ERROR;
     }
 
-    return {
-      statusCode,
-      errorCode: exception.errorCode,
-    };
+    return this.toRfc7807(status, exception.errorCode);
   }
 
   private handleRepositoryError(exception: RepositoryError): ErrorResponseDto {
-    const statusCode = HTTP_STATUS_ERROR_CODE_RECORD_BY_REPOSITORY_ERROR_CODE[exception.errorCode];
-    return {
-      statusCode,
-      errorCode: exception.errorCode,
-    };
+    const status = HTTP_STATUS_ERROR_CODE_RECORD_BY_REPOSITORY_ERROR_CODE[exception.errorCode];
+    return this.toRfc7807(status, exception.errorCode);
   }
 
   private handleUnknownError(exception: UnknownError): ErrorResponseDto {
-    return {
-      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-      errorCode: exception.errorCode,
-    };
+    return this.toRfc7807(HttpStatus.INTERNAL_SERVER_ERROR, exception.errorCode);
   }
 }

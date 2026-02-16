@@ -174,10 +174,18 @@ export interface components {
             users: components["schemas"]["UserResponseDto"][];
         };
         ErrorResponseDto: {
+            /** @example https://developer.music-practice-tracker.com/errors/AP0400 */
+            type: string;
+            /** @example Bad request. */
+            title: string;
             /** @example 400 */
-            statusCode: number;
-            /** @example RE0002 */
+            status: number;
+            /** @example AP0400 */
             errorCode: string;
+            /** @example req-uuid-xxx */
+            correlationId?: string;
+            /** @example /api/v1/users */
+            instance?: string;
         };
         CreateUserInputDto: {
             /**

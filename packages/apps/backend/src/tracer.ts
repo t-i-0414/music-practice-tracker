@@ -1,5 +1,7 @@
 import tracer from 'dd-trace';
 
+// service, env, version are configured via DD_SERVICE, DD_ENV, DD_VERSION environment variables.
+// Each app (App API / Admin API) sets DD_SERVICE to its own identifier.
 try {
   tracer.init({
     logInjection: true,

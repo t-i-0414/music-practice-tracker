@@ -33,6 +33,8 @@ const mockSpan = mockActive() as { setTag: jest.Mock };
 const mockSetTag = mockSpan.setTag;
 const mockIncrement = jest.mocked(ddTraceMock.dogstatsd.increment);
 
+const BASE_URL = 'https://developer.music-practice-tracker.com/errors';
+
 describe('unit GlobalExceptionFilter', () => {
   let filter: GlobalExceptionFilter;
   let mockResponse: Partial<Response>;
@@ -69,6 +71,7 @@ describe('unit GlobalExceptionFilter', () => {
 
     mockResponse = {
       status: jest.fn().mockReturnThis(),
+      header: jest.fn().mockReturnThis(),
       json: jest.fn(),
     };
 
@@ -100,9 +103,14 @@ describe('unit GlobalExceptionFilter', () => {
       filter.catch(exception, mockArgumentsHost as ArgumentsHost);
 
       expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+      expect(mockResponse.header).toHaveBeenCalledWith('Content-Type', 'application/problem+json');
       expect(mockResponse.json).toHaveBeenCalledWith({
-        statusCode: HttpStatus.BAD_REQUEST,
+        type: `${BASE_URL}/AP0400`,
+        title: 'Bad request',
+        status: HttpStatus.BAD_REQUEST,
         errorCode: 'AP0400',
+        correlationId: 'test-correlation-id',
+        instance: '/test',
       });
     });
 
@@ -113,8 +121,12 @@ describe('unit GlobalExceptionFilter', () => {
 
       expect(mockResponse.status).toHaveBeenCalledWith(499);
       expect(mockResponse.json).toHaveBeenCalledWith({
-        statusCode: 499,
+        type: `${BASE_URL}/AP9999`,
+        title: 'Unknown application error.',
+        status: 499,
         errorCode: 'AP9999',
+        correlationId: 'test-correlation-id',
+        instance: '/test',
       });
     });
 
@@ -125,8 +137,12 @@ describe('unit GlobalExceptionFilter', () => {
 
       expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.UNAUTHORIZED);
       expect(mockResponse.json).toHaveBeenCalledWith({
-        statusCode: HttpStatus.UNAUTHORIZED,
+        type: `${BASE_URL}/AP0401`,
+        title: 'Unauthorized',
+        status: HttpStatus.UNAUTHORIZED,
         errorCode: 'AP0401',
+        correlationId: 'test-correlation-id',
+        instance: '/test',
       });
     });
 
@@ -137,8 +153,12 @@ describe('unit GlobalExceptionFilter', () => {
 
       expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
       expect(mockResponse.json).toHaveBeenCalledWith({
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        type: `${BASE_URL}/AP9999`,
+        title: 'Unknown application error.',
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
         errorCode: 'AP9999',
+        correlationId: 'test-correlation-id',
+        instance: '/test',
       });
     });
 
@@ -149,8 +169,12 @@ describe('unit GlobalExceptionFilter', () => {
 
       expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
       expect(mockResponse.json).toHaveBeenCalledWith({
-        statusCode: HttpStatus.BAD_REQUEST,
+        type: `${BASE_URL}/DO9999`,
+        title: 'Unknown domain error.',
+        status: HttpStatus.BAD_REQUEST,
         errorCode: 'DO9999',
+        correlationId: 'test-correlation-id',
+        instance: '/test',
       });
     });
 
@@ -164,8 +188,12 @@ describe('unit GlobalExceptionFilter', () => {
 
       expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
       expect(mockResponse.json).toHaveBeenCalledWith({
-        statusCode: HttpStatus.BAD_REQUEST,
+        type: `${BASE_URL}/RE0001`,
+        title: 'Column value too long for database field.',
+        status: HttpStatus.BAD_REQUEST,
         errorCode: 'RE0001',
+        correlationId: 'test-correlation-id',
+        instance: '/test',
       });
     });
 
@@ -180,8 +208,12 @@ describe('unit GlobalExceptionFilter', () => {
 
       expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.NOT_FOUND);
       expect(mockResponse.json).toHaveBeenCalledWith({
-        statusCode: HttpStatus.NOT_FOUND,
+        type: `${BASE_URL}/RE0002`,
+        title: 'Record not found in database.',
+        status: HttpStatus.NOT_FOUND,
         errorCode: 'RE0002',
+        correlationId: 'test-correlation-id',
+        instance: '/test',
       });
     });
 
@@ -192,8 +224,12 @@ describe('unit GlobalExceptionFilter', () => {
 
       expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.CONFLICT);
       expect(mockResponse.json).toHaveBeenCalledWith({
-        statusCode: HttpStatus.CONFLICT,
+        type: `${BASE_URL}/FB0003`,
+        title: 'Failed to initialize Firebase Admin SDK.',
+        status: HttpStatus.CONFLICT,
         errorCode: 'FB0003',
+        correlationId: 'test-correlation-id',
+        instance: '/test',
       });
     });
 
@@ -204,8 +240,12 @@ describe('unit GlobalExceptionFilter', () => {
 
       expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.CONFLICT);
       expect(mockResponse.json).toHaveBeenCalledWith({
-        statusCode: HttpStatus.CONFLICT,
+        type: `${BASE_URL}/FB0004`,
+        title: 'Firebase token expired.',
+        status: HttpStatus.CONFLICT,
         errorCode: 'FB0004',
+        correlationId: 'test-correlation-id',
+        instance: '/test',
       });
     });
 
@@ -216,8 +256,12 @@ describe('unit GlobalExceptionFilter', () => {
 
       expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.NOT_FOUND);
       expect(mockResponse.json).toHaveBeenCalledWith({
-        statusCode: HttpStatus.NOT_FOUND,
+        type: `${BASE_URL}/FB0005`,
+        title: 'Firebase token revoked.',
+        status: HttpStatus.NOT_FOUND,
         errorCode: 'FB0005',
+        correlationId: 'test-correlation-id',
+        instance: '/test',
       });
     });
 
@@ -228,8 +272,12 @@ describe('unit GlobalExceptionFilter', () => {
 
       expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.UNAUTHORIZED);
       expect(mockResponse.json).toHaveBeenCalledWith({
-        statusCode: HttpStatus.UNAUTHORIZED,
+        type: `${BASE_URL}/FB0006`,
+        title: 'Firebase invalid token.',
+        status: HttpStatus.UNAUTHORIZED,
         errorCode: 'FB0006',
+        correlationId: 'test-correlation-id',
+        instance: '/test',
       });
     });
 
@@ -240,8 +288,12 @@ describe('unit GlobalExceptionFilter', () => {
 
       expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.UNAUTHORIZED);
       expect(mockResponse.json).toHaveBeenCalledWith({
-        statusCode: HttpStatus.UNAUTHORIZED,
+        type: `${BASE_URL}/FB0007`,
+        title: 'Firebase user not found.',
+        status: HttpStatus.UNAUTHORIZED,
         errorCode: 'FB0007',
+        correlationId: 'test-correlation-id',
+        instance: '/test',
       });
     });
 
@@ -252,8 +304,12 @@ describe('unit GlobalExceptionFilter', () => {
 
       expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.FORBIDDEN);
       expect(mockResponse.json).toHaveBeenCalledWith({
-        statusCode: HttpStatus.FORBIDDEN,
+        type: `${BASE_URL}/FB0008`,
+        title: 'Failed to delete Firebase user.',
+        status: HttpStatus.FORBIDDEN,
         errorCode: 'FB0008',
+        correlationId: 'test-correlation-id',
+        instance: '/test',
       });
     });
 
@@ -264,8 +320,12 @@ describe('unit GlobalExceptionFilter', () => {
 
       expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
       expect(mockResponse.json).toHaveBeenCalledWith({
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        type: `${BASE_URL}/FB9999`,
+        title: 'Unknown Firebase error.',
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
         errorCode: 'FB9999',
+        correlationId: 'test-correlation-id',
+        instance: '/test',
       });
     });
 
@@ -276,8 +336,12 @@ describe('unit GlobalExceptionFilter', () => {
 
       expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.UNAUTHORIZED);
       expect(mockResponse.json).toHaveBeenCalledWith({
-        statusCode: HttpStatus.UNAUTHORIZED,
+        type: `${BASE_URL}/FB0001`,
+        title: 'Firebase Admin credential not configured.',
+        status: HttpStatus.UNAUTHORIZED,
         errorCode: 'FB0001',
+        correlationId: 'test-correlation-id',
+        instance: '/test',
       });
     });
 
@@ -288,8 +352,12 @@ describe('unit GlobalExceptionFilter', () => {
 
       expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
       expect(mockResponse.json).toHaveBeenCalledWith({
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        type: `${BASE_URL}/UN9999`,
+        title: 'Unknown error.',
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
         errorCode: 'UN9999',
+        correlationId: 'test-correlation-id',
+        instance: '/test',
       });
     });
 
@@ -300,8 +368,12 @@ describe('unit GlobalExceptionFilter', () => {
 
       expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
       expect(mockResponse.json).toHaveBeenCalledWith({
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        type: `${BASE_URL}/UN9999`,
+        title: 'Unknown error.',
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
         errorCode: 'UN9999',
+        correlationId: 'test-correlation-id',
+        instance: '/test',
       });
     });
 
@@ -312,9 +384,37 @@ describe('unit GlobalExceptionFilter', () => {
 
       expect(mockResponse.status).toHaveBeenCalledWith(999);
       expect(mockResponse.json).toHaveBeenCalledWith({
-        statusCode: 999,
+        type: `${BASE_URL}/AP9999`,
+        title: 'Unknown application error.',
+        status: 999,
         errorCode: 'AP9999',
+        correlationId: 'test-correlation-id',
+        instance: '/test',
       });
+    });
+
+    it('should set Content-Type to application/problem+json', () => {
+      const exception = new DomainError('DO9999', 'Test error');
+
+      filter.catch(exception, mockArgumentsHost as ArgumentsHost);
+
+      expect(mockResponse.header).toHaveBeenCalledWith('Content-Type', 'application/problem+json');
+    });
+
+    it('should include correlationId and instance in every response', () => {
+      mockCls.getId.mockReturnValue('custom-corr-id');
+      (mockRequest as { url: string }).url = '/api/v1/users/me';
+
+      const exception = new ApiError('AP0400', 'Bad request');
+
+      filter.catch(exception, mockArgumentsHost as ArgumentsHost);
+
+      expect(mockResponse.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          correlationId: 'custom-corr-id',
+          instance: '/api/v1/users/me',
+        }),
+      );
     });
   });
 
@@ -442,8 +542,8 @@ describe('unit GlobalExceptionFilter', () => {
     it('should fallback to console.error when logError throws', () => {
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
 
-      mockCls.getId.mockImplementation(() => {
-        throw new Error('CLS failure');
+      mockCls.get.mockImplementation(() => {
+        throw new Error('CLS get failure');
       });
       const exception = new DomainError('DO9999', 'Test error');
 
@@ -581,10 +681,14 @@ describe('unit GlobalExceptionFilter', () => {
       consoleSpy.mockRestore();
 
       expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
-      expect(mockResponse.json).toHaveBeenCalledWith({
-        statusCode: HttpStatus.BAD_REQUEST,
-        errorCode: 'DO9999',
-      });
+      expect(mockResponse.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: `${BASE_URL}/DO9999`,
+          title: 'Unknown domain error.',
+          status: HttpStatus.BAD_REQUEST,
+          errorCode: 'DO9999',
+        }),
+      );
     });
   });
 });
