@@ -1,5 +1,5 @@
-import { AggregateRoot } from '@/domain/shared/aggregate-root.base';
-import { DomainEvent } from '@/domain/shared/domain-event.base';
+import { AggregateRoot } from '@/domain/utils/aggregate-root.base';
+import { DomainEvent } from '@/domain/utils/domain-event.base';
 
 class TestEvent extends DomainEvent {
   public readonly eventName = 'TestEvent';

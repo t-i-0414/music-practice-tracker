@@ -1,4 +1,4 @@
-import { toUserPublicId, toAdminUserPublicId, toFirebaseUid, toCognitoSub } from '@/domain/shared/brand-constructors';
+import { toUserPublicId, toAdminUserPublicId, toFirebaseUid, toCognitoSub } from '@/domain/utils/brand-constructors';
 import { DomainError } from '@/domain/utils/domain.error';
 
 describe('unit Brand Constructors', () => {

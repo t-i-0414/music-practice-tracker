@@ -1,4 +1,4 @@
-import { ValueObject } from '@/domain/shared/value-object.base';
+import { ValueObject } from '@/domain/utils/value-object.base';
 
 class TestVO extends ValueObject<{ value: string }> {
   public constructor(value: string) {

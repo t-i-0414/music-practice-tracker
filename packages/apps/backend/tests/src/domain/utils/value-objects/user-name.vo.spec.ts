@@ -1,5 +1,5 @@
-import { UserName } from '@/domain/shared/value-objects/user-name.vo';
 import { DomainError } from '@/domain/utils/domain.error';
+import { UserName } from '@/domain/utils/value-objects/user-name.vo';
 
 describe('unit UserName', () => {
   describe('create', () => {

@@ -1,4 +1,4 @@
-import { DomainEvent } from '@/domain/shared/domain-event.base';
+import { DomainEvent } from '@/domain/utils/domain-event.base';
 
 class TestEvent extends DomainEvent {
   public readonly eventName = 'UserCreated';

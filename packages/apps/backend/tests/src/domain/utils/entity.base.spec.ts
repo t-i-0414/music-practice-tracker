@@ -1,4 +1,4 @@
-import { Entity } from '@/domain/shared/entity.base';
+import { Entity } from '@/domain/utils/entity.base';
 
 class TestEntity extends Entity<{ name: string }> {
   public constructor(publicId: string, name: string) {
