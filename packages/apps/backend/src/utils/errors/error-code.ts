@@ -84,6 +84,9 @@ export const ERROR_CODE_RECORDS = {
   AP9999: 'Unknown application error.',
 
   // Domain Errors
+  DO0001: 'Invalid value object.',
+  DO0002: 'Aggregate invariant violation.',
+  DO0003: 'Invalid entity state transition.',
   DO0004: 'Invalid public IDs format.',
   DO9999: 'Unknown domain error.',
 
