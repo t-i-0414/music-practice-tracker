@@ -15,9 +15,11 @@ export class DomainEventPublisher {
       try {
         this.eventEmitter.emit(event.eventName, event);
       } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        const stack = error instanceof Error ? error.stack : undefined;
         this.logger.error(
-          `Failed to publish domain event: ${event.eventName} (aggregateId=${event.aggregateId})`,
-          error instanceof Error ? error.stack : undefined,
+          `Failed to publish domain event: ${event.eventName} (aggregateId=${event.aggregateId}): ${message}`,
+          stack,
         );
       }
     }

@@ -84,8 +84,8 @@ export class UserAggregate extends AggregateRoot<UserProps, UserPublicId> {
 
   /**
    * Status transition rules:
-   * - BANNED is a terminal state (no outbound transitions except BANNED -> BANNED no-op)
-   * - All other transitions are currently allowed (ACTIVE <-> PENDING <-> SUSPENDED)
+   * - BANNED is a terminal state (transitions out of BANNED are forbidden; BANNED -> BANNED passes validation)
+   * - All other transitions between ACTIVE, PENDING, and SUSPENDED are unrestricted
    */
   private validateStatusTransition(current: UserStatus, next: UserStatus): void {
     if (current.isBanned() && !next.isBanned()) {

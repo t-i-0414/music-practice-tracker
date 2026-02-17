@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 import { UserAggregate } from '@/domain/aggregates/user/user.aggregate';
 import { UserCommandService } from '@/domain/aggregates/user/user.command.service';
@@ -9,6 +9,8 @@ import { Trace } from '@/utils/decorators/trace.decorator';
 
 @Injectable()
 export class DeleteUserService {
+  private readonly logger = new Logger(DeleteUserService.name);
+
   public constructor(
     private readonly firebaseAuth: FirebaseAuthService,
     private readonly usersQuery: UserQueryService,
@@ -28,7 +30,16 @@ export class DeleteUserService {
     });
 
     await this.firebaseAuth.deleteUser(user.firebaseUid);
-    await this.usersCommand.deleteUserById({ publicId });
+
+    try {
+      await this.usersCommand.deleteUserById({ publicId });
+    } catch (error: unknown) {
+      this.logger.error(
+        `INCONSISTENT STATE: Firebase account deleted but DB deletion failed (publicId=${publicId}, firebaseUid=${user.firebaseUid}). Manual reconciliation required.`,
+        error instanceof Error ? error.stack : undefined,
+      );
+      throw error;
+    }
 
     aggregate.markAsDeleted();
     this.eventPublisher.publishAll(aggregate);

@@ -38,8 +38,8 @@ describe('unit UserMetricsHandler', () => {
     expect(Metrics.incrementUserDeleted).toHaveBeenCalledTimes(1);
   });
 
-  it('should catch and log error when incrementUserCreated throws', () => {
-    expect.assertions(2);
+  it('should catch and log error with aggregateId when incrementUserCreated throws', () => {
+    expect.assertions(3);
 
     const loggerSpy = jest.spyOn(Logger.prototype, 'warn').mockReturnValue(undefined);
     jest.spyOn(Metrics, 'incrementUserCreated').mockImplementation(() => {
@@ -52,21 +52,23 @@ describe('unit UserMetricsHandler', () => {
       handler.handleUserCreated(event);
     }).not.toThrow();
     expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('metrics failure'));
+    expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('agg-123'));
   });
 
-  it('should catch and log error when incrementUserDeleted throws', () => {
-    expect.assertions(2);
+  it('should catch and log error with aggregateId when incrementUserDeleted throws', () => {
+    expect.assertions(3);
 
     const loggerSpy = jest.spyOn(Logger.prototype, 'warn').mockReturnValue(undefined);
     jest.spyOn(Metrics, 'incrementUserDeleted').mockImplementation(() => {
       throw new Error('metrics failure');
     });
 
-    const event = new UserDeletedEvent('agg-123');
+    const event = new UserDeletedEvent('agg-456');
 
     expect(() => {
       handler.handleUserDeleted(event);
     }).not.toThrow();
     expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('metrics failure'));
+    expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('agg-456'));
   });
 });

@@ -13,23 +13,23 @@ export class UserMetricsHandler {
   private readonly logger = new Logger(UserMetricsHandler.name);
 
   @OnEvent(USER_CREATED_EVENT)
-  public handleUserCreated(_event: UserCreatedEvent): void {
+  public handleUserCreated(event: UserCreatedEvent): void {
     try {
       Metrics.incrementUserCreated();
     } catch (error: unknown) {
       this.logger.warn(
-        `Failed to record ${USER_CREATED_EVENT} metric: ${error instanceof Error ? error.message : String(error)}`,
+        `Failed to record ${USER_CREATED_EVENT} metric (aggregateId=${event.aggregateId}): ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   }
 
   @OnEvent(USER_DELETED_EVENT)
-  public handleUserDeleted(_event: UserDeletedEvent): void {
+  public handleUserDeleted(event: UserDeletedEvent): void {
     try {
       Metrics.incrementUserDeleted();
     } catch (error: unknown) {
       this.logger.warn(
-        `Failed to record ${USER_DELETED_EVENT} metric: ${error instanceof Error ? error.message : String(error)}`,
+        `Failed to record ${USER_DELETED_EVENT} metric (aggregateId=${event.aggregateId}): ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   }

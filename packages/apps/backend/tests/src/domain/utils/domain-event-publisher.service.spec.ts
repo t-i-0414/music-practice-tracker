@@ -101,7 +101,7 @@ describe('unit DomainEventPublisher', () => {
     publisher.publishAll(aggregate as unknown as Parameters<DomainEventPublisher['publishAll']>[0]);
 
     expect(loggerSpy).toHaveBeenCalledWith(
-      'Failed to publish domain event: user.created (aggregateId=agg-123)',
+      'Failed to publish domain event: user.created (aggregateId=agg-123): handler failure',
       expect.any(String),
     );
   });
