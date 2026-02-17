@@ -7,7 +7,6 @@ setup:
 	@bin/local/setup-env
 	@${MAKE} setup-dotenv-linter
 	bun install
-	bun run gen:rules
 	@make -C packages/libs/tsconfig-base setup
 	@make -C packages/libs/eslint-configs setup
 	@make -C packages/libs/eslint-configs build
