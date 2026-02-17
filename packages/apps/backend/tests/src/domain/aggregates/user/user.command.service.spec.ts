@@ -9,6 +9,7 @@ import { DatabaseHelper } from '@/tests/helpers/database.helper';
 describe('integration UserCommandService', () => {
   let userCommandService: UserCommandService;
   let userQueryService: UserQueryService;
+  let eventPublisher: { publishAll: jest.Mock };
   let databaseHelper: DatabaseHelper;
 
   beforeAll(async () => {
@@ -18,6 +19,8 @@ describe('integration UserCommandService', () => {
 
   beforeEach(async () => {
     await databaseHelper.cleanDatabase();
+
+    eventPublisher = { publishAll: jest.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -29,7 +32,7 @@ describe('integration UserCommandService', () => {
         },
         {
           provide: DomainEventPublisher,
-          useValue: { publishAll: jest.fn() },
+          useValue: eventPublisher,
         },
       ],
     }).compile();
@@ -44,7 +47,7 @@ describe('integration UserCommandService', () => {
 
   describe('createUser', () => {
     it('should create a user in the database', async () => {
-      expect.assertions(3);
+      expect.assertions(4);
 
       const createDto = {
         name: 'Test User',
@@ -57,6 +60,7 @@ describe('integration UserCommandService', () => {
         name: createDto.name,
       });
       expect(result.publicId).toBeDefined();
+      expect(eventPublisher.publishAll).toHaveBeenCalledTimes(1);
 
       const foundUser = await userQueryService.findUniqueOrThrowUserById({ publicId: result.publicId });
 

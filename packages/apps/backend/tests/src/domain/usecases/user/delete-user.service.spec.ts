@@ -14,6 +14,7 @@ describe('integration DeleteUserService', () => {
   let userCommandService: UserCommandService;
   let userQueryService: UserQueryService;
   let firebaseAuthService: jest.Mocked<Pick<FirebaseAuthService, 'deleteUser'>>;
+  let eventPublisher: { publishAll: jest.Mock };
   let databaseHelper: DatabaseHelper;
 
   beforeAll(async () => {
@@ -27,6 +28,8 @@ describe('integration DeleteUserService', () => {
     firebaseAuthService = {
       deleteUser: jest.fn().mockResolvedValue(undefined),
     };
+
+    eventPublisher = { publishAll: jest.fn() };
 
     testingModule = await Test.createTestingModule({
       providers: [
@@ -43,7 +46,7 @@ describe('integration DeleteUserService', () => {
         },
         {
           provide: DomainEventPublisher,
-          useValue: { publishAll: jest.fn() },
+          useValue: eventPublisher,
         },
       ],
     }).compile();
@@ -64,7 +67,7 @@ describe('integration DeleteUserService', () => {
 
   describe('execute', () => {
     it('deletes the firebase account before removing the database record', async () => {
-      expect.assertions(4);
+      expect.assertions(5);
 
       const createDto = {
         name: 'Integration Delete User',
@@ -72,24 +75,27 @@ describe('integration DeleteUserService', () => {
       };
 
       const createdUser = await userCommandService.createUser(createDto);
+      eventPublisher.publishAll.mockClear();
 
       await deleteUserService.execute(createdUser.publicId);
 
       expect(firebaseAuthService.deleteUser).toHaveBeenCalledTimes(1);
       expect(firebaseAuthService.deleteUser).toHaveBeenCalledWith(createDto.firebaseUid);
+      expect(eventPublisher.publishAll).toHaveBeenCalledTimes(1);
       await expect(userQueryService.findUniqueOrThrowUserById({ publicId: createdUser.publicId })).rejects.toThrow(
         'No record was found for a query',
       );
       await expect(userQueryService.findUniqueUserByFirebaseUid(createDto.firebaseUid)).resolves.toBeNull();
     });
 
-    it('propagates not-found errors without calling firebase', async () => {
-      expect.assertions(2);
+    it('propagates not-found errors without calling firebase or publishing events', async () => {
+      expect.assertions(3);
 
       const missingPublicId = '00000000-0000-0000-0000-000000000000';
 
       await expect(deleteUserService.execute(missingPublicId)).rejects.toThrow('No record was found for a query');
       expect(firebaseAuthService.deleteUser).not.toHaveBeenCalled();
+      expect(eventPublisher.publishAll).not.toHaveBeenCalled();
     });
   });
 });

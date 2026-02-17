@@ -1,3 +1,4 @@
+import type { UserCreatedEvent } from '@/domain/aggregates/user/events/user-created.event';
 import { UserAggregate } from '@/domain/aggregates/user/user.aggregate';
 import { DomainError } from '@/domain/utils/domain.error';
 
@@ -31,8 +32,8 @@ describe('unit UserAggregate', () => {
       expect(aggregate.status.value).toBe('ACTIVE');
     });
 
-    it('should add UserCreatedEvent on creation', () => {
-      expect.assertions(2);
+    it('should add UserCreatedEvent with correct payload on creation', () => {
+      expect.assertions(4);
 
       const aggregate = UserAggregate.create({
         publicId: validUuid,
@@ -41,9 +42,12 @@ describe('unit UserAggregate', () => {
       });
 
       const events = aggregate.pullDomainEvents();
+      const event = events[0] as UserCreatedEvent;
 
       expect(events).toHaveLength(1);
-      expect(events[0].eventName).toBe('user.created');
+      expect(event.eventName).toBe('user.created');
+      expect(event.aggregateId).toBe(validUuid);
+      expect(event.name).toBe('Takuya');
     });
 
     it('should throw DomainError for invalid publicId', () => {
@@ -182,23 +186,26 @@ describe('unit UserAggregate', () => {
       expect(aggregate.status.value).toBe('SUSPENDED');
     });
 
-    it('should throw DomainError for BANNED to ACTIVE transition', () => {
-      expect.assertions(1);
+    it.each(['ACTIVE', 'PENDING', 'SUSPENDED'] as const)(
+      'should throw DomainError for BANNED to %s transition',
+      (targetStatus) => {
+        expect.assertions(1);
 
-      const { UserStatus } = jest.requireActual<typeof import('@/domain/utils/value-objects/user-status.vo')>(
-        '@/domain/utils/value-objects/user-status.vo',
-      );
-      const aggregate = UserAggregate.fromPersistence({
-        publicId: validUuid,
-        name: 'Takuya',
-        firebaseUid: 'firebase-uid-1',
-        status: 'BANNED',
-      });
+        const { UserStatus } = jest.requireActual<typeof import('@/domain/utils/value-objects/user-status.vo')>(
+          '@/domain/utils/value-objects/user-status.vo',
+        );
+        const aggregate = UserAggregate.fromPersistence({
+          publicId: validUuid,
+          name: 'Takuya',
+          firebaseUid: 'firebase-uid-1',
+          status: 'BANNED',
+        });
 
-      expect(() => {
-        aggregate.changeStatus(UserStatus.create('ACTIVE'));
-      }).toThrow(DomainError);
-    });
+        expect(() => {
+          aggregate.changeStatus(UserStatus.create(targetStatus));
+        }).toThrow(DomainError);
+      },
+    );
 
     it('should allow BANNED to BANNED (no-op transition)', () => {
       expect.assertions(1);

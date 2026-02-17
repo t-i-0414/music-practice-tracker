@@ -22,7 +22,7 @@ export class UserAggregate extends AggregateRoot<UserProps, UserPublicId> {
   public static create(params: { publicId: string; name: string; firebaseUid: string }): UserAggregate {
     const userPublicId = toUserPublicId(params.publicId);
     const name = UserName.create(params.name);
-    const status = UserStatus.fromPersistence('ACTIVE');
+    const status = UserStatus.create('ACTIVE');
 
     const aggregate = new UserAggregate(userPublicId, {
       name,
@@ -82,6 +82,11 @@ export class UserAggregate extends AggregateRoot<UserProps, UserPublicId> {
     return this.props.status;
   }
 
+  /**
+   * Status transition rules:
+   * - BANNED is a terminal state (no outbound transitions except BANNED -> BANNED no-op)
+   * - All other transitions are currently allowed (ACTIVE <-> PENDING <-> SUSPENDED)
+   */
   private validateStatusTransition(current: UserStatus, next: UserStatus): void {
     if (current.isBanned() && !next.isBanned()) {
       throw new DomainError(

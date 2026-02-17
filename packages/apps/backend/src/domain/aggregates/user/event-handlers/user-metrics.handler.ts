@@ -1,20 +1,36 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 
+import { USER_CREATED_EVENT } from '../events/user-created.event';
 import type { UserCreatedEvent } from '../events/user-created.event';
+import { USER_DELETED_EVENT } from '../events/user-deleted.event';
 import type { UserDeletedEvent } from '../events/user-deleted.event';
 
 import { Metrics } from '@/utils/metrics/dogstatsd.metrics';
 
 @Injectable()
 export class UserMetricsHandler {
-  @OnEvent('user.created')
+  private readonly logger = new Logger(UserMetricsHandler.name);
+
+  @OnEvent(USER_CREATED_EVENT)
   public handleUserCreated(_event: UserCreatedEvent): void {
-    Metrics.incrementUserCreated();
+    try {
+      Metrics.incrementUserCreated();
+    } catch (error: unknown) {
+      this.logger.warn(
+        `Failed to record ${USER_CREATED_EVENT} metric: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
   }
 
-  @OnEvent('user.deleted')
+  @OnEvent(USER_DELETED_EVENT)
   public handleUserDeleted(_event: UserDeletedEvent): void {
-    Metrics.incrementUserDeleted();
+    try {
+      Metrics.incrementUserDeleted();
+    } catch (error: unknown) {
+      this.logger.warn(
+        `Failed to record ${USER_DELETED_EVENT} metric: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
   }
 }
