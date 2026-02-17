@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ClsModule } from 'nestjs-cls';
 import { LoggerModule } from 'nestjs-pino';
 
@@ -6,6 +7,7 @@ import { isDevelopment } from '@/utils/environment';
 
 @Module({
   imports: [
+    EventEmitterModule.forRoot(),
     ClsModule.forRoot({
       global: true,
       middleware: {
