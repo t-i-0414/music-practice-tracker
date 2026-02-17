@@ -181,10 +181,7 @@ describe('useAppUpdates', () => {
       });
 
       await waitFor(() => {
-        expect(result.current.checkError).toHaveProperty(
-          'message',
-          'string error',
-        );
+        expect(result.current.checkError).toHaveProperty('message', 'string error');
       });
     });
   });
