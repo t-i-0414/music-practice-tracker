@@ -39,7 +39,20 @@ export class UserCommandService {
   }
 
   public async createManyAndReturnUsers({ users }: CreateManyUsersInputDto): Promise<UsersResponseDto> {
-    return toUsersResponseDto(await this.repository.user.createManyAndReturn({ data: users }));
+    const created = await this.repository.user.createManyAndReturn({ data: users });
+
+    for (const user of created) {
+      const aggregate = UserAggregate.fromPersistence({
+        publicId: user.publicId,
+        name: user.name,
+        firebaseUid: user.firebaseUid,
+        status: user.status,
+      });
+      aggregate.markAsCreated();
+      this.eventPublisher.publishAll(aggregate);
+    }
+
+    return toUsersResponseDto(created);
   }
 
   public async updateUserById({ publicId, data }: UpdateUserInputDto): Promise<UserResponseDto> {

@@ -14,6 +14,8 @@ import {
   UserResponseDto,
   UsersResponseDto,
 } from '@/domain/aggregates/user/utils/dto';
+import { BulkDeleteUsersService } from '@/domain/usecases/user/bulk-delete-users.service';
+import { DeleteUserService } from '@/domain/usecases/user/delete-user.service';
 import { UpdateUserService } from '@/domain/usecases/user/update-user.service';
 
 @ApiTags('users')
@@ -22,6 +24,8 @@ export class AdminApiUsersController {
   public constructor(
     private readonly userQuery: UserQueryService,
     private readonly userCommand: UserCommandService,
+    private readonly bulkDeleteUsersService: BulkDeleteUsersService,
+    private readonly deleteUserService: DeleteUserService,
     private readonly updateUserService: UpdateUserService,
   ) {}
 
@@ -59,7 +63,7 @@ export class AdminApiUsersController {
   @ApiResponse({ status: 204, description: 'Users deleted' })
   @ApiStandardResponses()
   public async deleteManyUsersById(@Body() body: DeleteManyUsersInputDto): Promise<void> {
-    await this.userCommand.deleteManyUsersById(body);
+    await this.bulkDeleteUsersService.execute(body.publicIds);
   }
 
   @Post('bulk')
@@ -103,6 +107,6 @@ export class AdminApiUsersController {
   @ApiResponse({ status: 204, description: 'User deleted' })
   @ApiStandardResponses()
   public async deleteUserById(@Param('publicId', new ParseUUIDPipe()) publicId: string): Promise<void> {
-    await this.userCommand.deleteUserById({ publicId });
+    await this.deleteUserService.execute(publicId);
   }
 }

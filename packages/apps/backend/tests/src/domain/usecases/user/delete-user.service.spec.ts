@@ -121,6 +121,28 @@ describe('integration DeleteUserService', () => {
       expect(eventPublisher.publishAll).not.toHaveBeenCalled();
     });
 
+    it('propagates Firebase errors without deleting DB record or publishing events', async () => {
+      expect.assertions(4);
+
+      const createDto = {
+        name: 'Firebase Fail User',
+        firebaseUid: 'uid-int-firebase-fail',
+      };
+
+      const createdUser = await userCommandService.createUser(createDto);
+      eventPublisher.publishAll.mockClear();
+
+      firebaseAuthService.deleteUser.mockRejectedValueOnce(new Error('Firebase unavailable'));
+
+      await expect(deleteUserService.execute(createdUser.publicId)).rejects.toThrow('Firebase unavailable');
+      expect(eventPublisher.publishAll).not.toHaveBeenCalled();
+
+      const stillExists = await userQueryService.findUniqueOrThrowUserById({ publicId: createdUser.publicId });
+
+      expect(stillExists.publicId).toBe(createdUser.publicId);
+      expect(stillExists.name).toBe(createDto.name);
+    });
+
     it('handles non-Error thrown value when DB deletion fails', async () => {
       expect.assertions(3);
 
