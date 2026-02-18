@@ -74,13 +74,11 @@ export class FirebaseAuthService {
 
     if (result.failureCount > EMPTY) {
       const failedDetails = result.errors.map((e) => `index=${String(e.index)} error=${e.error.message}`).join('; ');
-      const failedIndices = new Set(result.errors.map((e) => e.index));
-      const succeededUids = uids.filter((_, i) => !failedIndices.has(i));
       throw new FirebaseError(
         'FB0009',
         `${String(result.failureCount)} of ${String(uids.length)} Firebase account(s) failed to delete. ` +
           `Failures: [${failedDetails}]. ` +
-          `Successfully deleted UIDs: [${succeededUids.join(', ')}] (${String(result.successCount)} accounts).`,
+          `${String(result.successCount)} account(s) were successfully deleted.`,
       );
     }
   }

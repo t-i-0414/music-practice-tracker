@@ -241,7 +241,7 @@ describe('integration FirebaseAuthService', () => {
         detail:
           '1 of 2 Firebase account(s) failed to delete. ' +
           'Failures: [index=1 error=internal error]. ' +
-          'Successfully deleted UIDs: [uid-ok] (1 accounts).',
+          '1 account(s) were successfully deleted.',
       });
       expect(authMock.deleteUsers).toHaveBeenCalledWith(['uid-ok', 'uid-fail']);
     });
