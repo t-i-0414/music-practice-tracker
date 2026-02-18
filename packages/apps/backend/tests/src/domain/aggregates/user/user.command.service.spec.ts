@@ -179,6 +179,28 @@ describe('integration UserCommandService', () => {
       expect(allUsers.users).toHaveLength(3);
       expect(new Set(allUsers.users.map((u) => u.publicId)).size).toBe(3);
     });
+
+    it('should publish UserCreatedEvent for each created user', async () => {
+      expect.assertions(2);
+
+      eventPublisher.publishAll.mockClear();
+
+      const createDto = {
+        users: [
+          { name: 'Event User 1', firebaseUid: 'uid-int-bulk-event-1' },
+          { name: 'Event User 2', firebaseUid: 'uid-int-bulk-event-2' },
+        ],
+      };
+
+      await userCommandService.createManyAndReturnUsers(createDto);
+
+      expect(eventPublisher.publishAll).toHaveBeenCalledTimes(2);
+
+      const [[firstAggregate]] = eventPublisher.publishAll.mock.calls;
+      const events = firstAggregate.pullDomainEvents();
+
+      expect(events[0].eventName).toBe('user.created');
+    });
   });
 
   describe('deleteManyUsersByIds', () => {

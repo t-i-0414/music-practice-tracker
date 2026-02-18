@@ -144,6 +144,8 @@ export default defineConfig({
     'Turborepo',
     'Turborepos',
     'Uid',
+    'Uids',
+    'uids',
     'ultrathink',
     'unhandledrejection',
     'unimodules',

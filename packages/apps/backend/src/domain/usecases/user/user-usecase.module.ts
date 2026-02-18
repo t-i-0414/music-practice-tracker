@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 
+import { BulkDeleteUsersService } from './bulk-delete-users.service';
 import { DeleteUserService } from './delete-user.service';
 import { UpdateUserService } from './update-user.service';
 
@@ -8,7 +9,7 @@ import { FirebaseAuthModule } from '@/firebase-auth/firebase-auth.module';
 
 @Module({
   imports: [FirebaseAuthModule, UserModule],
-  providers: [DeleteUserService, UpdateUserService],
-  exports: [DeleteUserService, UpdateUserService],
+  providers: [BulkDeleteUsersService, DeleteUserService, UpdateUserService],
+  exports: [BulkDeleteUsersService, DeleteUserService, UpdateUserService],
 })
 export class UserUsecaseModule {}

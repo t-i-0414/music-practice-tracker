@@ -313,6 +313,22 @@ describe('unit GlobalExceptionFilter', () => {
       });
     });
 
+    it('should handle FirebaseError with bulk deletion error (FB0009)', () => {
+      const exception = new FirebaseError('FB0009', 'Bulk delete failed');
+
+      filter.catch(exception, mockArgumentsHost as ArgumentsHost);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        type: `${BASE_URL}/FB0009`,
+        title: 'Failed to delete Firebase users in bulk.',
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        errorCode: 'FB0009',
+        correlationId: 'test-correlation-id',
+        instance: '/test',
+      });
+    });
+
     it('should handle FirebaseError with unknown error (FB9999)', () => {
       const exception = new FirebaseError('FB9999', 'Unknown Firebase error');
 
@@ -329,16 +345,16 @@ describe('unit GlobalExceptionFilter', () => {
       });
     });
 
-    it('should handle FirebaseError with unmapped error code as unauthorized', () => {
-      const exception = new FirebaseError('FB0001', 'Some other Firebase error');
+    it('should handle FirebaseError with credential config error (FB0001) as internal server error', () => {
+      const exception = new FirebaseError('FB0001', 'Credential not configured');
 
       filter.catch(exception, mockArgumentsHost as ArgumentsHost);
 
-      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.UNAUTHORIZED);
+      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
       expect(mockResponse.json).toHaveBeenCalledWith({
         type: `${BASE_URL}/FB0001`,
         title: 'Firebase Admin credential not configured.',
-        status: HttpStatus.UNAUTHORIZED,
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
         errorCode: 'FB0001',
         correlationId: 'test-correlation-id',
         instance: '/test',

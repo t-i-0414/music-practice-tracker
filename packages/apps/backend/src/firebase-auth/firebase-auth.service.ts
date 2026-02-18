@@ -14,17 +14,12 @@ export class FirebaseAuthService {
     try {
       return await this.provider.auth().verifyIdToken(idToken, checkRevoked);
     } catch (e) {
-      if (e instanceof Error && 'code' in e) {
-        switch (e.code) {
-          case 'auth/id-token-expired':
-            throw new FirebaseError('FB0004', ERROR_CODE_RECORDS.FB0004, e);
-          case 'auth/id-token-revoked':
-            throw new FirebaseError('FB0005', ERROR_CODE_RECORDS.FB0005, e);
-          default:
-            throw new FirebaseError('FB0006', ERROR_CODE_RECORDS.FB0006, e);
-        }
+      if (e instanceof Error && 'code' in e && e.code === 'auth/id-token-expired') {
+        throw new FirebaseError('FB0004', ERROR_CODE_RECORDS.FB0004, e);
       }
-
+      if (e instanceof Error && 'code' in e && e.code === 'auth/id-token-revoked') {
+        throw new FirebaseError('FB0005', ERROR_CODE_RECORDS.FB0005, e);
+      }
       throw new FirebaseError('FB0006', ERROR_CODE_RECORDS.FB0006, e);
     }
   }
@@ -46,6 +41,42 @@ export class FirebaseAuthService {
         return;
       }
       throw new FirebaseError('FB0008', ERROR_CODE_RECORDS.FB0008, e);
+    }
+  }
+
+  /**
+   * Delete multiple Firebase accounts in a single batch call.
+   * Non-existing UIDs are silently ignored by Firebase (treated as successful deletions).
+   * Throws a {@link FirebaseError} when the batch result contains failures.
+   *
+   * @remarks Firebase Admin SDK limits batch to 1000 UIDs per call.
+   *          This method throws FB0009 if the limit is exceeded;
+   *          callers handling larger sets must chunk before invoking.
+   */
+  public async deleteUsers(uids: string[]): Promise<void> {
+    const EMPTY = 0;
+    const FIREBASE_BATCH_LIMIT = 1000;
+    if (uids.length === EMPTY) return;
+
+    if (uids.length > FIREBASE_BATCH_LIMIT) {
+      throw new FirebaseError(
+        'FB0009',
+        `Cannot delete more than ${String(FIREBASE_BATCH_LIMIT)} Firebase accounts in a single batch (received ${String(uids.length)})`,
+      );
+    }
+
+    try {
+      const result = await this.provider.auth().deleteUsers(uids);
+      if (result.failureCount > EMPTY) {
+        const errorDetails = result.errors.map((e) => `index=${String(e.index)} error=${e.error.message}`).join('; ');
+        throw new FirebaseError(
+          'FB0009',
+          `${String(result.failureCount)} of ${String(uids.length)} Firebase account(s) failed to delete: ${errorDetails}`,
+        );
+      }
+    } catch (e) {
+      if (e instanceof FirebaseError) throw e;
+      throw new FirebaseError('FB0009', ERROR_CODE_RECORDS.FB0009, e);
     }
   }
 }
