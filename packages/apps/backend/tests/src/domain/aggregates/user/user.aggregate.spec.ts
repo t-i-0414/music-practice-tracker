@@ -191,6 +191,25 @@ describe('unit UserAggregate', () => {
       expect(event.oldName).toBe('Takuya');
       expect(event.newName).toBe('Alice');
     });
+
+    it('should not emit event when name is unchanged', () => {
+      expect.assertions(2);
+
+      const { UserName } = jest.requireActual<typeof import('@/domain/utils/value-objects/user-name.vo')>(
+        '@/domain/utils/value-objects/user-name.vo',
+      );
+      const aggregate = UserAggregate.fromPersistence({
+        publicId: validUuid,
+        name: 'Takuya',
+        firebaseUid: 'firebase-uid-1',
+        status: 'ACTIVE',
+      });
+
+      aggregate.changeName(UserName.create('Takuya'));
+
+      expect(aggregate.name.value).toBe('Takuya');
+      expect(aggregate.domainEvents).toHaveLength(0);
+    });
   });
 
   describe('changeStatus', () => {
@@ -277,8 +296,27 @@ describe('unit UserAggregate', () => {
       expect(aggregate.domainEvents).toHaveLength(0);
     });
 
-    it('should allow BANNED to BANNED (no-op transition)', () => {
-      expect.assertions(1);
+    it('should not emit event when status is unchanged (same-value guard)', () => {
+      expect.assertions(2);
+
+      const { UserStatus } = jest.requireActual<typeof import('@/domain/utils/value-objects/user-status.vo')>(
+        '@/domain/utils/value-objects/user-status.vo',
+      );
+      const aggregate = UserAggregate.fromPersistence({
+        publicId: validUuid,
+        name: 'Takuya',
+        firebaseUid: 'firebase-uid-1',
+        status: 'ACTIVE',
+      });
+
+      aggregate.changeStatus(UserStatus.create('ACTIVE'));
+
+      expect(aggregate.status.value).toBe('ACTIVE');
+      expect(aggregate.domainEvents).toHaveLength(0);
+    });
+
+    it('should not emit event for BANNED to BANNED (same-value guard)', () => {
+      expect.assertions(2);
 
       const { UserStatus } = jest.requireActual<typeof import('@/domain/utils/value-objects/user-status.vo')>(
         '@/domain/utils/value-objects/user-status.vo',
@@ -293,6 +331,7 @@ describe('unit UserAggregate', () => {
       aggregate.changeStatus(UserStatus.create('BANNED'));
 
       expect(aggregate.status.value).toBe('BANNED');
+      expect(aggregate.domainEvents).toHaveLength(0);
     });
   });
 });

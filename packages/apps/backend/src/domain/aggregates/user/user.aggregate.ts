@@ -62,12 +62,14 @@ export class UserAggregate extends AggregateRoot<UserProps, UserPublicId> {
   }
 
   public changeName(newName: UserName): void {
+    if (this.props.name.equals(newName)) return;
     const oldName = this.props.name.value;
     this.props = { ...this.props, name: newName };
     this.addDomainEvent(new UserNameChangedEvent(this.publicId, oldName, newName.value));
   }
 
   public changeStatus(newStatus: UserStatus): void {
+    if (this.props.status.equals(newStatus)) return;
     this.validateStatusTransition(this.props.status, newStatus);
     const oldStatus = this.props.status.value;
     this.props = { ...this.props, status: newStatus };
