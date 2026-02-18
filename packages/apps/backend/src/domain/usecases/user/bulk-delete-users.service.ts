@@ -70,9 +70,9 @@ export class BulkDeleteUsersService {
     } catch (error: unknown) {
       const detail = error instanceof Error ? error.message : String(error);
       this.logger.error(
-        `Firebase batch deletion failed. Some accounts may have been deleted. ` +
+        `Firebase batch deletion failed; no DB records were modified. ` +
           `publicIds=[${matchedPublicIds.join(', ')}], firebaseUids=[${firebaseUids.join(', ')}]. ` +
-          `detail=${detail}. Manual reconciliation may be required.`,
+          `detail=${detail}. Check Firebase console for partial deletions.`,
         error instanceof Error ? error.stack : undefined,
       );
       throw error;

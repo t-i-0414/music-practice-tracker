@@ -152,6 +152,37 @@ export class FirebaseAuthEmulatorHelper {
     }
   }
 
+  /**
+   * Look up a Firebase Auth emulator user by UID.
+   * Returns the user record if found, or `undefined` if the account does not exist.
+   *
+   * Uses the emulator admin endpoint (`Authorization: Bearer owner`) because the
+   * client API (`?key=`) requires `idToken` and rejects `localId`-only lookups.
+   */
+  public async getUserByUid(uid: string): Promise<Record<string, unknown> | undefined> {
+    const response = await fetch(
+      `${this.emulatorOrigin}/identitytoolkit.googleapis.com/v1/projects/${this.projectId}/accounts:lookup`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer owner',
+        },
+        body: JSON.stringify({ localId: [uid] }),
+      },
+    );
+
+    if (!response.ok) {
+      const responseBody = await response.text();
+      throw new Error(
+        `Firebase Auth emulator request failed (accounts:lookup by UID): ${response.status} ${response.statusText} ${responseBody}`,
+      );
+    }
+
+    const body = (await response.json()) as { users?: Record<string, unknown>[] };
+    return body.users?.[0];
+  }
+
   private async postIdentityToolkit<TResponse>(path: string, body: unknown): Promise<TResponse> {
     const response = await fetch(
       `${this.emulatorOrigin}/identitytoolkit.googleapis.com/v1/${path}?key=${FirebaseAuthEmulatorHelper.API_KEY}`,

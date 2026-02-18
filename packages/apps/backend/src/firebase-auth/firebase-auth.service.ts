@@ -65,18 +65,21 @@ export class FirebaseAuthService {
       );
     }
 
-    try {
-      const result = await this.provider.auth().deleteUsers(uids);
-      if (result.failureCount > EMPTY) {
-        const errorDetails = result.errors.map((e) => `index=${String(e.index)} error=${e.error.message}`).join('; ');
-        throw new FirebaseError(
-          'FB0009',
-          `${String(result.failureCount)} of ${String(uids.length)} Firebase account(s) failed to delete: ${errorDetails}`,
-        );
-      }
-    } catch (e) {
-      if (e instanceof FirebaseError) throw e;
-      throw new FirebaseError('FB0009', ERROR_CODE_RECORDS.FB0009, e);
+    const result = await this.provider
+      .auth()
+      .deleteUsers(uids)
+      .catch((e: unknown) => {
+        throw new FirebaseError('FB0009', ERROR_CODE_RECORDS.FB0009, e);
+      });
+
+    if (result.failureCount > EMPTY) {
+      const failedDetails = result.errors.map((e) => `index=${String(e.index)} error=${e.error.message}`).join('; ');
+      throw new FirebaseError(
+        'FB0009',
+        `${String(result.failureCount)} of ${String(uids.length)} Firebase account(s) failed to delete. ` +
+          `Failures: [${failedDetails}]. ` +
+          `${String(result.successCount)} account(s) were successfully deleted.`,
+      );
     }
   }
 }
