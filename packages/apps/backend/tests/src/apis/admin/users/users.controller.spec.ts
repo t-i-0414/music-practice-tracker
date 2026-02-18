@@ -101,7 +101,7 @@ describe('e2e AdminApiUsersController', () => {
 
   describe('delete /api/users', () => {
     it('deletes multiple users by public IDs', async () => {
-      expect.assertions(4);
+      expect.assertions(6);
 
       const { uid: uid1 } = await firebaseHelper.createVerifiedUser();
       const { uid: uid2 } = await firebaseHelper.createVerifiedUser();
@@ -125,7 +125,7 @@ describe('e2e AdminApiUsersController', () => {
 
       expect(deleteResponse.status).toBe(204);
 
-      // Verify users are deleted
+      // Verify users are deleted from database
       const user1InDatabase = await databaseHelper.client.user.findUnique({ where: { publicId: publicId1 } });
       const user2InDatabase = await databaseHelper.client.user.findUnique({ where: { publicId: publicId2 } });
 
@@ -136,6 +136,13 @@ describe('e2e AdminApiUsersController', () => {
       const fetchResponse = await httpClient.get(`/api/users/${publicId1}`);
 
       expect(fetchResponse.status).toBe(404);
+
+      // Verify Firebase accounts are deleted
+      const firebaseUser1 = await firebaseHelper.getUserByUid(uid1);
+      const firebaseUser2 = await firebaseHelper.getUserByUid(uid2);
+
+      expect(firebaseUser1).toBeUndefined();
+      expect(firebaseUser2).toBeUndefined();
     });
   });
 
@@ -243,7 +250,7 @@ describe('e2e AdminApiUsersController', () => {
 
   describe('delete /api/users/:publicId', () => {
     it('deletes a user by public ID', async () => {
-      expect.assertions(3);
+      expect.assertions(4);
 
       const { uid } = await firebaseHelper.createVerifiedUser();
 
@@ -267,6 +274,11 @@ describe('e2e AdminApiUsersController', () => {
       const userInDatabase = await databaseHelper.client.user.findUnique({ where: { publicId } });
 
       expect(userInDatabase).toBeNull();
+
+      // Verify Firebase account is deleted
+      const firebaseUser = await firebaseHelper.getUserByUid(uid);
+
+      expect(firebaseUser).toBeUndefined();
     });
   });
 });

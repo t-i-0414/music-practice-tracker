@@ -152,6 +152,17 @@ export class FirebaseAuthEmulatorHelper {
     }
   }
 
+  /**
+   * Look up a Firebase Auth emulator user by UID.
+   * Returns the user record if found, or `undefined` if the account does not exist.
+   */
+  public async getUserByUid(uid: string): Promise<Record<string, unknown> | undefined> {
+    const body = await this.postIdentityToolkit<{ users?: Record<string, unknown>[] }>('accounts:lookup', {
+      localId: [uid],
+    });
+    return body.users?.[0];
+  }
+
   private async postIdentityToolkit<TResponse>(path: string, body: unknown): Promise<TResponse> {
     const response = await fetch(
       `${this.emulatorOrigin}/identitytoolkit.googleapis.com/v1/${path}?key=${FirebaseAuthEmulatorHelper.API_KEY}`,

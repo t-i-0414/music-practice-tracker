@@ -182,7 +182,7 @@ describe('integration BulkDeleteUsersService', () => {
 
       expect(stillExists.publicId).toBe(users.users[0].publicId);
       expect(stillExists.name).toBe('Firebase Fail 1');
-      expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('reconciliation'), expect.any(String));
+      expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('partial deletions'), expect.any(String));
     });
 
     it('logs inconsistent state with user identifiers and re-throws when DB deletion fails after Firebase deletion', async () => {

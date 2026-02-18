@@ -214,7 +214,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
   private handleFirebaseError(exception: FirebaseError): ErrorResponseDto {
     const { errorCode } = exception;
-    let status = HttpStatus.UNAUTHORIZED;
+    let status = HttpStatus.INTERNAL_SERVER_ERROR;
 
     switch (errorCode) {
       case 'FB0001':
@@ -239,7 +239,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         break;
       default: {
         const _exhaustive: never = errorCode;
-        this.logger.warn(`Unmapped Firebase error code: ${String(_exhaustive)}, defaulting to 401`);
+        this.logger.warn(`Unmapped Firebase error code: ${String(_exhaustive)}, defaulting to 500`);
         break;
       }
     }
