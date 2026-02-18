@@ -1,5 +1,6 @@
 import type { ConfigService } from '@nestjs/config';
 
+import type { EnvironmentVariables } from '@/config/env-validation';
 import { FirebaseAuthProvider } from '@/firebase-auth/firebase-auth.provider';
 import { FirebaseError } from '@/firebase-auth/utils/firebase.error';
 
@@ -52,17 +53,10 @@ const createFirebaseApp = () => ({
 
 type EnvMap = Record<string, string | undefined>;
 
-const createConfigService = (envMap: EnvMap = {}): ConfigService =>
+const createConfigService = (envMap: EnvMap = {}): ConfigService<EnvironmentVariables> =>
   ({
     get: jest.fn((key: string) => envMap[key]),
-    getOrThrow: jest.fn((key: string) => {
-      const value = envMap[key];
-      if (value === undefined) {
-        throw new Error(`Missing config key: ${key}`);
-      }
-      return value;
-    }),
-  }) as unknown as ConfigService;
+  }) as unknown as ConfigService<EnvironmentVariables>;
 
 describe('unit FirebaseAuthProvider', () => {
   beforeEach(() => {

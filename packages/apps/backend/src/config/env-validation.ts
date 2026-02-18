@@ -1,11 +1,11 @@
 import { plainToInstance } from 'class-transformer';
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, validateSync } from 'class-validator';
+import { IsEnum, IsIn, IsNotEmpty, IsNumber, IsOptional, IsString, validateSync } from 'class-validator';
 
 const NodeEnvValues = ['development', 'staging', 'production', 'test'] as const;
 
 const NO_ERRORS = 0;
 
-class EnvironmentVariables {
+export class EnvironmentVariables {
   @IsString()
   @IsNotEmpty()
   public DATABASE_URL: string;
@@ -42,7 +42,7 @@ class EnvironmentVariables {
   @IsOptional()
   public FIREBASE_SERVICE_ACCOUNT?: string;
 
-  @IsString()
+  @IsIn(['true', 'false'])
   @IsOptional()
   public FIREBASE_CHECK_REVOKED?: string;
 }

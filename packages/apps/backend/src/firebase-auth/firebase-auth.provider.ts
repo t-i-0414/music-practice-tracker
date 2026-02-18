@@ -2,12 +2,13 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as firebaseAdmin from 'firebase-admin';
 
+import { EnvironmentVariables } from '@/config/env-validation';
 import { FirebaseError } from '@/firebase-auth/utils/firebase.error';
 import { ERROR_CODE_RECORDS } from '@/utils/errors/error-code';
 
 @Injectable()
 export class FirebaseAuthProvider implements OnModuleInit {
-  public constructor(private readonly configService: ConfigService) {}
+  public constructor(private readonly configService: ConfigService<EnvironmentVariables>) {}
 
   public onModuleInit(): void {
     if (this.hasInitialized()) {

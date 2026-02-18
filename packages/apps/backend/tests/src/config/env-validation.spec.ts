@@ -82,6 +82,22 @@ describe('unit validateEnvironment', () => {
     expect(result.FIREBASE_CHECK_REVOKED).toBe('true');
   });
 
+  it('accepts FIREBASE_CHECK_REVOKED=false', () => {
+    expect.assertions(1);
+
+    const result = validateEnvironment({ ...validConfig, FIREBASE_CHECK_REVOKED: 'false' });
+
+    expect(result.FIREBASE_CHECK_REVOKED).toBe('false');
+  });
+
+  it('throws when FIREBASE_CHECK_REVOKED is an invalid value', () => {
+    expect.assertions(1);
+
+    expect(() => validateEnvironment({ ...validConfig, FIREBASE_CHECK_REVOKED: 'yes' })).toThrow(
+      'FIREBASE_CHECK_REVOKED',
+    );
+  });
+
   it('passes without any optional fields', () => {
     expect.assertions(1);
 

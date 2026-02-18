@@ -7,6 +7,7 @@ import { ClsService } from 'nestjs-cls';
 import { UserAuthGuard } from '@/apis/app/utils/guards/user-auth.guard';
 import { ApiError } from '@/apis/utils/api.error';
 import { IS_PUBLIC_KEY } from '@/apis/utils/decorators/public.decorator';
+import type { EnvironmentVariables } from '@/config/env-validation';
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 import { FirebaseAuthService } from '@/firebase-auth/firebase-auth.service';
 
@@ -49,7 +50,7 @@ describe('unit UserAuthGuard', () => {
       firebaseAuthService as unknown as FirebaseAuthService,
       usersQueryService as unknown as UserQueryService,
       cls as unknown as ClsService,
-      configService as unknown as ConfigService,
+      configService as unknown as ConfigService<EnvironmentVariables>,
     );
   });
 
@@ -114,6 +115,33 @@ describe('unit UserAuthGuard', () => {
     expect(request.user).toStrictEqual({ publicId: 'public-id', name: 'Current User' });
     expect(cls.set).toHaveBeenCalledWith('userId', 'public-id');
     expect(reflector.getAllAndOverride).toHaveBeenCalledWith(IS_PUBLIC_KEY, [handler, controller]);
+  });
+
+  it('defaults to checkRevoked=false when FIREBASE_CHECK_REVOKED is not set', async () => {
+    expect.assertions(2);
+
+    reflector.getAllAndOverride.mockReturnValue(false);
+    configService.get.mockReturnValue(undefined);
+
+    const request = {
+      headers: {
+        authorization: 'Bearer token-no-revoke-check',
+      },
+    } as unknown as Request & {
+      user?: unknown;
+    };
+
+    const context = createExecutionContext(request);
+
+    firebaseAuthService.verifyIdToken.mockResolvedValue({ uid: 'firebase-uid' } as never);
+    usersQueryService.findUniqueOrThrowUserByFirebaseUid.mockResolvedValue({
+      publicId: 'public-id',
+      name: 'User',
+    } as never);
+
+    await expect(guard.canActivate(context)).resolves.toBe(true);
+
+    expect(firebaseAuthService.verifyIdToken).toHaveBeenCalledWith('token-no-revoke-check', false);
   });
 
   it('propagates verification errors from FirebaseAuthService', async () => {

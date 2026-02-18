@@ -9,6 +9,7 @@ import { Logger } from 'nestjs-pino';
 import { useGlobalOptions } from '../utils/use-global-options';
 
 import { AppApiModule } from '@/apis/app/app.module';
+import type { EnvironmentVariables } from '@/config/env-validation';
 import { isDevelopment } from '@/utils/environment';
 
 const DEFAULT_PORT_NUMBER = 3000;
@@ -29,7 +30,7 @@ async function bootstrap(): Promise<void> {
     SwaggerModule.setup('api', app, document);
   }
 
-  const configService = app.get(ConfigService);
+  const configService = app.get<ConfigService<EnvironmentVariables>>(ConfigService);
   const port = configService.get<number>('APP_API_PORT') ?? DEFAULT_PORT_NUMBER;
   await app.listen(port);
 }
