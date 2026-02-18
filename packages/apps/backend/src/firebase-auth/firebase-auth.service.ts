@@ -14,17 +14,12 @@ export class FirebaseAuthService {
     try {
       return await this.provider.auth().verifyIdToken(idToken, checkRevoked);
     } catch (e) {
-      if (e instanceof Error && 'code' in e) {
-        switch (e.code) {
-          case 'auth/id-token-expired':
-            throw new FirebaseError('FB0004', ERROR_CODE_RECORDS.FB0004, e);
-          case 'auth/id-token-revoked':
-            throw new FirebaseError('FB0005', ERROR_CODE_RECORDS.FB0005, e);
-          default:
-            throw new FirebaseError('FB0006', ERROR_CODE_RECORDS.FB0006, e);
-        }
+      if (e instanceof Error && 'code' in e && e.code === 'auth/id-token-expired') {
+        throw new FirebaseError('FB0004', ERROR_CODE_RECORDS.FB0004, e);
       }
-
+      if (e instanceof Error && 'code' in e && e.code === 'auth/id-token-revoked') {
+        throw new FirebaseError('FB0005', ERROR_CODE_RECORDS.FB0005, e);
+      }
       throw new FirebaseError('FB0006', ERROR_CODE_RECORDS.FB0006, e);
     }
   }

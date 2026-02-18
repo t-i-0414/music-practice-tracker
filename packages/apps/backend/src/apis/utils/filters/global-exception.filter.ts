@@ -201,7 +201,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
   private handleApiError(exception: ApiError): ErrorResponseDto {
     const statusMatch = /^AP0(?<status>\d{3})$/u.exec(exception.errorCode);
     const status =
-      statusMatch?.groups?.status !== undefined && statusMatch.groups.status !== ''
+      statusMatch?.groups?.status !== undefined
         ? parseInt(statusMatch.groups.status, 10)
         : HttpStatus.INTERNAL_SERVER_ERROR;
 

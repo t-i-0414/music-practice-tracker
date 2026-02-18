@@ -36,9 +36,9 @@ export class BulkDeleteUsersService {
    * 6. Delete database records.
    * 7. Publish `UserDeletedEvent` for each deleted user.
    *
-   * If Firebase batch deletion partially succeeds (some accounts deleted,
-   * some failed), the error is logged at the orchestration level and
-   * re-thrown without proceeding to DB deletion.
+   * If Firebase batch deletion throws (which includes the case where the
+   * batch partially succeeded with some failures), the error is logged
+   * and re-thrown without proceeding to DB deletion.
    *
    * If the database deletion fails after Firebase accounts have been
    * removed, the inconsistent state is logged with affected user
@@ -68,10 +68,11 @@ export class BulkDeleteUsersService {
     try {
       await this.firebaseAuth.deleteUsers(firebaseUids);
     } catch (error: unknown) {
+      const detail = error instanceof Error ? error.message : String(error);
       this.logger.error(
         `Firebase batch deletion failed. Some accounts may have been deleted. ` +
           `publicIds=[${matchedPublicIds.join(', ')}], firebaseUids=[${firebaseUids.join(', ')}]. ` +
-          `Manual reconciliation may be required.`,
+          `detail=${detail}. Manual reconciliation may be required.`,
         error instanceof Error ? error.stack : undefined,
       );
       throw error;
