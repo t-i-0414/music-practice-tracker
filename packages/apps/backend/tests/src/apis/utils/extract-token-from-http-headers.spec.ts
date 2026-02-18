@@ -108,6 +108,6 @@ describe('unit extractTokenFromHttpHeaders', () => {
     execSpy.mockRestore();
 
     expect(result).toBeUndefined();
-    expect(calls[0]?.[0]).toBe('Bearer token-without-groups');
+    expect(calls[0]).toHaveProperty('[0]', 'Bearer token-without-groups');
   });
 });

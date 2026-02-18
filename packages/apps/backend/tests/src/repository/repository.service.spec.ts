@@ -281,7 +281,7 @@ describe('unit RepositoryService', () => {
       expect(results).toHaveLength(10);
 
       results.forEach((result) => {
-        expect(result?.name).toBe('Concurrent User');
+        expect(result).toHaveProperty('name', 'Concurrent User');
       });
 
       expect(results.every((result) => result !== null)).toBe(true);

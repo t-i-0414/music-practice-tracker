@@ -46,7 +46,7 @@ describe('unit AggregateRoot', () => {
       const aggregate = new TestAggregate('abc-123', 'test');
       aggregate.doSomething();
 
-      expect(aggregate.domainEvents[0]?.aggregateId).toBe('abc-123');
+      expect(aggregate.domainEvents[0]).toHaveProperty('aggregateId', 'abc-123');
     });
   });
 
