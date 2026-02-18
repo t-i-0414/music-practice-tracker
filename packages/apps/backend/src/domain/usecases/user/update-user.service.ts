@@ -28,17 +28,17 @@ export class UpdateUserService {
       status: user.status,
     });
 
+    const updateData: UpdateUserDataDto = {};
+
     if (data.name !== undefined) {
       aggregate.changeName(UserName.create(data.name));
+      updateData.name = aggregate.name.value;
     }
 
     if (data.status !== undefined) {
       aggregate.changeStatus(UserStatus.create(data.status));
+      updateData.status = aggregate.status.value;
     }
-
-    const updateData: UpdateUserDataDto = {};
-    if (data.name !== undefined) updateData.name = aggregate.name.value;
-    if (data.status !== undefined) updateData.status = aggregate.status.value;
 
     const result = await this.usersCommand.updateUserById({ publicId, data: updateData });
 
