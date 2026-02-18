@@ -181,7 +181,7 @@ describe('useAppUpdates', () => {
       });
 
       await waitFor(() => {
-        expect(result.current.checkError?.message).toBe('string error');
+        expect(result.current.checkError).toHaveProperty('message', 'string error');
       });
     });
   });
@@ -276,7 +276,7 @@ describe('useAppUpdates', () => {
         }
       });
 
-      expect(thrownError?.message).toBe('Download failed');
+      expect(thrownError).toHaveProperty('message', 'Download failed');
     });
   });
 });

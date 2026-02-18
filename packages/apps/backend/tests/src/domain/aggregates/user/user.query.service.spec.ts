@@ -287,7 +287,7 @@ describe('integration UserQueryService', () => {
       const result = await userQueryService.findUniqueUserByFirebaseUid('uid-int-find-by-firebase-nullable-1');
 
       expect(result).not.toBeNull();
-      expect(result?.publicId).toBe(created.publicId);
+      expect(result).toHaveProperty('publicId', created.publicId);
     });
 
     it('should return null for non-existent firebaseUid', async () => {
@@ -325,7 +325,7 @@ describe('integration UserQueryService', () => {
       const result = await userQueryService.findUniqueUserByFirebaseUid('uid-int-many-firebase-nullable-2');
 
       expect(result).not.toBeNull();
-      expect(result?.publicId).toBe(targetUser.publicId);
+      expect(result).toHaveProperty('publicId', targetUser.publicId);
     });
   });
 });
