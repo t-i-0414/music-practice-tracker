@@ -1,4 +1,5 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import * as firebaseAdmin from 'firebase-admin';
 
 import { FirebaseError } from '@/firebase-auth/utils/firebase.error';
@@ -6,16 +7,20 @@ import { ERROR_CODE_RECORDS } from '@/utils/errors/error-code';
 
 @Injectable()
 export class FirebaseAuthProvider implements OnModuleInit {
+  public constructor(private readonly configService: ConfigService) {}
+
   public onModuleInit(): void {
     if (this.hasInitialized()) {
       this.app = firebaseAdmin.app();
       return;
     }
 
-    const emulatorHost = process.env.FIREBASE_AUTH_EMULATOR_HOST;
+    const emulatorHost = this.configService.get<string>('FIREBASE_AUTH_EMULATOR_HOST');
     if (typeof emulatorHost === 'string' && emulatorHost.trim() !== '') {
       const projectId =
-        process.env.GOOGLE_CLOUD_PROJECT ?? process.env.GCLOUD_PROJECT ?? process.env.FIREBASE_PROJECT_ID;
+        this.configService.get<string>('GOOGLE_CLOUD_PROJECT') ??
+        this.configService.get<string>('GCLOUD_PROJECT') ??
+        this.configService.get<string>('FIREBASE_PROJECT_ID');
       if (typeof projectId === 'string' && projectId.trim() !== '') {
         this.app = firebaseAdmin.initializeApp({ projectId: projectId.trim() });
         return;
@@ -27,7 +32,7 @@ export class FirebaseAuthProvider implements OnModuleInit {
         credential: firebaseAdmin.credential.applicationDefault(),
       });
     } catch (adcCause) {
-      const serviceAccountJsonString = process.env.FIREBASE_SERVICE_ACCOUNT;
+      const serviceAccountJsonString = this.configService.get<string>('FIREBASE_SERVICE_ACCOUNT');
       if (serviceAccountJsonString === undefined || serviceAccountJsonString.trim() === '') {
         throw new FirebaseError('FB0001', ERROR_CODE_RECORDS.FB0001, adcCause);
       }

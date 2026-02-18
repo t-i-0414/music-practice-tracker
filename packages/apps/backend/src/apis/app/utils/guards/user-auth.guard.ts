@@ -1,4 +1,5 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import { ClsService } from 'nestjs-cls';
@@ -18,6 +19,7 @@ export class UserAuthGuard implements CanActivate {
     private readonly firebaseAuthService: FirebaseAuthService,
     private readonly usersQueryService: UserQueryService,
     private readonly cls: ClsService,
+    private readonly configService: ConfigService,
   ) {}
 
   public async canActivate(ctx: ExecutionContext): Promise<boolean> {
@@ -33,7 +35,7 @@ export class UserAuthGuard implements CanActivate {
 
     const decodedIdToken = await this.firebaseAuthService.verifyIdToken(
       token,
-      process.env.FIREBASE_CHECK_REVOKED === 'true',
+      this.configService.get<string>('FIREBASE_CHECK_REVOKED') === 'true',
     );
 
     const user = await this.usersQueryService.findUniqueOrThrowUserByFirebaseUid(decodedIdToken.uid);

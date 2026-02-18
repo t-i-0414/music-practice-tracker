@@ -1,3 +1,4 @@
+import { ConfigService } from '@nestjs/config';
 import { Test, type TestingModule } from '@nestjs/testing';
 
 import { UserStatusRecord } from '@/domain/aggregates/user/utils/constants';
@@ -18,7 +19,18 @@ describe('unit RepositoryService', () => {
     jest.clearAllMocks();
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [RepositoryService],
+      providers: [
+        RepositoryService,
+        {
+          provide: ConfigService,
+          useValue: {
+            getOrThrow: jest.fn((key: string) => {
+              if (key === 'DATABASE_URL') return process.env.DATABASE_URL;
+              throw new Error(`Missing config key: ${key}`);
+            }),
+          },
+        },
+      ],
     }).compile();
 
     service = module.get<RepositoryService>(RepositoryService);

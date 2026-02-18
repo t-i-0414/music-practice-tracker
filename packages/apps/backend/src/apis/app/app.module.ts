@@ -11,10 +11,13 @@ import { AppApiUsersModule } from './users/users.module';
 import { CommonModule } from './utils/common.module';
 import { UserAuthGuard } from './utils/guards/user-auth.guard';
 
+import { validateEnvironment } from '@/config/env-validation';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      validate: validateEnvironment,
     }),
     ObservabilityModule,
     HealthModule,

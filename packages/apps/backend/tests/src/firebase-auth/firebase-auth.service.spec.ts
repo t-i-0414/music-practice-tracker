@@ -1,3 +1,4 @@
+import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import type { DecodedIdToken, UserRecord } from 'firebase-admin/auth';
 
@@ -78,7 +79,14 @@ describe('integration FirebaseAuthService', () => {
     resetFirebaseAdmin(authMock);
 
     testingModule = await Test.createTestingModule({
-      providers: [FirebaseAuthProvider, FirebaseAuthService],
+      providers: [
+        FirebaseAuthProvider,
+        FirebaseAuthService,
+        {
+          provide: ConfigService,
+          useValue: { get: jest.fn() },
+        },
+      ],
     }).compile();
 
     provider = testingModule.get(FirebaseAuthProvider);

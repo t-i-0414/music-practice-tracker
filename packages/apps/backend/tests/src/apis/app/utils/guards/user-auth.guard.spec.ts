@@ -1,4 +1,5 @@
 import type { ExecutionContext } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
 import { ClsService } from 'nestjs-cls';
@@ -23,8 +24,8 @@ describe('unit UserAuthGuard', () => {
   let firebaseAuthService: jest.Mocked<Pick<FirebaseAuthService, 'verifyIdToken'>>;
   let usersQueryService: jest.Mocked<Pick<UserQueryService, 'findUniqueOrThrowUserByFirebaseUid'>>;
   let cls: jest.Mocked<Pick<ClsService, 'set'>>;
+  let configService: { get: jest.Mock };
   let guard: UserAuthGuard;
-  const originalCheckRevoked = process.env.FIREBASE_CHECK_REVOKED;
 
   beforeEach(() => {
     reflector = {
@@ -39,21 +40,20 @@ describe('unit UserAuthGuard', () => {
     cls = {
       set: jest.fn(),
     };
+    configService = {
+      get: jest.fn(),
+    };
 
     guard = new UserAuthGuard(
       reflector as unknown as Reflector,
       firebaseAuthService as unknown as FirebaseAuthService,
       usersQueryService as unknown as UserQueryService,
       cls as unknown as ClsService,
+      configService as unknown as ConfigService,
     );
   });
 
   afterEach(() => {
-    if (originalCheckRevoked === undefined) {
-      delete process.env.FIREBASE_CHECK_REVOKED;
-    } else {
-      process.env.FIREBASE_CHECK_REVOKED = originalCheckRevoked;
-    }
     jest.clearAllMocks();
   });
 
@@ -84,7 +84,7 @@ describe('unit UserAuthGuard', () => {
     expect.assertions(6);
 
     reflector.getAllAndOverride.mockReturnValue(false);
-    process.env.FIREBASE_CHECK_REVOKED = 'true';
+    configService.get.mockReturnValue('true');
 
     const request = {
       headers: {
