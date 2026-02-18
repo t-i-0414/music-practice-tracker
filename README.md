@@ -150,44 +150,6 @@ bunx turbo login
 bunx turbo link
 ```
 
-## AI Tool Configuration (RuleSync)
-
-AI coding tool settings (rules, commands, agents, skills) are managed by [RuleSync](https://github.com/dyoshikawa/rulesync). The single source of truth is `.rulesync/` and tool-specific files are auto-generated.
-
-```bash
-# Regenerate all AI tool configs (Claude Code, Cursor, Copilot)
-bun run rulesync
-
-# Preview changes without writing
-bun run rulesync:dry-run
-
-# CI check (exits 1 if out of date)
-bun run rulesync:check
-```
-
-`make setup` automatically runs RuleSync generation (`bun run gen:rules`). RuleSync is installed as an npm devDependency.
-
-### Managed Targets
-
-| Tool           | Generated Files                                       |
-| -------------- | ----------------------------------------------------- |
-| Claude Code    | `CLAUDE.md`, `.claude/`                               |
-| Cursor         | `.cursor/rules/`, `.cursor/commands/`, etc            |
-| GitHub Copilot | `.github/copilot-instructions.md`, `.github/prompts/` |
-
-### Editing Rules
-
-Edit files in `.rulesync/` (not the generated files), then run `bun run rulesync`.
-
-| What     | Location                    |
-| -------- | --------------------------- |
-| Rules    | `.rulesync/rules/CLAUDE.md` |
-| Commands | `.rulesync/commands/`       |
-| Agents   | `.rulesync/subagents/`      |
-| Skills   | `.rulesync/skills/`         |
-| MCP      | `.rulesync/mcp.json`        |
-| Ignore   | `.rulesync/.aiignore`       |
-
 ## License
 
 Proprietary software. See [LICENSE](./LICENSE). For inquiries: <takuya.iwashiro@takudev.net>

@@ -1,4 +1,6 @@
 import type { UserCreatedEvent } from '@/domain/aggregates/user/events/user-created.event';
+import type { UserNameChangedEvent } from '@/domain/aggregates/user/events/user-name-changed.event';
+import type { UserStatusChangedEvent } from '@/domain/aggregates/user/events/user-status-changed.event';
 import { UserAggregate } from '@/domain/aggregates/user/user.aggregate';
 import { DomainError } from '@/domain/utils/domain.error';
 
@@ -165,6 +167,49 @@ describe('unit UserAggregate', () => {
 
       expect(aggregate.name.value).toBe('Alice');
     });
+
+    it('should emit UserNameChangedEvent with oldName and newName', () => {
+      expect.assertions(4);
+
+      const { UserName } = jest.requireActual<typeof import('@/domain/utils/value-objects/user-name.vo')>(
+        '@/domain/utils/value-objects/user-name.vo',
+      );
+      const aggregate = UserAggregate.fromPersistence({
+        publicId: validUuid,
+        name: 'Takuya',
+        firebaseUid: 'firebase-uid-1',
+        status: 'ACTIVE',
+      });
+
+      aggregate.changeName(UserName.create('Alice'));
+
+      const events = aggregate.pullDomainEvents();
+      const event = events[0] as UserNameChangedEvent;
+
+      expect(events).toHaveLength(1);
+      expect(event.eventName).toBe('user.name_changed');
+      expect(event.oldName).toBe('Takuya');
+      expect(event.newName).toBe('Alice');
+    });
+
+    it('should not emit event when name is unchanged', () => {
+      expect.assertions(2);
+
+      const { UserName } = jest.requireActual<typeof import('@/domain/utils/value-objects/user-name.vo')>(
+        '@/domain/utils/value-objects/user-name.vo',
+      );
+      const aggregate = UserAggregate.fromPersistence({
+        publicId: validUuid,
+        name: 'Takuya',
+        firebaseUid: 'firebase-uid-1',
+        status: 'ACTIVE',
+      });
+
+      aggregate.changeName(UserName.create('Takuya'));
+
+      expect(aggregate.name.value).toBe('Takuya');
+      expect(aggregate.domainEvents).toHaveLength(0);
+    });
   });
 
   describe('changeStatus', () => {
@@ -184,6 +229,30 @@ describe('unit UserAggregate', () => {
       aggregate.changeStatus(UserStatus.create('SUSPENDED'));
 
       expect(aggregate.status.value).toBe('SUSPENDED');
+    });
+
+    it('should emit UserStatusChangedEvent with oldStatus and newStatus', () => {
+      expect.assertions(4);
+
+      const { UserStatus } = jest.requireActual<typeof import('@/domain/utils/value-objects/user-status.vo')>(
+        '@/domain/utils/value-objects/user-status.vo',
+      );
+      const aggregate = UserAggregate.fromPersistence({
+        publicId: validUuid,
+        name: 'Takuya',
+        firebaseUid: 'firebase-uid-1',
+        status: 'ACTIVE',
+      });
+
+      aggregate.changeStatus(UserStatus.create('SUSPENDED'));
+
+      const events = aggregate.pullDomainEvents();
+      const event = events[0] as UserStatusChangedEvent;
+
+      expect(events).toHaveLength(1);
+      expect(event.eventName).toBe('user.status_changed');
+      expect(event.oldStatus).toBe('ACTIVE');
+      expect(event.newStatus).toBe('SUSPENDED');
     });
 
     it.each(['ACTIVE', 'PENDING', 'SUSPENDED'] as const)(
@@ -207,8 +276,47 @@ describe('unit UserAggregate', () => {
       },
     );
 
-    it('should allow BANNED to BANNED (no-op transition)', () => {
-      expect.assertions(1);
+    it('should not emit event when BANNED to non-BANNED transition fails', () => {
+      expect.assertions(2);
+
+      const { UserStatus } = jest.requireActual<typeof import('@/domain/utils/value-objects/user-status.vo')>(
+        '@/domain/utils/value-objects/user-status.vo',
+      );
+      const aggregate = UserAggregate.fromPersistence({
+        publicId: validUuid,
+        name: 'Takuya',
+        firebaseUid: 'firebase-uid-1',
+        status: 'BANNED',
+      });
+
+      expect(() => {
+        aggregate.changeStatus(UserStatus.create('ACTIVE'));
+      }).toThrow(DomainError);
+
+      expect(aggregate.domainEvents).toHaveLength(0);
+    });
+
+    it('should not emit event when status is unchanged (same-value guard)', () => {
+      expect.assertions(2);
+
+      const { UserStatus } = jest.requireActual<typeof import('@/domain/utils/value-objects/user-status.vo')>(
+        '@/domain/utils/value-objects/user-status.vo',
+      );
+      const aggregate = UserAggregate.fromPersistence({
+        publicId: validUuid,
+        name: 'Takuya',
+        firebaseUid: 'firebase-uid-1',
+        status: 'ACTIVE',
+      });
+
+      aggregate.changeStatus(UserStatus.create('ACTIVE'));
+
+      expect(aggregate.status.value).toBe('ACTIVE');
+      expect(aggregate.domainEvents).toHaveLength(0);
+    });
+
+    it('should not emit event for BANNED to BANNED (same-value guard)', () => {
+      expect.assertions(2);
 
       const { UserStatus } = jest.requireActual<typeof import('@/domain/utils/value-objects/user-status.vo')>(
         '@/domain/utils/value-objects/user-status.vo',
@@ -223,6 +331,7 @@ describe('unit UserAggregate', () => {
       aggregate.changeStatus(UserStatus.create('BANNED'));
 
       expect(aggregate.status.value).toBe('BANNED');
+      expect(aggregate.domainEvents).toHaveLength(0);
     });
   });
 });

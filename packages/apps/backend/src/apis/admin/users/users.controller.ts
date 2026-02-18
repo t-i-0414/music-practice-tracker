@@ -14,6 +14,7 @@ import {
   UserResponseDto,
   UsersResponseDto,
 } from '@/domain/aggregates/user/utils/dto';
+import { UpdateUserService } from '@/domain/usecases/user/update-user.service';
 
 @ApiTags('users')
 @ApiController('users')
@@ -21,6 +22,7 @@ export class AdminApiUsersController {
   public constructor(
     private readonly userQuery: UserQueryService,
     private readonly userCommand: UserCommandService,
+    private readonly updateUserService: UpdateUserService,
   ) {}
 
   @Get()
@@ -91,7 +93,7 @@ export class AdminApiUsersController {
     @Param('publicId', new ParseUUIDPipe()) publicId: string,
     @Body() data: UpdateUserDataDto,
   ): Promise<UserResponseDto> {
-    return this.userCommand.updateUserById({ publicId, data });
+    return this.updateUserService.execute(publicId, data);
   }
 
   @Delete(':publicId')

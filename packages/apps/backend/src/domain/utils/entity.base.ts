@@ -1,5 +1,11 @@
 export abstract class Entity<TProps, TId extends string = string> {
   protected readonly _publicId: TId;
+  /**
+   * Not `readonly` by design — aggregates reassign `this.props` via spread
+   * (`this.props = { ...this.props, … }`) to apply state transitions while
+   * keeping each mutation explicit. Value-object immutability is enforced
+   * separately by `Object.freeze` inside each VO.
+   */
   protected props: TProps;
 
   protected constructor(publicId: TId, props: TProps) {

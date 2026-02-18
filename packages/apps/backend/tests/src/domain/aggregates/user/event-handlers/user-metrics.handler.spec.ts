@@ -3,6 +3,8 @@ import { Logger } from '@nestjs/common';
 import { UserMetricsHandler } from '@/domain/aggregates/user/event-handlers/user-metrics.handler';
 import { UserCreatedEvent } from '@/domain/aggregates/user/events/user-created.event';
 import { UserDeletedEvent } from '@/domain/aggregates/user/events/user-deleted.event';
+import { UserNameChangedEvent } from '@/domain/aggregates/user/events/user-name-changed.event';
+import { UserStatusChangedEvent } from '@/domain/aggregates/user/events/user-status-changed.event';
 import { Metrics } from '@/utils/metrics/dogstatsd.metrics';
 
 describe('unit UserMetricsHandler', () => {
@@ -12,6 +14,8 @@ describe('unit UserMetricsHandler', () => {
     handler = new UserMetricsHandler();
     jest.spyOn(Metrics, 'incrementUserCreated').mockReturnValue(undefined);
     jest.spyOn(Metrics, 'incrementUserDeleted').mockReturnValue(undefined);
+    jest.spyOn(Metrics, 'incrementUserNameChanged').mockReturnValue(undefined);
+    jest.spyOn(Metrics, 'incrementUserStatusChanged').mockReturnValue(undefined);
   });
 
   afterEach(() => {
@@ -36,6 +40,26 @@ describe('unit UserMetricsHandler', () => {
     handler.handleUserDeleted(event);
 
     expect(Metrics.incrementUserDeleted).toHaveBeenCalledTimes(1);
+  });
+
+  it('should call Metrics.incrementUserNameChanged on user.name_changed event', () => {
+    expect.assertions(1);
+
+    const event = new UserNameChangedEvent('agg-123', 'OldName', 'NewName');
+
+    handler.handleUserNameChanged(event);
+
+    expect(Metrics.incrementUserNameChanged).toHaveBeenCalledTimes(1);
+  });
+
+  it('should call Metrics.incrementUserStatusChanged on user.status_changed event', () => {
+    expect.assertions(1);
+
+    const event = new UserStatusChangedEvent('agg-123', 'ACTIVE', 'SUSPENDED');
+
+    handler.handleUserStatusChanged(event);
+
+    expect(Metrics.incrementUserStatusChanged).toHaveBeenCalledTimes(1);
   });
 
   it('should catch and log error with aggregateId when incrementUserCreated throws', () => {
@@ -70,5 +94,107 @@ describe('unit UserMetricsHandler', () => {
     }).not.toThrow();
     expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('metrics failure'));
     expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('agg-456'));
+  });
+
+  it('should catch and log error with aggregateId when incrementUserNameChanged throws', () => {
+    expect.assertions(3);
+
+    const loggerSpy = jest.spyOn(Logger.prototype, 'warn').mockReturnValue(undefined);
+    jest.spyOn(Metrics, 'incrementUserNameChanged').mockImplementation(() => {
+      throw new Error('metrics failure');
+    });
+
+    const event = new UserNameChangedEvent('agg-789', 'OldName', 'NewName');
+
+    expect(() => {
+      handler.handleUserNameChanged(event);
+    }).not.toThrow();
+    expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('metrics failure'));
+    expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('agg-789'));
+  });
+
+  it('should catch and log error with aggregateId when incrementUserStatusChanged throws', () => {
+    expect.assertions(3);
+
+    const loggerSpy = jest.spyOn(Logger.prototype, 'warn').mockReturnValue(undefined);
+    jest.spyOn(Metrics, 'incrementUserStatusChanged').mockImplementation(() => {
+      throw new Error('metrics failure');
+    });
+
+    const event = new UserStatusChangedEvent('agg-101', 'ACTIVE', 'BANNED');
+
+    expect(() => {
+      handler.handleUserStatusChanged(event);
+    }).not.toThrow();
+    expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('metrics failure'));
+    expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('agg-101'));
+  });
+
+  it('should stringify non-Error thrown value in handleUserCreated', () => {
+    expect.assertions(2);
+
+    const loggerSpy = jest.spyOn(Logger.prototype, 'warn').mockReturnValue(undefined);
+    jest.spyOn(Metrics, 'incrementUserCreated').mockImplementation(() => {
+      // eslint-disable-next-line @typescript-eslint/only-throw-error
+      throw 'non-error failure';
+    });
+
+    const event = new UserCreatedEvent('agg-123', 'Takuya', 'firebase-uid-1');
+
+    expect(() => {
+      handler.handleUserCreated(event);
+    }).not.toThrow();
+    expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('non-error failure'));
+  });
+
+  it('should stringify non-Error thrown value in handleUserDeleted', () => {
+    expect.assertions(2);
+
+    const loggerSpy = jest.spyOn(Logger.prototype, 'warn').mockReturnValue(undefined);
+    jest.spyOn(Metrics, 'incrementUserDeleted').mockImplementation(() => {
+      // eslint-disable-next-line @typescript-eslint/only-throw-error
+      throw 'non-error failure';
+    });
+
+    const event = new UserDeletedEvent('agg-456');
+
+    expect(() => {
+      handler.handleUserDeleted(event);
+    }).not.toThrow();
+    expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('non-error failure'));
+  });
+
+  it('should stringify non-Error thrown value in handleUserNameChanged', () => {
+    expect.assertions(2);
+
+    const loggerSpy = jest.spyOn(Logger.prototype, 'warn').mockReturnValue(undefined);
+    jest.spyOn(Metrics, 'incrementUserNameChanged').mockImplementation(() => {
+      // eslint-disable-next-line @typescript-eslint/only-throw-error
+      throw 'non-error failure';
+    });
+
+    const event = new UserNameChangedEvent('agg-789', 'OldName', 'NewName');
+
+    expect(() => {
+      handler.handleUserNameChanged(event);
+    }).not.toThrow();
+    expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('non-error failure'));
+  });
+
+  it('should stringify non-Error thrown value in handleUserStatusChanged', () => {
+    expect.assertions(2);
+
+    const loggerSpy = jest.spyOn(Logger.prototype, 'warn').mockReturnValue(undefined);
+    jest.spyOn(Metrics, 'incrementUserStatusChanged').mockImplementation(() => {
+      // eslint-disable-next-line @typescript-eslint/only-throw-error
+      throw 'non-error failure';
+    });
+
+    const event = new UserStatusChangedEvent('agg-101', 'ACTIVE', 'BANNED');
+
+    expect(() => {
+      handler.handleUserStatusChanged(event);
+    }).not.toThrow();
+    expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('non-error failure'));
   });
 });

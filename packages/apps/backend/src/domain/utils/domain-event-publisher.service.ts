@@ -9,6 +9,12 @@ export class DomainEventPublisher {
 
   public constructor(private readonly eventEmitter: EventEmitter2) {}
 
+  /**
+   * Publish all pending domain events from the aggregate using synchronous
+   * fire-and-forget semantics. Event handler failures are caught and logged
+   * but never propagate to callers. Events are pulled (consumed) from the
+   * aggregate, so calling this method twice yields no duplicate emissions.
+   */
   public publishAll(aggregate: AggregateRoot<unknown>): void {
     const events = aggregate.pullDomainEvents();
     for (const event of events) {

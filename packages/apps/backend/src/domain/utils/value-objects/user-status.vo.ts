@@ -3,7 +3,7 @@ import { ValueObject } from '../value-object.base';
 import { DomainError } from '@/domain/utils/domain.error';
 
 const VALID_STATUSES = ['ACTIVE', 'PENDING', 'SUSPENDED', 'BANNED'] as const;
-type UserStatusValue = (typeof VALID_STATUSES)[number];
+export type UserStatusValue = (typeof VALID_STATUSES)[number];
 
 type UserStatusProps = {
   value: UserStatusValue;

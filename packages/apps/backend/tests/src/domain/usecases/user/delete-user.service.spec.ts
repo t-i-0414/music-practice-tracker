@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { UserCommandService } from '@/domain/aggregates/user/user.command.service';
@@ -95,6 +96,48 @@ describe('integration DeleteUserService', () => {
 
       await expect(deleteUserService.execute(missingPublicId)).rejects.toThrow('No record was found for a query');
       expect(firebaseAuthService.deleteUser).not.toHaveBeenCalled();
+      expect(eventPublisher.publishAll).not.toHaveBeenCalled();
+    });
+
+    it('logs inconsistent state and re-throws when DB deletion fails after Firebase deletion', async () => {
+      expect.assertions(4);
+
+      const createDto = {
+        name: 'DB Fail User',
+        firebaseUid: 'uid-int-db-fail',
+      };
+
+      const createdUser = await userCommandService.createUser(createDto);
+      eventPublisher.publishAll.mockClear();
+
+      const dbError = new Error('DB connection lost');
+      jest.spyOn(userCommandService, 'deleteUserById').mockRejectedValueOnce(dbError);
+      const loggerSpy = jest.spyOn(Logger.prototype, 'error').mockReturnValue(undefined);
+
+      await expect(deleteUserService.execute(createdUser.publicId)).rejects.toThrow('DB connection lost');
+
+      expect(firebaseAuthService.deleteUser).toHaveBeenCalledWith(createDto.firebaseUid);
+      expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('INCONSISTENT STATE'), expect.any(String));
+      expect(eventPublisher.publishAll).not.toHaveBeenCalled();
+    });
+
+    it('handles non-Error thrown value when DB deletion fails', async () => {
+      expect.assertions(3);
+
+      const createDto = {
+        name: 'Non-Error Fail User',
+        firebaseUid: 'uid-int-non-error-fail',
+      };
+
+      const createdUser = await userCommandService.createUser(createDto);
+      eventPublisher.publishAll.mockClear();
+
+      jest.spyOn(userCommandService, 'deleteUserById').mockRejectedValueOnce('raw db failure');
+      const loggerSpy = jest.spyOn(Logger.prototype, 'error').mockReturnValue(undefined);
+
+      await expect(deleteUserService.execute(createdUser.publicId)).rejects.toBe('raw db failure');
+
+      expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('INCONSISTENT STATE'), undefined);
       expect(eventPublisher.publishAll).not.toHaveBeenCalled();
     });
   });

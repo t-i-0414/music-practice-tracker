@@ -13,6 +13,7 @@ import { UserCommandService } from '@/domain/aggregates/user/user.command.servic
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 import { CreateUserInputDto, UpdateUserDataDto, UserResponseDto } from '@/domain/aggregates/user/utils/dto';
 import { DeleteUserService } from '@/domain/usecases/user/delete-user.service';
+import { UpdateUserService } from '@/domain/usecases/user/update-user.service';
 import { FirebaseAuthService } from '@/firebase-auth/firebase-auth.service';
 import { isProviderAllowed } from '@/firebase-auth/utils/constants';
 
@@ -24,6 +25,7 @@ export class AppApiUsersController {
     private readonly userQueryService: UserQueryService,
     private readonly userCommandService: UserCommandService,
     private readonly deleteUserService: DeleteUserService,
+    private readonly updateUserService: UpdateUserService,
   ) {}
 
   @Post()
@@ -78,7 +80,7 @@ export class AppApiUsersController {
     @CurrentUser() user: CurrentUserData,
     @Body() data: UpdateUserDataDto,
   ): Promise<UserResponseDto> {
-    return this.userCommandService.updateUserById({ publicId: user.publicId, data });
+    return this.updateUserService.execute(user.publicId, data);
   }
 
   @Delete('me')

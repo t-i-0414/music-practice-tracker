@@ -1,4 +1,4 @@
-import { UserCreatedEvent, UserDeletedEvent } from './events';
+import { UserCreatedEvent, UserDeletedEvent, UserNameChangedEvent, UserStatusChangedEvent } from './events';
 
 import { AggregateRoot } from '@/domain/utils/aggregate-root.base';
 import { toUserPublicId } from '@/domain/utils/brand-constructors';
@@ -62,12 +62,18 @@ export class UserAggregate extends AggregateRoot<UserProps, UserPublicId> {
   }
 
   public changeName(newName: UserName): void {
+    if (this.props.name.equals(newName)) return;
+    const oldName = this.props.name.value;
     this.props = { ...this.props, name: newName };
+    this.addDomainEvent(new UserNameChangedEvent(this.publicId, oldName, newName.value));
   }
 
   public changeStatus(newStatus: UserStatus): void {
+    if (this.props.status.equals(newStatus)) return;
     this.validateStatusTransition(this.props.status, newStatus);
+    const oldStatus = this.props.status.value;
     this.props = { ...this.props, status: newStatus };
+    this.addDomainEvent(new UserStatusChangedEvent(this.publicId, oldStatus, newStatus.value));
   }
 
   public get name(): UserName {
@@ -83,8 +89,9 @@ export class UserAggregate extends AggregateRoot<UserProps, UserPublicId> {
   }
 
   /**
-   * Status transition rules:
-   * - BANNED is a terminal state (transitions out of BANNED are forbidden; BANNED -> BANNED passes validation)
+   * Status transition rules (called only when current !== next due to
+   * same-value guard in changeStatus):
+   * - BANNED is a terminal state; transitions from BANNED to any other status are forbidden
    * - All other transitions between ACTIVE, PENDING, and SUSPENDED are unrestricted
    */
   private validateStatusTransition(current: UserStatus, next: UserStatus): void {
