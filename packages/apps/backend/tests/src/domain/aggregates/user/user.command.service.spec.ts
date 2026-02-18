@@ -187,8 +187,8 @@ describe('integration UserCommandService', () => {
 
       const createDto = {
         users: [
-          { name: 'Event User 1', firebaseUid: 'uid-int-bulk-evt-1' },
-          { name: 'Event User 2', firebaseUid: 'uid-int-bulk-evt-2' },
+          { name: 'Event User 1', firebaseUid: 'uid-int-bulk-event-1' },
+          { name: 'Event User 2', firebaseUid: 'uid-int-bulk-event-2' },
         ],
       };
 
