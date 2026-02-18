@@ -39,6 +39,7 @@ const createAuthMock = () => ({
   verifyIdToken: jest.fn(),
   getUser: jest.fn(),
   deleteUser: jest.fn(),
+  deleteUsers: jest.fn(),
 });
 
 const resetFirebaseAdmin = (authMock: ReturnType<typeof createAuthMock>) => {
@@ -205,6 +206,64 @@ describe('integration FirebaseAuthService', () => {
         detail: 'Failed to delete Firebase user.',
       });
       expect(authMock.deleteUser).toHaveBeenCalledWith('uid-error');
+    });
+  });
+
+  describe('deleteUsers', () => {
+    it('returns immediately for an empty UIDs array without calling Firebase', async () => {
+      expect.assertions(1);
+
+      await service.deleteUsers([]);
+
+      expect(authMock.deleteUsers).not.toHaveBeenCalled();
+    });
+
+    it('succeeds when all accounts are deleted without failures', async () => {
+      expect.assertions(2);
+
+      authMock.deleteUsers.mockResolvedValue({ successCount: 2, failureCount: 0, errors: [] });
+
+      await expect(service.deleteUsers(['uid-1', 'uid-2'])).resolves.toBeUndefined();
+      expect(authMock.deleteUsers).toHaveBeenCalledWith(['uid-1', 'uid-2']);
+    });
+
+    it('throws FB0009 with per-UID error details when some accounts fail', async () => {
+      expect.assertions(2);
+
+      authMock.deleteUsers.mockResolvedValue({
+        successCount: 1,
+        failureCount: 1,
+        errors: [{ index: 1, error: { message: 'internal error' } }],
+      });
+
+      await expect(service.deleteUsers(['uid-ok', 'uid-fail'])).rejects.toMatchObject({
+        errorCode: 'FB0009',
+        detail: 'Failed to delete Firebase users in bulk.',
+      });
+      expect(authMock.deleteUsers).toHaveBeenCalledWith(['uid-ok', 'uid-fail']);
+    });
+
+    it('wraps unexpected SDK errors as FB0009', async () => {
+      expect.assertions(1);
+
+      authMock.deleteUsers.mockRejectedValue(new Error('network timeout'));
+
+      await expect(service.deleteUsers(['uid-1'])).rejects.toMatchObject({
+        errorCode: 'FB0009',
+        detail: 'Failed to delete Firebase users in bulk.',
+      });
+    });
+
+    it('throws FB0009 when UIDs exceed the 1000 batch limit', async () => {
+      expect.assertions(2);
+
+      const oversizedUids = Array.from({ length: 1001 }, (_, i) => `uid-${String(i)}`);
+
+      await expect(service.deleteUsers(oversizedUids)).rejects.toMatchObject({
+        errorCode: 'FB0009',
+        detail: 'Failed to delete Firebase users in bulk.',
+      });
+      expect(authMock.deleteUsers).not.toHaveBeenCalled();
     });
   });
 });

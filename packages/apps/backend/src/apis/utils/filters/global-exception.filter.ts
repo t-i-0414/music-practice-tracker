@@ -224,6 +224,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       status = HttpStatus.UNAUTHORIZED;
     } else if (errorCode === 'FB0008') {
       status = HttpStatus.FORBIDDEN;
+    } else if (errorCode === 'FB0009') {
+      status = HttpStatus.INTERNAL_SERVER_ERROR;
     } else if (errorCode === 'FB9999') {
       status = HttpStatus.INTERNAL_SERVER_ERROR;
     }

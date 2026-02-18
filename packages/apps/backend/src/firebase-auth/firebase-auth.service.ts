@@ -52,21 +52,32 @@ export class FirebaseAuthService {
   /**
    * Delete multiple Firebase accounts in a single batch call.
    * Non-existing UIDs are silently ignored by Firebase (idempotent).
-   * Throws if any deletion fails for reasons other than "user-not-found".
+   * Throws a {@link FirebaseError} if any account in the batch fails to delete.
    *
    * @remarks Firebase Admin SDK limits batch to 1000 UIDs per call.
+   *          Callers must chunk larger lists before invoking this method.
    */
   public async deleteUsers(uids: string[]): Promise<void> {
     const EMPTY = 0;
+    const FIREBASE_BATCH_LIMIT = 1000;
     if (uids.length === EMPTY) return;
+
+    if (uids.length > FIREBASE_BATCH_LIMIT) {
+      throw new FirebaseError(
+        'FB0009',
+        ERROR_CODE_RECORDS.FB0009,
+        `Cannot delete more than ${String(FIREBASE_BATCH_LIMIT)} Firebase accounts in a single batch (received ${String(uids.length)})`,
+      );
+    }
 
     try {
       const result = await this.provider.auth().deleteUsers(uids);
       if (result.failureCount > EMPTY) {
+        const errorDetails = result.errors.map((e) => `index=${String(e.index)} error=${e.error.message}`).join('; ');
         throw new FirebaseError(
           'FB0009',
           ERROR_CODE_RECORDS.FB0009,
-          `${String(result.failureCount)} of ${String(uids.length)} Firebase account(s) failed to delete`,
+          `${String(result.failureCount)} of ${String(uids.length)} Firebase account(s) failed to delete: ${errorDetails}`,
         );
       }
     } catch (e) {
