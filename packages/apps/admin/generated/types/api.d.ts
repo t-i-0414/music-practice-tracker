@@ -32,7 +32,7 @@ export interface paths {
         put?: never;
         /** Create a new user */
         post: operations["AdminApiUsersController_createUser"];
-        /** Delete multiple users by public IDs */
+        /** Delete multiple users by public IDs (Firebase + DB) */
         delete: operations["AdminApiUsersController_deleteManyUsersById"];
         options?: never;
         head?: never;
@@ -68,7 +68,7 @@ export interface paths {
         /** Update a user by public ID */
         put: operations["AdminApiUsersController_updateUserById"];
         post?: never;
-        /** Delete a user by public ID */
+        /** Delete a user by public ID (Firebase + DB) */
         delete: operations["AdminApiUsersController_deleteUserById"];
         options?: never;
         head?: never;
