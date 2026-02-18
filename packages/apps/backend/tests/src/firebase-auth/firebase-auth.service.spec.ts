@@ -261,7 +261,7 @@ describe('integration FirebaseAuthService', () => {
 
       await expect(service.deleteUsers(oversizedUids)).rejects.toMatchObject({
         errorCode: 'FB0009',
-        detail: 'Failed to delete Firebase users in bulk.',
+        detail: expect.stringContaining('Cannot delete more than 1000'),
       });
       expect(authMock.deleteUsers).not.toHaveBeenCalled();
     });

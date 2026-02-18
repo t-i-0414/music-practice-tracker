@@ -61,7 +61,6 @@ export class FirebaseAuthService {
     if (uids.length > FIREBASE_BATCH_LIMIT) {
       throw new FirebaseError(
         'FB0009',
-        ERROR_CODE_RECORDS.FB0009,
         `Cannot delete more than ${String(FIREBASE_BATCH_LIMIT)} Firebase accounts in a single batch (received ${String(uids.length)})`,
       );
     }
