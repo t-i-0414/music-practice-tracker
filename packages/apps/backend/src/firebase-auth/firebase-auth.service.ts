@@ -48,4 +48,30 @@ export class FirebaseAuthService {
       throw new FirebaseError('FB0008', ERROR_CODE_RECORDS.FB0008, e);
     }
   }
+
+  /**
+   * Delete multiple Firebase accounts in a single batch call.
+   * Non-existing UIDs are silently ignored by Firebase (idempotent).
+   * Throws if any deletion fails for reasons other than "user-not-found".
+   *
+   * @remarks Firebase Admin SDK limits batch to 1000 UIDs per call.
+   */
+  public async deleteUsers(uids: string[]): Promise<void> {
+    const EMPTY = 0;
+    if (uids.length === EMPTY) return;
+
+    try {
+      const result = await this.provider.auth().deleteUsers(uids);
+      if (result.failureCount > EMPTY) {
+        throw new FirebaseError(
+          'FB0009',
+          ERROR_CODE_RECORDS.FB0009,
+          `${String(result.failureCount)} of ${String(uids.length)} Firebase account(s) failed to delete`,
+        );
+      }
+    } catch (e) {
+      if (e instanceof FirebaseError) throw e;
+      throw new FirebaseError('FB0009', ERROR_CODE_RECORDS.FB0009, e);
+    }
+  }
 }

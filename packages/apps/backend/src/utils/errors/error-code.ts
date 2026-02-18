@@ -99,6 +99,7 @@ export const ERROR_CODE_RECORDS = {
   FB0006: 'Firebase invalid token.',
   FB0007: 'Firebase user not found.',
   FB0008: 'Failed to delete Firebase user.',
+  FB0009: 'Failed to delete Firebase users in bulk.',
   FB9999: 'Unknown Firebase error.',
 
   // Repository Errors - Data Validation (RE00xx)

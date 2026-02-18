@@ -58,7 +58,7 @@ export class AdminApiUsersController {
 
   @Delete()
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Delete multiple users by public IDs' })
+  @ApiOperation({ summary: 'Delete multiple users by public IDs (Firebase + DB)' })
   @ApiBody({ type: DeleteManyUsersInputDto })
   @ApiResponse({ status: 204, description: 'Users deleted' })
   @ApiStandardResponses()
