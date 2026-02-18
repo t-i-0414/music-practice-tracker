@@ -105,4 +105,24 @@ describe('unit DomainEventPublisher', () => {
       expect.any(String),
     );
   });
+
+  it('should handle non-Error thrown values with String() fallback', () => {
+    expect.assertions(1);
+
+    const loggerSpy = jest.spyOn(Logger.prototype, 'error').mockReturnValue(undefined);
+    emitter.emit.mockImplementationOnce(() => {
+      // eslint-disable-next-line @typescript-eslint/only-throw-error
+      throw 'raw string failure';
+    });
+
+    const aggregate = new FakeAggregate();
+    aggregate.addEvent('user.created', 'agg-456');
+
+    publisher.publishAll(aggregate as unknown as Parameters<DomainEventPublisher['publishAll']>[0]);
+
+    expect(loggerSpy).toHaveBeenCalledWith(
+      'Failed to publish domain event: user.created (aggregateId=agg-456): raw string failure',
+      undefined,
+    );
+  });
 });

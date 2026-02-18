@@ -129,4 +129,72 @@ describe('unit UserMetricsHandler', () => {
     expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('metrics failure'));
     expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('agg-101'));
   });
+
+  it('should stringify non-Error thrown value in handleUserCreated', () => {
+    expect.assertions(2);
+
+    const loggerSpy = jest.spyOn(Logger.prototype, 'warn').mockReturnValue(undefined);
+    jest.spyOn(Metrics, 'incrementUserCreated').mockImplementation(() => {
+      // eslint-disable-next-line @typescript-eslint/only-throw-error
+      throw 'non-error failure';
+    });
+
+    const event = new UserCreatedEvent('agg-123', 'Takuya', 'firebase-uid-1');
+
+    expect(() => {
+      handler.handleUserCreated(event);
+    }).not.toThrow();
+    expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('non-error failure'));
+  });
+
+  it('should stringify non-Error thrown value in handleUserDeleted', () => {
+    expect.assertions(2);
+
+    const loggerSpy = jest.spyOn(Logger.prototype, 'warn').mockReturnValue(undefined);
+    jest.spyOn(Metrics, 'incrementUserDeleted').mockImplementation(() => {
+      // eslint-disable-next-line @typescript-eslint/only-throw-error
+      throw 'non-error failure';
+    });
+
+    const event = new UserDeletedEvent('agg-456');
+
+    expect(() => {
+      handler.handleUserDeleted(event);
+    }).not.toThrow();
+    expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('non-error failure'));
+  });
+
+  it('should stringify non-Error thrown value in handleUserNameChanged', () => {
+    expect.assertions(2);
+
+    const loggerSpy = jest.spyOn(Logger.prototype, 'warn').mockReturnValue(undefined);
+    jest.spyOn(Metrics, 'incrementUserNameChanged').mockImplementation(() => {
+      // eslint-disable-next-line @typescript-eslint/only-throw-error
+      throw 'non-error failure';
+    });
+
+    const event = new UserNameChangedEvent('agg-789', 'OldName', 'NewName');
+
+    expect(() => {
+      handler.handleUserNameChanged(event);
+    }).not.toThrow();
+    expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('non-error failure'));
+  });
+
+  it('should stringify non-Error thrown value in handleUserStatusChanged', () => {
+    expect.assertions(2);
+
+    const loggerSpy = jest.spyOn(Logger.prototype, 'warn').mockReturnValue(undefined);
+    jest.spyOn(Metrics, 'incrementUserStatusChanged').mockImplementation(() => {
+      // eslint-disable-next-line @typescript-eslint/only-throw-error
+      throw 'non-error failure';
+    });
+
+    const event = new UserStatusChangedEvent('agg-101', 'ACTIVE', 'BANNED');
+
+    expect(() => {
+      handler.handleUserStatusChanged(event);
+    }).not.toThrow();
+    expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('non-error failure'));
+  });
 });
