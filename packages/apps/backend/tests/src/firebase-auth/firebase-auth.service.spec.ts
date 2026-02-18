@@ -238,7 +238,7 @@ describe('integration FirebaseAuthService', () => {
 
       await expect(service.deleteUsers(['uid-ok', 'uid-fail'])).rejects.toMatchObject({
         errorCode: 'FB0009',
-        detail: 'Failed to delete Firebase users in bulk.',
+        detail: '1 of 2 Firebase account(s) failed to delete: index=1 error=internal error',
       });
       expect(authMock.deleteUsers).toHaveBeenCalledWith(['uid-ok', 'uid-fail']);
     });

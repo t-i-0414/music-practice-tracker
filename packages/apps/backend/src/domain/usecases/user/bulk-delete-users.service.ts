@@ -81,10 +81,11 @@ export class BulkDeleteUsersService {
     try {
       await this.usersCommand.deleteManyUsersById({ publicIds: matchedPublicIds });
     } catch (error: unknown) {
+      const detail = error instanceof Error ? error.message : String(error);
       this.logger.error(
         `INCONSISTENT STATE: Firebase accounts deleted but DB deletion failed. ` +
           `publicIds=[${matchedPublicIds.join(', ')}], firebaseUids=[${firebaseUids.join(', ')}]. ` +
-          `Manual reconciliation required.`,
+          `detail=${detail}. Manual reconciliation required.`,
         error instanceof Error ? error.stack : undefined,
       );
       throw error;

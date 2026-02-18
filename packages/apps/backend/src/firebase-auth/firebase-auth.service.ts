@@ -72,7 +72,6 @@ export class FirebaseAuthService {
         const errorDetails = result.errors.map((e) => `index=${String(e.index)} error=${e.error.message}`).join('; ');
         throw new FirebaseError(
           'FB0009',
-          ERROR_CODE_RECORDS.FB0009,
           `${String(result.failureCount)} of ${String(uids.length)} Firebase account(s) failed to delete: ${errorDetails}`,
         );
       }

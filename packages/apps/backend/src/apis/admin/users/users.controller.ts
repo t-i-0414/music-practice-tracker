@@ -102,7 +102,7 @@ export class AdminApiUsersController {
 
   @Delete(':publicId')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Delete a user by public ID' })
+  @ApiOperation({ summary: 'Delete a user by public ID (Firebase + DB)' })
   @ApiParam({ name: 'publicId', description: 'User public ID' })
   @ApiResponse({ status: 204, description: 'User deleted' })
   @ApiStandardResponses()

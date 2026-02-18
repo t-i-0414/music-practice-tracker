@@ -219,6 +219,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     switch (errorCode) {
       case 'FB0001':
       case 'FB0002':
+      case 'FB0009':
+      case 'FB9999':
         status = HttpStatus.INTERNAL_SERVER_ERROR;
         break;
       case 'FB0003':
@@ -234,10 +236,6 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         break;
       case 'FB0008':
         status = HttpStatus.FORBIDDEN;
-        break;
-      case 'FB0009':
-      case 'FB9999':
-        status = HttpStatus.INTERNAL_SERVER_ERROR;
         break;
       default: {
         const _exhaustive: never = errorCode;
