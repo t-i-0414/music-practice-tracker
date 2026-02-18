@@ -51,11 +51,12 @@ export class FirebaseAuthService {
 
   /**
    * Delete multiple Firebase accounts in a single batch call.
-   * Non-existing UIDs are silently ignored by Firebase (idempotent).
-   * Throws a {@link FirebaseError} if any account in the batch fails to delete.
+   * Non-existing UIDs are silently ignored by Firebase (treated as successful deletions).
+   * Throws a {@link FirebaseError} when the batch result contains failures.
    *
    * @remarks Firebase Admin SDK limits batch to 1000 UIDs per call.
-   *          Callers must chunk larger lists before invoking this method.
+   *          This method throws FB0009 if the limit is exceeded;
+   *          callers handling larger sets must chunk before invoking.
    */
   public async deleteUsers(uids: string[]): Promise<void> {
     const EMPTY = 0;

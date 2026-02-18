@@ -216,18 +216,34 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const { errorCode } = exception;
     let status = HttpStatus.UNAUTHORIZED;
 
-    if (errorCode === 'FB0003' || errorCode === 'FB0004') {
-      status = HttpStatus.CONFLICT;
-    } else if (errorCode === 'FB0005') {
-      status = HttpStatus.NOT_FOUND;
-    } else if (errorCode === 'FB0006' || errorCode === 'FB0007') {
-      status = HttpStatus.UNAUTHORIZED;
-    } else if (errorCode === 'FB0008') {
-      status = HttpStatus.FORBIDDEN;
-    } else if (errorCode === 'FB0009') {
-      status = HttpStatus.INTERNAL_SERVER_ERROR;
-    } else if (errorCode === 'FB9999') {
-      status = HttpStatus.INTERNAL_SERVER_ERROR;
+    switch (errorCode) {
+      case 'FB0001':
+      case 'FB0002':
+        status = HttpStatus.INTERNAL_SERVER_ERROR;
+        break;
+      case 'FB0003':
+      case 'FB0004':
+        status = HttpStatus.CONFLICT;
+        break;
+      case 'FB0005':
+        status = HttpStatus.NOT_FOUND;
+        break;
+      case 'FB0006':
+      case 'FB0007':
+        status = HttpStatus.UNAUTHORIZED;
+        break;
+      case 'FB0008':
+        status = HttpStatus.FORBIDDEN;
+        break;
+      case 'FB0009':
+      case 'FB9999':
+        status = HttpStatus.INTERNAL_SERVER_ERROR;
+        break;
+      default: {
+        const _exhaustive: never = errorCode;
+        this.logger.warn(`Unmapped Firebase error code: ${String(_exhaustive)}, defaulting to 401`);
+        break;
+      }
     }
 
     return this.toRfc7807(status, exception.errorCode);

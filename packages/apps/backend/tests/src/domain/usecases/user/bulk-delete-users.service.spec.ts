@@ -68,7 +68,7 @@ describe('integration BulkDeleteUsersService', () => {
 
   describe('execute', () => {
     it('deletes Firebase accounts + DB records and publishes UserDeletedEvent for each', async () => {
-      expect.assertions(7);
+      expect.assertions(9);
 
       const users = await userCommandService.createManyAndReturnUsers({
         users: [
@@ -89,11 +89,16 @@ describe('integration BulkDeleteUsersService', () => {
 
       expect(eventPublisher.publishAll).toHaveBeenCalledTimes(2);
 
-      const [[firstAggregate]] = eventPublisher.publishAll.mock.calls;
-      const events = firstAggregate.pullDomainEvents();
+      const [[firstAggregate], [secondAggregate]] = eventPublisher.publishAll.mock.calls;
+      const firstEvents = firstAggregate.pullDomainEvents();
 
-      expect(events[0].eventName).toBe('user.deleted');
-      expect(events[0].aggregateId).toBe(users.users[0].publicId);
+      expect(firstEvents[0].eventName).toBe('user.deleted');
+      expect(firstEvents[0].aggregateId).toBe(users.users[0].publicId);
+
+      const secondEvents = secondAggregate.pullDomainEvents();
+
+      expect(secondEvents[0].eventName).toBe('user.deleted');
+      expect(secondEvents[0].aggregateId).toBe(users.users[1].publicId);
 
       await expect(userQueryService.findUniqueOrThrowUserById({ publicId: users.users[0].publicId })).rejects.toThrow(
         'No record was found for a query',
@@ -147,8 +152,8 @@ describe('integration BulkDeleteUsersService', () => {
       expect(eventPublisher.publishAll).toHaveBeenCalledTimes(1);
     });
 
-    it('propagates Firebase errors without deleting DB records or publishing events', async () => {
-      expect.assertions(4);
+    it('logs partial failure info and propagates Firebase errors without deleting DB records or publishing events', async () => {
+      expect.assertions(6);
 
       const users = await userCommandService.createManyAndReturnUsers({
         users: [
@@ -159,11 +164,16 @@ describe('integration BulkDeleteUsersService', () => {
       eventPublisher.publishAll.mockClear();
 
       firebaseAuthService.deleteUsers.mockRejectedValueOnce(new Error('Firebase batch delete failed'));
+      const loggerSpy = jest.spyOn(Logger.prototype, 'error').mockReturnValue(undefined);
 
       await expect(bulkDeleteUsersService.execute(users.users.map((u) => u.publicId))).rejects.toThrow(
         'Firebase batch delete failed',
       );
 
+      expect(loggerSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Firebase batch deletion failed'),
+        expect.any(String),
+      );
       expect(eventPublisher.publishAll).not.toHaveBeenCalled();
 
       const stillExists = await userQueryService.findUniqueOrThrowUserById({
@@ -172,10 +182,11 @@ describe('integration BulkDeleteUsersService', () => {
 
       expect(stillExists.publicId).toBe(users.users[0].publicId);
       expect(stillExists.name).toBe('Firebase Fail 1');
+      expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('reconciliation'), expect.any(String));
     });
 
-    it('logs inconsistent state and re-throws when DB deletion fails after Firebase deletion', async () => {
-      expect.assertions(4);
+    it('logs inconsistent state with user identifiers and re-throws when DB deletion fails after Firebase deletion', async () => {
+      expect.assertions(6);
 
       const users = await userCommandService.createManyAndReturnUsers({
         users: [{ name: 'DB Fail User', firebaseUid: 'uid-db-fail-bulk' }],
@@ -189,6 +200,8 @@ describe('integration BulkDeleteUsersService', () => {
 
       expect(firebaseAuthService.deleteUsers).toHaveBeenCalledWith(['uid-db-fail-bulk']);
       expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('INCONSISTENT STATE'), expect.any(String));
+      expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining(users.users[0].publicId), expect.any(String));
+      expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('uid-db-fail-bulk'), expect.any(String));
       expect(eventPublisher.publishAll).not.toHaveBeenCalled();
     });
 

@@ -10,9 +10,9 @@ import { Trace } from '@/utils/decorators/trace.decorator';
 /**
  * Orchestrates bulk user deletion across Firebase and the database.
  *
- * For each matched user the service deletes the Firebase account first,
- * then removes the database record, and finally publishes a
- * {@link UserDeletedEvent} per entity through the domain event system.
+ * The service deletes all matched Firebase accounts in a single batch,
+ * then removes the database records, and finally publishes a
+ * `UserDeletedEvent` per entity through the domain event system.
  */
 @Injectable()
 export class BulkDeleteUsersService {
@@ -28,14 +28,21 @@ export class BulkDeleteUsersService {
   /**
    * Delete multiple users by their public IDs.
    *
-   * 1. Query matching users from the database.
-   * 2. Warn if some requested IDs did not match any record.
-   * 3. Delete Firebase accounts in a single batch call.
-   * 4. Delete database records.
-   * 5. Publish {@link UserDeletedEvent} for each deleted user.
+   * 1. Return immediately if the input list is empty.
+   * 2. Query matching users from the database.
+   * 3. Return early (with a warning) if none of the requested IDs match.
+   * 4. Warn if only a subset of requested IDs matched.
+   * 5. Delete Firebase accounts in a single batch call.
+   * 6. Delete database records.
+   * 7. Publish `UserDeletedEvent` for each deleted user.
+   *
+   * If Firebase batch deletion partially succeeds (some accounts deleted,
+   * some failed), the error is logged at the orchestration level and
+   * re-thrown without proceeding to DB deletion.
    *
    * If the database deletion fails after Firebase accounts have been
-   * removed, the inconsistent state is logged and the error is re-thrown.
+   * removed, the inconsistent state is logged with affected user
+   * identifiers and the error is re-thrown.
    */
   @Trace()
   public async execute(publicIds: string[]): Promise<void> {
@@ -56,15 +63,27 @@ export class BulkDeleteUsersService {
     }
 
     const firebaseUids = users.map((u) => u.firebaseUid);
-    await this.firebaseAuth.deleteUsers(firebaseUids);
-
     const matchedPublicIds = users.map((u) => u.publicId);
+
+    try {
+      await this.firebaseAuth.deleteUsers(firebaseUids);
+    } catch (error: unknown) {
+      this.logger.error(
+        `Firebase batch deletion failed. Some accounts may have been deleted. ` +
+          `publicIds=[${matchedPublicIds.join(', ')}], firebaseUids=[${firebaseUids.join(', ')}]. ` +
+          `Manual reconciliation may be required.`,
+        error instanceof Error ? error.stack : undefined,
+      );
+      throw error;
+    }
 
     try {
       await this.usersCommand.deleteManyUsersById({ publicIds: matchedPublicIds });
     } catch (error: unknown) {
       this.logger.error(
-        `INCONSISTENT STATE: Firebase accounts deleted but DB deletion failed for ${String(matchedPublicIds.length)} user(s). Manual reconciliation required.`,
+        `INCONSISTENT STATE: Firebase accounts deleted but DB deletion failed. ` +
+          `publicIds=[${matchedPublicIds.join(', ')}], firebaseUids=[${firebaseUids.join(', ')}]. ` +
+          `Manual reconciliation required.`,
         error instanceof Error ? error.stack : undefined,
       );
       throw error;
