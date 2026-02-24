@@ -44,7 +44,7 @@ export class EnvironmentVariables {
 
   @IsIn(['true', 'false'])
   @IsOptional()
-  public FIREBASE_CHECK_REVOKED?: string;
+  public FIREBASE_CHECK_REVOKED?: 'true' | 'false';
 }
 
 export function validateEnvironment(config: Record<string, unknown>): EnvironmentVariables {
@@ -58,9 +58,11 @@ export function validateEnvironment(config: Record<string, unknown>): Environmen
   });
 
   if (errors.length > NO_ERRORS) {
-    const messages = errors.map((error) => {
-      const constraints = error.constraints ?? {};
-      return `${error.property}: ${Object.values(constraints).join(', ')}`;
+    const messages = errors.map(({ property, constraints }) => {
+      if (constraints !== undefined) {
+        return `${property}: ${Object.values(constraints).join(', ')}`;
+      }
+      return `${property}: validation failed`;
     });
     // eslint-disable-next-line custom-backend-eslint/throw-new-common-error-only -- Startup validation runs before NestJS error infrastructure
     throw new Error(`Environment validation failed:\n${messages.join('\n')}`);

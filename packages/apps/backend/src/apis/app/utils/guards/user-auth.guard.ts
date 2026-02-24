@@ -36,7 +36,7 @@ export class UserAuthGuard implements CanActivate {
 
     const decodedIdToken = await this.firebaseAuthService.verifyIdToken(
       token,
-      this.configService.get<string>('FIREBASE_CHECK_REVOKED') === 'true',
+      this.configService.get('FIREBASE_CHECK_REVOKED') === 'true',
     );
 
     const user = await this.usersQueryService.findUniqueOrThrowUserByFirebaseUid(decodedIdToken.uid);
