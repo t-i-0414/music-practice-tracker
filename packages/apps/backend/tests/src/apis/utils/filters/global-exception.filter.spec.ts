@@ -313,6 +313,22 @@ describe('unit GlobalExceptionFilter', () => {
       });
     });
 
+    it('should handle FirebaseError with invalid service account JSON (FB0002) as internal server error', () => {
+      const exception = new FirebaseError('FB0002', 'Invalid service account JSON');
+
+      filter.catch(exception, mockArgumentsHost as ArgumentsHost);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        type: `${BASE_URL}/FB0002`,
+        title: 'Invalid FIREBASE_SERVICE_ACCOUNT JSON.',
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        errorCode: 'FB0002',
+        correlationId: 'test-correlation-id',
+        instance: '/test',
+      });
+    });
+
     it('should handle FirebaseError with bulk deletion error (FB0009)', () => {
       const exception = new FirebaseError('FB0009', 'Bulk delete failed');
 

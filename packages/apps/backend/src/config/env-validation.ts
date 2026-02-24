@@ -1,4 +1,4 @@
-import { plainToInstance } from 'class-transformer';
+import { plainToInstance, Type } from 'class-transformer';
 import { IsEnum, IsIn, IsNotEmpty, IsNumber, IsOptional, IsString, validateSync } from 'class-validator';
 
 const NodeEnvValues = ['development', 'staging', 'production', 'test'] as const;
@@ -14,10 +14,12 @@ export class EnvironmentVariables {
   @IsOptional()
   public NODE_ENV?: (typeof NodeEnvValues)[number];
 
+  @Type(() => Number)
   @IsNumber()
   @IsOptional()
   public APP_API_PORT?: number;
 
+  @Type(() => Number)
   @IsNumber()
   @IsOptional()
   public ADMIN_API_PORT?: number;

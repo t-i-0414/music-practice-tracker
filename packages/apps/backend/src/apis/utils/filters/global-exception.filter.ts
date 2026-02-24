@@ -239,7 +239,9 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         break;
       default: {
         const _exhaustive: never = errorCode;
-        this.logger.warn(`Unmapped Firebase error code: ${String(_exhaustive)}, defaulting to 500`);
+        this.logger.warn(
+          `Unmapped Firebase error code: ${String(_exhaustive)}, defaulting to 500. detail=${exception.detail}`,
+        );
         break;
       }
     }
