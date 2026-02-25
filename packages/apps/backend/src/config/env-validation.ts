@@ -8,45 +8,45 @@ const NO_ERRORS = 0;
 export class EnvironmentVariables {
   @IsString()
   @IsNotEmpty()
-  public DATABASE_URL: string;
+  public readonly DATABASE_URL: string;
 
   @IsEnum(NodeEnvValues)
   @IsOptional()
-  public NODE_ENV?: (typeof NodeEnvValues)[number];
+  public readonly NODE_ENV?: (typeof NodeEnvValues)[number];
 
   @Type(() => Number)
   @IsNumber()
   @IsOptional()
-  public APP_API_PORT?: number;
+  public readonly APP_API_PORT?: number;
 
   @Type(() => Number)
   @IsNumber()
   @IsOptional()
-  public ADMIN_API_PORT?: number;
+  public readonly ADMIN_API_PORT?: number;
 
   @IsString()
   @IsOptional()
-  public FIREBASE_AUTH_EMULATOR_HOST?: string;
+  public readonly FIREBASE_AUTH_EMULATOR_HOST?: string;
 
   @IsString()
   @IsOptional()
-  public GOOGLE_CLOUD_PROJECT?: string;
+  public readonly GOOGLE_CLOUD_PROJECT?: string;
 
   @IsString()
   @IsOptional()
-  public GCLOUD_PROJECT?: string;
+  public readonly GCLOUD_PROJECT?: string;
 
   @IsString()
   @IsOptional()
-  public FIREBASE_PROJECT_ID?: string;
+  public readonly FIREBASE_PROJECT_ID?: string;
 
   @IsString()
   @IsOptional()
-  public FIREBASE_SERVICE_ACCOUNT?: string;
+  public readonly FIREBASE_SERVICE_ACCOUNT?: string;
 
   @IsIn(['true', 'false'])
   @IsOptional()
-  public FIREBASE_CHECK_REVOKED?: 'true' | 'false';
+  public readonly FIREBASE_CHECK_REVOKED?: 'true' | 'false';
 }
 
 export function validateEnvironment(config: Record<string, unknown>): EnvironmentVariables {

@@ -217,8 +217,8 @@ describe('unit GlobalExceptionFilter', () => {
       });
     });
 
-    it('should handle FirebaseError with email already exists error (FB0003)', () => {
-      const exception = new FirebaseError('FB0003', 'Email already exists');
+    it('should handle FirebaseError with SDK initialization failure (FB0003)', () => {
+      const exception = new FirebaseError('FB0003', 'SDK initialization failure');
 
       filter.catch(exception, mockArgumentsHost as ArgumentsHost);
 
@@ -233,8 +233,8 @@ describe('unit GlobalExceptionFilter', () => {
       });
     });
 
-    it('should handle FirebaseError with UID already exists error (FB0004)', () => {
-      const exception = new FirebaseError('FB0004', 'UID already exists');
+    it('should handle FirebaseError with token expired error (FB0004)', () => {
+      const exception = new FirebaseError('FB0004', 'Token expired');
 
       filter.catch(exception, mockArgumentsHost as ArgumentsHost);
 
@@ -249,8 +249,8 @@ describe('unit GlobalExceptionFilter', () => {
       });
     });
 
-    it('should handle FirebaseError with user not found error (FB0005)', () => {
-      const exception = new FirebaseError('FB0005', 'User not found');
+    it('should handle FirebaseError with token revoked error (FB0005)', () => {
+      const exception = new FirebaseError('FB0005', 'Token revoked');
 
       filter.catch(exception, mockArgumentsHost as ArgumentsHost);
 
@@ -281,8 +281,8 @@ describe('unit GlobalExceptionFilter', () => {
       });
     });
 
-    it('should handle FirebaseError with token expired error (FB0007)', () => {
-      const exception = new FirebaseError('FB0007', 'Token expired');
+    it('should handle FirebaseError with user not found error (FB0007)', () => {
+      const exception = new FirebaseError('FB0007', 'User not found');
 
       filter.catch(exception, mockArgumentsHost as ArgumentsHost);
 

@@ -265,6 +265,16 @@ describe('integration FirebaseAuthService', () => {
       });
     });
 
+    it('succeeds when UIDs are exactly at the 1000 batch limit', async () => {
+      expect.assertions(2);
+
+      const exactLimitUids = Array.from({ length: 1000 }, (_, i) => `uid-${String(i)}`);
+      authMock.deleteUsers.mockResolvedValue({ successCount: 1000, failureCount: 0, errors: [] });
+
+      await expect(service.deleteUsers(exactLimitUids)).resolves.toBeUndefined();
+      expect(authMock.deleteUsers).toHaveBeenCalledWith(exactLimitUids);
+    });
+
     it('throws FB0009 when UIDs exceed the 1000 batch limit', async () => {
       expect.assertions(2);
 
