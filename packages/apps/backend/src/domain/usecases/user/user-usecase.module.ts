@@ -10,6 +10,6 @@ import { FirebaseAuthModule } from '@/firebase-auth/firebase-auth.module';
 @Module({
   imports: [FirebaseAuthModule, UserModule],
   providers: [BulkDeleteUsersService, DeleteUserService, UpdateUserService],
-  exports: [BulkDeleteUsersService, DeleteUserService, UpdateUserService],
+  exports: [BulkDeleteUsersService, DeleteUserService, UpdateUserService, UserModule],
 })
 export class UserUsecaseModule {}
