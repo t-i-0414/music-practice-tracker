@@ -1,3 +1,6 @@
+import type { ConfigService } from '@nestjs/config';
+
+import type { EnvironmentVariables } from '@/config/env-validation';
 import { FirebaseAuthProvider } from '@/firebase-auth/firebase-auth.provider';
 import { FirebaseError } from '@/firebase-auth/utils/firebase.error';
 
@@ -48,36 +51,16 @@ const createFirebaseApp = () => ({
   delete: jest.fn().mockResolvedValue(undefined),
 });
 
-const SERVICE_ACCOUNT_KEYS = [
-  'FIREBASE_AUTH_EMULATOR_HOST',
-  'GOOGLE_CLOUD_PROJECT',
-  'GCLOUD_PROJECT',
-  'FIREBASE_PROJECT_ID',
-  'FIREBASE_SERVICE_ACCOUNT',
-] as const;
+type EnvMap = Record<string, string | undefined>;
 
-const envVarRecordForRestore: Record<(typeof SERVICE_ACCOUNT_KEYS)[number], string | undefined> = Object.fromEntries(
-  SERVICE_ACCOUNT_KEYS.map((key) => [key, process.env[key]]),
-) as Record<(typeof SERVICE_ACCOUNT_KEYS)[number], string | undefined>;
-
-const resetEnvVars = () => {
-  SERVICE_ACCOUNT_KEYS.forEach((key) => {
-    if (envVarRecordForRestore[key] === undefined) {
-      delete process.env[key];
-    } else {
-      process.env[key] = envVarRecordForRestore[key];
-    }
-  });
-};
+const createConfigService = (envMap: EnvMap = {}): ConfigService<EnvironmentVariables> =>
+  ({
+    get: jest.fn((key: string) => envMap[key]),
+  }) as unknown as ConfigService<EnvironmentVariables>;
 
 describe('unit FirebaseAuthProvider', () => {
   beforeEach(() => {
     resetFirebaseAdmin();
-    resetEnvVars();
-  });
-
-  afterAll(() => {
-    resetEnvVars();
   });
 
   it('reuses an already initialized firebase app', () => {
@@ -88,7 +71,8 @@ describe('unit FirebaseAuthProvider', () => {
     firebaseAdmin.apps.push(existingApp);
     firebaseAdmin.app.mockReturnValue(existingApp);
 
-    const provider = new FirebaseAuthProvider();
+    const configService = createConfigService();
+    const provider = new FirebaseAuthProvider(configService);
 
     provider.onModuleInit();
 
@@ -105,7 +89,7 @@ describe('unit FirebaseAuthProvider', () => {
   it('initializes firebase using application default credentials when not yet initialized and no emulator', () => {
     expect.assertions(4);
 
-    delete process.env.FIREBASE_AUTH_EMULATOR_HOST;
+    const configService = createConfigService();
 
     const newApp = createFirebaseApp();
     newApp.auth.mockReturnValue('adc-auth');
@@ -114,7 +98,7 @@ describe('unit FirebaseAuthProvider', () => {
       return newApp;
     });
 
-    const provider = new FirebaseAuthProvider();
+    const provider = new FirebaseAuthProvider(configService);
 
     provider.onModuleInit();
 
@@ -136,10 +120,12 @@ describe('unit FirebaseAuthProvider', () => {
       return emulatorApp;
     });
 
-    process.env.FIREBASE_AUTH_EMULATOR_HOST = 'localhost:9099';
-    process.env.GOOGLE_CLOUD_PROJECT = 'test-project';
+    const configService = createConfigService({
+      FIREBASE_AUTH_EMULATOR_HOST: 'localhost:9099',
+      GOOGLE_CLOUD_PROJECT: 'test-project',
+    });
 
-    const provider = new FirebaseAuthProvider();
+    const provider = new FirebaseAuthProvider(configService);
 
     provider.onModuleInit();
 
@@ -161,11 +147,12 @@ describe('unit FirebaseAuthProvider', () => {
       return emulatorApp;
     });
 
-    delete process.env.GOOGLE_CLOUD_PROJECT;
-    process.env.GCLOUD_PROJECT = 'gcloud-project';
-    process.env.FIREBASE_AUTH_EMULATOR_HOST = 'localhost:9099';
+    const configService = createConfigService({
+      GCLOUD_PROJECT: 'gcloud-project',
+      FIREBASE_AUTH_EMULATOR_HOST: 'localhost:9099',
+    });
 
-    const provider = new FirebaseAuthProvider();
+    const provider = new FirebaseAuthProvider(configService);
 
     provider.onModuleInit();
 
@@ -186,12 +173,12 @@ describe('unit FirebaseAuthProvider', () => {
       return emulatorApp;
     });
 
-    delete process.env.GOOGLE_CLOUD_PROJECT;
-    delete process.env.GCLOUD_PROJECT;
-    process.env.FIREBASE_PROJECT_ID = 'firebase-project';
-    process.env.FIREBASE_AUTH_EMULATOR_HOST = 'localhost:9099';
+    const configService = createConfigService({
+      FIREBASE_PROJECT_ID: 'firebase-project',
+      FIREBASE_AUTH_EMULATOR_HOST: 'localhost:9099',
+    });
 
-    const provider = new FirebaseAuthProvider();
+    const provider = new FirebaseAuthProvider(configService);
 
     provider.onModuleInit();
 
@@ -212,13 +199,12 @@ describe('unit FirebaseAuthProvider', () => {
       return adcApp;
     });
 
-    // Emulator host is set but project ID is empty/whitespace
-    process.env.FIREBASE_AUTH_EMULATOR_HOST = 'localhost:9099';
-    process.env.GOOGLE_CLOUD_PROJECT = '   '; // whitespace only
-    delete process.env.GCLOUD_PROJECT;
-    delete process.env.FIREBASE_PROJECT_ID;
+    const configService = createConfigService({
+      FIREBASE_AUTH_EMULATOR_HOST: 'localhost:9099',
+      GOOGLE_CLOUD_PROJECT: '   ',
+    });
 
-    const provider = new FirebaseAuthProvider();
+    const provider = new FirebaseAuthProvider(configService);
 
     provider.onModuleInit();
 
@@ -239,13 +225,11 @@ describe('unit FirebaseAuthProvider', () => {
       return adcApp;
     });
 
-    // Emulator host is set but no project ID variables are defined
-    process.env.FIREBASE_AUTH_EMULATOR_HOST = 'localhost:9099';
-    delete process.env.GOOGLE_CLOUD_PROJECT;
-    delete process.env.GCLOUD_PROJECT;
-    delete process.env.FIREBASE_PROJECT_ID;
+    const configService = createConfigService({
+      FIREBASE_AUTH_EMULATOR_HOST: 'localhost:9099',
+    });
 
-    const provider = new FirebaseAuthProvider();
+    const provider = new FirebaseAuthProvider(configService);
 
     provider.onModuleInit();
 
@@ -263,14 +247,9 @@ describe('unit FirebaseAuthProvider', () => {
       throw new Error('adc unavailable');
     });
 
-    // No emulator configured
-    delete process.env.FIREBASE_AUTH_EMULATOR_HOST;
-    delete process.env.GOOGLE_CLOUD_PROJECT;
-    delete process.env.GCLOUD_PROJECT;
-    delete process.env.FIREBASE_PROJECT_ID;
-    delete process.env.FIREBASE_SERVICE_ACCOUNT;
+    const configService = createConfigService();
 
-    const provider = new FirebaseAuthProvider();
+    const provider = new FirebaseAuthProvider(configService);
 
     let caught: unknown;
 
@@ -292,13 +271,11 @@ describe('unit FirebaseAuthProvider', () => {
       throw new Error('adc unavailable');
     });
 
-    delete process.env.FIREBASE_AUTH_EMULATOR_HOST;
-    delete process.env.GOOGLE_CLOUD_PROJECT;
-    delete process.env.GCLOUD_PROJECT;
-    delete process.env.FIREBASE_PROJECT_ID;
-    process.env.FIREBASE_SERVICE_ACCOUNT = 'not-json';
+    const configService = createConfigService({
+      FIREBASE_SERVICE_ACCOUNT: 'not-json',
+    });
 
-    const provider = new FirebaseAuthProvider();
+    const provider = new FirebaseAuthProvider(configService);
 
     let caught: unknown;
 
@@ -320,13 +297,11 @@ describe('unit FirebaseAuthProvider', () => {
       throw new Error('adc unavailable');
     });
 
-    delete process.env.FIREBASE_AUTH_EMULATOR_HOST;
-    delete process.env.GOOGLE_CLOUD_PROJECT;
-    delete process.env.GCLOUD_PROJECT;
-    delete process.env.FIREBASE_PROJECT_ID;
-    process.env.FIREBASE_SERVICE_ACCOUNT = JSON.stringify({ projectId: 'id-only' });
+    const configService = createConfigService({
+      FIREBASE_SERVICE_ACCOUNT: JSON.stringify({ projectId: 'id-only' }),
+    });
 
-    const provider = new FirebaseAuthProvider();
+    const provider = new FirebaseAuthProvider(configService);
 
     let caught: unknown;
 
@@ -354,11 +329,9 @@ describe('unit FirebaseAuthProvider', () => {
       privateKey: '-----BEGIN KEY-----\\nline2\\n-----END KEY-----',
     };
 
-    delete process.env.FIREBASE_AUTH_EMULATOR_HOST;
-    delete process.env.GOOGLE_CLOUD_PROJECT;
-    delete process.env.GCLOUD_PROJECT;
-    delete process.env.FIREBASE_PROJECT_ID;
-    process.env.FIREBASE_SERVICE_ACCOUNT = JSON.stringify(serviceAccount);
+    const configService = createConfigService({
+      FIREBASE_SERVICE_ACCOUNT: JSON.stringify(serviceAccount),
+    });
 
     const serviceAccountApp = createFirebaseApp();
     serviceAccountApp.auth.mockReturnValue('service-account-auth');
@@ -367,7 +340,7 @@ describe('unit FirebaseAuthProvider', () => {
       return serviceAccountApp;
     });
 
-    const provider = new FirebaseAuthProvider();
+    const provider = new FirebaseAuthProvider(configService);
 
     provider.onModuleInit();
 
@@ -393,18 +366,15 @@ describe('unit FirebaseAuthProvider', () => {
       throw new Error('service account failure');
     });
 
-    delete process.env.FIREBASE_AUTH_EMULATOR_HOST;
-    delete process.env.GOOGLE_CLOUD_PROJECT;
-    delete process.env.GCLOUD_PROJECT;
-    delete process.env.FIREBASE_PROJECT_ID;
-
-    process.env.FIREBASE_SERVICE_ACCOUNT = JSON.stringify({
-      projectId: 'project-abc',
-      clientEmail: 'user@example.com',
-      privateKey: 'key',
+    const configService = createConfigService({
+      FIREBASE_SERVICE_ACCOUNT: JSON.stringify({
+        projectId: 'project-abc',
+        clientEmail: 'user@example.com',
+        privateKey: 'key',
+      }),
     });
 
-    const provider = new FirebaseAuthProvider();
+    const provider = new FirebaseAuthProvider(configService);
 
     let caught: unknown;
 
@@ -426,7 +396,8 @@ describe('unit FirebaseAuthProvider', () => {
     appInstance.delete.mockRejectedValue(new Error('failed'));
     firebaseAdmin.initializeApp.mockReturnValue(appInstance);
 
-    const provider = new FirebaseAuthProvider();
+    const configService = createConfigService();
+    const provider = new FirebaseAuthProvider(configService);
     provider.onModuleInit();
 
     // eslint-disable-next-line jest/valid-expect-with-promise

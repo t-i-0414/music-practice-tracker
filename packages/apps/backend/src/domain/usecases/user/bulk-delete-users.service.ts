@@ -36,9 +36,9 @@ export class BulkDeleteUsersService {
    * 6. Delete database records.
    * 7. Publish `UserDeletedEvent` for each deleted user.
    *
-   * If Firebase batch deletion throws (which includes the case where the
-   * batch partially succeeded with some failures), the error is logged
-   * and re-thrown without proceeding to DB deletion.
+   * If Firebase batch deletion throws, the error is logged and re-thrown
+   * without proceeding to DB deletion. Note that `FirebaseAuthService.deleteUsers`
+   * converts partial-failure batch results into a thrown error.
    *
    * If the database deletion fails after Firebase accounts have been
    * removed, the inconsistent state is logged with affected user
@@ -71,7 +71,7 @@ export class BulkDeleteUsersService {
       const detail = error instanceof Error ? error.message : String(error);
       this.logger.error(
         `Firebase batch deletion failed; no DB records were modified. ` +
-          `publicIds=[${matchedPublicIds.join(', ')}], firebaseUids=[${firebaseUids.join(', ')}]. ` +
+          `publicIds=[${matchedPublicIds.join(', ')}], affectedFirebaseAccountCount=${String(firebaseUids.length)}. ` +
           `detail=${detail}. Check Firebase console for partial deletions.`,
         error instanceof Error ? error.stack : undefined,
       );
@@ -84,7 +84,7 @@ export class BulkDeleteUsersService {
       const detail = error instanceof Error ? error.message : String(error);
       this.logger.error(
         `INCONSISTENT STATE: Firebase accounts deleted but DB deletion failed. ` +
-          `publicIds=[${matchedPublicIds.join(', ')}], firebaseUids=[${firebaseUids.join(', ')}]. ` +
+          `publicIds=[${matchedPublicIds.join(', ')}], affectedFirebaseAccountCount=${String(firebaseUids.length)}. ` +
           `detail=${detail}. Manual reconciliation required.`,
         error instanceof Error ? error.stack : undefined,
       );

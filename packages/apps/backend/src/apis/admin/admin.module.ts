@@ -11,10 +11,13 @@ import { ObservabilityModule } from '../utils/modules/observability.module';
 import { AdminAdminUsersModule } from './admin-users/admin-users.module';
 import { AdminUsersModule } from './users/users.module';
 
+import { validateEnvironment } from '@/config/env-validation';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      validate: validateEnvironment,
     }),
     ObservabilityModule,
     HealthModule,

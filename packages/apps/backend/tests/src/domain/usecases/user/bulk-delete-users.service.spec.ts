@@ -201,7 +201,10 @@ describe('integration BulkDeleteUsersService', () => {
       expect(firebaseAuthService.deleteUsers).toHaveBeenCalledWith(['uid-db-fail-bulk']);
       expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('INCONSISTENT STATE'), expect.any(String));
       expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining(users.users[0].publicId), expect.any(String));
-      expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('uid-db-fail-bulk'), expect.any(String));
+      expect(loggerSpy).toHaveBeenCalledWith(
+        expect.stringContaining('affectedFirebaseAccountCount=1'),
+        expect.any(String),
+      );
       expect(eventPublisher.publishAll).not.toHaveBeenCalled();
     });
 

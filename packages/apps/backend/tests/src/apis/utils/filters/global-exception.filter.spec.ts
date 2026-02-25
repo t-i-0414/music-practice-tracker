@@ -217,8 +217,8 @@ describe('unit GlobalExceptionFilter', () => {
       });
     });
 
-    it('should handle FirebaseError with email already exists error (FB0003)', () => {
-      const exception = new FirebaseError('FB0003', 'Email already exists');
+    it('should handle FirebaseError with SDK initialization failure (FB0003)', () => {
+      const exception = new FirebaseError('FB0003', 'SDK initialization failure');
 
       filter.catch(exception, mockArgumentsHost as ArgumentsHost);
 
@@ -233,8 +233,8 @@ describe('unit GlobalExceptionFilter', () => {
       });
     });
 
-    it('should handle FirebaseError with UID already exists error (FB0004)', () => {
-      const exception = new FirebaseError('FB0004', 'UID already exists');
+    it('should handle FirebaseError with token expired error (FB0004)', () => {
+      const exception = new FirebaseError('FB0004', 'Token expired');
 
       filter.catch(exception, mockArgumentsHost as ArgumentsHost);
 
@@ -249,8 +249,8 @@ describe('unit GlobalExceptionFilter', () => {
       });
     });
 
-    it('should handle FirebaseError with user not found error (FB0005)', () => {
-      const exception = new FirebaseError('FB0005', 'User not found');
+    it('should handle FirebaseError with token revoked error (FB0005)', () => {
+      const exception = new FirebaseError('FB0005', 'Token revoked');
 
       filter.catch(exception, mockArgumentsHost as ArgumentsHost);
 
@@ -281,8 +281,8 @@ describe('unit GlobalExceptionFilter', () => {
       });
     });
 
-    it('should handle FirebaseError with token expired error (FB0007)', () => {
-      const exception = new FirebaseError('FB0007', 'Token expired');
+    it('should handle FirebaseError with user not found error (FB0007)', () => {
+      const exception = new FirebaseError('FB0007', 'User not found');
 
       filter.catch(exception, mockArgumentsHost as ArgumentsHost);
 
@@ -308,6 +308,22 @@ describe('unit GlobalExceptionFilter', () => {
         title: 'Failed to delete Firebase user.',
         status: HttpStatus.FORBIDDEN,
         errorCode: 'FB0008',
+        correlationId: 'test-correlation-id',
+        instance: '/test',
+      });
+    });
+
+    it('should handle FirebaseError with invalid service account JSON (FB0002) as internal server error', () => {
+      const exception = new FirebaseError('FB0002', 'Invalid service account JSON');
+
+      filter.catch(exception, mockArgumentsHost as ArgumentsHost);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        type: `${BASE_URL}/FB0002`,
+        title: 'Invalid FIREBASE_SERVICE_ACCOUNT JSON.',
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        errorCode: 'FB0002',
         correlationId: 'test-correlation-id',
         instance: '/test',
       });

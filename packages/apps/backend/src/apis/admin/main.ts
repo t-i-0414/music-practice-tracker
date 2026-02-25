@@ -1,6 +1,7 @@
 // eslint-disable-next-line import/order -- dd-trace must be initialized before any other imports
 import '../../tracer';
 
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from 'nestjs-pino';
@@ -8,6 +9,7 @@ import { Logger } from 'nestjs-pino';
 import { useGlobalOptions } from '../utils/use-global-options';
 
 import { AdminApiModule } from '@/apis/admin/admin.module';
+import type { EnvironmentVariables } from '@/config/env-validation';
 import { isDevelopment } from '@/utils/environment';
 
 const DEFAULT_PORT_NUMBER = 3001;
@@ -28,7 +30,8 @@ async function bootstrap(): Promise<void> {
     SwaggerModule.setup('api', app, document);
   }
 
-  const port = process.env.ADMIN_API_PORT ?? DEFAULT_PORT_NUMBER;
+  const configService = app.get<ConfigService<EnvironmentVariables>>(ConfigService);
+  const port = configService.get<number>('ADMIN_API_PORT') ?? DEFAULT_PORT_NUMBER;
   await app.listen(port);
 }
 void bootstrap();

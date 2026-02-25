@@ -1,4 +1,5 @@
 import type { ExecutionContext } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
 import { ClsService } from 'nestjs-cls';
@@ -6,6 +7,7 @@ import { ClsService } from 'nestjs-cls';
 import { UserAuthGuard } from '@/apis/app/utils/guards/user-auth.guard';
 import { ApiError } from '@/apis/utils/api.error';
 import { IS_PUBLIC_KEY } from '@/apis/utils/decorators/public.decorator';
+import type { EnvironmentVariables } from '@/config/env-validation';
 import { UserQueryService } from '@/domain/aggregates/user/user.query.service';
 import { FirebaseAuthService } from '@/firebase-auth/firebase-auth.service';
 
@@ -23,8 +25,8 @@ describe('unit UserAuthGuard', () => {
   let firebaseAuthService: jest.Mocked<Pick<FirebaseAuthService, 'verifyIdToken'>>;
   let usersQueryService: jest.Mocked<Pick<UserQueryService, 'findUniqueOrThrowUserByFirebaseUid'>>;
   let cls: jest.Mocked<Pick<ClsService, 'set'>>;
+  let configService: { get: jest.Mock };
   let guard: UserAuthGuard;
-  const originalCheckRevoked = process.env.FIREBASE_CHECK_REVOKED;
 
   beforeEach(() => {
     reflector = {
@@ -39,21 +41,20 @@ describe('unit UserAuthGuard', () => {
     cls = {
       set: jest.fn(),
     };
+    configService = {
+      get: jest.fn(),
+    };
 
     guard = new UserAuthGuard(
       reflector as unknown as Reflector,
       firebaseAuthService as unknown as FirebaseAuthService,
       usersQueryService as unknown as UserQueryService,
       cls as unknown as ClsService,
+      configService as unknown as ConfigService<EnvironmentVariables>,
     );
   });
 
   afterEach(() => {
-    if (originalCheckRevoked === undefined) {
-      delete process.env.FIREBASE_CHECK_REVOKED;
-    } else {
-      process.env.FIREBASE_CHECK_REVOKED = originalCheckRevoked;
-    }
     jest.clearAllMocks();
   });
 
@@ -84,7 +85,7 @@ describe('unit UserAuthGuard', () => {
     expect.assertions(6);
 
     reflector.getAllAndOverride.mockReturnValue(false);
-    process.env.FIREBASE_CHECK_REVOKED = 'true';
+    configService.get.mockReturnValue('true');
 
     const request = {
       headers: {
@@ -114,6 +115,33 @@ describe('unit UserAuthGuard', () => {
     expect(request.user).toStrictEqual({ publicId: 'public-id', name: 'Current User' });
     expect(cls.set).toHaveBeenCalledWith('userId', 'public-id');
     expect(reflector.getAllAndOverride).toHaveBeenCalledWith(IS_PUBLIC_KEY, [handler, controller]);
+  });
+
+  it('defaults to checkRevoked=false when FIREBASE_CHECK_REVOKED is not set', async () => {
+    expect.assertions(2);
+
+    reflector.getAllAndOverride.mockReturnValue(false);
+    configService.get.mockReturnValue(undefined);
+
+    const request = {
+      headers: {
+        authorization: 'Bearer token-no-revoke-check',
+      },
+    } as unknown as Request & {
+      user?: unknown;
+    };
+
+    const context = createExecutionContext(request);
+
+    firebaseAuthService.verifyIdToken.mockResolvedValue({ uid: 'firebase-uid' } as never);
+    usersQueryService.findUniqueOrThrowUserByFirebaseUid.mockResolvedValue({
+      publicId: 'public-id',
+      name: 'User',
+    } as never);
+
+    await expect(guard.canActivate(context)).resolves.toBe(true);
+
+    expect(firebaseAuthService.verifyIdToken).toHaveBeenCalledWith('token-no-revoke-check', false);
   });
 
   it('propagates verification errors from FirebaseAuthService', async () => {

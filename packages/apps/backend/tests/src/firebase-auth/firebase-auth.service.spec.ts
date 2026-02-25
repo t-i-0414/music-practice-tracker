@@ -1,3 +1,4 @@
+import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import type { DecodedIdToken, UserRecord } from 'firebase-admin/auth';
 
@@ -78,7 +79,14 @@ describe('integration FirebaseAuthService', () => {
     resetFirebaseAdmin(authMock);
 
     testingModule = await Test.createTestingModule({
-      providers: [FirebaseAuthProvider, FirebaseAuthService],
+      providers: [
+        FirebaseAuthProvider,
+        FirebaseAuthService,
+        {
+          provide: ConfigService,
+          useValue: { get: jest.fn() },
+        },
+      ],
     }).compile();
 
     provider = testingModule.get(FirebaseAuthProvider);
@@ -255,6 +263,16 @@ describe('integration FirebaseAuthService', () => {
         errorCode: 'FB0009',
         detail: 'Failed to delete Firebase users in bulk.',
       });
+    });
+
+    it('succeeds when UIDs are exactly at the 1000 batch limit', async () => {
+      expect.assertions(2);
+
+      const exactLimitUids = Array.from({ length: 1000 }, (_, i) => `uid-${String(i)}`);
+      authMock.deleteUsers.mockResolvedValue({ successCount: 1000, failureCount: 0, errors: [] });
+
+      await expect(service.deleteUsers(exactLimitUids)).resolves.toBeUndefined();
+      expect(authMock.deleteUsers).toHaveBeenCalledWith(exactLimitUids);
     });
 
     it('throws FB0009 when UIDs exceed the 1000 batch limit', async () => {

@@ -39,15 +39,23 @@ describe('unit FirebaseError', () => {
       expect(error.stack).toContain('FirebaseError');
     });
 
-    it.each(['FB0001', 'FB0002', 'FB0003', 'FB0004', 'FB0005', 'FB0006', 'FB0007', 'FB0008', 'FB9999'] as const)(
-      'should work with Firebase error code %s',
-      (code) => {
-        const error = new FirebaseError(code, `Error for ${code}`);
+    it.each([
+      'FB0001',
+      'FB0002',
+      'FB0003',
+      'FB0004',
+      'FB0005',
+      'FB0006',
+      'FB0007',
+      'FB0008',
+      'FB0009',
+      'FB9999',
+    ] as const)('should work with Firebase error code %s', (code) => {
+      const error = new FirebaseError(code, `Error for ${code}`);
 
-        expect(error.errorCode).toBe(code);
-        expect(error.detail).toBe(`Error for ${code}`);
-      },
-    );
+      expect(error.errorCode).toBe(code);
+      expect(error.detail).toBe(`Error for ${code}`);
+    });
   });
 
   describe('observability properties', () => {
@@ -113,7 +121,7 @@ describe('unit FirebaseError', () => {
   });
 
   describe('function isFirebaseErrorCode', () => {
-    it.each(['FB0001', 'FB0002', 'FB0003', 'FB0004', 'FB0005', 'FB0006', 'FB0007', 'FB0008', 'FB9999'])(
+    it.each(['FB0001', 'FB0002', 'FB0003', 'FB0004', 'FB0005', 'FB0006', 'FB0007', 'FB0008', 'FB0009', 'FB9999'])(
       'should return true for Firebase error code %s',
       (code) => {
         expect(isFirebaseErrorCode(code)).toBe(true);
@@ -168,6 +176,7 @@ describe('unit FirebaseError', () => {
         | 'FB0006'
         | 'FB0007'
         | 'FB0008'
+        | 'FB0009'
         | 'FB9999';
 
       expect(code).toBe('FB0001');
