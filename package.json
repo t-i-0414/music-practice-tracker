@@ -92,7 +92,7 @@
     "cypress": "15.10.0",
     "dotenv-cli": "11.0.0",
     "eslint": "9.39.3",
-    "eslint-config-expo": "10.0.0",
+    "eslint-config-expo": "55.0.0",
     "eslint-config-prettier": "10.1.8",
     "eslint-import-resolver-typescript": "4.4.4",
     "eslint-plugin-cypress": "6.1.0",
