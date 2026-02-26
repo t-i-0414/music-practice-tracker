@@ -1,7 +1,7 @@
-appId: host.exp.Exponent
+appId: com.takudev.musicpracticetracker.development
 ---
 - launchApp
-- tapOn: 'music-practice-tracker'
 - assertVisible: 'Welcome!'
 - assertVisible: 'Step 1: Try it'
 - tapOn: 'nav-explore'
+- assertVisible: 'Explore'
