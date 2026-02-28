@@ -4,15 +4,17 @@ import { useCallback } from 'react';
 import { Platform } from 'react-native';
 
 import { type BottomTabBarButtonProps } from '@react-navigation/bottom-tabs';
-import { Tabs } from 'expo-router';
+import { Redirect, Tabs } from 'expo-router';
 
 import { HapticTab } from '@/components/HapticTab';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Colors } from '@/constants/Colors';
+import { useAuthContext } from '@/features/auth';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 const TabLayout: React.FC = () => {
   const colorScheme = useColorScheme();
+  const { authState } = useAuthContext();
   const renderHapticTab = useCallback((props: BottomTabBarButtonProps) => <HapticTab {...props} />, []);
   const renderHouseIcon = useCallback(
     ({ color }: { color: string }) => <IconSymbol size={28} name='house.fill' color={color} />,
@@ -22,6 +24,14 @@ const TabLayout: React.FC = () => {
     ({ color }: { color: string }) => <IconSymbol size={28} name='paperplane.fill' color={color} />,
     [],
   );
+
+  if (authState.status === 'initializing') {
+    return null;
+  }
+
+  if (authState.status !== 'authenticated') {
+    return <Redirect href='/sign-up' />;
+  }
 
   return (
     <Tabs
