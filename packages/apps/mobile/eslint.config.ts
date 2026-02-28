@@ -87,6 +87,7 @@ const config = defineConfig(
   globalIgnores([
     ...sharedIgnores,
     '.expo',
+    'plugins/',
     'scripts/reset-project.js',
     'babel.config.js',
     'metro.config.js',
