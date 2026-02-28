@@ -81,7 +81,14 @@ export default ({ config: _config }: ConfigContext): ExpoConfig => {
     '@react-native-firebase/app',
     '@react-native-firebase/auth',
     'expo-apple-authentication',
-    './plugins/withFirebaseModularHeaders',
+    [
+      'expo-build-properties',
+      {
+        ios: {
+          useFrameworks: 'static',
+        },
+      },
+    ],
   ];
 
   if (googleIosUrlScheme.length >= MIN_URL_SCHEME_LENGTH) {
