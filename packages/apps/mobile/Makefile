@@ -5,7 +5,7 @@
 setup:
 	@echo "🔧 Setting up the mobile environment..."
 	@${MAKE} setup-env
-	npm install -g eas-cli
+	@${MAKE} eas-install
 	@mkdir -p .vscode && printf '{\n  "files.exclude": {\n    ".expo": true,\n    "dist": true,\n    "build": true,\n    "coverage": true,\n    "expo-env.d.ts": true,\n    "node_modules": true\n  },\n  "jest.enable": false,\n  "editor.codeActionsOnSave": {\n    "source.organizeImports": "never"\n  }\n}' > .vscode/settings.json
 	@echo "✅ mobile environment setup complete!"
 
@@ -109,3 +109,51 @@ eas-device-list:
 eas-device-create:
 	@echo "📲 Registering new device..."
 	eas device:create
+
+# -------------------------------------------------------------
+# EAS Others
+# -------------------------------------------------------------
+.PHONY: eas-install
+eas-install:
+	@echo "📥 Installing EAS CLI..."
+	npm install -g eas-cli
+
+.PHONY: eas-version
+eas-version:
+	@echo "📊 EAS CLI version:"
+	eas --version
+
+.PHONY: eas-login
+eas-login:
+	@echo "🔐 Logging into EAS..."
+	eas login
+
+.PHONY: eas-logout
+eas-logout:
+	@echo "🔓 Logging out of EAS..."
+	eas logout
+
+.PHONY: eas-whoami
+eas-whoami:
+	@echo "👤 Checking EAS login status..."
+	eas whoami
+
+.PHONY: eas-config
+eas-config:
+	@echo "⚙️  Showing EAS configuration..."
+	eas config
+
+.PHONY: eas-build-clean
+eas-build-clean:
+	@echo "🧹 Cleaning EAS build cache..."
+	eas build:cache:clear
+
+.PHONY: eas-diagnostics
+eas-diagnostics:
+	@echo "🔍 Running EAS diagnostics..."
+	eas diagnostics
+
+.PHONY: expo-doctor
+expo-doctor:
+	@echo "🩺 Running Expo doctor..."
+	npx expo-doctor
