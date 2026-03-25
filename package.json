@@ -82,7 +82,7 @@
     "@vitest/browser": "4.1.0",
     "@vitest/browser-playwright": "4.1.0",
     "@vitest/coverage-v8": "4.1.0",
-    "@vitest/eslint-plugin": "1.6.12",
+    "@vitest/eslint-plugin": "1.6.13",
     "@vitest/ui": "4.1.0",
     "babel-jest": "30.3.0",
     "babel-plugin-module-resolver": "5.0.3",
