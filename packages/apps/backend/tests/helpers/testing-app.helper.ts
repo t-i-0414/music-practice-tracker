@@ -1,10 +1,10 @@
 import { type INestApplication, type Type } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import type { SuperTest, Test as SuperTestRequest } from 'supertest';
+import type { SuperTest } from 'supertest';
 
 import { useGlobalOptions } from '@/apis/utils/use-global-options';
 
-export type TestingHttpClient = SuperTest<SuperTestRequest>;
+export type TestingHttpClient = SuperTest;
 const supertest: (app: unknown) => TestingHttpClient = require('supertest');
 
 export async function createTestingApp<T>(
