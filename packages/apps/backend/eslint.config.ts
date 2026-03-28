@@ -31,6 +31,7 @@ const config: Linter.Config[] = defineConfig(
     files: ['**/*.ts'],
     extends: [baseConfig, tsConfig, importConfig],
     plugins: {
+      // @ts-expect-error -- typescript-eslint RuleModule is structurally incompatible with ESLint v9 Plugin type in TS6
       'custom-backend-eslint': pluginBackend,
     },
     rules: enabledBackendPluginRules,

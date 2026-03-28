@@ -5,6 +5,7 @@
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
+    "types": ["node", "bun"],
     "jsx": "preserve",
     "incremental": false,
     "noPropertyAccessFromIndexSignature": false,
