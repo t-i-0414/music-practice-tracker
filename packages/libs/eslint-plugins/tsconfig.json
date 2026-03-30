@@ -3,8 +3,8 @@
   "compilerOptions": {
     "target": "es2021",
     "lib": ["es2021"],
+    "types": ["node", "vitest/globals"],
     "rootDir": "./",
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     }

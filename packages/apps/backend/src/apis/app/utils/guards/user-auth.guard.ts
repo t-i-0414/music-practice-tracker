@@ -27,7 +27,7 @@ export class UserAuthGuard implements CanActivate {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [ctx.getHandler(), ctx.getClass()]);
     if (isPublic) return true;
 
-    const req = ctx.switchToHttp().getRequest<Request>();
+    const req = ctx.switchToHttp().getRequest<Request & { user?: CurrentUserData }>();
 
     const token = extractTokenFromHttpHeaders(req.headers);
     if (token === undefined) {
