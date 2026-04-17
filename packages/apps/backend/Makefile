@@ -65,6 +65,9 @@ docker-compose-up:
 	@${MAKE} cd-to-root
 	@echo "🐳 Starting Docker services..."
 	docker compose up -d
+	@echo "⏳ Waiting for database to be ready..."
+	@cd ../../../ && timeout 60 bash -c 'until docker compose exec -T postgres pg_isready -U postgres > /dev/null 2>&1; do sleep 1; done'
+	@cd ../../../ && timeout 60 bash -c 'until docker compose exec -T postgres-test pg_isready -U postgres > /dev/null 2>&1; do sleep 1; done'
 	@echo "✅ Docker services started"
 
 .PHONY: docker-compose-down
