@@ -1,0 +1,16 @@
+{
+  "extends": "@music-practice-tracker/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "types": ["bun"],
+    // App package doesn't publish .d.ts; disabling declaration avoids "type
+    // cannot be named" errors from BetterAuth's zod-generic return types.
+    "declaration": false,
+    "declarationMap": false
+  },
+  "include": ["src/**/*", "drizzle.config.ts", "eslint.config.ts"],
+  "exclude": ["node_modules", "dist"]
+}
