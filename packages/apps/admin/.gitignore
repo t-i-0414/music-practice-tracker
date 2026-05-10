@@ -36,9 +36,8 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files (do not negate .env.test; secretlint v13 cascades .gitignore)
 .env*
-!.env.test
 
 # vercel
 .vercel

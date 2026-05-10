@@ -91,7 +91,7 @@ describe('unit Publicize', () => {
 
       const publicize = <T extends { id: any }>(internal: T): Publicize<T> => {
         const { id, ...publicData } = internal;
-        return publicData as Publicize<T>;
+        return publicData;
       };
 
       const publicUser = publicize(internalUser);
