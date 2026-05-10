@@ -169,7 +169,7 @@ export function isPrismaFindMethod(node: TSESTree.Node): node is TSESTree.Member
 
   while (current) {
     if (current.type === AST_NODE_TYPES.MemberExpression) {
-      const memberExp = current as TSESTree.MemberExpression;
+      const memberExp: TSESTree.MemberExpression = current;
       const objectName =
         memberExp.object.type === AST_NODE_TYPES.Identifier
           ? memberExp.object.name
