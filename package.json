@@ -36,6 +36,9 @@
     "type:check": "bun turbo type:check",
     "type:check:root": "tsc --noEmit"
   },
+  "overrides": {
+    "jest-environment-node": "30.4.0"
+  },
   "dependencies": {
     "dotenv": "17.4.2",
     "react": "19.1.0",
