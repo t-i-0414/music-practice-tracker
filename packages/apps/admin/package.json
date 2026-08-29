@@ -29,10 +29,10 @@
     "type:check:tests-integration": "tsc --noEmit --project tests/integration/tsconfig.json"
   },
   "dependencies": {
-    "next": "16.3.2"
+    "next": "16.3.3"
   },
   "devDependencies": {
-    "@next/eslint-plugin-next": "16.3.2",
-    "eslint-config-next": "16.3.2"
+    "@next/eslint-plugin-next": "16.3.3",
+    "eslint-config-next": "16.3.3"
   }
 }
