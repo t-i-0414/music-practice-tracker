@@ -52,7 +52,7 @@
     "@commitlint/config-conventional": "21.0.2",
     "@eslint/eslintrc": "3.3.5",
     "@eslint/js": "9.39.4",
-    "@faker-js/faker": "10.4.0",
+    "@faker-js/faker": "10.5.0",
     "@music-practice-tracker/eslint-configs": "workspace:*",
     "@music-practice-tracker/tsconfig-base": "workspace:*",
     "@playwright/test": "1.61.0",
